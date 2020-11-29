@@ -1,0 +1,9 @@
+[submodule "lib/knx"]
+	path = lib/knx
+	url = https://github.com/thelsing/knx.git
+[submodule "lib/FNET"]
+	path = lib/FNET
+	url = https://github.com/vjmuzik/FNET.git
+[submodule "lib/NativeEthernet"]
+	path = lib/NativeEthernet
+	url = https://github.com/vjmuzik/NativeEthernet.git
