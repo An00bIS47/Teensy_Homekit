@@ -1663,11 +1663,7 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 		_curLine += (char) b;      		// add it to the end of the currentLine
 	}
 	
-	hapClient->state = HAP_CLIENT_STATE_IDLE;
-
-	// ToDo: DEBUG ??
-	// delay(1);
-	Serial.println("IDLE");
+	hapClient->state = HAP_CLIENT_STATE_IDLE;	
 }
 
 
@@ -2038,21 +2034,19 @@ bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8
 #if defined (CORE_TEENSY)
 	int bytesSent = 0;	
 
-	for (int i = 0; i < encryptedLen; i++){
-		bytesSent += hapClient->client.write(encrypted[i]);
-	}
+	// for (int i = 0; i < encryptedLen; i++){
+	// 	bytesSent += hapClient->client.write(encrypted[i]);
+	// }
 
 
-	// int remain = encryptedLen;
-    // while (remain)
-    // {
-    //   int toCpy = remain > 256 ? 256 : remain;      
-	//   bytesSent += hapClient->client.write(encrypted, toCpy);
-    //   encrypted += toCpy;
-    //   remain -= toCpy;
-
+	int remain = encryptedLen;
+    while (remain)
+    {
+      int toCpy = remain > HAP_SEND_BUFFER_SIZE ? HAP_SEND_BUFFER_SIZE : remain;      
+	  bytesSent += hapClient->client.write(encrypted + bytesSent, toCpy);
+      remain -= toCpy;
 	//   Serial.println("remaining: " + String(remain));
-    // }
+    }
 
 #else	
 	int bytesSent = hapClient->client.write(encrypted, encryptedLen);

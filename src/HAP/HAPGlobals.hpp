@@ -202,9 +202,9 @@
 #define HAP_SPRINTF_UI32			"%lu"
 #endif
 
+#define HAP_SEND_BUFFER_SIZE		512		// Ethernet Client has problems writing large chunks ( > 3KB)
 
-
-#define HAP_ETHERNET_TIMEOUT			10000
+#define HAP_ETHERNET_TIMEOUT		10000
 /**
  * WiFi
  ********************************************************************/
