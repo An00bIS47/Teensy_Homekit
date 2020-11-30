@@ -970,7 +970,6 @@ void HAPServer::handle() {
 #endif
 	if (client) {
 
-		Serial.println("HANDLE HANDLE HANDLE ->2.1");
 		HAPClient hapClient;
 
 		// New client connected
@@ -1295,7 +1294,6 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient){
 
 	while ( hapClient->client.available() )	{
 
-
 		//
 	    // AAD
 	    //
@@ -1329,7 +1327,6 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient){
 		// Serial.println(trueLength);
 		// HAPHelper::arrayPrint(cipherText, trueLength);
 
-
 		// 
 		// hmac
 		uint8_t hmac[HAP_ENCRYPTION_HMAC_SIZE];	// 16 is the size of the HMAC
@@ -1344,7 +1341,7 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient){
 
 		hapClient->client.readBytes(hmac, HAP_ENCRYPTION_HMAC_SIZE);
 
-		uint8_t plainText[trueLength];
+		uint8_t plainText[trueLength + 1];
 
 		// 
 	    // nonce
@@ -1368,29 +1365,35 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient){
     	nonce[4] = hapClient->encryptionContext.decryptCount % 256;
     	nonce[5] = hapClient->encryptionContext.decryptCount++ / 256;
 
+
 		HAPEncryption::decrypt(hmac, plainText, cipherText, trueLength, AAD, 2, nonce, HAP_ENCRYPTION_NONCE_SIZE, hapClient->encryptionContext.decryptKey);
+
+		
 #endif
 
+		plainText[trueLength] = '\0';
 
-#if HAP_DEBUG
+#if HAP_DEBUG_HOMEKIT_REQUEST
 		Serial.println("plaintext:");
 		Serial.println((char*) plainText);
+		Serial.send_now();
 #endif
+
 
 		int bodyDataLen = 0;
 		uint8_t *bodyData;
 		parseRequest(hapClient, (char*)plainText, trueLength, &bodyData, &bodyDataLen);
 		
-#if HAP_DEBUG
+#if HAP_DEBUG_HOMEKIT_REQUEST
 		HAPHelper::array_print("bodyData", bodyData, bodyDataLen);
+		Serial.send_now();
 #endif		
 
 		handlePath(hapClient, bodyData, bodyDataLen);
 		
 		if (bodyDataLen > 0){
 			free(bodyData);
-		}
-		
+		}		
 	}		
 }
 
@@ -1469,14 +1472,13 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 
 
 void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_len, uint8_t** out, int* outLen){	
-
 	
-
 	int curPos = 0;
 	for (int i = 0; i < msg_len; i++) {
     		//Serial.print(decrypted[i]);
 		if ( msg[i] == '\r' && msg[i + 1] == '\n' ) {
 			
+	
 			processIncomingLine(hapClient, String(msg).substring(curPos, i));
 			i++;
 
@@ -1488,7 +1490,6 @@ void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_l
 		}
 
 	}	
-
 	
 	//Serial.printf(">>> curPos: %d\n", curPos);
 
@@ -1626,9 +1627,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 							stopEvents(false);
 						}
 					}
-					
-
-
 
 					// pair-verify M1
 					if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M1) ) {
@@ -1653,6 +1651,8 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 			}
 
 			_curLine = "";
+
+			
 			return;
 		} else {    					// if you got a newline, then clear currentLine:
 			// Handle lines
@@ -1663,7 +1663,11 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 		_curLine += (char) b;      		// add it to the end of the currentLine
 	}
 	
-	hapClient->state = HAP_CLIENT_STATE_IDLE;	
+	hapClient->state = HAP_CLIENT_STATE_IDLE;
+
+	// ToDo: DEBUG ??
+	// delay(1);
+	// Serial.println("IDLE");
 }
 
 
@@ -1678,16 +1682,17 @@ void HAPServer::processPathParameters(HAPClient* hapClient, String line, int cur
 	} else {
 		hapClient->request.path = line.substring(curPos, index);
 		
-		//Serial.print("path: ");
-		//Serial.println(hapClient->request.path);
+		// Serial.print("path: ");
+		// Serial.println(hapClient->request.path);
+		// Serial.send_now();
 
 		curPos = index + 1;
 		String paramStr = line.substring(curPos, line.indexOf(" ", curPos));
 
 
-		//Serial.println("paramStr:");
-		//Serial.println(paramStr);
-		
+		// Serial.println("paramStr:");
+		// Serial.println(paramStr);
+		// Serial.send_now();	
 
 		do {
 			curPos = 0;
@@ -1697,20 +1702,25 @@ void HAPServer::processPathParameters(HAPClient* hapClient, String line, int cur
 			}
 
 			String keyPair = paramStr.substring(curPos, endIndex); 
-			//Serial.printf("tmp: %s\n", keyPair.c_str());
+			// Serial.printf("tmp: %s\n", keyPair.c_str());
 
 			int equalIndex = keyPair.indexOf("=");
+			
+			// Serial.print("key: "); 
+			// Serial.print(keyPair.substring(0, equalIndex));
+			// Serial.print(" - value: "); 
+			// Serial.println(keyPair.substring(equalIndex + 1));
+			// Serial.send_now();
 
-			/*
-			Serial.print("key: "); 
-			Serial.print(keyPair.substring(0, equalIndex));
-			Serial.print(" - value: "); 
-			Serial.println(keyPair.substring(equalIndex + 1));
-			*/
 
 			hapClient->request.params[keyPair.substring(0, equalIndex)] = keyPair.substring(equalIndex + 1); 
 
-			paramStr = paramStr.substring(endIndex + 1); 
+			if (endIndex < paramStr.length())
+				paramStr = paramStr.substring(endIndex + 1); 
+			else {
+				break;
+			}
+
 		} while ( paramStr.length() > 0 );		
 	}
 }
@@ -1720,7 +1730,9 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, String line){
 
 	// Print Line
 #if HAP_DEBUG_HOMEKIT_REQUEST
-	LogD( line, true );
+
+	if (line != "") Serial.println(line);	
+	Serial.send_now();
 #endif
 
 	int curPos = 0;
@@ -3753,8 +3765,12 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 			errorOccured = true;
 		}
 		
+		if (endIndex < idStr.length()) {
+			idStr = idStr.substring(endIndex + 1); 
+		} else {
+			break;
+		}
 		
-		idStr = idStr.substring(endIndex + 1); 
 	} while ( idStr.length() > 0 );
 
 	String response;			

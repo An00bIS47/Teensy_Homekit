@@ -20,10 +20,12 @@
 
 #define TRNG_ENT_COUNT 16
 
-uint32_t gWDT_trng_priorT[16];
-uint8_t gWDT_trng_indexT=16;
-uint32_t retValT;
-uint32_t share_entropy;
+static uint32_t gWDT_trng_priorT[16];
+static uint8_t gWDT_trng_indexT=16;
+static uint32_t retValT;
+static uint32_t share_entropy;
+static isInit = false;
+static uint8_t byte_positionT=0;
 
 // This function returns a unsigned char (8-bit) with the number of unsigned long values
 // in the entropy pool
@@ -91,7 +93,7 @@ uint32_t randomTeensy(void)
 // that capability to the random method, shown below
 uint8_t random8T(void)
 {
-  static uint8_t byte_positionT=0;
+  
   uint8_t retVal8 = 0;
 
   if (byte_positionT == 0) {
@@ -112,6 +114,9 @@ uint8_t random8T(void)
 }
 
 void init(){
+
+  if (isInit == true) return;
+
   CCM_CCGR6 |= CCM_CCGR6_TRNG(CCM_CCGR_ON);
   TRNG_MCTL = TRNG_MCTL_RST_DEF | TRNG_MCTL_PRGM; // reset to program mode
   TRNG_SCMISC = TRNG_SCMISC_RTY_CT(TRNG_DEFAULT_RETRY_COUNT) | 
@@ -141,13 +146,15 @@ void init(){
 
   TRNG_MCTL = TRNG_MCTL_SAMP_MODE(2); // start run mode
   TRNG_ENT15; // discard any stale data
+
+  isInit = true;
 }
 
 int mbedtls_hardware_poll( void *data,
                            unsigned char *output, size_t len, size_t *olen )
 {    
 
-    init();
+    // init();
     for (int i=0; i < len; i++){
         output[i] = random8T();
     }

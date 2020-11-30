@@ -281,10 +281,9 @@ void HAPHelper::mergeJson(JsonDocument& dst, const JsonObject& src) {
         dst[p.key()] = p.value();
     } 
 
-#if HAP_DEBUG_CONFIG
-    serializeJson(dst, Serial);
-#endif
-
+// #if HAP_DEBUG_CONFIG
+//     serializeJson(dst, Serial);
+// #endif
 }
 
 #if defined (ARDUINO_ARCH_ESP32)
