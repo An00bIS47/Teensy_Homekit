@@ -437,7 +437,7 @@ bool HAPServer::begin(bool resume) {
 // #endif 		
 
 
-		LogD(" OK", true);
+		LogD(F("OK"), true);
 	}
 
 	LogI( "Setup accessory ...", false);
@@ -2025,7 +2025,7 @@ bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8
 		hapClient->clear();
     	return false;
     } else {
-		LogD(" OK", true);
+		LogD(F("OK"), true);
     }
     
 
@@ -2385,12 +2385,12 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	hapClient->request.tlv.decode(HAP_TLV_PUBLIC_KEY, device_public_key, &decodedLen);
 
 	if (decodedLen == 0) {
-		LogE( "ERROR: Invalid payload: no client public key", true);		
+		LogE(F("ERROR: Invalid payload: no client public key"), true);		
 
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M4, HAP_ERROR_AUTHENTICATON);	
 		return false;
 	}
-	LogV(" OK", true);
+	LogV(F("OK"), true);
 	
 
 	LogV( "Generating proof ...", false);
@@ -2403,7 +2403,7 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	);
 
 	if (_srp->ver == NULL) {
-		LogE( "ERROR: srp_verifier_new1 failed", true);		
+		LogE(F("ERROR: srp_verifier_new1 failed"), true);		
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M4, HAP_ERROR_AUTHENTICATON);		
         return false;
     }
@@ -2427,11 +2427,11 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	hapClient->request.tlv.decode(HAP_TLV_PROOF, proof, &decodedLen);
 
     if (decodedLen == 0) {
-    	LogE( "ERROR: Invalid payload: no device proof", true);		    	
+    	LogE(F("ERROR: Invalid payload: no device proof"), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M4, HAP_ERROR_AUTHENTICATON);		
     	return false;
     }
-	LogV(" OK", true);
+	LogV(F("OK"), true);
 
 
 	LogV( "Verifying device proof ...", false);
@@ -2439,14 +2439,14 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 #if HAP_USE_MBEDTLS_SRP
 	if (decodedLen != srp_hash_length(_srp->ses)){
         
-		LogE("ERROR: Client SRP proof does not match session hash length", true);
+		LogE(F("ERROR: Client SRP proof does not match session hash length"), true);
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M4, HAP_ERROR_AUTHENTICATON);			
 		return false;
 	}
 
 
 	if (srp_verifier_verify_session(_srp->ver, proof, NULL) == 0) {
-        LogE("ERROR: Failed to verify client SRP proof", true);
+        LogE(F("ERROR: Failed to verify client SRP proof"), true);
 		
 		// Server keys
 		// HAPHelper::mpi_print("_srp->keys->B", _srp->keys->B);
@@ -2459,8 +2459,8 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 		// HAPHelper::array_print("_srp_bytes_b", (uint8_t*)_srp->bytes_B, SRP_PUBLIC_KEY_LENGTH);		
 		
 		// proof
-		HAPHelper::array_print("_srp->ver->M", _srp->ver->M, SHA512_DIGEST_LENGTH);
-		HAPHelper::array_print("proof", proof, SHA512_DIGEST_LENGTH);
+		// HAPHelper::array_print("_srp->ver->M", _srp->ver->M, SHA512_DIGEST_LENGTH);
+		// HAPHelper::array_print("proof", proof, SHA512_DIGEST_LENGTH);
 
 		
 		// HAPHelper::array_print("username", (uint8_t*)_srp->username, strlen(_srp->username)); 
@@ -2489,10 +2489,10 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
         return false; 
     }
 #endif	
-    LogV(" OK", true);
+    LogV(F("OK"), true);
 
 
-    LogV( "Generating accessory proof ...", false);
+    LogV(F("Generating accessory proof ..."), false);
 	
 
 #if HAP_USE_MBEDTLS_SRP
@@ -2516,7 +2516,7 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	const uint8_t *acc_srp_proof = srp_verifier_get_HAMK(_srp->ver);
 	if (acc_srp_proof == NULL) {
-		LogE( "ERROR: srp_verifier_get_HAMK failed", true);		    	
+		LogE(F("ERROR: srp_verifier_get_HAMK failed"), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M4, HAP_ERROR_AUTHENTICATON);		
         return false; 
 	} 
@@ -2534,9 +2534,9 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
         return false; 
     }
 #endif	   
-	LogV(" OK", true);
+	LogV(F("OK"), true);
 
-    LogV("Sending response ...", false);
+    LogV(F("Sending response ..."), false);
 	TLV8 response;
     response.encode(HAP_TLV_STATE, 1, HAP_PAIR_STATE_M4);
     response.encode(HAP_TLV_PROOF, SRP_PROOF_LENGTH, acc_srp_proof);
@@ -2546,14 +2546,14 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 #endif    
 	
 	sendResponse(hapClient, &response);
-	LogV(" OK", true);
+	LogV(F("OK"), true);
 	
 	hapClient->request.clear();
 	response.clear();
 
 	hapClient->clear();		
 
-	LogD(" OK", true);	
+	LogD(F("OK"), true);	
     return true;
 }
 
@@ -2562,9 +2562,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 #if defined( ARDUINO_ARCH_ESP32 )		
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 3/4 ...", false);
 #elif defined( CORE_TEENSY )					
-	LogV( "<<< Handle client [", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pair-setup Step 3/4 ...", false);
+	LogV(F("] -> /pair-setup Step 3/4 ..."), false);
 #endif		
 
 	_eventManager.queueEvent(EventManager::kEventPairingStep3, HAPEvent());
@@ -2580,7 +2580,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	memcpy(srp_key, srp_verifier_get_session_key(_srp->ver, &srp_key_length), SRP_SESSION_KEY_LENGTH);
 
 	if (srp_key_length == 0) {
-		LogE("ERROR: Failed to verify session key!", true);
+		LogE(F("ERROR: Failed to verify session key!"), true);
 		
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);		
 		response.clear();
@@ -2593,7 +2593,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	}
 #endif   
 
-    LogV( "\nDecoding TLV values ...", false);
+    LogV(F("\nDecoding TLV values ..."), false);
 	// uint8_t *encrypted_tlv = hapClient->request.tlv.decode(HAP_TLV_ENCRYPTED_DATA);
 
 	size_t decodedLen = 0;
@@ -2604,34 +2604,34 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	
 
 	if (decodedLen == 0) {
-        LogE( "ERROR: Decrypting TLV failed", true);		    	
+        LogE(F("ERROR: Decrypting TLV failed!"), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);			     
 		response.clear();
     	return false;
     }
-    LogV( "OK", true);
+    LogV(F("OK"), true);
 
-    LogV("Get HKDF key ...", false);		
+    LogV(F("Get HKDF key ..."), false);		
 	uint8_t subtlv_key[HKDF_KEY_LEN] = {0,};
 	hkdf_key_get(HKDF_KEY_TYPE_PAIR_SETUP_ENCRYPT, srp_key, SRP_SESSION_KEY_LENGTH, subtlv_key);
 
-	if (err_code < 0) {
-        LogE("ERROR: Failed to get HKDF key", true);		    	        
+	if (err_code != 0) {
+        LogE(F("ERROR: Failed to get HKDF key"), true);		    	        
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);				
 		response.clear();		
         return false;
     }
-    LogV( "OK", true);
+    LogV(F("OK"), true);
 
-    LogV( "Decrypting chacha20_poly1305 ...", false);
+    LogV(F("Decrypting chacha20_poly1305 ..."), false);
     // uint8_t *subtlv = (uint8_t*) malloc(sizeof(uint8_t) * encrypted_tlv_len);
     uint8_t subtlv[encryptedTLVLen];
 
 
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PS05, subtlv_key, NULL, 0, encryptedTLV, encryptedTLVLen, subtlv);
 
-    if (err_code < 0) {
-        LogE("ERROR: Decrypting CHACHA20_POLY1305_TYPE_PS05 failed", true);		    	
+    if (err_code != 0) {
+        LogE(F("ERROR: Decrypting CHACHA20_POLY1305_TYPE_PS05 failed! Reason: ") + String(err_code), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		response.clear();
         return false;
@@ -2703,7 +2703,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
             &ios_device_info_len);
     
 
-    LogV( "Verifying ED25519 ...", false);
+    LogV(F("Verifying ED25519 ..."), false);
 #if HAP_USE_LIBSODIUM	
 	int verified = crypto_sign_verify_detached(ios_device_signature,
                                 ios_device_info,
@@ -2717,7 +2717,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
     concat_free(ios_device_info);
 
 	if (verified < 0) {
-        LogE( F("[ERROR] Verification failed"), true);		    	
+        LogE(F("ERROR: Verification failed"), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		encTLV.clear();
 		response.clear();		
@@ -2728,10 +2728,10 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	// ToDo: When is admin set?
 	// Save to Pairings as admin
-	LogD( F("Saving pairing ..."), false);
+	LogD(F("Saving pairing ..."), false);
 	_accessorySet->getPairings()->add(ios_device_pairing_id, ios_device_ltpk, true);
 	_accessorySet->getPairings()->save();		
-	LogV( " OK", true);
+	LogV( F("OK"), true);
 	
 	encTLV.clear();
 	// delete enc_tlv;
@@ -2745,9 +2745,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 #if defined( ARDUINO_ARCH_ESP32 )		
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
 #elif defined( CORE_TEENSY )					
-	LogV( "<<< Handle client [", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pair-setup Step 4/4 ...", false);
+	LogV(F("] -> /pair-setup Step 4/4 ..."), false);
 #endif
 
 	_eventManager.queueEvent(EventManager::kEventPairingStep4, HAPEvent());
@@ -2787,12 +2787,12 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
     concat_free(acc_info);
 
     if (err_code != 0) {
-        LogE("ERROR: Verify signature failed", true);		    	
+        LogE(F("ERROR: Verify signature failed! Reason: ") + String(err_code), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		response.clear();
         return false;
 	}
-	LogV( " OK", true);
+	LogV(F("OK"), true);
 
 	// Encrypt data
 	TLV8 subTLV;
@@ -2824,33 +2824,33 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	uint8_t encryptedData[tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH];
 
-	LogV( F("Getting session key ..."), false);
+	LogV(F("Getting session key ..."), false);
 	err_code = hkdf_key_get(HKDF_KEY_TYPE_PAIR_SETUP_ENCRYPT, srp_key, SRP_SESSION_KEY_LENGTH, subtlv_key);
 	if (err_code != 0) {
-        LogE( "ERROR: Getting session key failed", true);		    	
+        LogE(F("ERROR: Getting session key failed! Reason") + String(err_code), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		response.clear();
 		subTLV.clear();		
         return false;
 	}
-	LogV( " OK", true);
+	LogV(F("OK"), true);
 
 
-	LogV( "Encrypting Data ...", false);	
+	LogV(F("Encrypting Data ..."), false);	
 	err_code = chacha20_poly1305_encrypt(CHACHA20_POLY1305_TYPE_PS06, subtlv_key, NULL, 0, tlv8Data, tlv8Len, encryptedData);	
 
 	if (err_code != 0) {
-        LogE( F("[ERROR] Verify signature failed"), true);		    	
+        LogE(F("ERROR: Verify signature failed"), true);		    	
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		response.clear();
 		subTLV.clear();
 		
         return false;
 	}
-	LogV( " OK", true);
+	LogV(F("OK"), true);
 
 
-	LogV( "Sending response ...", false);
+	LogV(F("Sending response ..."), false);
 	response.encode(HAP_TLV_STATE, 1, HAP_PAIR_STATE_M6);
 	response.encode(HAP_TLV_ENCRYPTED_DATA, tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH, encryptedData);
 
@@ -2859,7 +2859,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 #endif
 
 	sendResponse(hapClient, &response);	
-	LogV( " OK", true);
+	LogV(F("OK"), true);
 
 	response.clear();
 	subTLV.clear();
@@ -2868,16 +2868,16 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	LogV( "Updating mDNS ...", false);
 	updateServiceTxt();
-	LogV( " OK", true);
+	LogV(F("OK"), true);
 	
 	
 
 #if defined( ARDUINO_ARCH_ESP32 )		
 	LogI(">>> Pairing with client [" + hapClient->client.remoteIP().toString() + "] complete!", true);	
 #elif defined( CORE_TEENSY )					
-	LogI(">>> Pairing with client [", false);	
+	LogI(F(">>> Pairing with client ["), false);	
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> complete!", true);
+	LogI(F("] -> complete!"), true);
 #endif	
 	
 	// ToDo: set timeout for resetting to false automatically?
@@ -2918,7 +2918,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	int err_code = 0;
 	
 	if ( !isPaired() ) {
-		LogW( F("\n[WARNING] Attempt to verify unpaired accessory!"), true);        
+		LogW(F("\nWARNING: Attempt to verify unpaired accessory!\n"), true);        
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 		
 		return false;
@@ -2927,7 +2927,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	hapClient->encryptionContext.decryptCount = 0;
 	hapClient->encryptionContext.encryptCount = 0;
 
-	LogD("\nGenerating accessory curve25519 keys ...", false);
+	LogD(F("\nGenerating accessory curve25519 keys ..."), false);
 
 #if HAP_USE_LIBSODIUM
 
@@ -2958,13 +2958,13 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	// Create new, random key pair.    
 	err_code = X25519_scalarmult_base(acc_curve_public_key, acc_curve_private_key);
 	if (err_code < 0) {
-		LogE( F("[ERROR] X25519_scalarmult_base failed! Reason: ") + String(err_code), true);
+		LogE(F("ERROR: X25519_scalarmult_base failed! Reason: ") + String(err_code), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 		return false;
 	} 
 #endif
 	else {
-		LogD( F("OK"), true);	
+		LogD(F("OK"), true);	
 	}		
 	
 	uint8_t ios_device_curve_key_len = hapClient->request.tlv.size(HAP_TLV_PUBLIC_KEY);
@@ -2976,7 +2976,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	hapClient->request.tlv.decode(HAP_TLV_PUBLIC_KEY, ios_device_curve_key, &decodedLen);	
 	
 	if (decodedLen == 0) {
-		LogE( F("[PAIR-VERIFY M1] [ERROR] HAP_TLV_ENCRYPTED_DATA failed "), true);		    	
+		LogE( F("ERROR: PAIR-VERIFY M1 - HAP_TLV_ENCRYPTED_DATA failed "), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}
@@ -2990,7 +2990,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 #endif
 
 	// shared_secret
-	LogD("Generating Curve25519 shared secret ...", false);
+	LogD(F("Generating Curve25519 shared secret ..."), false);
 	uint8_t sharedSecret[CURVE25519_SECRET_LENGTH] = {0,};	
 	
 
@@ -3006,7 +3006,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 #else
 
 	if (X25519_scalarmult(sharedSecret, acc_curve_private_key, ios_device_curve_key) < 0) {
-		LogE( F("[ERROR] X25519_scalarmult failed"), true);
+		LogE( F("ERROR: X25519_scalarmult failed"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}	
@@ -3016,7 +3016,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	LogD( F("OK"), true);
 
-	LogD("Generating signature ...", false);
+	LogD(F("Generating signature ..."), false);
 	int acc_info_len;
 	uint8_t* acc_info = concat3(acc_curve_public_key, CURVE25519_KEY_LENGTH,
 		(uint8_t*)HAPDeviceID::deviceID().c_str(), 17,
@@ -3042,12 +3042,12 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 #endif
 
 	concat_free(acc_info);
-	LogD( F("OK"), true);
+	LogD(F("OK"), true);
 
 	
 	// Encrypt data
 
-	LogD( F("Encoding into TLV ..."), false);
+	LogD(F("Encoding into TLV ..."), false);
 	TLV8 *subTLV = new TLV8();
 	subTLV->encode(HAP_TLV_IDENTIFIER, 17, (uint8_t*)HAPDeviceID::deviceID().c_str()  );
 	subTLV->encode(HAP_TLV_SIGNATURE, ED25519_SIGN_LENGTH, acc_signature);
@@ -3058,7 +3058,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	subTLV->decode(tlv8Data, &written);
 	if (written == 0) {
-		LogE("[ERROR] Failed to decode subtlv8!", true);
+		LogE(F("ERROR: Failed to decode subtlv8!"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 		
 		subTLV->clear();
@@ -3071,14 +3071,14 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	subTLV->print();
 	//HAPHelper::arrayPrint(tlv8Data, tlv8Len);
 #endif
-	LogD( F("OK"), true);
+	LogD(F("OK"), true);
 
 
-	LogD("Generating proof ...", false);	
+	LogD(F("Generating proof ..."), false);	
     uint8_t sessionKey[HKDF_KEY_LEN] = {0,};   		// session_key 
     err_code = hkdf_key_get(HKDF_KEY_TYPE_PAIR_VERIFY_ENCRYPT, sharedSecret, CURVE25519_SECRET_LENGTH, sessionKey);
 	if (err_code != 0) {
-        LogE( F("[ERROR] Verify signature failed"), true);		    	
+        LogE( F("ERROR: Get HKDF key failed! Reason: ") + String(err_code), true);		    	
         sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 		
 		subTLV->clear();
@@ -3086,11 +3086,11 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	
         return false;
 	}
-	LogD( F("OK"), true);
+	LogD(F("OK"), true);
 
 
 
-	LogD( F("Encrypting data ..."), false);
+	LogD(F("Encrypting data ..."), false);
 	// uint8_t* encryptedData;
 	// encryptedData = (uint8_t*)malloc(sizeof(uint8_t) * (tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH));
 	uint8_t encryptedData[tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH];
@@ -3109,7 +3109,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 
 	if (err_code != 0) {
-        LogE( F("[ERROR] Verify signature failed"), true);		    	
+        LogE( F("ERROR: Encrypting failed! Reason: ") + String(err_code), true);		    	
         sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 
 
@@ -3120,7 +3120,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	}
 	LogD( F("OK"), true);
 
-	LogD("Saving context ...", false);
+	LogD(F("Saving context ..."), false);
 
 	//hapClient->verifyContext = new struct HAPVerifyContext;	
 	memcpy(hapClient->verifyContext.secret, sharedSecret, HKDF_KEY_LEN);
@@ -3154,7 +3154,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	//stopEvents(false);
 
-	LogI("OK", true);
+	LogI(F("OK"), true);
 
 	return true;
 }
@@ -3166,18 +3166,15 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 #if defined( ARDUINO_ARCH_ESP32 )		
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 2/2 ...", false);
 #elif defined( CORE_TEENSY )					
-	LogV("Handle client [", false);
+	LogV(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pair-verify Step 2/2 ...", false);
+	LogV(F("] -> /pair-verify Step 2/2 ..."), false);
 
 #endif	
 
 	_eventManager.queueEvent(EventManager::kEventVerifyStep2, HAPEvent());
 
 	int err_code = 0;
-	
-
-
 	
 	int encryptedDataLen = hapClient->request.tlv.size(HAP_TLV_ENCRYPTED_DATA);
 	size_t decodedLen = 0;
@@ -3187,7 +3184,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	
 
 	if (decodedLen == 0) {
-		LogE( F("[PAIR-VERIFY M3] [ERROR] HAP_TLV_ENCRYPTED_DATA failed "), true);		    	
+		LogE(F("ERROR: PAIR-VERIFY M3 - HAP_TLV_ENCRYPTED_DATA failed "), true);		    	
 
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		return false;
@@ -3199,20 +3196,26 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	uint8_t subtlv_key[HKDF_KEY_LEN] = {0,};
 	err_code = hkdf_key_get(HKDF_KEY_TYPE_PAIR_VERIFY_ENCRYPT, hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH, subtlv_key);
 	if (err_code != 0) {
-		LogE( F("[PAIR-VERIFY M3] [ERROR] hkdf_key_get failed"), true);		    	
+		LogE( F("ERROR: PAIR-VERIFY M3 - hkdf_key_get failed"), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}
 	LogD("OK", true);
 
+	
+	// ToDo: 
 	// LogD("Decrypting data ...", false);	
-	Serial.println(encryptedDataLen);
+	// Serial.println(encryptedDataLen);
+	// Serial.send_now();
+
 	uint8_t subtlvData[encryptedDataLen];
 
-	
+	Serial.println("chacha20_poly1305_decrypt");
+	Serial.send_now();
+
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PV03, subtlv_key, NULL, 0, encryptedData, encryptedDataLen, subtlvData);
 	if (err_code != 0) {
-		LogE( F("[ERROR] Decrypting failed"), true);		    	
+		LogE( F("[ERROR] Decrypting failed: Reason: ") + String(err_code), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}	
@@ -3226,7 +3229,6 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 // 	subTlv.print();
 // #endif
 
-
 	
 	uint8_t ios_device_pairing_id_len 	= subTlv.size(HAP_TLV_IDENTIFIER);
 	// uint8_t *ios_device_pairing_id 		= subTlv.decode(HAP_TLV_IDENTIFIER);
@@ -3234,10 +3236,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	subTlv.decode(HAP_TLV_IDENTIFIER, ios_device_pairing_id, &decodedLen);	
 
 	if (decodedLen == 0) {
-		LogE( "ERROR: HAP_TLV_IDENTIFIER failed ", true);		    	
+		LogE(F("ERROR: HAP_TLV_IDENTIFIER failed!"), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		subTlv.clear();
-
 		return false;
 	}
 
@@ -3248,7 +3249,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 	
 #if HAP_DEBUG_HOMEKIT
-	LogD("Looking up iOS device LTPK for client: ", true);
+	LogD(F("Looking up iOS device LTPK for client: "), true);
 	HAPHelper::array_print("ios_device_pairing_id", ios_device_pairing_id, ios_device_pairing_id_len);	
 #endif
 
@@ -3256,7 +3257,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	err_code = _accessorySet->getPairings()->getKey(ios_device_pairing_id, ios_device_ltpk);
 	
 	if (err_code == -1) {
-		LogE( F("[ERROR] No iOS Device LTPK found!"), true);		    	
+		LogE( F("ERROR: No iOS Device LTPK found!"), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		subTlv.clear();
 		return false;
@@ -3275,14 +3276,14 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	subTlv.decode(HAP_TLV_SIGNATURE, ios_device_signature, &decodedLen);	
 
 	if (decodedLen == 0) {
-		LogE( F("[PAIR-VERIFY M3] [ERROR] HAP_TLV_ENCRYPTED_DATA failed "), true);		    	
+		LogE( F("ERROR: PAIR-VERIFY M3 - HAP_TLV_ENCRYPTED_DATA failed "), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		subTlv.clear();
 		return false;
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	LogD("Found Signature: ", true);
+	LogD(F("Found Signature: "), true);
 	HAPHelper::array_print("ios_device_signature", ios_device_signature, ios_device_signature_len);
 #endif
 
@@ -3307,7 +3308,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
     concat_free(ios_device_info);
 	if (verified < 0) {
-        LogE( F("[ERROR] Signature verification failed"), true);		    	
+        LogE( F("ERROR: Signature verification failed"), true);		    	
         sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		subTlv.clear();
         return false;
@@ -3319,7 +3320,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	
     err_code = hkdf_key_get(HKDF_KEY_TYPE_CONTROL_READ, hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH, hapClient->encryptionContext.encryptKey);
 	if (err_code != 0) {
-		LogE( F("[ERROR] HKDF encrpytion key not available!"), true);		    	
+		LogE( F("ERROR: HKDF encrpytion key not available!"), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		subTlv.clear();
 		return false;
@@ -3329,7 +3330,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	
 	err_code = hkdf_key_get(HKDF_KEY_TYPE_CONTROL_WRITE, hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH, hapClient->encryptionContext.decryptKey);
 	if (err_code != 0) {
-		LogE( F("[ERROR] HKDF decryption key not available!"), true);		    	
+		LogE( F("ERROR: HKDF decryption key not available!"), true);		    	
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		subTlv.clear();
 		return false;
@@ -3362,9 +3363,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 #if defined( ARDUINO_ARCH_ESP32 )		
 	LogI(">>> Verification with client [" + hapClient->client.remoteIP().toString() + "] complete!", true);
 #elif defined( CORE_TEENSY )					
-	LogI("Handle client [", false);
+	LogI(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> Pair verify complete!", true);
+	LogI(F("] -> Pair verify complete!"), true);
 #endif		
 
 	_eventManager.queueEvent(EventManager::kEventVerifyComplete, HAPEvent());
@@ -3382,7 +3383,7 @@ void HAPServer::handleAccessories(HAPClient* hapClient) {
 	// LogV( "<<< Handle [" + String(hapClient->client.remoteIP()) + "] -> /accessories ...", false);
 	LogV("Handle client [", false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> /accessories ...", false);
+	LogV("] -> /accessories ...", false);
 
 #endif	
 	
@@ -3422,7 +3423,7 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 	//LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings list ...", false);
 	LogV("Handle client [", false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> /pairings list ...", false);
+	LogV("] -> /pairings list ...", false);
 #endif	
 
 	if (hapClient->isAdmin() == false){
@@ -3476,7 +3477,7 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings add ...", false);	
 	LogV("Handle client [", false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> /pairings add ...", false);
+	LogV("] -> /pairings add ...", false);
 #endif		
 
 
@@ -3527,9 +3528,9 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> POST /pairings remove ...", false);	
 #elif defined( CORE_TEENSY )					
 	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings remove ...", false);
-	LogV("Handle client [", false);
+	LogV(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> /pairings remove ...", false);	
+	LogV(F("] -> /pairings remove ..."), false);	
 #endif	
 
 	
@@ -3537,7 +3538,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 
 	// id identifier is controllers id, then disonnect 
 	if (memcmp(identifier, hapClient->getId(), HAP_PAIRINGS_ID_LENGTH) == 0) {
-		Serial.println("removie its own pairings");
+		LogD(F("Removie its own pairing"), true);
 		removeItsOwnPairings = true;
 	}
 	
@@ -3548,7 +3549,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	// i will allow this
 	// 
 	if ( (hapClient->isAdmin() == false) && (removeItsOwnPairings == false) ) {
-		LogE("ERROR: Non-Admin controllers are not allowed to call this method!", true);
+		LogE(F("ERROR: Non-Admin controllers are not allowed to call this method!"), true);
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_AUTHENTICATON);
 		return;
 	}
@@ -3558,10 +3559,10 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 
 
 	// if not paired 
-	LogD("Removing pairings ...", false);
+	LogD(F("Removing pairings ..."), false);
 	if (!_accessorySet->getPairings()->removePairing(identifier)){
 		
-		LogE("ERROR: No pairings found!", true);
+		LogE(F("ERROR: No pairings found!"), true);
 		
 		response.encode(HAP_TLV_ERROR, 1, HAP_ERROR_UNKNOWN);
 		
@@ -3582,7 +3583,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	// ToDo: Check if needed here!?
 	_accessorySet->getPairings()->save();
 
-	LogD(" OK", true);
+	LogD(F("OK"), true);
 
 	// send response
 	
@@ -3645,7 +3646,7 @@ void HAPServer::handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size
 	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings ...", false);
 	LogV("Handle client [", false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> /pairings ...", false);
+	LogV("] -> /pairings ...", false);
 #endif
 
 
@@ -3689,9 +3690,9 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> GET /characteristics ...", false);
 #elif defined( CORE_TEENSY )					
 	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> GET /characteristics ...", false);
-	LogV("Handle client [", false);
+	LogV(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> GET /characteristics ...", false);
+	LogV(F("] -> GET /characteristics ..."), false);
 #endif	
 
 	String idStr = hapClient->request.params["id"];
@@ -3803,16 +3804,16 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] ->  PUT /characteristics ...", true);
 #elif defined( CORE_TEENSY )					
 	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] ->  PUT /characteristics ...", true);
-	LogV("Handle client [", false);
+	LogV(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI("] -> PUT /characteristics ...", false);
+	LogV(F("] -> PUT /characteristics ..."), false);
 #endif		
 	
 	DynamicJsonDocument root(HAP_ARDUINOJSON_BUFFER_SIZE);
 	DeserializationError error = deserializeJson(root, body);
 
 	if (error) {
-    	LogE("[ERROR] Parsing put characteristics request failed!", true);
+    	LogE(F("ERROR: Parsing put characteristics request failed!"), true);
 		// ToDo Send Error Response to client
     	return;
   	}
@@ -3834,7 +3835,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
     	int aid = jc["aid"].as<int>();
     	int iid = jc["iid"].as<int>();
 
-		bool isEvent = false;
+		
 		
 		characteristics *character = _accessorySet->getCharacteristics(aid, iid);		
 		
@@ -3842,6 +3843,8 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 		jsonNewChr["aid"] = aid;
 
 		if (character) {	
+
+			bool isEvent = false;
 					
 			if (jc.as<JsonObject>().containsKey("ev")){
 				isEvent = true;
@@ -3860,7 +3863,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 					
 				} else {
 					// char has no event permission
-					LogE("[ERROR] - Resource notify not permitted for characteristic " + String(aid) + "." + String(iid), true);					
+					LogE(F("ERROR: Resource notify not permitted for characteristic ") + String(aid) + "." + String(iid), true);					
 					jsonNewChr["iid"] = iid;
 					jsonNewChr["status"] = String(HAP_STATUS_NO_NOTIFICATION);
 					errorOccured = true;
@@ -3872,7 +3875,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 					// Add to jsonCharacteristics array				
 					character->toJson(jsonNewChr);
 				} else {
-					LogE("[ERROR] - Resource not writable for characteristic " + String(aid) + "." + String(iid), true);
+					LogE(F("ERROR: Resource not writable for characteristic ") + String(aid) + "." + String(iid), true);
 					jsonNewChr["iid"] = iid;
 					jsonNewChr["status"] = String(HAP_STATUS_READONLY_WRITE);
 					errorOccured = true;			    		
@@ -3881,7 +3884,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 
 						
 		} else {
-			LogE("[ERROR] - Resource not found for characteristic " + String(aid) + "." + String(iid), true);
+			LogE(F("ERROR: Resource not found for characteristic ") + String(aid) + "." + String(iid), true);
 			jsonNewChr["iid"] = iid;
 			jsonNewChr["status"] = String(HAP_STATUS_RESOURCE_NOT_FOUND);
 			errorOccured = true;			    		
@@ -3898,7 +3901,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 	}
 
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
-	LogV("OK", true);
+	LogV(F("OK"), true);
 
 }
 
@@ -3909,23 +3912,27 @@ void HAPServer::handleEventUpdateConfigNumber( int eventCode, struct HAPEvent ev
 
 
 void HAPServer::handleEventRebootNow(int eventCode, struct HAPEvent eventParam){
-	LogW("*********************************************************", true);
-	LogW("*                                                       *", true);
-	LogW("*                 !!! Rebooting now !!!                 *", true);
-	LogW("*                                                       *", true);
-	LogW("*********************************************************", true);
+	LogW(F("*********************************************************"), true);
+	LogW(F("*                                                       *"), true);
+	LogW(F("*                 !!! Rebooting now !!!                 *"), true);
+	LogW(F("*                                                       *"), true);
+	LogW(F("*********************************************************"), true);
 
 	delay(2000);
 
 #if defined( ARDUINO_ARCH_ESP32)	
 	ESP.restart();
+#elif defined( CORE_TEENSY )
+	// ToDo: Add reboot
+
+
 #endif
 
 }
 
 void HAPServer::handleEventConfigReset(int eventCode, struct HAPEvent eventParam){
 
-	LogI( "Delete config!", true);
+	LogI(F("Delete config!"), true);
 
     _config.begin();
     _config.save();
@@ -4060,7 +4067,7 @@ bool HAPServer::sendEvent(HAPClient* hapClient, String response){
 
 	if ( hapClient->client.connected() ){				
 		sendEncrypt(hapClient, EVENT_200, response, true);	
-		LogD(" OK", true);
+		LogD(F("OK"), true);
 		return true;		
 	} 
 	

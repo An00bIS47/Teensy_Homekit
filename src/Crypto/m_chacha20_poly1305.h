@@ -27,7 +27,7 @@ enum chacha20_poly1305_type {
 int chacha20_poly1305_decrypt(enum chacha20_poly1305_type type, uint8_t* key, 
         uint8_t* aad, int aad_len,
         uint8_t* encrypted, int encrypted_len, uint8_t* decrypted);
-int chacha20_poly1305_decrypt_with_nonce(uint8_t* nonce, uint8_t* key, uint8_t* aad, int add_len, uint8_t* encrypted, int encrypted_len, uint8_t* decrypted);
+int chacha20_poly1305_decrypt_with_nonce(uint8_t* curNonce, uint8_t* key, uint8_t* aad, int add_len, uint8_t* encrypted, int encrypted_len, uint8_t* decrypted);
 
 
 int chacha20_poly1305_encrypt(enum chacha20_poly1305_type type, uint8_t* key, 
@@ -35,7 +35,7 @@ int chacha20_poly1305_encrypt(enum chacha20_poly1305_type type, uint8_t* key,
         uint8_t* plain_text, int plain_text_length, 
         uint8_t* encrypted);
 
-int chacha20_poly1305_encrypt_with_nonce(uint8_t nonce[CHACHA20_POLY1305_NONCE_LENGTH], uint8_t* key, 
+int chacha20_poly1305_encrypt_with_nonce(uint8_t curNonce[CHACHA20_POLY1305_NONCE_LENGTH], uint8_t* key, 
         uint8_t* aad, int aad_len,
         uint8_t* plain_text, int plain_text_length, 
         uint8_t* encrypted);
