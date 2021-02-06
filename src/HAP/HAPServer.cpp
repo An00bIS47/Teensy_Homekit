@@ -1163,24 +1163,6 @@ void HAPServer::handle() {
 	}
 #endif	
 
-	// Handle new clients
-#if defined(ARDUINO_ARCH_ESP32)	
-	WiFiClient client = _server.available();
-#elif defined( CORE_TEENSY)
-	EthernetClient client = _server.available();
-#endif
-	if (client) {
-
-		HAPClient hapClient;
-
-		// New client connected
-		hapClient.client = client;
-		hapClient.state = HAP_CLIENT_STATE_CONNECTED;
-
-		handleClientState(&hapClient);
-	}
-
-
 	// Handle existing clients
 	for (auto& hapClient : _clients) {
 
@@ -1188,11 +1170,9 @@ void HAPServer::handle() {
 		if (hapClient.client.connected()) {
 
 			// Available
-			unsigned long timeout = 100;
+			unsigned long timeout = 150;
 			unsigned long previousMillis = millis();
 			while ( millis() - previousMillis < timeout) {
-
-				delay(1);
 
 				if (hapClient.client.available()) {
 					hapClient.state = HAP_CLIENT_STATE_AVAILABLE;
@@ -1211,10 +1191,29 @@ void HAPServer::handle() {
 			handleClientState(&hapClient);
 		}
 
-		// LogV( "HAPClient state " + hapClient.getClientState(), true );
-		// delay(1);
-
+		// LogV( "HAPClient state " + hapClient.getClientState(), true );		
 	}
+
+	
+	// Handle new clients
+#if defined(ARDUINO_ARCH_ESP32)	
+	WiFiClient client = _server.available();
+#elif defined( CORE_TEENSY)
+	EthernetClient client = _server.available();
+#endif
+	if (client) {
+
+		HAPClient hapClient;
+
+		// New client connected
+		hapClient.client = client;
+		hapClient.state = HAP_CLIENT_STATE_CONNECTED;
+
+		handleClientState(&hapClient);
+	}
+
+
+
 
 	// Handle ntp client
 #if HAP_ENABLE_NTP
@@ -1420,7 +1419,7 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 }
 
 void HAPServer::handleAllPairingsRemoved(){
-	LogV( F("<<< Handle admin removed ..."), false);
+	LogV( F("<<< Handle all pairings removed ..."), false);
 	for (int i=0; i < _clients.size(); i++){
 		
 
@@ -1450,12 +1449,12 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 
 		delay(1);
 
-#if defined(CORE_TEENSY)		
-		Serial.print("_curLine: *");
-		Serial.print(_curLine);
-		Serial.println("*");	
-		delay(1);	
-#endif
+// #if defined(CORE_TEENSY)		
+// 		Serial.print("_curLine: *");
+// 		Serial.print(_curLine);
+// 		Serial.println("*");	
+// 		delay(1);	
+// #endif
 
 		if (hapClient->isEncrypted()) {
 			processIncomingEncryptedRequest( hapClient );	

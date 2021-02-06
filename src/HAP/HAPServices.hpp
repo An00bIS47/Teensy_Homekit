@@ -54,7 +54,7 @@ typedef enum {
 } HAP_SERVICE;
 
 
-String serviceName(int type){
+inline String serviceName(int type){
     switch(type) {
         case HAP_SERVICE_ACCESSORY_INFORMATION:                           // 0x3E     ==    62
             return "AccessoryInformation";
