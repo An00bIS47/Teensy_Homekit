@@ -19,7 +19,7 @@
 #if defined(ARDUINO_ARCH_ESP32)
 
 #if ESP_IDF_VERSION_MAJOR == 4
-
+#include "mbedtls/base64.h"
 #else
 extern "C" {
     #include "crypto/base64.h"
@@ -69,6 +69,10 @@ extern "C" {
 #define HAP_FAKEGATO_TYPE_AQUA          0x05    // Entry for Eve Aqua, valve on, 13 bytes in total
 #define HAP_FAKEGATO_TYPE_AQUA_21       0x07    // --> not unique
 #define HAP_FAKEGATO_TYPE_SWITCH        0x01
+
+
+
+#define HAP_SERVICE_FAKEGATO_ENDING                             "-079E-48FF-8F27-9C2605A29F52"
 
 // 
 // Services
@@ -325,14 +329,14 @@ protected:
     String                _serialNumber;
 
     // History Characteristics
-    dataCharacteristics*  _s2r1Characteristics;
-    dataCharacteristics*  _s2r2Characteristics;
-    dataCharacteristics*  _s2w1Characteristics;
-    dataCharacteristics*  _s2w2Characteristics;
+    HAPCharacteristicData*  _s2r1Characteristics;
+    HAPCharacteristicData*  _s2r2Characteristics;
+    HAPCharacteristicData*  _s2w1Characteristics;
+    HAPCharacteristicData*  _s2w2Characteristics;
     
     // Schedule Characteristics
-    dataCharacteristics* _configReadCharacteristics;
-    dataCharacteristics* _configWriteCharacteristics;
+    HAPCharacteristicData* _configReadCharacteristics;
+    HAPCharacteristicData* _configWriteCharacteristics;
     
     bool                    _isEnabled;
     uint32_t                _refTime;    
@@ -372,7 +376,9 @@ protected:
 
 
     inline uint32_t incrementIndex(uint32_t index){
-        return (index + 1) % HAP_FAKEGATO_BUFFER_SIZE;
+        uint32_t result = (index + 1) % (HAP_FAKEGATO_BUFFER_SIZE);
+        //if (result == 0) result += 1;
+        return result;
     }
 
     inline uint32_t decrementIndex(uint32_t index){

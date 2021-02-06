@@ -343,7 +343,7 @@ void HAPClient::setHeader(HAPClientHeader header){
 	setHeader(header.name, header.value);
 }
 
-void HAPClient::setHeader(String name, String value) {
+void HAPClient::setHeader(const String& name, const String& value) {
 	bool found = false;
 	for (auto & elem : _headers)
 	{

@@ -26,7 +26,10 @@ public:
 
     HAPPluginRCSwitchDevice();
     HAPPluginRCSwitchDevice(uint8_t houseAddress_, uint8_t deviceAddress_, String name_);
-                            
+
+    ~HAPPluginRCSwitchDevice();
+
+
     HAPAccessory* initAccessory();    
 
     void setState(String pwrState);    
@@ -64,11 +67,11 @@ private:
     EventManager*			_eventManager;
     HAPFakeGatoFactory*     _fakegatoFactory;
 
-    boolCharacteristics*    _stateValue;
-    boolCharacteristics*    _inUseState;
-    boolCharacteristics*    _parentalLock;
-    floatCharacteristics*   _curPowerValue;
-    floatCharacteristics*   _ttlPowerValue;
+    HAPCharacteristicBool*    _stateValue;
+    HAPCharacteristicBool*    _inUseState;
+    HAPCharacteristicBool*    _parentalLock;
+    HAPCharacteristicFloat*   _curPowerValue;
+    HAPCharacteristicFloat*   _ttlPowerValue;
 
     uint32_t                _timestampLastActivity;
 

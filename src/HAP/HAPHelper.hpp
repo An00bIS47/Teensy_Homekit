@@ -61,6 +61,32 @@ public:
 	static bool containsNestedKey(const JsonObject obj, const char* key);
 	static void mergeJson(JsonDocument& dst, const JsonObject& src);
 
+	static void printHex(const char* suffix, const uint8_t *data, size_t length, bool newline = true);
+
+	static uint32_t u8_to_u32(const uint8_t* bytes) {
+		uint32_t u32 = (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
+		return u32;
+	}
+
+	static void u32_to_u8(const uint32_t u32, uint8_t* u8) {
+		u8[0] = (u32 & 0xff000000) >> 24;
+		u8[1] = (u32 & 0x00ff0000) >> 16;
+		u8[2] = (u32 & 0x0000ff00) >> 8;
+		u8[3] = u32 & 0x000000ff;
+	}
+
+	static void u16_to_u8(const uint16_t u16, uint8_t* u8){
+    	u8[0] = (uint8_t)(u16 & 0xFF);
+    	u8[1] = (uint8_t)((u16 >> 8) & 0xFF);
+	}
+
+	static uint16_t u8_to_u16(const uint8_t* bytes) {
+		uint16_t u16 = (bytes[1] | (bytes[0] << 8));
+		return u16;
+	}
+	
+
+
 #if defined(ARDUINO_ARCH_ESP32)
 	static void getPartionTableInfo();
 #endif
@@ -115,7 +141,12 @@ public:
 	static bool isValidFloat(String tString);
 	static bool isValidNumber(String str);
 
-
+	
+	// rounds a number to 2 decimal places
+	// example: round(3.14159) -> 3.14
+	static inline double round2(double value) {
+   		return (int)(value * 100 + 0.5) / 100.0;
+	}
 	
 };
 

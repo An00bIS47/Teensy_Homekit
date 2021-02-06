@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #if ARDUINO_ARCH_ESP32  
 #include <esp_log.h>

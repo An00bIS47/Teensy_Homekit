@@ -9,6 +9,8 @@
 #ifndef HAPINDICATORPIXELCOLORS_HPP_
 #define HAPINDICATORPIXELCOLORS_HPP_
 
+
+#if HAP_ENABLE_PIXEL_INDICATOR
 #include <Arduino.h>
 // #include "NeoPixelBus.h"
 #include "FastLED.h"
@@ -63,5 +65,7 @@
 #define HAPColorYellow 	    CRGB::Yellow // RGB(255,255,0)
 #define HAPColorOrange 	    CRGB::Orange // RGB(255,165,0)
 #define HAPColorPurple 	    CRGB::Purple // RGB(128,0,128)
+
+#endif
 
 #endif /* HAPVERSION_HPP_ */

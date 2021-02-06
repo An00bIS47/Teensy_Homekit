@@ -29,8 +29,8 @@
 /* NOTE: 
 * This files is based on fnet\third_party\mbedtls-x.x.x\include\mbedtls\config.h */
 
-#ifndef FNET_MBEDTLS_USER_CONFIG_H
-#define FNET_MBEDTLS_USER_CONFIG_H
+#ifndef MBEDTLS_USER_CONFIG_H
+#define MBEDTLS_USER_CONFIG_H
 
 #include <Arduino.h>
 #define MBEDTLSPROGMEM PROGMEM  //Uncomment to place large constants in PROGMEM for Teensy
@@ -53,12 +53,6 @@
 #define MBEDTLS_ECP_MAX_BITS        384 /* Maximum bit size of groups */
 /******************************************************************************/
 
-/**
- * \name SECTION: System support
- *
- * This section sets system specific settings.
- * \{
- */
 
 /**
  * \def MBEDTLS_HAVE_ASM
@@ -663,8 +657,8 @@
  *
  * Comment macros to disable the curve and functions for it
  */
-// #define MBEDTLS_ECP_DP_SECP192R1_ENABLED
-// #define MBEDTLS_ECP_DP_SECP224R1_ENABLED
+#define MBEDTLS_ECP_DP_SECP192R1_ENABLED
+//#define MBEDTLS_ECP_DP_SECP224R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 //#define MBEDTLS_ECP_DP_SECP384R1_ENABLED
 //#define MBEDTLS_ECP_DP_SECP521R1_ENABLED

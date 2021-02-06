@@ -60,18 +60,7 @@
 #include <DHT_U.h>
 #endif
 
-
-
-
-
-// #if HAP_PLUGIN_DHT_USE_PRESSURE
 #include "HAPFakeGatoWeather.hpp"
-// #else
-
-// #endif
-
-
-// #include "HAPFakeGatoWeather.hpp"
 
 class HAPPluginDHT: public HAPPlugin {
 public:
@@ -90,23 +79,24 @@ public:
 	void changePressure(uint16_t oldValue, uint16_t newValue);
 #endif
 
-
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 	
-	HAPConfigValidationResult validateConfig(JsonObject object);
-	JsonObject getConfigImpl();
-	void setConfigImpl(JsonObject root);
-	// void handleEvents(int eventCode, struct HAPEvent eventParam);
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
+
+	HAPConfigurationPlugin* setDefaults();	
+
 private:
 
-	
-	// HAPAccessory*			_accessory;
+	// String 						_name;
+	// bool 						_isEnabled;
+	// unsigned long 				_interval;
 
-	floatCharacteristics*	_humidityValue;
-	floatCharacteristics*	_temperatureValue;
+
+	HAPCharacteristicFloat*	_humidityValue;
+	HAPCharacteristicFloat*	_temperatureValue;
 #if HAP_PLUGIN_DHT_USE_PRESSURE	
-	uint16Characteristics*	_pressureValue;
+	HAPCharacteristicUInt16*	_pressureValue;
 #endif
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
@@ -116,12 +106,8 @@ private:
 
 	bool fakeGatoCallback();
 
-// #if HAP_PLUGIN_DHT_USE_PRESSURE	
 
-// #else
 	HAPFakeGatoWeather _fakegato;
-// #endif
-
 
 };
 

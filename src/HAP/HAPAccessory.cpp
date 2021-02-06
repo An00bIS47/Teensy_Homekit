@@ -16,28 +16,53 @@
 
 HAPAccessory::HAPAccessory() {
 	aid = 0;
-    
-    _infoService    = nullptr;
-    _accessoryName  = nullptr;
-    _manufacturer   = nullptr;
-    _modelName      = nullptr; 
-    _serialNumber   = nullptr;
-    _identify       = nullptr;
-    _firmware       = nullptr;
+	
+	_infoService    = nullptr;
+	_accessoryName  = nullptr;
+	_manufacturer   = nullptr;
+	_modelName      = nullptr; 
+	_serialNumber   = nullptr;
+	_identify       = nullptr;
+	_firmware       = nullptr;
 }
+
+
+HAPAccessory::~HAPAccessory(){
+	if (_infoService) delete _infoService;
+
+	if (_accessoryName) delete _accessoryName;
+	if (_firmware) delete _firmware;
+	if (_manufacturer) delete _manufacturer;
+	if (_modelName) delete _modelName;
+	if (_serialNumber) delete _serialNumber;
+	if (_identify) delete _identify;
+
+	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
+		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+			
+			struct HAPEvent event = HAPEvent(NULL, aid, (*jt)->iid, "");
+			HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);					
+			(*it)->_characteristics.erase(jt);			                        
+		}
+		_services.erase(it);
+	}
+
+}
+
+
 
 void HAPAccessory::addService(HAPService *ser) {
 	ser->serviceID = ++numberOfInstance;
 	_services.push_back(ser);
 }
 
-void HAPAccessory::addCharacteristics(HAPService *ser, characteristics *cha) {
+void HAPAccessory::addCharacteristics(HAPService *ser, HAPCharacteristic *cha) {
 	cha->iid = ++numberOfInstance;
 	ser->_characteristics.push_back(cha);
 
-    // ToDo: Add event for update mdns config
-    
-    struct HAPEvent event = HAPEvent(NULL, aid, cha->iid, "");					
+	// ToDo: Add event for update mdns config
+	
+	struct HAPEvent event = HAPEvent(NULL, aid, cha->iid, "");					
 	HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
 }
 
@@ -52,17 +77,17 @@ bool HAPAccessory::removeService(HAPService *ser) {
 	return exist;
 }
 
-bool HAPAccessory::removeCharacteristics(characteristics *cha) {
+bool HAPAccessory::removeCharacteristics(HAPCharacteristic *cha) {
 	bool exist = false;
 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<characteristics *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
 			if (*jt == cha) {
 				(*it)->_characteristics.erase(jt);
 				exist = true;
 
-                // ToDo: Add event for update mdns config                                                     
-                struct HAPEvent event = HAPEvent(NULL, aid, (*jt)->iid, "");					
-	            HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
+				// ToDo: Add event for update mdns config                                                     
+				struct HAPEvent event = HAPEvent(NULL, aid, (*jt)->iid, "");					
+				HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
 			}
 		}
 	}
@@ -80,9 +105,9 @@ HAPService *HAPAccessory::serviceAtIndex(uint8_t index) {
 	return _services[index];
 }
 
-characteristics *HAPAccessory::characteristicsAtIndex(uint8_t index) {
+HAPCharacteristic *HAPAccessory::characteristicsAtIndex(uint8_t index) {
 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<characteristics *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
 			if ((*jt)->iid == index) {
 				return *jt;
 			}
@@ -91,9 +116,9 @@ characteristics *HAPAccessory::characteristicsAtIndex(uint8_t index) {
 	return NULL;
 }
 
-characteristics *HAPAccessory::characteristicsOfType(int type) {
+HAPCharacteristic *HAPAccessory::characteristicsOfType(int type) {
 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<characteristics *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
 			if ((*jt)->type == type) {
 				return *jt;
 			}
@@ -103,175 +128,207 @@ characteristics *HAPAccessory::characteristicsOfType(int type) {
 }
 
 
+void HAPAccessory::toJson(JsonArray& array){
 
-String HAPAccessory::describe() const {
+	JsonObject nested = array.createNestedObject();
+	nested["aid"] = aid;
+	
+	JsonArray servicesArray = nested.createNestedArray("services");
+	for (int i = 0; i < numberOfService(); i++) {
+		// services[i] = _services[i]->describe();
+		_services[i]->toJson(servicesArray);
+	}        
+}
 
-    String keys[2];
-    String values[2];
-    
-    {
-        keys[0] = "aid";
-        char temp[8];
-        sprintf(temp, "%d", aid);
-        values[0] = temp;
-    }
-    
-    {
-        //Form services list
-        int noOfService = numberOfService();
-        String *services = new String[noOfService];
-        for (int i = 0; i < noOfService; i++) {
-            services[i] = _services[i]->describe();
-        }
-        keys[1] = "services";
-        values[1] = HAPHelper::arrayWrap(services, noOfService);
-        delete [] services;
-    }
-    
-    
-    return HAPHelper::dictionaryWrap(keys, values, 2);
+void HAPAccessory::printTo(Print& print){
+	print.print("{");
+	
+	// aid
+	print.print("\"aid\":");
+	print.print(aid);    
+	print.print(",");
+
+	// services
+	print.print("\"services\":[");    
+	for (int i = 0; i < numberOfService(); i++) {
+		_services[i]->printTo(print);
+
+		if (i+1 < numberOfService()){
+			print.print(",");
+		}
+	}
+	print.print("]}");
 }
 
 
-HAPService* HAPAccessory::addInfoService(String accessoryName, String manufactuerName, String modelName, String serialNumber, identifyFunctionCallback callback, String firmwareRev){
-    
-    setName(accessoryName);
-    
-    setIdentifyCallback(callback);
+// String HAPAccessory::describe() const {
 
-    setManufacturer(manufactuerName);
+//     String keys[2];
+//     String values[2];
+	
+//     {
+//         keys[0] = "aid";
+//         char temp[8];
+//         sprintf(temp, "%d", aid);
+//         values[0] = temp;
+//     }
+	
+//     {
+//         //Form services list
+//         int noOfService = numberOfService();
+//         String *services = new String[noOfService];
+//         for (int i = 0; i < noOfService; i++) {
+//             services[i] = _services[i]->describe();
+//         }
+//         keys[1] = "services";
+//         values[1] = HAPHelper::arrayWrap(services, noOfService);
+//         delete [] services;
+//     }
+	
+	
+//     return HAPHelper::dictionaryWrap(keys, values, 2);
+// }
 
-    setModelName(modelName);
 
-    setSerialNumber(serialNumber);
-    
-    if ( firmwareRev != "" ) {
-        setFirmware(firmwareRev);
-    }
-    
-    return _infoService;
+HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
+	
+	setName(accessoryName);
+	
+	setIdentifyCallback(callback);
+
+	setManufacturer(manufactuerName);
+
+	setModelName(modelName);
+
+	setSerialNumber(serialNumber);
+	
+	if ( firmwareRev != "" ) {
+		setFirmware(firmwareRev);
+	}
+	
+	return _infoService;
 }
 
 
 void HAPAccessory::initInfoService(){
-    if (_infoService == nullptr) {
-        _infoService = new HAPService(HAP_SERVICE_ACCESSORY_INFORMATION);
-        addService(_infoService);    
-    }    
+	if (_infoService == nullptr) {
+		_infoService = new HAPService(HAP_SERVICE_ACCESSORY_INFORMATION);
+		addService(_infoService);    
+	}    
 }
 
 void HAPAccessory::initAccessoryName(){
-    initInfoService();
-    if (_accessoryName == nullptr) {
-        _accessoryName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, 32);            
-        addCharacteristics(_infoService, _accessoryName);
-    }
+	initInfoService();
+	if (_accessoryName == nullptr) {
+		_accessoryName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);            
+		addCharacteristics(_infoService, _accessoryName);
+	}
 }
 
 void HAPAccessory::initFirmware(){
-    initInfoService();
-    if (_firmware == nullptr) {
-        _firmware = new stringCharacteristics(HAP_CHARACTERISTIC_FIRMWARE_REVISION, permission_read, 32);            
-        addCharacteristics(_infoService, _firmware);
-    }
+	initInfoService();
+	if (_firmware == nullptr) {
+		_firmware = new HAPCharacteristicString(HAP_CHARACTERISTIC_FIRMWARE_REVISION, permission_read);            
+		addCharacteristics(_infoService, _firmware);
+	}
 }
 
 void HAPAccessory::initManufacturer(){
-    initInfoService();
-    if (_manufacturer == nullptr) {
-        _manufacturer = new stringCharacteristics(HAP_CHARACTERISTIC_MANUFACTURER, permission_read, 32);            
-        addCharacteristics(_infoService, _manufacturer);
-    }
+	initInfoService();
+	if (_manufacturer == nullptr) {
+		_manufacturer = new HAPCharacteristicString(HAP_CHARACTERISTIC_MANUFACTURER, permission_read);            
+		addCharacteristics(_infoService, _manufacturer);
+	}
 }
 
 void HAPAccessory::initModelName(){
-    initInfoService();
-    if (_modelName == nullptr) {
-        _modelName = new stringCharacteristics(HAP_CHARACTERISTIC_MODEL, permission_read, 32);            
-        addCharacteristics(_infoService, _modelName);
-    }
+	initInfoService();
+	if (_modelName == nullptr) {
+		_modelName = new HAPCharacteristicString(HAP_CHARACTERISTIC_MODEL, permission_read);            
+		addCharacteristics(_infoService, _modelName);
+	}
 }
 
 void HAPAccessory::initSerialNumber(){
-    initInfoService();
-    if (_serialNumber == nullptr) {
-        _serialNumber = new stringCharacteristics(HAP_CHARACTERISTIC_SERIAL_NUMBER, permission_read, 32);            
-        addCharacteristics(_infoService, _serialNumber);
-    }
+	initInfoService();
+	if (_serialNumber == nullptr) {
+		_serialNumber = new HAPCharacteristicString(HAP_CHARACTERISTIC_SERIAL_NUMBER, permission_read);            
+		addCharacteristics(_infoService, _serialNumber);
+	}
 }
 
 void HAPAccessory::initIdentify(){
-    initInfoService();
-    if (_identify == nullptr) {
-        _identify = new boolCharacteristics(HAP_CHARACTERISTIC_IDENTIFY, permission_write);            
-        addCharacteristics(_infoService, _identify);
-    }
+	initInfoService();
+	if (_identify == nullptr) {
+		_identify = new HAPCharacteristicBool(HAP_CHARACTERISTIC_IDENTIFY, permission_write);            
+		addCharacteristics(_infoService, _identify);
+	}
 }
 
 
-void HAPAccessory::setName(String name){
-    initAccessoryName();
+void HAPAccessory::setName(const String& name){
+	initAccessoryName();
 	_accessoryName->setValue(name);
 }
 
 String HAPAccessory::name(){
-    if (_accessoryName == nullptr) {
-        return "";    
-    }
+	if (_accessoryName == nullptr) {
+		return "";    
+	}
 	return _accessoryName->value();
 }
 
-void HAPAccessory::setFirmware(String firmware){
-    initFirmware();
+void HAPAccessory::setFirmware(const String& firmware){
+	initFirmware();
 	_firmware->setValue(firmware);
 }
 
 String HAPAccessory::firmware(){
-    if (_firmware == nullptr) {
-        return "";    
-    }
+	if (_firmware == nullptr) {
+		return "";    
+	}
 	return _firmware->value();
 }
 
 
-void HAPAccessory::setManufacturer(String manufacturer){
-    initManufacturer();
+void HAPAccessory::setManufacturer(const String& manufacturer){
+	initManufacturer();
 	_manufacturer->setValue(manufacturer);
 }
 
 String HAPAccessory::manufacturer(){
-    if (_manufacturer == nullptr) {
-        return "";    
-    }
+	if (_manufacturer == nullptr) {
+		return "";    
+	}
 	return _manufacturer->value();
 }
 
 
-void HAPAccessory::setModelName(String modelName){
-    initModelName();
+void HAPAccessory::setModelName(const String& modelName){
+	initModelName();
 	_modelName->setValue(modelName);
 }
 
 String HAPAccessory::modelName(){
-    if (_modelName == nullptr) {
-        return "";    
-    }
+	if (_modelName == nullptr) {
+		return "";    
+	}
 	return _modelName->value();
 }
 
-void HAPAccessory::setSerialNumber(String serialNumber){
-    initSerialNumber();
+void HAPAccessory::setSerialNumber(const String& serialNumber){
+	initSerialNumber();
 	_serialNumber->setValue(serialNumber);
 }
 
 String HAPAccessory::serialNumber(){
-    if (_serialNumber == nullptr) {
-        return "";    
-    }
+	if (_serialNumber == nullptr) {
+		return "";    
+	}
 	return _serialNumber->value();
 }
 
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
-    initIdentify();
-    _identify->valueChangeFunctionCall = callback;
+	initIdentify();
+	_identify->valueChangeFunctionCall = callback;
 }

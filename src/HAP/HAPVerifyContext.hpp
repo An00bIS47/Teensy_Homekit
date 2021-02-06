@@ -13,35 +13,6 @@
 #include "m_ed25519.h"
 #include "HAPGlobals.hpp"
 
-struct HAPLongTermContext {
-	// uint8_t publicKey[ED25519_PUBLIC_KEY_LENGTH];
-	uint8_t* publicKey;
-	uint8_t publicKeyLength;
-
-	// uint8_t privateKey[ED25519_PRIVATE_KEY_LENGTH];
-	uint8_t* privateKey;
-	uint8_t privateKeyLength;
-
-	uint8_t* LTSK;
-	uint8_t LTSKLength;
-
-	HAPLongTermContext() 
-	: publicKeyLength(ED25519_PUBLIC_KEY_LENGTH)
-	, privateKeyLength(ED25519_PRIVATE_KEY_LENGTH)
-	, LTSKLength(ED25519_BYTES) {
-		publicKey = (uint8_t*) malloc(sizeof(uint8_t) * publicKeyLength);
-		privateKey = (uint8_t*) malloc(sizeof(uint8_t) * privateKeyLength);
-		LTSK = (uint8_t*) malloc(sizeof(uint8_t) * LTSKLength);
-	}
-
-	~HAPLongTermContext(){
-		free(publicKey);
-		free(privateKey);
-		free(LTSK);
-	}
-};
-
-
 struct HAPEncryptionContext {
 	uint8_t encryptKey[CURVE25519_SECRET_LENGTH];
 	uint8_t decryptKey[CURVE25519_SECRET_LENGTH];

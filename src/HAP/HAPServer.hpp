@@ -21,7 +21,10 @@
 #include "HAPVerifyContext.hpp"
 #include "HAPVersion.hpp"
 
-#include "HAPConfig.hpp"
+
+
+
+#include "HAPSRP.hpp"
 
 #include "HAPTLV8Types.hpp"
 #include "HAPPlugins.hpp"
@@ -34,12 +37,22 @@
 #if defined(ARDUINO_ARCH_ESP32)
 #include <WiFiClient.h>
 #include <WiFiServer.h>
-// #include <Preferences.h>
+
+#if HAP_USE_PREFERENCES
+#include "HAPConfigurationPreferences.hpp"
+#endif
+
+#if HAP_USE_EEPROM
+#include "HAPConfigurationEEPROM.hpp"
+#endif
 
 #include "HAPWiFiHelper.hpp"
-#include "HAPWebServer.hpp"
 
-#if HAP_KEYSTORE_ENABLED
+#if HAP_ENABLE_WEBSERVER
+#include "HAPWebServer.hpp"
+#endif
+
+#if HAP_ENABLE_KEYSTORE
 #include "HAPKeystore.hpp"
 #endif
 
@@ -51,26 +64,29 @@
 
 #elif defined(CORE_TEENSY)
 
+#include "HAPConfigurationEEPROM.hpp"
+
 #ifdef HAP_ENABLE_WEBSERVER
 #undef HAP_ENABLE_WEBSERVER
 #endif
 
 #include <NativeEthernet.h>
-#if HAP_NTP_ENABLED	
+#if HAP_ENABLE_NTP	
 #include <NativeEthernetUdp.h>
 #include <TimeLib.h>
 #include <time.h>
 #endif
 #endif
 
-#if HAP_PIXEL_INDICATOR_ENABLED
+#if HAP_ENABLE_PIXEL_INDICATOR
 #include "HAPIndicatorPixel.hpp"
 #endif
 
-#if HAP_UPDATE_ENABLE_OTA || HAP_UPDATE_ENABLE_FROM_WEB
+#if HAP_ENABLE_UPDATE_OTA || HAP_ENABLE_UPDATE_WEB
 #include "HAPUpdate.hpp"
 #endif
 
+#include "HAPPrintEncrypted.hpp"
 
 #define Homekit_setFirmware(name, version, rev) \
 const char* __FLAGGED_FW_NAME 		= "\xbf\x84\xe4\x13\x54" name "\x93\x44\x6b\xa7\x75"; \
@@ -91,30 +107,13 @@ hap.__setBrand(__FLAGGED_BRAND);
 
 
 
-#if HAP_USE_MBEDTLS_SRP
 
-#include "m_srp.h"
-#include "m_srp_internal.h"
-
-typedef struct Srp_ {
-	SRPSession *ses;
-	const unsigned char * bytes_s; int len_s;
-	const unsigned char * bytes_v; int len_v;
-	SRPKeyPair *keys;
-	const unsigned char * bytes_B; int len_B;
-	SRPVerifier *ver;
-	char * username;
-} Srp;
 
 #define SRP_SALT_LENGTH         16
 #define SRP_PUBLIC_KEY_LENGTH   384
 #define SRP_PROOF_LENGTH        64
 #define SRP_SESSION_KEY_LENGTH  64
 
-#else
-#include "srp.h"
-
-#endif
 
 
 // ToDo: Remove?
@@ -136,50 +135,59 @@ static const char EVENT_200[] PROGMEM 					= "EVENT/1.0 200 OK\r\n";
 
 #if defined( CORE_TEENSY )
 struct HAP_MDNS_TXT {
-	char md[32];
-	char id[32];
-	char cN[20];	
-	char ff[2];	
-	char pv[4];
-	char sN[2];
-	char sf[2];
-	char ci[2];
-	char sh[20];
+	char md[32 + 1];
+	char id[20 + 1];
+	char cN[20 + 1];	
+	char ff[2  + 1];	
+	char pv[4  + 1];
+	char sN[2  + 1];
+	char sf[2  + 1];
+	char ci[2  + 1];
+	char sh[12 + 1];
 
 	void setModellDescription(const char* md_){
-		strncpy(md, md_, strlen(md_) > 32 ? 32 : strlen(md_));
+		strncpy(md, md_, 32);
+		md[32] ='\0';
 	}
 
 	void setConfigNumber(const uint32_t c_){		
-		sprintf(cN, HAP_SPRINTF_UI32, c_);
+		sprintf(cN, "%" PRIu32, c_);
+		cN[20] ='\0';
 	}
 
 	void setId(const char* id_){
-		strncpy(id, id_, strlen(id_) > 32 ? 32 : strlen(id_));
+		strncpy(id, id_, 20);
+		id[20] ='\0';
 	}
 
 	void setFf(bool value){
 		sprintf(ff, "%d", value);
+		ff[2] ='\0';
 	}
 
 	void setPv(const char* value){
-		strncpy(pv, value, strlen(value) > 4 ? 4 : strlen(value));
+		strncpy(pv, value, 4);
+		pv[4] ='\0';
 	}
 
 	void setStateNumber(uint8_t value){
 		sprintf(sN, "%d", value);
+		sN[2] ='\0';
 	}
 
 	void setSf(bool value){
 		sprintf(sf, "%d", value);
+		sf[2] ='\0';
 	}
 
 	void setCi(uint8_t value){
 		sprintf(ci, "%d", value);
+		sf[2] ='\0';
 	}
 
 	void setSh(const char* value){
-		strncpy(sh, value, strlen(value) > 20 ? 20 : strlen(value));
+		strncpy(sh, value, 12);
+		sh[12] ='\0';
 	}
 };
 #endif
@@ -219,14 +227,11 @@ public:
 	static EventManager _eventManager;
 protected:
 
-	HAPConfig _config;
-
-	
+	// HAPConfig _config;
 
 
 
 	// struct HAPPairSetup* _pairSetup;
-
 	
 	void updateConfig();
 
@@ -237,7 +242,14 @@ protected:
 	WiFiServer _server;
 	HAPWiFiHelper _wifi;
 
-#if HAP_KEYSTORE_ENABLED
+#if HAP_USE_PREFERENCES
+	HAPConfigurationPreferences _configuration;
+#else	
+	HAPConfigurationEEPROM _configuration;	
+#endif
+
+
+#if HAP_ENABLE_KEYSTORE
 	HAPKeystore	  _keystore;	
 #endif
 
@@ -250,10 +262,13 @@ protected:
 	// Preferences _preferences;
 #elif defined(CORE_TEENSY)		
 	EthernetServer _server;
+	
+	HAPConfigurationEEPROM _configuration;	
+
 	static const fnet_mdns_txt_key_t* HomekitTXTRecord();
 	static HAP_MDNS_TXT _hapMdnsTxt;
 
-#if HAP_NTP_ENABLED	
+#if HAP_ENABLE_NTP	
 	static EthernetUDP _udp;
 	static void sendNTPpacket(const char * address);
 	static time_t getNtpTime();
@@ -263,11 +278,9 @@ protected:
 
 #endif
 
-#if HAP_NTP_ENABLED	
+#if HAP_ENABLE_NTP	
 	static struct tm _timeinfo;
 #endif	
-
-
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
 	HAPFakeGatoFactory _fakeGatoFactory;
@@ -296,7 +309,7 @@ protected:
 	MemberFunctionCallable<HAPServer> listenerConfigReset;	
 	MemberFunctionCallable<HAPServer> listenerDeleteAllPairings;	
 
-#if HAP_UPDATE_ENABLE_OTA || HAP_UPDATE_ENABLE_FROM_WEB 	
+#if HAP_ENABLE_UPDATE_OTA || HAP_ENABLE_UPDATE_WEB 	
 	HAPUpdate _updater;
 #endif
 
@@ -359,22 +372,14 @@ private:
 	uint8_t _homekitFailedLoginAttempts;
 
 	String _curLine;
-	uint16_t _port;
-
-	unsigned long _minimalPluginInterval;
-	unsigned long _previousMillis;
+	uint16_t _port;	
 
 #if HAP_DEBUG	
 	unsigned long _previousMillisHeap;
 #endif
-	struct HAPLongTermContext* _longTermContext;
 
-#if HAP_USE_MBEDTLS_SRP
-	Srp* _srp;
-	bool _srpInitialized;
-#else	
-	void* _srp;
-#endif
+	HAPSRP* _hapsrp;	
+
 	char _brand[MAX_BRAND_LENGTH];
 
 	bool _stopEvents;	
@@ -413,17 +418,21 @@ private:
 	bool sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked = true);
 	bool sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType);
 
+	bool send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+
+
+
 
 	void sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error);
 
-	bool sendEvent(HAPClient* hapClient, String response);
+	bool sendEvent(HAPClient* hapClient, const JsonDocument& response);
 
-#if HAP_PIXEL_INDICATOR_ENABLED
+#if HAP_ENABLE_PIXEL_INDICATOR
 	// ToDo: Pixel Indicator
 	HAPIndicatorPixel _pixelIndicator;
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32)
+#if HAP_ENABLE_WIFI_BUTTON
 	// 
 	// Button
 	//

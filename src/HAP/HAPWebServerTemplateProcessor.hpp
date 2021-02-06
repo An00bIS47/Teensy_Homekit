@@ -8,6 +8,8 @@
 #ifndef HAPWEBSERVERTEMPLATEPROCESSOR_HPP_
 #define HAPWEBSERVERTEMPLATEPROCESSOR_HPP_
 
+#if HAP_ENABLE_WEBSERVER
+
 #include <HTTPSServer.hpp>
 #include <functional>
 #include "HAPGlobals.hpp"
@@ -51,4 +53,5 @@ private:
 
 };
 
+#endif
 #endif

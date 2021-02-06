@@ -17,7 +17,7 @@ HAPFakeGatoSwitch::HAPFakeGatoSwitch(){
 	_previousMillis = 0;
     _isEnabled      = true;
     _name           = "";
-    _memoryUsed     = 0;
+    _memoryUsed     = 1;    // first entry is reserved for reftime
     _requestedEntry = 0;
     
     _refTime        = 0;
@@ -107,7 +107,7 @@ bool HAPFakeGatoSwitch::addEntry(HAPFakeGatoSwitchData data){
         _idxRead = incrementIndex(_idxWrite);      
     }
 
-#if HAP_DEBUG_FAKEGATO
+#if HAP_DEBUG_FAKEGATO_DETAILED
     Serial.print("_memoryUsed: ");
     Serial.println(_memoryUsed);
 
@@ -136,7 +136,7 @@ void HAPFakeGatoSwitch::getData(const size_t count, uint8_t *data, size_t* lengt
     LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
 #endif
 
-#if HAP_DEBUG_FAKEGATO
+#if HAP_DEBUG_FAKEGATO_DETAILED
     for (int i=0; i< HAP_FAKEGATO_BUFFER_SIZE; i++){
         HAPFakeGatoSwitchData entryData;    
         entryData = (*_vectorBuffer)[i];
@@ -192,9 +192,22 @@ void HAPFakeGatoSwitch::getData(const size_t count, uint8_t *data, size_t* lengt
 #endif
 
         uint8_t size = HAP_FAKEGATO_DATA_LENGTH;
-        memcpy(data + offset, (uint8_t *)&size, 1);
+        memcpy(data + offset, (uint8_t *)&size, 1);        
+        
+        Serial.print("SEND questedEntry: ");
+        Serial.println(_requestedEntry);
+        
+        _idxRead = incrementIndex(_idxRead);        
 
-        ui32_to_ui8 eC;
+        // requested Entry
+        _idxRead = incrementIndex(_idxRead);        
+
+#if HAP_DEBUG_FAKEGATO   
+        Serial.print("SEND questedEntry: ");
+        Serial.println(_requestedEntry);
+#endif        
+
+        ui32_to_ui8 eC;      
         eC.ui32 = _requestedEntry++;
         memcpy(data + offset + 1, eC.ui8, 4);
 

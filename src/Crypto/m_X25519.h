@@ -2,7 +2,7 @@
 #ifndef _M_X25519_H_
 #define _M_X25519_H_
 
-#include <Arduino.h>
+// #include <Arduino.h>
 
 #ifdef __cplusplus
 extern "C" {

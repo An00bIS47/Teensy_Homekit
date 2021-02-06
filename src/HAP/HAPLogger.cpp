@@ -176,7 +176,7 @@ HAPLogger::~HAPLogger() {
 void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 	if (HAPLogger::_logLevel >= LogLevel::DEBUG) {
 		_printer->print(color);
-#if HAP_NTP_ENABLED		
+#if HAP_ENABLE_NTP		
 		_printer->print(HAPServer::timeString() + " ");
 #else					
 		_printer->printf(F("%lu "), millis());		
@@ -199,6 +199,7 @@ void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 		_printer->print(F("]"));
 		_printer->println(COLOR_RESET);
 	}
+	
 #if defined( CORE_TEENSY )
 	Serial.send_now();
 
@@ -207,19 +208,19 @@ void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 #endif	
 }
 
-void HAPLogger::logInfo(String str, bool newLine){
+void HAPLogger::logInfo(const String &str, bool newLine){
 	if (HAPLogger::_logLevel >= LogLevel::INFO) {
 		colorPrint(COLOR_INFO, str.c_str(), newLine);
 	}
 }
 
-void HAPLogger::logError(String str, bool newLine){
+void HAPLogger::logError(const String &str, bool newLine){
 	if (HAPLogger::_logLevel >= LogLevel::ERROR) {
 		colorPrint(COLOR_ERROR, str.c_str(), newLine);
 	}
 }
 
-void HAPLogger::logDebug(String str, bool newLine){
+void HAPLogger::logDebug(const String &str, bool newLine){
 	if (HAPLogger::_logLevel >= LogLevel::DEBUG) {
 		colorPrint(COLOR_DEBUG, str.c_str(), newLine);
 	}
@@ -231,13 +232,13 @@ void HAPLogger::logDebug(uint8_t str, bool newLine){
 	}
 }
 
-void HAPLogger::logWarning(String str, bool newLine){
+void HAPLogger::logWarning(const String &str, bool newLine){
 	if (HAPLogger::_logLevel >= LogLevel::WARNING) {
 		colorPrint(COLOR_WARNING, str.c_str(), newLine);
 	}
 }
 
-void HAPLogger::logVerbose(String str, bool newLine){
+void HAPLogger::logVerbose(const String &str, bool newLine){
 	if (HAPLogger::_logLevel >= LogLevel::VERBOSE) {
 		colorPrint(COLOR_VERBOSE, str.c_str(), newLine);
 	}

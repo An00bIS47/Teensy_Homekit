@@ -11,9 +11,10 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <ArduinoJson.h>
 
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristics.hpp"
 
 
 // typedef void (*identifyFunction)(bool oldValue, bool newValue);
@@ -22,68 +23,73 @@ typedef std::function<void(bool, bool)> identifyFunctionCallback;
 class HAPAccessory {
 public:
 
-    int aid;    
-    uint8_t numberOfInstance = 0;
-    
-    std::vector<HAPService *>_services;
+	HAPAccessory();
+	~HAPAccessory();
 
-    void addService(HAPService *ser);   
-    void addCharacteristics(HAPService *ser, characteristics *cha);
-    bool removeService(HAPService *ser);
-    bool removeCharacteristics(characteristics *cha);
+	uint8_t aid;    
+	uint8_t numberOfInstance = 0;
+	
+	std::vector<HAPService *>_services;
 
-    HAPAccessory();
+	void addService(HAPService *ser);   
+	void addCharacteristics(HAPService *ser, HAPCharacteristic *cha);
+	bool removeService(HAPService *ser);
+	bool removeCharacteristics(HAPCharacteristic *cha);
 
-    uint8_t numberOfService() const;
-    HAPService *serviceAtIndex(uint8_t index);
+	
 
-    characteristics *characteristicsAtIndex(uint8_t index);
-    characteristics *characteristicsOfType(int type);
+	uint8_t numberOfService() const;
+	HAPService *serviceAtIndex(uint8_t index);
 
-    String describe() const;
+	HAPCharacteristic *characteristicsAtIndex(uint8_t index);
+	HAPCharacteristic *characteristicsOfType(int type);
 
-    HAPService* addInfoService(String accessoryName, String manufactuerName, String modelName, String serialNumber, identifyFunctionCallback callback, String firmwareRev = "");
-    
-    void setName(String name);
-    String name();
-    
-    void setFirmware(String firmware);
-    String firmware();
+	void printTo(Print& print);
+	void toJson(JsonArray& array);
+	// String describe() const;
 
-    void setIdentifyCallback(identifyFunctionCallback callback);
+	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");
+	
+	void setName(const String& name);
+	String name();
+	
+	void setFirmware(const String& firmware);
+	String firmware();
 
-
-    String serialNumber();
-    void setSerialNumber(String serialNumber);
-
-
-    String modelName();
-    void setModelName(String serialNumber);
+	void setIdentifyCallback(identifyFunctionCallback callback);
 
 
-    String manufacturer();
-    void setManufacturer(String serialNumber);
+	String serialNumber();
+	void setSerialNumber(const String& serialNumber);
+
+
+	String modelName();
+	void setModelName(const String& serialNumber);
+
+
+	String manufacturer();
+	void setManufacturer(const String& serialNumber);
 
 private:
 
-    void initInfoService();
-    void initAccessoryName();
-    void initFirmware();
-    void initSerialNumber();
-    void initIdentify();
-    void initModelName();
-    void initManufacturer();
+	void initInfoService();
+	void initAccessoryName();
+	void initFirmware();
+	void initSerialNumber();
+	void initIdentify();
+	void initModelName();
+	void initManufacturer();
 
-    // String _accessoryName;
+	// String _accessoryName;
 
-    HAPService*             _infoService;
+	HAPService*               _infoService;
 
-    stringCharacteristics*  _accessoryName;
-    stringCharacteristics*  _firmware;
-    stringCharacteristics*  _manufacturer;
-    stringCharacteristics*  _modelName;
-    stringCharacteristics*  _serialNumber;
-    boolCharacteristics*    _identify;
+	HAPCharacteristicString*  _accessoryName;
+	HAPCharacteristicString*  _firmware;
+	HAPCharacteristicString*  _manufacturer;
+	HAPCharacteristicString*  _modelName;
+	HAPCharacteristicString*  _serialNumber;
+	HAPCharacteristicBool*    _identify;
 };
 
 

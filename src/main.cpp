@@ -1,74 +1,63 @@
+
+//
+// main.cpp
+// Homekit
+//
+//  Created on: 08.08.2017
+//      Author: michael
+//
 #include <Arduino.h>
+
 #include "HAP/HAPLogger.hpp"
 #include "HAP/HAPServer.hpp"
 #include "HAP/HAPGlobals.hpp"
+
 #include "HAP/HAPHelper.hpp"
 #include "HAP/HAPVersion.hpp"
 
-#include <knx.h>
 
-// create named references for easy access to group objects
-#define goCurrent knx.getGroupObject(1)
-#define goMax knx.getGroupObject(2)
-#define goMin knx.getGroupObject(3)
-#define goReset knx.getGroupObject(4)
 
-float currentValue = 0;
-float maxValue = 0;
-float minValue = RAND_MAX;
-long lastsend = 0;
+// #if HAP_ENABLE_WEBSERVER_CORE_0
+// #include "HAP/HAPWebServer.hpp"
+// HAPWebServer* _webserver;
+// #endif
 
-void measureTemp()
-{
-    long now = millis();
-    if ((now - lastsend) < 2000)
-        return;
 
-    lastsend = now;
-    int r = rand();
-    currentValue = (r * 1.0) / (RAND_MAX * 1.0);
-    currentValue *= 100 * 100;
 
-    // write new value to groupobject
-    goCurrent.value(currentValue);
+// // unsigned long previousMillis = 0;
 
-    if (currentValue > maxValue)
-    {
-        maxValue = currentValue;
-        goMax.value(maxValue);
-    }
+// // const long interval = 1000;
 
-    if (currentValue < minValue)
-    {
-        minValue = currentValue;
-        goMin.value(minValue);
-    }
-}
+// #if HAP_ENABLE_WEBSERVER_CORE_0
+// void taskWebserver( void * parameter )
+// {
+// 	_webserver = new HAPWebServer();
+// 	_webserver->setAccessorySet(hap.getAccessorySet());
+// 	_webserver->begin();
 
-// callback from reset-GO
-void resetCallback(GroupObject& go)
-{
-    if (go.value())
-    {
-        maxValue = 0;
-        minValue = 10000;
-    }
-}
+//     while( true ){
+//         _webserver->handle();
+//         delay(1);		
+//     }
+ 
+//     // Serial.println("Ending task 1");
+//     // vTaskDelete( NULL );
+// }
+// #endif
 
-void setup()
-{
-    Serial.begin(115200);
 
-    Serial.print("Starting on Teensy ...");
+
+
+
+void setup(){
+
+	Serial.begin(115200);
     while (!Serial) {
-        ; // wait for serial port to connect. Needed for Leonardo only  
+        ; // wait for serial port to connect. Needed for Leonardo and Due
     }
-    Serial.println( "OK");
     
-    ArduinoPlatform::SerialDebug = &Serial;
 
-
-    // Imprint infos to firmware
+	// Imprint infos to firmware
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);
 	Homekit_setBrand(HAP_MANUFACTURER);
 
@@ -76,62 +65,28 @@ void setup()
 	LogI( hap.versionString() + String( " ..."), true);
 	LogI( F("Log level: "), false);
 	LogI( String(HAPLogger::getLogLevel() ), true);
-    Serial.send_now();
 
-    randomSeed(millis());
-
-    // read adress table, association table, groupobject table and parameters from eeprom
-    knx.readMemory();
-
-    // print values of parameters if device is already configured
-    if (knx.configured())
-    {
-        // register callback for reset GO
-        goReset.callback(resetCallback);
-        goReset.dataPointType(DPT_Trigger);
-        goCurrent.dataPointType(DPT_Value_Temp);
-        goMin.dataPointType(DPT_Value_Temp);
-        goMax.dataPointType(DPT_Value_Temp);
-
-        Serial.print("Timeout: ");
-        Serial.println(knx.paramByte(0));
-        Serial.print("Zykl. senden: ");
-        Serial.println(knx.paramByte(1));
-        Serial.print("Min/Max senden: ");
-        Serial.println(knx.paramByte(2));
-        Serial.print("Aenderung senden: ");
-        Serial.println(knx.paramByte(3));
-        Serial.print("Abgleich: ");
-        Serial.println(knx.paramByte(4));
-    }
-
-    // pin or GPIO the programming led is connected to. Default is LED_BUILTIN
-    // knx.ledPin(LED_BUILTIN);
-    // is the led active on HIGH or low? Default is LOW
-    // knx.ledPinActiveOn(HIGH);
-    // pin or GPIO programming button is connected to. Default is 0
-    // knx.buttonPin(0);
-
-    // start the framework.
-    knx.start();
-
-    // Start homekit
+	// Start homekit
 	hap.begin();
+
+
+	
+
+// #if HAP_ENABLE_WEBSERVER_CORE_0
+// 	xTaskCreatePinnedToCore(
+// 					taskWebserver,   /* Function to implement the task */
+//                     "coreTask", /* Name of the task */
+//                     8192,      	/* Stack size in words */
+//                     NULL,       /* Task input parameter */
+//                     1,          /* Priority of the task */
+//                     NULL,       /* Task handle. */
+//                     0);  		/* Core where the task should run */
+// #endif
+
+	
 
 }
 
-void loop()
-{
-
-    // don't delay here to much. Otherwise you might lose packages or mess up the timing with ETS
-    // knx.loop();
-
-    hap.handle();
-    
-    // only run the application code if the device was configured with ETS
-    if (!knx.configured())
-        return;
-
-
-    measureTemp();
+void loop(){
+	hap.handle();	
 }

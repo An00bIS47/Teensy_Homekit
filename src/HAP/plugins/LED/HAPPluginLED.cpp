@@ -8,7 +8,7 @@
 #include "HAPPluginLED.hpp"
 #include "HAPServer.hpp"
 
-#define HAP_BLINK_INTERVAL 1000	
+#define HAP_PLUGIN_LED_INTERVAL 1000	
 
 #if 0
 #ifndef BUILTIN_LED
@@ -26,9 +26,9 @@
 #endif
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       5	// 2 = FakeGato support
-#define VERSION_REVISION    2
-#define VERSION_BUILD       1
+#define VERSION_MINOR       6	// 2 = FakeGato support
+#define VERSION_REVISION    0
+#define VERSION_BUILD       0
 
 #ifndef HAP_LED_ENABLE_BRIGHTNESS
 #define HAP_LED_ENABLE_BRIGHTNESS   0
@@ -37,9 +37,6 @@
 
 HAPPluginLED::HAPPluginLED(){
     _type               = HAP_PLUGIN_TYPE_ACCESSORY;
-    _name               = "LED";
-    _isEnabled          = HAP_PLUGIN_USE_LED;
-    _interval           = HAP_BLINK_INTERVAL;
     _previousMillis     = 0;
     _isOn               = false;
     _gpio               = HAP_LED_PIN;
@@ -54,10 +51,12 @@ HAPPluginLED::HAPPluginLED(){
 
     _enabledState       = nullptr;
     _blinkingEnabled    = true;
+
+    _config = new HAPConfigurationPlugin("LED", true, HAP_PLUGIN_LED_INTERVAL);
 }
 
 void HAPPluginLED::changePower(bool oldValue, bool newValue) {
-    // LogD(HAPServer::timeString() + " " + _name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+    // LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
     if (newValue == true) {
         digitalWrite(_gpio, HIGH);     // dont know why to put low here, maybe because of SPI ?  
@@ -67,7 +66,7 @@ void HAPPluginLED::changePower(bool oldValue, bool newValue) {
 }
 
 void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
-    // LogD(HAPServer::timeString() + " " + _name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+    // LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
     if (newValue != oldValue) {
         _blinkingEnabled = newValue;
@@ -85,8 +84,8 @@ void HAPPluginLED::changeBrightness(int oldValue, int newValue){
 
 void HAPPluginLED::handleImpl(bool forced){
     
-    if (_isEnabled && _blinkingEnabled) {
-        LogD(HAPServer::timeString() + " " + _name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_interval) + "]", true);
+    if (isEnabled() && _blinkingEnabled) {
+        LogV(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
         if (_isOn) {            
             setValue(_powerState->iid, "1", "0");
@@ -115,6 +114,8 @@ void HAPPluginLED::handleImpl(bool forced){
 }
 
 bool HAPPluginLED::begin(){
+    LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
+
     pinMode(_gpio, OUTPUT);    
     digitalWrite(_gpio, _isOn);
 
@@ -124,22 +125,32 @@ bool HAPPluginLED::begin(){
 
 HAPAccessory* HAPPluginLED::initAccessory(){
     
+    LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
+
     String sn = HAPDeviceID::serialNumber("LED", String(_gpio));
 
+    // 
+    // Add new accessory
+    // 
 	_accessory = new HAPAccessory();
 	//HAPAccessory::addInfoServiceToAccessory(_accessory, "Builtin LED", "ACME", "LED", "123123123", &identify);
     auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
     _accessory->addInfoService("Builtin LED", "ACME", "LED", sn, callbackIdentify, version());
 
+
+    // 
+    // Lightbulb Service
+    // 
     HAPService* _service = new HAPService(HAP_SERVICE_LIGHTBULB);
     // _service->setPrimaryService(true);
     _accessory->addService(_service);
 
-    stringCharacteristics *lightServiceName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, 32);
+
+    HAPCharacteristicString *lightServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
     lightServiceName->setValue("LED");
     _accessory->addCharacteristics(_service, lightServiceName);
 
-    _powerState = new boolCharacteristics(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
+    _powerState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
     if (_isOn)
         _powerState->setValue("1");
     else
@@ -150,7 +161,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     _accessory->addCharacteristics(_service, _powerState);
 
     
-    _brightnessState = new intCharacteristics(HAP_CHARACTERISTIC_BRIGHTNESS, permission_read|permission_write|permission_notify, 0, 100, 1, unit_percentage);
+    _brightnessState = new HAPCharacteristicInt(HAP_CHARACTERISTIC_BRIGHTNESS, permission_read|permission_write|permission_notify, 0, 100, 1, unit_percentage);
         //_brightnessState->valueChangeFunctionCall = &changeBrightness;
 
 #if HAP_LED_ENABLE_BRIGHTNESS   
@@ -166,11 +177,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
     _accessory->addService(switchService);
 
-    stringCharacteristics *plugServiceName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
-    plugServiceName->setValue("Enabled");
+    HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
+    plugServiceName->setValue("LED");
     _accessory->addCharacteristics(switchService, plugServiceName);
 
-    _enabledState = new boolCharacteristics(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
+    _enabledState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
     _enabledState->setDescription("Enabled");
     if (_blinkingEnabled)
         _enabledState->setValue("1");
@@ -191,7 +202,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
 
 void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
-    LogD(HAPServer::timeString() + " " + _name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+    LogV(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
      if (iid == _powerState->iid) {
         
@@ -216,24 +227,12 @@ void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
 
 }
 
-
-
-String HAPPluginLED::getValue(int iid){
-    if (iid == _powerState->iid) {
-        return _powerState->value();
-    } 
-    // else if (type == charType_brightness) {
-    //     return _brightnessState->value();
-    // }
-    return "";
-}
-
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
     printf("Start Identify Light from member\n");
 }
 
-HAPConfigValidationResult HAPPluginLED::validateConfig(JsonObject object){
-    HAPConfigValidationResult result;
+HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object){
+    HAPConfigurationValidationResult result;
     
     result = HAPPlugin::validateConfig(object);
     if (result.valid == false) {
@@ -243,7 +242,7 @@ HAPConfigValidationResult HAPPluginLED::validateConfig(JsonObject object){
     
     // plugin._name.username
     if (object.containsKey("gpio") && !object["gpio"].is<uint8_t>()) {
-        result.reason = "plugins." + _name + ".gpio is not an integer";
+        result.reason = "plugins." + String(_config->name) + ".gpio is not an integer";
         return result;
     }
 
@@ -251,29 +250,41 @@ HAPConfigValidationResult HAPPluginLED::validateConfig(JsonObject object){
     return result;
 }
 
-JsonObject HAPPluginLED::getConfigImpl(){
+// JsonObject HAPPluginLED::getConfigImpl(){
 
-    LogD(HAPServer::timeString() + " " + _name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+//     LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
-    DynamicJsonDocument doc(128);
-    doc["gpio"] = _gpio;
-    doc["blinkingEnabled"] = _blinkingEnabled;
+//     DynamicJsonDocument doc(128);
+//     doc["gpio"] = _gpio;
+//     doc["blinkingEnabled"] = _blinkingEnabled;
 
-#if HAP_DEBUG_CONFIG
-    serializeJson(doc, Serial);
-    Serial.println();
-#endif
+// #if HAP_DEBUG_CONFIG
+//     serializeJson(doc, Serial);
+//     Serial.println();
+// #endif
 
-#if defined(ARDUINO_ARCH_ESP32)	
-	doc.shrinkToFit();
-#endif
-	return doc.as<JsonObject>();
+// #if defined(ARDUINO_ARCH_ESP32)	
+// 	doc.shrinkToFit();
+// #endif
+// 	return doc.as<JsonObject>();
+// }
+
+// void HAPPluginLED::setConfigImpl(JsonObject root){
+//     if (root.containsKey("gpio")){
+//         // LogD(" -- password: " + String(root["password"]), true);
+//         _gpio = root["gpio"].as<uint8_t>();
+//         _blinkingEnabled = root["blinkingEnabled"].as<bool>();
+//     }
+// }
+
+HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
+	_config->enabled  = HAP_PLUGIN_USE_LED;
+	_config->interval = HAP_PLUGIN_LED_INTERVAL;	
+	_config->dataPtr = nullptr;
+	_config->dataSize = 0;
+	return _config;
 }
 
-void HAPPluginLED::setConfigImpl(JsonObject root){
-    if (root.containsKey("gpio")){
-        // LogD(" -- password: " + String(root["password"]), true);
-        _gpio = root["gpio"].as<uint8_t>();
-        _blinkingEnabled = root["blinkingEnabled"].as<bool>();
-    }
+void HAPPluginLED::setConfiguration(HAPConfigurationPlugin* cfg){
+	_config = cfg;	
 }

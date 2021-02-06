@@ -71,5 +71,8 @@
 #include "HAPPluginNimbleMiFlora.hpp"
 #endif
 
+#if HAP_PLUGIN_USE_KNX
+#include "HAPPluginKNX.hpp"
+#endif
 
 #endif /* PLUGINS_HPP_ */  

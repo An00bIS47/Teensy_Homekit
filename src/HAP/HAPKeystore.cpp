@@ -17,7 +17,7 @@
 #include "mbedtls/x509_csr.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
-
+#include "mbedtls/ecdsa.h"
 
 HAPKeystore::HAPKeystore(){
     init();
@@ -274,11 +274,13 @@ uint8_t* HAPKeystore::getDevicePrivateKey(){
     return _devicePrivateKey;
 }
 
+
+#if HAP_ENABLE_WEBSERVER
 bool HAPKeystore::parseRequest(HTTPRequest * req){
     
     // Store "old" values
     char currentPartition[strlen(getCurrentPartition()) + 1];    
-    strncpy(currentPartition, getCurrentPartition(), strlen(getCurrentPartition()));
+    strncpy(currentPartition, getCurrentPartition(), 10);
     currentPartition[strlen(getCurrentPartition())] = '\0';
     
     getRootCaPublicKeySignature();  // initial load from partition, all following requests are from memory
@@ -441,6 +443,8 @@ bool HAPKeystore::parseRequest(HTTPRequest * req){
 
     return result;
 }
+
+#endif
 
 bool HAPKeystore::verifySignature(const uint8_t* publicKey, size_t publicKeyLength, const uint8_t* hash, const uint8_t* signature, size_t signatureLength){
     

@@ -26,8 +26,6 @@ public:
 
 	void setValue(int iid, String oldValue, String newValue);
 
-	String getValue(int iid);
-
 	void changePower(bool oldValue, bool newValue);
 	void changeEnabled(bool oldValue, bool newValue);
 	void changeBrightness(int oldValue, int newValue);
@@ -35,21 +33,20 @@ public:
 	void handleImpl(bool forced=false);
 	void identify( bool oldValue, bool newValue);
 	
-	// void handleEvents(int eventCode, struct HAPEvent eventParam);
-	HAPConfigValidationResult validateConfig(JsonObject object);
-	JsonObject getConfigImpl();
-	void setConfigImpl(JsonObject root);
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
 
-private:	
+	HAPConfigurationPlugin* setDefaults();
+	void setConfiguration(HAPConfigurationPlugin* cfg) override;
 
-	boolCharacteristics* 	_powerState;
-	intCharacteristics*	 	_brightnessState;
 
-	boolCharacteristics* 	_enabledState;
+protected:	
+	HAPCharacteristicBool* 	_powerState;
+	HAPCharacteristicInt*	_brightnessState;
+	HAPCharacteristicBool* 	_enabledState;
 
-	bool _blinkingEnabled;
+	bool 	_blinkingEnabled;
 	uint8_t _gpio;
-	bool _isOn;
+	bool 	_isOn;
 };
 
 REGISTER_PLUGIN(HAPPluginLED)

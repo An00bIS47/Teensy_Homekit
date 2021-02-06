@@ -17,7 +17,7 @@ HAPFakeGatoWeather::HAPFakeGatoWeather(){
 	_previousMillis = 0;
     _isEnabled      = true;
     _name           = "";
-    _memoryUsed     = 0;
+    _memoryUsed     = 1;    // first entry is reserved for reftime
     _requestedEntry = 0;
     
     _refTime        = 0;
@@ -165,10 +165,13 @@ bool HAPFakeGatoWeather::addEntry(HAPFakeGatoWeatherData data){
         _idxRead = incrementIndex(_idxWrite);      
     }
 
-    // Serial.print("_idxRead: ");
-    // Serial.println(_idxRead);
+    
 
 #if HAP_DEBUG_FAKEGATO_DETAILED
+
+    Serial.print("_idxRead: ");
+    Serial.println(_idxRead);
+
     Serial.print("ADD DATA: _memoryUsed: ");
     Serial.println(_memoryUsed);
 
@@ -220,8 +223,8 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
 
     if ( (tmpRequestedEntry >= _idxWrite) && ( _rolledOver == false) ){
         _transfer = false;
-#if HAP_DEBUG_FAKEGATO              
-        LogW("ERROR: No newer entries available. Requested entry goes beyond write index!", true);                          
+#if HAP_DEBUG          
+        LogW("ERROR 1: No newer entries available. Requested entry goes beyond write index!", true);                          
         LogW("   - tmpRequestedEntry=" + String(tmpRequestedEntry), true);
         LogW("   - _requestedEntry=" + String(_requestedEntry), true);
         LogW("   - _idxWrite=" + String(_idxWrite), true);
@@ -236,7 +239,6 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
     for (int i = 0; i < count; i++){            
         uint8_t currentOffset = 0;
 
-
         uint8_t size = 10;
         size += (((entryData.bitmask & 0x04) >> 2) * 2);  
         size += (((entryData.bitmask & 0x02) >> 1) * 2);  
@@ -247,8 +249,18 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
         currentOffset += 1;
 
         // requested Entry
+        _idxRead = incrementIndex(_idxRead);                        
+
+
+#if HAP_DEBUG_FAKEGATO   
+        Serial.print("SEND questedEntry: ");
+        Serial.println(_requestedEntry);
+#endif
+
+
         ui32_to_ui8 eC;
         eC.ui32 = _requestedEntry++;
+        //_requestedEntry = incrementIndex(_requestedEntry);
         memcpy(data + offset + currentOffset, eC.ui8, 4);
         currentOffset += 4;
 
@@ -297,8 +309,8 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
         // _noOfEntriesSent++;            
         if ( (tmpRequestedEntry + 1 >= _idxWrite )  && ( _rolledOver == false) ){
             _transfer = false;  
-#if HAP_DEBUG_FAKEGATO              
-            LogW("ERROR: No newer entries available. Requested entry goes beyond write index!", true);                          
+#if HAP_DEBUG            
+            LogW("ERROR 2: No newer entries available. Requested entry goes beyond write index!", true);                          
             LogW("   - tmpRequestedEntry=" + String(tmpRequestedEntry), true);
             LogW("   - _requestedEntry=" + String(_requestedEntry), true);
             LogW("   - _idxWrite=" + String(_idxWrite), true);
@@ -316,8 +328,8 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
         if ( _rolledOver == true) { 
             if (tsOld > entryData.timestamp) {
                 _transfer = false;  
-#if HAP_DEBUG_FAKEGATO                
-                LogW("ERROR: No newer entries available. Older timestamp is newer than the new timestamp!", true);                          
+#if HAP_DEBUG               
+                LogW("ERROR 3: No newer entries available. Older timestamp is newer than the new timestamp!", true);                          
                 LogW("   - tmpRequestedEntry=" + String(tmpRequestedEntry), true);
                 LogW("   - _requestedEntry=" + String(_requestedEntry), true);
                 LogW("   - _idxWrite=" + String(_idxWrite), true);

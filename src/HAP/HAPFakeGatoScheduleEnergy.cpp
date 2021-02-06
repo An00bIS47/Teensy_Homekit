@@ -82,6 +82,11 @@ void HAPFakeGatoScheduleEnergy::decodeDays(uint8_t *data){
 }
 
 
+/**
+ * @brief Load Programs from data
+ * 
+ * @param data 
+ */
 void HAPFakeGatoScheduleEnergy::decodePrograms(uint8_t* data){
 	// clear all old programs and timers
 	clear();
@@ -186,6 +191,12 @@ uint8_t HAPFakeGatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
 }
 
 
+/**
+ * @brief Put programs to data
+ * 
+ * @param data 			Output for programs
+ * @param dataSize 		length of data
+ */
 void HAPFakeGatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 	// uint8_t programCount = data[1] | data[2] << 8;
 	uint8_t programCount = _programEvents.size();

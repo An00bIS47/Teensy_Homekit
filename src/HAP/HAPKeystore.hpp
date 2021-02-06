@@ -13,11 +13,12 @@
 #include <Arduino.h>
 
 #include "HAPPreferencesExt.hpp"
+#if HAP_ENABLE_WEBSERVER
 #include <HTTPRequest.hpp>
 
 // Easier access to the classes of the server
 using namespace httpsserver;
-
+#endif
 
 
 // enum HAP_KEYSTORE_PARTITION {
@@ -163,7 +164,9 @@ public:
         return _pluginServerCert_3;
     }  
     
+#if HAP_ENABLE_WEBSERVER    
     bool parseRequest(HTTPRequest * req);
+#endif    
 private:
     bool readFromNVS(const char* entryName, uint8_t* buffer, uint16_t* len);
     

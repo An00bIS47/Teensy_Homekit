@@ -9,6 +9,8 @@
 #ifndef HAPWEBSERVERBODYPARSERURLENCODED_HPP_
 #define HAPWEBSERVERBODYPARSERURLENCODED_HPP_
 
+#if HAP_ENABLE_WEBSERVER
+
 #include <Arduino.h>
 #include <HTTPSServer.hpp>
 #include <vector>
@@ -24,5 +26,7 @@ public:
 private:
 
 };
+
+#endif
 
 #endif /* HAPWEBSERVERBODYPARSERURLENCODED_HPP_ */

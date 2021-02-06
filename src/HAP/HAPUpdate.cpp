@@ -62,28 +62,30 @@ HAPUpdate::HAPUpdate()
 	_available = false;
 	_remoteInfo = HAPUpdateVersionInfo();
 	// _localVersion = nullptr;
+
+	_configuration = nullptr;	
 }
 
 HAPUpdate::~HAPUpdate() {
 	// TODO Auto-generated destructor stub
 }
 
-void HAPUpdate::begin(HAPConfig* config) {
+void HAPUpdate::begin(const char* hostname) {
 
-#if HAP_UPDATE_ENABLE_OTA	
+#if HAP_ENABLE_UPDATE_OTA	
 
 	// Disable mDNS cause we use our own!
 	ArduinoOTA.setMdnsEnabled(false);
 
 	// Hostname defaults to esp3232-[MAC]
-	ArduinoOTA.setHostname(config->config()["hostname"]);
+	ArduinoOTA.setHostname(hostname);
 
 	// Port defaults to 3232
-	ArduinoOTA.setPort(config->config()["update"]["ota"]["port"].as<uint16_t>());
+	ArduinoOTA.setPort(_configuration->port);
 
 	// No authentication by default
-	if (config->config()["update"]["ota"]["password"].as<String>().length() > 0) {
-		ArduinoOTA.setPassword(config->config()["update"]["ota"]["password"].as<const char*>());
+	if (strlen(_configuration->password) > 0) {
+		ArduinoOTA.setPassword(_configuration->password);
 	}
 	
 	// Password can be set with it's md5 value as well
@@ -117,8 +119,9 @@ void HAPUpdate::begin(HAPConfig* config) {
 
 	ArduinoOTA.begin();
 
+	// ToDo:
 	// set ArduinoOTA mDNS
-	mDNSExt.enableArduino(config->config()["update"]["ota"]["port"].as<uint16_t>(), (config->config()["update"]["ota"]["password"].as<String>().length() > 0));
+	mDNSExt.enableArduino(_configuration->port, (strlen(_configuration->password) > 0));
 
 #endif	
 	// Delay first update check for 3 seconds
@@ -127,11 +130,11 @@ void HAPUpdate::begin(HAPConfig* config) {
 
 void HAPUpdate::handle() {
 
-#if HAP_UPDATE_ENABLE_OTA	
+#if HAP_ENABLE_UPDATE_OTA	
 	ArduinoOTA.handle();
 #endif
 
-#if HAP_UPDATE_ENABLE_FROM_WEB
+#if HAP_ENABLE_UPDATE_WEB
 	if ( millis() - _previousMillis >= _interval) {
 	    // save the last time you blinked the LED
 	    _previousMillis = millis();
@@ -151,7 +154,7 @@ bool HAPUpdate::updateAvailable(){
 }
 
 
-#if HAP_UPDATE_ENABLE_FROM_WEB
+#if HAP_ENABLE_UPDATE_WEB
 bool HAPUpdate::checkUpdateAvailable(){
 	
 	String url = String(HAP_UPDATE_HTTP) + _host + String(HAP_UPDATE_WEB_CHECK_URL_PATH);	

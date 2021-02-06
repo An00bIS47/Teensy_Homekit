@@ -12,6 +12,8 @@
 #include <esp_wifi.h>
 #include <ArduinoJson.h>
 
+
+#if HAP_ENABLE_WEBSERVER
 #include "HAPWebServer.hpp"
 
 #if HAP_WEBSERVER_USE_SPIFFS    
@@ -19,20 +21,25 @@
 #else
 #include "HAPWebServerFiles.hpp"
 #endif
+#include "HAPWebServerTemplateProcessor.hpp"
+#include "HAPWebServerBodyParserURLEncoded.hpp"
+#endif
 
 #include "HAPDeviceID.hpp"
 #include "HAPLogger.hpp"
-#include "HAPWebServerTemplateProcessor.hpp"
-#include "HAPWebServerBodyParserURLEncoded.hpp"
+
 
 enum HAP_WIFI_MODE HAPWiFiHelper::_mode;
 WiFiMulti HAPWiFiHelper::_wifiMulti;
-HAPConfig* HAPWiFiHelper::_config;
+HAPConfigurationWiFi* HAPWiFiHelper::_config;
 esp_wps_config_t HAPWiFiHelper::_wpsConfig;
 uint8_t HAPWiFiHelper::_errorCount;
+std::function<bool(bool)> HAPWiFiHelper::_callbackBegin;
+
+#if HAP_ENABLE_WEBSERVER
 DNSServer* HAPWiFiHelper::_dnsServer;
 HTTPServer* HAPWiFiHelper::_webserver;
-std::function<bool(bool)> HAPWiFiHelper::_callbackBegin;
+#endif
 
 bool HAPWiFiHelper::_captiveInitialized;
 bool HAPWiFiHelper::_isProvisioned;
@@ -44,9 +51,12 @@ HAPWiFiHelper::HAPWiFiHelper(){
 	_errorCount = 0;		
 	_captiveInitialized = false;
 	_isProvisioned = false;
-	
+
+#if HAP_ENABLE_WEBSERVER	
 	_webserver = nullptr;
 	_dnsServer = nullptr;
+#endif
+
 }
 
 
@@ -55,14 +65,14 @@ HAPWiFiHelper::~HAPWiFiHelper() {
 }
 
 
-void HAPWiFiHelper::begin(HAPConfig* config, std::function<bool(bool)> callbackBegin, const char* hostname){
+void HAPWiFiHelper::begin(HAPConfigurationWiFi* config, std::function<bool(bool)> callbackBegin, const char* hostname){
 	_config = config;
 	_callbackBegin = callbackBegin;
 
 	WiFi.persistent(false);
 	WiFi.setHostname(hostname);
 	
-	enum HAP_WIFI_MODE selectedMode = (enum HAP_WIFI_MODE)_config->config()["wifi"]["mode"].as<uint8_t>();
+	enum HAP_WIFI_MODE selectedMode = (enum HAP_WIFI_MODE)_config->mode;
 
 #if HAP_PROVISIONING_ENABLE_BLE == 0
 	WiFi.onEvent(eventHandler);
@@ -114,6 +124,8 @@ void HAPWiFiHelper::startWPS(){
 	LogI( F("OK"), true);
 }
 
+
+#if HAP_ENABLE_WEBSERVER
 void HAPWiFiHelper::startCaptivePortal(){
 
 	LogI("Starting captive portal ...", false);
@@ -190,7 +202,7 @@ void HAPWiFiHelper::handleRootPost(HTTPRequest *req, HTTPResponse *res)
 	
 	if (ssid != "") {
 		_config->addNetwork(ssid, password);
-		_config->config()["wifi"]["mode"] = (uint8_t)HAP_WIFI_MODE_MULTI;
+		_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;
 		_config->save();
 
 		res->setStatusCode(200);
@@ -321,6 +333,9 @@ void HAPWiFiHelper::stopCaptivePortal() {
 	_callbackBegin(true);
 }
 
+
+#endif // HAP_ENABLE_WEBSERVER
+
 void HAPWiFiHelper::connectMulti(){
 	LogI("Connecting WiFi...", false);
 	if(_wifiMulti.run() == WL_CONNECTED) {
@@ -330,7 +345,7 @@ void HAPWiFiHelper::connectMulti(){
 		_errorCount = _errorCount + 1;
 		if (_errorCount > HAP_WIFI_CONNECTION_MAX_RETRIES) {
 			LogW("WiFi connection failed! Setting WiFi mode back to default mode", true);
-			_config->config()["wifi"]["mode"] = (uint8_t)HAP_WIFI_MODE_DEFAULT;
+			_config->mode = (uint8_t)HAP_WIFI_MODE_DEFAULT;
 			_config->save();
 			_errorCount = 0;
 			connect((enum HAP_WIFI_MODE)HAP_WIFI_MODE_DEFAULT);
@@ -347,15 +362,21 @@ void HAPWiFiHelper::connect(enum HAP_WIFI_MODE mode){
 	
 	switch (mode){
 
+
 		case HAP_WIFI_MODE_AP:
+#if HAP_ENABLE_WEBSERVER		
 			startCaptivePortal();
 			break;
+#else
+			LogE("ERROR: WEBSERVER IS DISABLED! -> CHANGE COMPILE TIME FLAG!", true);
+			break;
+#endif
 
 		case HAP_WIFI_MODE_MULTI:	
 			
 			// Add networks
-			for( const auto& value : _config->config()["wifi"]["networks"].as<JsonArray>() ) { 					
-				_wifiMulti.addAP(value["ssid"].as<const char*>(), value["password"].as<const char*>());
+			for( const auto& cred : _config->credentials ) { 					
+				_wifiMulti.addAP(cred->ssid, cred->password);
 			}	
 			connectMulti();
 
@@ -405,13 +426,13 @@ bool HAPWiFiHelper::captiveInitialized(){
 
 void HAPWiFiHelper::handle(){
 
+#if HAP_ENABLE_WEBSERVER
 	_dnsServer->processNextRequest();
 	
 	_webserver->loop();
 	// _config->config()["wifi"]["mode"] = (uint8_t)HAPWiFiModeMulti;
 	// stopCaptivePortal();
-
-	delay(1);
+#endif
 }
 
 
@@ -430,7 +451,6 @@ void HAPWiFiHelper::eventHandler(WiFiEvent_t event) {
 		case SYSTEM_EVENT_STA_CONNECTED:
 			//enable sta ipv6 here
             WiFi.enableIpV6();
-			_isOnline = true;
 			// LogV( F("OK"), true);
 			break;
 
@@ -455,7 +475,7 @@ void HAPWiFiHelper::eventHandler(WiFiEvent_t event) {
 			LogI("", true);
 
 			_config->addNetwork(WiFi.SSID(), WiFi.psk());
-			_config->config()["wifi"]["mode"] = (uint8_t)HAP_WIFI_MODE_MULTI;			
+			_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;			
 			_config->save();
 			
 			ESP_ERROR_CHECK(esp_wifi_wps_disable());
@@ -529,7 +549,7 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 				LogI("", true);
 
 				_config->addNetwork(WiFi.SSID(), WiFi.psk());
-				_config->config()["wifi"]["mode"] = (uint8_t)HAP_WIFI_MODE_MULTI;			
+				_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;			
 				_config->save();
 				
 				ESP_ERROR_CHECK(esp_wifi_wps_disable());
@@ -619,7 +639,7 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 
 #endif
 
-#if HAP_PIXEL_INDICATOR_ENABLED
+#if HAP_ENABLE_PIXEL_INDICATOR
 // uint32_t HAPWiFiHelper::getColorForMode(const HAP_WIFI_MODE mode){
 // 	switch (mode) {
 // 		case HAP_WIFI_MODE_AP:
@@ -703,11 +723,11 @@ CRGB HAPWiFiHelper::getColorForMode(const HAP_WIFI_MODE mode){
 #endif
 
 HAP_WIFI_MODE HAPWiFiHelper::getCurrentMode(){
-	return (enum HAP_WIFI_MODE)_config->config()["wifi"]["mode"].as<uint8_t>();
+	return (enum HAP_WIFI_MODE)_config->mode;
 }
 
 HAP_WIFI_MODE HAPWiFiHelper::getNextMode(){
-	uint8_t curMode = _config->config()["wifi"]["mode"].as<uint8_t>();
+	uint8_t curMode = _config->mode;
 	uint8_t nextMode = (curMode + 1) % 6;
 
 	return (enum HAP_WIFI_MODE)nextMode;

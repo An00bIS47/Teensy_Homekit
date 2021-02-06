@@ -12,6 +12,7 @@
 #include <Arduino.h>
 #include "HAPGlobals.hpp"
 
+#if HAP_ENABLE_PIXEL_INDICATOR
 #include "FastLED.h"
 // #include "NeoPixelBus.h"
 // #include <Adafruit_NeoPixel.h>
@@ -50,5 +51,7 @@ protected:
 private:
 
 };
+
+#endif
 
 #endif

@@ -24,6 +24,7 @@ public:
 	static uint8_t* generateID();
 	//static byte* deviceID();
 	//static const char* deviceID();
+	static void deviceID(char baseMacChr[18]);
 
 	static String deviceID();	// mac address -> change to random
 	static String chipID();		// basically mac reverse

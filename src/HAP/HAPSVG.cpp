@@ -12,98 +12,86 @@
 #define QR_CODE_ZOOM_FACTOR 5
 
 
-void HAPSVG::init(Print* prt, QRCode* qrcode){
+void HAPSVG::begin(Print& prt, QRCode* qrcode){
     int width = (((4 * qrcode->version) + 17) * QR_CODE_ZOOM_FACTOR ) + QR_CODE_X_OFFSET + QR_CODE_Y_OFFSET;
     int height = width;
 
     // Serial.println(String(width) + "x" + String(height));
 
-    String svg = "";
+    // String svg = "";
     // appendstringtosvg(_svg, "<svg width='");
-    svg += "<svg width='";    
+    prt.print(F("<svg width='"));    
     
     // appendnumbertosvg(_svg, width);
-    svg += String(width);
+    prt.print(width);
 
     // appendstringtosvg(_svg, "px' height='");
-    svg += "px' height='";
+    prt.print(F("px' height='"));
 
     // appendnumbertosvg(_svg, height);
-    svg += String(height);
+    prt.print(height);
 
     // appendstringtosvg(_svg, "px' xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
-    svg += "px' xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink'>";
-
-    prt->print(svg);
+    prt.print(F("px' xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink'>"));
 }
 
 
-void HAPSVG::finalize(Print* prt)
+void HAPSVG::end(Print& prt)
 {
-    // appendstringtosvg(_svg, "</svg>");
-    String svg = "</svg>";
-    // _finalized = true;
-
-    prt->print(svg);
+    prt.print(F("</svg>"));
 }
 
 
 
-void HAPSVG::rectangle(Print* prt, int width, int height, int x, int y, const char* fill, const char* stroke, int strokeWidth, int radiusx, int radiusy)
-{   
-    String svg = "";
+void HAPSVG::rectangle(Print& prt, int width, int height, int x, int y, const char* fill, const char* stroke, int strokeWidth, int radiusx, int radiusy)
+{       
+    prt.print(F("<rect width='"));
+    prt.print(width);
+    
+    prt.print(F("' height='"));
+    prt.print(height);
     
 
-    svg += "<rect width='";
-    svg += String(width);
-    
-    svg += "' height='";
-    svg += String(height);
-    
-
-    svg += "' y='";    
-    svg += String(y);
+    prt.print(F("' y='"));    
+    prt.print(y);
     
     
-    svg += "' x='";
-    svg += String(x);
+    prt.print(F("' x='"));
+    prt.print(x);
     
     // appendstringtosvg(_svg, "' ry='");
-    svg += "' ry='";
+    prt.print(F("' ry='"));
     
     // appendnumbertosvg(_svg, radiusy);
-    svg += String(radiusy);
+    prt.print(radiusy);
     
     // appendstringtosvg(_svg, "' rx='");
-    svg += "' rx='";
+    prt.print(F("' rx='"));
     
     // appendnumbertosvg(_svg, radiusx);
-    svg += String(radiusx);
+    prt.print(radiusx);
 
-    if (strcmp(fill, "#000") != 0 ) {
-        svg += "' fill='";        
-        svg += String(fill);
+    if (strcmp_P(fill, PSTR("#000")) != 0 ) {
+        prt.print(F("' fill='"));        
+        prt.print(fill);
     }
 
     if (strokeWidth > 0) {
-        svg += "' stroke='";
-        svg += String(stroke);
+        prt.print(F("' stroke='"));
+        prt.print(stroke);
 
-        svg += "' stroke-width='";
-        svg += String(strokeWidth);
+        prt.print(F("' stroke-width='"));
+        prt.print(strokeWidth);
     }
 
     
     // appendstringtosvg(_svg, "' />\n");
-    svg += "' />";
-
-    prt->print(svg);    
+    prt.print(F("' />"));       
 }
 
-void HAPSVG::drawQRCode(Print* prt, QRCode* qrcode, const char* colorFill, const char* colorBackground){
+void HAPSVG::drawQRCode(Print& prt, QRCode* qrcode, const char* colorFill, const char* colorBackground){
 
-
-    init(prt, qrcode);
+    begin(prt, qrcode);
 
     int k = 0;         
     for (uint8_t y = 0; y < qrcode->size; y++) {
@@ -125,5 +113,5 @@ void HAPSVG::drawQRCode(Print* prt, QRCode* qrcode, const char* colorFill, const
         k++;            
     }
 
-    finalize(prt);
+    end(prt);
 }

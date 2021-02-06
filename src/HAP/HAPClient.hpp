@@ -102,7 +102,7 @@ public:
 #endif
 
 	HAP_CLIENT_STATE 	state;
-	HAP_PAIR_STATE	pairState;
+	HAP_PAIR_STATE		pairState;
 	HAP_VERIFY_STATE	verifyState;	
 
 
@@ -135,7 +135,7 @@ public:
 	}
 
 	void setHeader(HAPClientHeader header);
-	void setHeader(String name, String value);
+	void setHeader(const String& name, const String& value);
 
 	void clear();
 

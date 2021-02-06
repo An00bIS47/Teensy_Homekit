@@ -44,6 +44,22 @@ HAPPluginRCSwitchDevice::HAPPluginRCSwitchDevice(uint8_t houseAddress_, uint8_t 
     _ttlPowerValue      = nullptr;
 }
 
+HAPPluginRCSwitchDevice::~HAPPluginRCSwitchDevice(){
+    // if (_configInternal != nullptr) delete _configInternal;
+    // if (_config != nullptr) delete _config;
+
+    delete _accessory;
+    delete _stateValue;
+    delete _inUseState;
+    delete _parentalLock;
+    delete _curPowerValue;
+    delete _ttlPowerValue;
+
+
+    // _configInternal = nullptr;
+    // _config = nullptr;
+}
+
 
 HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
 
@@ -90,14 +106,14 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     HAPService* outletService = new HAPService(HAP_SERVICE_OUTLET);
     _accessory->addService(outletService);
 
-    stringCharacteristics *plugServiceName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, 32);
+    HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, 32);
     plugServiceName->setValue("RCSwitch " + String(houseAddress) + String(deviceAddress));
     _accessory->addCharacteristics(outletService, plugServiceName);
 
     //
     // Power State 
     // 
-    _stateValue = new boolCharacteristics(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
+    _stateValue = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
     _stateValue->setValue("0");
 
     auto callbackState = std::bind(&HAPPluginRCSwitchDevice::changedState, this, std::placeholders::_1, std::placeholders::_2);        
@@ -108,7 +124,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     //
     // in use State
     //
-    _inUseState = new boolCharacteristics(HAP_CHARACTERISTIC_OUTLET_IN_USE, permission_read|permission_notify);        
+    _inUseState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_OUTLET_IN_USE, permission_read|permission_notify);        
     // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);        
     // _inUseState->valueChangeFunctionCall = callbackState;
     _inUseState->setValue("1");
@@ -117,7 +133,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     //
     // power current (EVE)
     //
-    _curPowerValue = new floatCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
+    _curPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
     _curPowerValue->setValue("0.0");
     
     auto callbackChangeCurPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerCurrent, this, std::placeholders::_1, std::placeholders::_2);
@@ -128,7 +144,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     //
     // power total (EVE)
     //
-    _ttlPowerValue = new floatCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
+    _ttlPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
     _ttlPowerValue->setValue("0.0");
     
     auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
@@ -139,7 +155,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     //
     // parental Lock
     //
-    _parentalLock = new boolCharacteristics(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, permission_read|permission_write);        
+    _parentalLock = new HAPCharacteristicBool(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, permission_read|permission_write);        
     _parentalLock->setValue("0");    
     // auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
     // _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;

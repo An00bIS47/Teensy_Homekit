@@ -8,21 +8,21 @@
 
 #include <ArduinoJson.h>
 
+#if HAP_ENABLE_WEBSERVER
 
 #include "HAPWebServer.hpp"
 #include "HAPServer.hpp"
 #include "HAPDeviceID.hpp"
 #include "HAPHelper.hpp"
-#include "HAPPairings.hpp"
 #include "HAPWebServerBodyParserMultipart.hpp"
 #include "HAPSVG.hpp"
-
+#include "HAPPrintChunked.hpp"
 
 // Certs + Key
 #if HAP_WEBSERVER_USE_SSL
 
 // Server Cert if not using keystore
-#if HAP_KEYSTORE_ENABLED == 0
+#if HAP_ENABLE_KEYSTORE == 0
 
 #if HAP_BOARD_HELTEC == 1
 extern const unsigned char server_cert_der_start[] asm("_binary_esp32_AF5FA4_cer_start");
@@ -46,7 +46,7 @@ extern const unsigned char server_cert_der_end[] asm("_binary_esp32_CAFEEC_cer_e
 // Private Key
 
 #if HAP_BOARD_HELTEC == 1
-#define HAVE_PRIVATE_KEY=1
+#define HAVE_PRIVATE_KEY 1
 extern const unsigned char server_privateKey_der_start[] asm("_binary_esp32_AF5FA4_privatekey_start");
 extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_AF5FA4_privatekey_end");
 
@@ -56,7 +56,7 @@ extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_AF5FA4
 
 
 #if HAP_BOARD_HUZZAH == 1
-#define HAVE_PRIVATE_KEY=1
+#define HAVE_PRIVATE_KEY 1
 extern const unsigned char server_privateKey_der_start[] asm("_binary_esp32_0C9D6C_privatekey_start");
 extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_0C9D6C_privatekey_end");
 
@@ -66,7 +66,7 @@ extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_0C9D6C
 
 
 #if HAP_BOARD_SPARKFUN == 1
-#define HAVE_PRIVATE_KEY=1
+#define HAVE_PRIVATE_KEY 1
 extern const unsigned char server_privateKey_der_start[] asm("_binary_esp32_CAFEEC_privatekey_start");
 extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_CAFEEC_privatekey_end");
 // extern const unsigned char server_publicKey_der_start[] asm("_binary_esp32_CAFEEC_publickey_start");
@@ -74,7 +74,7 @@ extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_CAFEEC
 #endif
 
 #if HAP_BOARD_SPARKFUN2 == 1
-#define HAVE_PRIVATE_KEY=1
+#define HAVE_PRIVATE_KEY 1
 #if HAP_USING_PLATFORMIO == 0
 extern const unsigned char server_privateKey_der_start[] asm("_binary_esp32_CB3DC4_privatekey_start");
 extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_CB3DC4_privatekey_end");
@@ -87,13 +87,13 @@ extern const unsigned char server_privateKey_der_end[] asm("_binary_certs_esp32_
 #endif
 
 #if HAP_BOARD_SPARKFUN3 == 1
-#define HAVE_PRIVATE_KEY=1
+#define HAVE_PRIVATE_KEY 1
 extern const unsigned char server_privateKey_der_start[] asm("_binary_esp32_134248_privatekey_start");
 extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_134248_privatekey_end");
 #endif
 
 #if HAP_BOARD_SPARKFUN4 == 1
-#define HAVE_PRIVATE_KEY=1
+#define HAVE_PRIVATE_KEY 1
 extern const unsigned char server_privateKey_der_start[] asm("_binary_esp32_13994C_privatekey_start");
 extern const unsigned char server_privateKey_der_end[] asm("_binary_esp32_13994C_privatekey_end");
 #endif
@@ -137,7 +137,7 @@ HTTPServer* HAPWebServer::_secureServer;
 
 HAPKeystore* HAPWebServer::_keystore;
 HAPAccessorySet* HAPWebServer::_accessorySet;
-HAPConfig* HAPWebServer::_config;
+HAPConfiguration* HAPWebServer::_configuration;
 EventManager* HAPWebServer::_eventManager;
 
 std::vector<HAPWebServerPluginNode*> HAPWebServer::_pluginNodes;
@@ -157,7 +157,7 @@ bool HAPWebServer::begin()
 #if HAP_WEBSERVER_USE_SSL
 
 
-#if HAP_KEYSTORE_ENABLED    
+#if HAP_ENABLE_KEYSTORE    
     
     SSLCert cert = SSLCert(
                             _keystore->getDeviceWebserverCert(), _keystore->getDeviceWebserverCertLength(),
@@ -168,7 +168,7 @@ bool HAPWebServer::begin()
             (unsigned char *)server_cert_der_start, server_cert_der_end - server_cert_der_start,
             (unsigned char *)server_privateKey_der_start, server_privateKey_der_end - server_privateKey_der_start
         );
-#endif /* HAP_KEYSTORE_ENABLED */
+#endif /* HAP_ENABLE_KEYSTORE */
     
     _secureServer = new HTTPSServer(&cert);
 #else
@@ -247,7 +247,7 @@ bool HAPWebServer::begin()
     _secureServer->registerNode(nodePluginPost);
 
 
-// #if HAP_KEYSTORE_ENABLED
+// #if HAP_ENABLE_KEYSTORE
 // 	// ====================================================================================================
 // 	// Keystore
 // 	// ====================================================================================================
@@ -292,9 +292,9 @@ void HAPWebServer::handle()
     _secureServer->loop();
 }
 
-void HAPWebServer::setConfig(HAPConfig *config)
+void HAPWebServer::setConfig(HAPConfiguration *config)
 {
-    _config = config;
+    _configuration = config;
 }
 
 void HAPWebServer::setAccessorySet(HAPAccessorySet *accessorySet)
@@ -391,7 +391,7 @@ void HAPWebServer::rootKeyProcessor(const String& key, HTTPResponse * res){
         uint8_t qrcodeData[qrcode_getBufferSize(3)];
         qrcode_initText(&qrCode, qrcodeData, 3, ECC_HIGH, _accessorySet->xhm());
 
-        HAPSVG::drawQRCode(res, &qrCode);
+        HAPSVG::drawQRCode(*res, &qrCode);
 
         res->print("</div><p>Scan this code with your iPhone to pair this device</p></div></div>");
 
@@ -533,7 +533,7 @@ void HAPWebServer::handleConfigPost(HTTPRequest *req, HTTPResponse *res){
     Serial.println("");
 #endif
 
-    HAPConfigValidationResult result = _config->parse(buffer + from, to - from, false);
+    HAPConfigurationValidationResult result = _configuration->parse(buffer + from, to - from, false);
     if (result.valid == false) {
         res->setStatusCode(400);
         res->setStatusText("Bad Request");
@@ -544,7 +544,7 @@ void HAPWebServer::handleConfigPost(HTTPRequest *req, HTTPResponse *res){
         return;
     } else {
         
-        bool error = _config->save();
+        bool error = _configuration->save();
         if (error == false)
         {
             LogE("ERROR: Could not save configuration!", true);
@@ -559,7 +559,7 @@ void HAPWebServer::handleConfigPost(HTTPRequest *req, HTTPResponse *res){
             // res->setStatusText("Created");
 
             // Call updatecallback
-            _config->update();
+            _configuration->update();
 
             // template processing                    
             
@@ -635,8 +635,9 @@ void HAPWebServer::configGetKeyProcessor(const String& key, HTTPResponse* res){
         result += "<textarea class=\"jsonviewer\" name=\"config\" cols=\"50\" rows=\"20\">";
         HAPWebServerTemplateProcessor::sendChunk(res, result);
 
-        res->printf("%x%s", _config->measureLength() , "\r\n");
-        _config->prettyPrintTo(*res);
+        // ToDo: Chunked Print...
+        // res->printf("%x%s", _config->measureLength() , "\r\n");
+        // _config->prettyPrintTo(*res);
 
         result += "</textarea>";
         result += "<button type=\"submit\" class=\"pure-button pure-button-primary\">Save</button>";
@@ -664,7 +665,11 @@ void HAPWebServer::configGetKeyProcessor(const String& key, HTTPResponse* res){
 
         res->print("<form action=\"/config\" method=\"post\" enctype=\"multipart/form-data\">");
         res->print("<textarea class=\"jsonviewer\" name=\"config\" cols=\"50\" rows=\"20\">");
-        _config->prettyPrintTo(*res);
+        
+        // ToDo: Chunked Print ...
+        // _config->prettyPrintTo(*res);
+        
+        
         res->print("</textarea>");
         res->print("<button type=\"submit\" class=\"pure-button pure-button-primary\">Save</button>");
         res->print("</form>");
@@ -940,11 +945,12 @@ void HAPWebServer::handleApiConfigGet(HTTPRequest *req, HTTPResponse *res)
 {
     res->setStatusCode(200);
     res->setStatusText("OK");
-    res->setHeader("Content-Type", "application/json");
-    // JsonObject cfg = _config->config();
-    String configStr;
-    serializeJsonPretty(_config->config(), configStr);
-    res->println(configStr.c_str());    
+    res->setHeader("Content-Type", "application/json");    
+    _configuration->toJson((Print&)*res);
+
+    // String configStr;    
+    // serializeJsonPretty(_config->config(), configStr);
+    // res->println(configStr.c_str());    
 }
 
 void HAPWebServer::handleApiConfigPost(HTTPRequest *req, HTTPResponse *res)
@@ -976,7 +982,7 @@ void HAPWebServer::handleApiConfigPost(HTTPRequest *req, HTTPResponse *res)
         return;
     }
 
-    HAPConfigValidationResult result = _config->parse(buffer, capacity, false);
+    HAPConfigurationValidationResult result = _configuration->parse(buffer, capacity, false);
     if (result.valid == false)
     {
         res->setStatusCode(400);
@@ -988,7 +994,7 @@ void HAPWebServer::handleApiConfigPost(HTTPRequest *req, HTTPResponse *res)
         return;
     } else {                
 
-        bool error = _config->save();
+        bool error = _configuration->save();
         if (error == false)
         {
             LogE("ERROR: Could not save configuration!", true);
@@ -1003,7 +1009,7 @@ void HAPWebServer::handleApiConfigPost(HTTPRequest *req, HTTPResponse *res)
             res->setStatusText("Created");
 
             // Call updatecallback
-            _config->update();                       
+            _configuration->update();                       
         }
     }
 
@@ -1061,7 +1067,7 @@ void HAPWebServer::handleApiRefTimeGet(HTTPRequest *req, HTTPResponse *res)
     res->setStatusCode(200);
     res->setStatusText("OK");
     res->setHeader("Content-Type", "application/json");
-    res->printf("{ \"reftime\": %zu }\n", _config->getRefTime());
+    res->printf("{ \"reftime\": %zu }\n", _configuration->getPlatformConfig()->refTime());
 }
 
 void HAPWebServer::handleApiRefTimePost(HTTPRequest *req, HTTPResponse *res)
@@ -1102,7 +1108,7 @@ void HAPWebServer::handleApiRefTimePost(HTTPRequest *req, HTTPResponse *res)
 
     // Validate and set
     if (doc.containsKey("reftime") && doc["reftime"].is<uint32_t>()) {        
-        _config->setRefTime(doc["reftime"].as<uint32_t>(), true);
+        _configuration->getPlatformConfig()->setRefTime(doc["reftime"].as<uint32_t>());
 
         res->setStatusCode(201);
         res->setStatusText("Created");
@@ -1127,18 +1133,19 @@ void HAPWebServer::handleApiRefTimePost(HTTPRequest *req, HTTPResponse *res)
 // ===========================================================================================================
 void HAPWebServer::handleApiPairingsDelete(HTTPRequest *req, HTTPResponse *res)
 {
-    HAPPairings::resetEEPROM();
+    _configuration->getAccessoryConfig()->clearPairings();
 
     req->discardRequestBody();
     res->setStatusCode(200);
     res->setStatusText("OK");
     // res->setHeader("Content-Type", "text/html");
-    // res->println("<p>All parings deleted!</p>");
-    res->print("");
+    // res->println("<p>All parings deleted!</p>");    
 
 #if HAP_DEBUG
     res->setHeader("Content-Type", "application/json");
     res->println("{ \"pairings\": \"deleted\"}");
+#else
+    res->print("");
 #endif        
 
 }
@@ -1166,8 +1173,9 @@ void HAPWebServer::handleApiRestart(HTTPRequest *req, HTTPResponse *res)
 void HAPWebServer::handleApiReset(HTTPRequest *req, HTTPResponse *res)
 {   
     LogD("Reset!", true);
-    _config->begin();
-    _config->save();
+    // _configuration->begin();
+    _configuration->setDefaults();
+    _configuration->save();
 
     res->setStatusCode(200);
     res->setStatusText("OK");
@@ -1222,8 +1230,8 @@ void HAPWebServer::handleApiKeystorePost(HTTPRequest * req, HTTPResponse * res){
         return;
     } else {        
 
-        _config->config()["homekit"]["keystore"] = _keystore->getAlternatePartition();
-        _config->save();
+        _configuration->getKeystoreConfig()->setKeystore(_keystore->getAlternatePartition());
+        _configuration->save();
         
         LogI("Keystore on partition " + String(_keystore->getAlternatePartition()) + "  was updated successfully!", true);        
         LogI("A reboot is required for the changes to take effect!", true);
@@ -1281,23 +1289,37 @@ void HAPWebServer::middlewareBasicAuthentication(HTTPRequest *req, HTTPResponse 
 
         bool authValid = false;
 
-        for (JsonVariant admin : _config->config()["webserver"]["admins"].as<JsonArray>()) {
-            if ( ( strcmp(reqUsername.c_str(), admin["username"].as<const char*>() ) == 0)  && ( strcmp(reqPassword.c_str(), admin["password"] ) == 0) ){
-                LogD("Set GROUP Header to ADMIN", true);
-                group = "ADMIN";
-                authValid = true;
-                break;
+        for (auto cred : _configuration->getWebServerConfig()->credentials){
+            if ( ( strcmp(reqUsername.c_str(), cred->username ) == 0)  && ( strcmp(reqPassword.c_str(), cred->password ) == 0) ){
+                if (cred->permission & HAPConfigurationWebserverPermission_Admin) {
+                    group = "ADMIN";
+                    authValid = true;
+                    break;
+                } else if (cred->permission & HAPConfigurationWebserverPermission_API){
+                    group = "API";
+                    authValid = true;
+                    break;
+                }
             }
         }
 
-        for (JsonVariant api : _config->config()["webserver"]["apis"].as<JsonArray>()) {
-            if ( ( strcmp(reqUsername.c_str(), api["username"].as<const char*>() ) == 0)  && ( strcmp(reqPassword.c_str(), api["password"] ) == 0) ){
-                LogD("Set GROUP Header to API", true);
-                group = "API";
-                authValid = true;
-                break;
-            }
-        }
+        // for (JsonVariant admin : _config->config()["webserver"]["admins"].as<JsonArray>()) {
+        //     if ( ( strcmp(reqUsername.c_str(), admin["username"].as<const char*>() ) == 0)  && ( strcmp(reqPassword.c_str(), admin["password"] ) == 0) ){
+        //         LogD("Set GROUP Header to ADMIN", true);
+        //         group = "ADMIN";
+        //         authValid = true;
+        //         break;
+        //     }
+        // }
+
+        // for (JsonVariant api : _config->config()["webserver"]["apis"].as<JsonArray>()) {
+        //     if ( ( strcmp(reqUsername.c_str(), api["username"].as<const char*>() ) == 0)  && ( strcmp(reqPassword.c_str(), api["password"] ) == 0) ){
+        //         LogD("Set GROUP Header to API", true);
+        //         group = "API";
+        //         authValid = true;
+        //         break;
+        //     }
+        // }
 
 
         // _Very_ simple hardcoded user database to check credentials and assign the group
@@ -1581,3 +1603,6 @@ void HAPWebServer::handlePluginNodes(HTTPRequest * req, HTTPResponse * res){
     }
 
 }
+
+
+#endif

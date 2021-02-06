@@ -26,9 +26,9 @@ uint32_t HAPAccessorySet::configurationNumber = HOMEKIT_CONFIGURATION_NUMBER;
 
 HAPAccessorySet::HAPAccessorySet() 
 : _accessoryType(HAP_ACCESSORY_TYPE_OTHER)
-, _modelName("")
-, _pinCode("000-00-000")
 {
+	// memset(_xhm, 0, 21);
+	_configuration = nullptr;	
 }
 
 
@@ -44,8 +44,7 @@ void HAPAccessorySet::addAccessoryInfo(){
 	HAPAccessory *accessory = new HAPAccessory();
 	accessory->addInfoService(modelName(), HAP_MANUFACTURER, HAP_MODELL_NAME, "44-22-777", NULL, hap.versionString());
 	
-	
-	// stringCharacteristics *fwCha = new stringCharacteristics(charType_firmwareRevision, permission_read, 32);
+	// HAPCharacteristicString *fwCha = new HAPCharacteristicString(charType_firmwareRevision, permission_read, 32);
 	// fwCha->setValue(hap.versionString());
 	// accessory->addCharacteristics(infoService, fwCha);
 	
@@ -57,16 +56,15 @@ uint8_t HAPAccessorySet::accessoryType(){
 }
 
 void HAPAccessorySet::setAccessoryType(enum HAP_ACCESSORY_TYPE accessoryType){
-	_accessoryType = accessoryType;
+	_accessoryType = (uint8_t)accessoryType;
 }
 
 const char* HAPAccessorySet::setupID(){
-	return _setupID.c_str();
+	return _configuration->setupId;
 }
 
+
 void HAPAccessorySet::generateSetupID(){
-
-
 	char setupID[5];
 
 #if HAP_DEBUG	
@@ -84,7 +82,8 @@ void HAPAccessorySet::generateSetupID(){
   	setupID[4] = '\0';
 
 #endif
-  	_setupID = String(setupID);
+	
+	_configuration->setSetupId(setupID);
   	computeSetupHash();
 
   	generateXMI();
@@ -94,43 +93,32 @@ char HAPAccessorySet::randomChar(char* letters) {
    return letters[random(0, strlen(letters)-1)];
 }
 
-void HAPAccessorySet::setModelName(String name){
-	_modelName = name;
+void HAPAccessorySet::setModelName(const char* name){
+	_configuration->setModelName(name);
 }
 
 const char* HAPAccessorySet::modelName(){
-	return _modelName.c_str();
+	return _configuration->modelname;
 }
 
 const char* HAPAccessorySet::setupHash(){
-	return _setupHash.c_str();
+	return _setupHash;
 }
 
 void HAPAccessorySet::computeSetupHash(){
 	
 	uint8_t *baseMac = HAPDeviceID::generateID();
 
-	char* ci = (char*) malloc(sizeof(char) * 18);
+	char ci[18];
 	sprintf(ci, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 	
+	uint8_t setupHashMaterial[(4 + 17)];
 
-	int len = 4 + (sizeof(char) * 17);
-	uint8_t setupHashMaterial[len];
-
-	memcpy(setupHashMaterial, _setupID.c_str(), 4);
-	memcpy(setupHashMaterial + 4, ci, sizeof(char) * 17);
-	
-
-	/*
-	LogD(">>>>>>>>>>>> setupHashMAterial: ", false);
-	char* outData = HAPHelper::toHex(setupHashMaterial, len);
-	LogD(outData, true);
-	free(outData);
- 	 */
-
+	memcpy(setupHashMaterial, _configuration->setupId, 4);
+	memcpy(setupHashMaterial + 4, ci, 17);
 
 	uint8_t output[64];
-	mbedtls_sha512(setupHashMaterial, len, output, 0);
+	mbedtls_sha512(setupHashMaterial, 21, output, 0);
 
 	uint8_t sliced[4];
 	memcpy(sliced, output, 4);
@@ -138,31 +126,27 @@ void HAPAccessorySet::computeSetupHash(){
 	// Doesn't work :(
 	//_setupHash = base64::encode(sliced);	
 
-	char setupHash[10];
-
 	size_t olen;		
-	if (mbedtls_base64_encode((uint8_t*)setupHash, 9, &olen, sliced, 4)) {
+	if (mbedtls_base64_encode((uint8_t*)_setupHash, 9, &olen, sliced, 4)) {
 		LogE("[computeSetupHash] ERROR: mbedtls_base64_encode failed!", true);
 	}
-
-	setupHash[9] = '\0';
-	_setupHash = String(setupHash);
+	// setupHash[9] = '\0';
 }
 
 
 
 void HAPAccessorySet::setPinCode(const char* pinCode){
-	_pinCode = String(pinCode);
+	_configuration->setPincode(pinCode);
 }
 
 const char* HAPAccessorySet::pinCode(){
-	return _pinCode.c_str();
+	return _configuration->pincode;
 }
 
 
 void HAPAccessorySet::generateXMI(){
 	
-	String tmp = _pinCode;	
+	String tmp = _configuration->pincode;	
 	tmp.replace("-", "");	
 
 	int lowValue = atoi(tmp.c_str());
@@ -218,23 +202,19 @@ void HAPAccessorySet::generateXMI(){
 	str16_to_str36(dest, dst3);
 	
 	char finalDest[9];	
-	HAPHelper::prependZeros(finalDest, dest, 9);
-	
-	char xhm[21];
+	HAPHelper::prependZeros(finalDest, dest, 9);	
 
-	memcpy(xhm, "X-HM://", 7);
-	memcpy(xhm + 7, finalDest, 9);
-	memcpy(xhm + 7 + 9, _setupID.c_str(), 4);
-	xhm[20] = '\0';
-
-	_xhm = String(xhm);
+	memcpy(_xhm, "X-HM://", 7);
+	memcpy(_xhm + 7, finalDest, 9);
+	memcpy(_xhm + 7 + 9, _configuration->setupId, 4);
+	_xhm[20] = '\0';
 
 	mbedtls_mpi_free(&bignumLow);
 	mbedtls_mpi_free(&bignumHigh);
 }
 
 const char* HAPAccessorySet::xhm(){
-	return _xhm.c_str();
+	return _xhm;
 }
 
 
@@ -283,25 +263,32 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *acc) {
 }
 
 
-String HAPAccessorySet::describe() {
-    int numberOfAcc = numberOfAccessory();
-    String *desc = new String[numberOfAcc];
+// String HAPAccessorySet::describe() {
+//     int numberOfAcc = numberOfAccessory();
+//     String *desc = new String[numberOfAcc];
 
-    for (int i = 0; i < numberOfAcc; i++) {
-        desc[i] = _accessories[i]->describe();
+//     for (int i = 0; i < numberOfAcc; i++) {
+//         desc[i] = _accessories[i]->describe();
+//     }
+
+    
+//     String result = HAPHelper::arrayWrap(desc, numberOfAcc);
+//     delete [] desc;
+//     String key = "accessories";
+//     result = HAPHelper::dictionaryWrap(&key, &result, 1);
+    
+//     return result;
+// }
+
+void HAPAccessorySet::toJson(JsonArray& array){
+	
+	for (int i = 0; i < numberOfAccessory(); i++) {
+        _accessories[i]->toJson(array);
     }
-
-    
-    String result = HAPHelper::arrayWrap(desc, numberOfAcc);
-    delete [] desc;
-    String key = "accessories";
-    result = HAPHelper::dictionaryWrap(&key, &result, 1);
-    
-    return result;
 }
 
-int32_t HAPAccessorySet::getValueForCharacteristics(int aid, int iid, char* out, size_t* outSize){
-	characteristics *c = getCharacteristics(aid, iid);
+int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
+	HAPCharacteristic *c = getCharacteristics(aid, iid);
 	if (c != nullptr) {		
 		*outSize = c->value().length() + 1;
 		if (out != NULL){
@@ -312,10 +299,10 @@ int32_t HAPAccessorySet::getValueForCharacteristics(int aid, int iid, char* out,
 	return HAP_STATUS_RESOURCE_NOT_FOUND;
 }
 
-characteristics* HAPAccessorySet::getCharacteristicsOfType(int aid, uint8_t type){
+HAPCharacteristic* HAPAccessorySet::getCharacteristicsOfType(uint8_t aid, uint16_t type){
 	HAPAccessory *a = accessoryWithAID(aid);
 	if (a != NULL) {		
-		characteristics *c = a->characteristicsOfType(type);
+		HAPCharacteristic *c = a->characteristicsOfType(type);
 		if (c != NULL){
 			return c;
 		}
@@ -323,7 +310,7 @@ characteristics* HAPAccessorySet::getCharacteristicsOfType(int aid, uint8_t type
 	return NULL;
 }
 
-characteristics* HAPAccessorySet::getCharacteristics(int aid, int iid){
+HAPCharacteristic* HAPAccessorySet::getCharacteristics(uint8_t aid, uint8_t iid){
 	HAPAccessory *a = accessoryWithAID(aid);		
 		
 		if (a == NULL) {
@@ -339,7 +326,7 @@ characteristics* HAPAccessorySet::getCharacteristics(int aid, int iid){
 		} 
 		else {
 
-			characteristics *c = a->characteristicsAtIndex(iid);
+			HAPCharacteristic *c = a->characteristicsAtIndex(iid);
 
 			if (c == NULL) {
 				LogE("[ERROR] Characteristics with aid: ", false);
@@ -357,4 +344,17 @@ characteristics* HAPAccessorySet::getCharacteristics(int aid, int iid){
 		}
 
 	return nullptr;
+}
+
+
+void HAPAccessorySet::printTo(Print& print){
+	print.print("{\"accessories\":[");
+	for (int i = 0; i < numberOfAccessory(); i++) {
+        _accessories[i]->printTo(print);
+
+		if (i+1 < numberOfAccessory()){
+			print.print(",");
+		}
+    }
+	print.print("]}");
 }

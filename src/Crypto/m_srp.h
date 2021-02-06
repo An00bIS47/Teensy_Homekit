@@ -71,6 +71,8 @@ extern "C" {
 #ifndef SRP_H
 #define SRP_H
 
+#define HAP_SRP_SUPPORT_ALL_NG_SIZES 0
+
 #define SHA1_DIGEST_LENGTH 20
 #define SHA224_DIGEST_LENGTH 28
 #define SHA256_DIGEST_LENGTH 32
@@ -85,13 +87,17 @@ typedef struct NGConstant NGConstant;
 
 typedef enum
 {
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES    
 	SRP_NG_512,
 	SRP_NG_768,
     SRP_NG_1024,
     SRP_NG_2048,
+#endif    
 	SRP_NG_3072,
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES    
     SRP_NG_4096,
     SRP_NG_8192,
+#endif    
     SRP_NG_CUSTOM,
 	SRP_NG_LAST
 } SRP_NGType;
@@ -125,6 +131,8 @@ int srp_random_seeded();
 
 int srp_hash_length( SRPSession *ses );
 
+
+void srp_clear();
 /*
  * Create internal representation of given SRP_NGType.
  * if ng_type==SRP_NG_CUSTOM n_hex and g_hex will be used

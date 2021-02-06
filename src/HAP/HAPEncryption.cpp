@@ -485,7 +485,7 @@ uint8_t* HAPEncryption::encrypt(uint8_t *message, size_t length, int* encrypted_
 #if HAP_DEBUG_ENCRYPTION
         Serial.println("=========================================================");
         HAPHelper::array_print("nonce", nonce, 12);
-        HAPHelper::array_print("key", key, strlen((const char*)key));
+        HAPHelper::array_print("key", key, 32);
         HAPHelper::array_print("aad", aad, HAP_ENCRYPTION_AAD_SIZE);
         HAPHelper::array_print("decrypted_ptr", decrypted_ptr, strlen((const char*)decrypted_ptr));
         printf("chunk_len %d\n", chunk_len);

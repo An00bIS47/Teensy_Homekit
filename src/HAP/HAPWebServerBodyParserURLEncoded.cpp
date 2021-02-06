@@ -6,6 +6,7 @@
 //      Author: michael
 //
 
+#if HAP_ENABLE_WEBSERVER
 #include "HAPWebServerBodyParserURLEncoded.hpp"
 
 /** HTTP Query parameters, as key-value pairs */
@@ -73,3 +74,5 @@ std::vector<std::pair<std::string, std::string>> HAPWebServerBodyParserURLEncode
 
 	return keyValues;
 }
+
+#endif

@@ -95,7 +95,7 @@ struct SRPUser
     int                   authenticated;
 
     const char *          username;
-    const unsigned char * password;
+    const uint8_t*        password;
     int                   password_len;
 
     unsigned char M           [SHA512_DIGEST_LENGTH];

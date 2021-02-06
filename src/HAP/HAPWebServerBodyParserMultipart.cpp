@@ -5,6 +5,7 @@
 //  Created on: 14.12.2018
 //      Author: michael
 //
+#if HAP_ENABLE_WEBSERVER
 
 #include "HAPWebServerBodyParserMultipart.hpp"
 #include "HAPGlobals.hpp"
@@ -221,3 +222,6 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
     }
   }
 }
+
+
+#endif

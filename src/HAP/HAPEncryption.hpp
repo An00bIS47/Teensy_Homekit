@@ -63,8 +63,6 @@ class HAPEncryption {
 
 public:
 
-	
-
 #if HAP_USE_LIBSODIUM
 
 	static int begin();
@@ -132,5 +130,8 @@ public:
         size_t n_len,
         const uint8_t k[CHACHA20_POLY1305_KEY_BYTES]);
 };
+
+
+
 
 #endif /* HAPENCRYPTION_HPP_ */

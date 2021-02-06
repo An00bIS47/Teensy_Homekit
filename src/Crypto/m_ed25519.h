@@ -6,7 +6,6 @@
 extern "C" {
 #endif
 
-
 #include "Ed25519/curve25519_mehdi.h"
 // #include "Ed25519/curve25519_utils.c"
 // #include "Ed25519/curve25519_order.c"

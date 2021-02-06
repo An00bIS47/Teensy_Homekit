@@ -34,25 +34,34 @@
 #define HAP_MANUFACTURER			"An00bIS47"
 
 #if defined(ARDUINO_ARCH_ESP32)
-#define HAP_MODELL_NAME				"SparkfunESP32"
+#define HAP_MODELL_NAME				"ESP32 KNX Homekit"
 #elif defined (CORE_TEENSY)
-#define HAP_MODELL_NAME				"Teensy41"
+#define HAP_MODELL_NAME				"Teensy41 KNX Homekit"
 #endif
 
+
 #ifndef HAP_RESET_EEPROM
-#define HAP_RESET_EEPROM 			0
+#define HAP_RESET_EEPROM 			0		// ToDo: Deprecated
+#endif
+
+#ifndef HAP_RESET_PAIRINGS	
+#define HAP_RESET_PAIRINGS			0
 #endif
 
 #define HAP_BUTTON_PIN 				0       // PIN of onboard button 
 
 
-#ifndef HAP_PIXEL_INDICATOR_ENABLED
-#define HAP_PIXEL_INDICATOR_ENABLED 1
+#define HAP_ADD_DESC_TO_JSON		1		// Adds description for each chr to accessory.json
+
+#ifndef HAP_ENABLE_PIXEL_INDICATOR
+#define HAP_ENABLE_PIXEL_INDICATOR 	0
 #endif
 
 
 #define HAP_PIXEL_INDICATOR_PIN		A0		// PIN of the NeoPixel inidicator pin for wifi connection etc
 #define HAP_PIXEL_INIDICATOR_BRIGHTNESS 75
+
+#define HAP_SEND_BUFFER_SIZE		1024
 
 
 /**
@@ -68,7 +77,7 @@
  * Version
  ********************************************************************/
 #define HOMEKIT_VERSION_MAJOR 		0
-#define HOMEKIT_VERSION_MINOR 		8
+#define HOMEKIT_VERSION_MINOR 		9
 #define HOMEKIT_VERSION_REVISION 	0
 
 
@@ -139,16 +148,43 @@
 #define HAP_DEBUG_IR				1
 #endif
 
-#ifndef HAP_DEBUG_CONFIG
-#define HAP_DEBUG_CONFIG			1
+#ifndef HAP_DEBUG_CONFIGURATION
+#define HAP_DEBUG_CONFIGURATION		1
 #endif
 
 /**
  * Homekit pairing
  ********************************************************************/
+#ifndef HAP_ALLOW_PAIRING_WHILE_PAIRED
 #define HAP_ALLOW_PAIRING_WHILE_PAIRED 1		// disable for release !!
+#endif
 
 
+/**
+ * KNX
+ ********************************************************************/
+#ifndef HAP_SERVER_USE_INTEGRATED_KNX
+#define HAP_SERVER_USE_INTEGRATED_KNX  0
+#endif
+
+
+/**
+ * Preferences / EEPROM
+ ********************************************************************/
+#ifndef HAP_USE_PREFERENCES
+#define HAP_USE_PREFERENCES 		0
+#endif
+
+#ifndef HAP_USE_EEPROM
+#define HAP_USE_EEPROM 				1
+#endif
+
+#if HAP_USE_EEPROM
+	#ifdef HAP_USE_PREFERENCES
+	#undef HAP_USE_PREFERENCES
+	#define HAP_USE_PREFERENCES 	0
+	#endif
+#endif
 
 /**
  * ESP32
@@ -158,8 +194,8 @@
 #define HAP_ENABLE_WIFI 			1
 #endif
 
-#ifndef HAP_KEYSTORE_ENABLED
-#define HAP_KEYSTORE_ENABLED 		1
+#ifndef HAP_ENABLE_KEYSTORE
+#define HAP_ENABLE_KEYSTORE 		1
 #endif
 
 #ifndef HAP_ENABLE_WEBSERVER
@@ -170,18 +206,28 @@
 #define HAP_PROVISIONING_ENABLE_BLE 1
 #endif
 
-#ifndef HAP_UPDATE_ENABLE_OTA
-#define HAP_UPDATE_ENABLE_OTA 		1
+#ifndef HAP_ENABLE_UPDATE_OTA
+#define HAP_ENABLE_UPDATE_OTA 		1
 #endif
 
-#define HAP_SPRINTF_UI32			"%zu"
+//#define HAP_SPRINTF_UI32			"%zu"
+
+#ifndef HAP_CONFIG_USE_PREFS_FOR_PAIRINGS
+#define HAP_CONFIG_USE_PREFS_FOR_PAIRINGS 1
+#endif
+
+
+#ifndef HAP_ENABLE_WIFI_BUTTON
+#define HAP_ENABLE_WIFI_BUTTON		0
+#endif
+
 #elif defined ( CORE_TEENSY)
 #ifndef HAP_ENABLE_WIFI
 #define HAP_ENABLE_WIFI 			0
 #endif
 
-#ifndef HAP_KEYSTORE_ENABLED
-#define HAP_KEYSTORE_ENABLED 		0
+#ifndef HAP_ENABLE_KEYSTORE
+#define HAP_ENABLE_KEYSTORE 		0
 #endif
 
 #ifndef HAP_ENABLE_WEBSERVER
@@ -192,25 +238,38 @@
 #define HAP_PROVISIONING_ENABLE_BLE 0
 #endif
 
-#ifndef HAP_UPDATE_ENABLE_OTA
-#define HAP_UPDATE_ENABLE_OTA 		0
+#ifndef HAP_ENABLE_UPDATE_OTA
+#define HAP_ENABLE_UPDATE_OTA 		0
 #endif
 
-#define HAP_SPRINTF_UI32			"%lu"
-
-#else
-#define HAP_SPRINTF_UI32			"%lu"
+#ifndef HAP_CONFIG_USE_PREFS_FOR_PAIRINGS
+#define HAP_CONFIG_USE_PREFS_FOR_PAIRINGS 0
 #endif
 
-#define HAP_SEND_BUFFER_SIZE		1360		// Ethernet Client has problems writing large chunks ( > 3KB)
+
+#ifndef HAP_ENABLE_WIFI_BUTTON
+#define HAP_ENABLE_WIFI_BUTTON		0
+#endif
+
+//#define HAP_SPRINTF_UI32			"%lu"
+
+#else	/* END CORE_TEENSY */ 
+//#define HAP_SPRINTF_UI32			"%lu"
+#endif
+
+#undef HAP_SEND_BUFFER_SIZE
+#define HAP_SEND_BUFFER_SIZE		1024		// Ethernet Client has problems writing large chunks ( > 3KB)
 
 #define HAP_ETHERNET_TIMEOUT		10000
+
+
+
 /**
  * WiFi
  ********************************************************************/
 
 #ifndef HAP_ENABLE_WIFI
-#define HAP_ENABLE_WIFI 	0				
+#define HAP_ENABLE_WIFI 	1				
 #endif	
 
 
@@ -248,7 +307,7 @@
  * Include WiFi credentials if necessary
  ********************************************************************/
 #if HAP_ENABLE_WIFI
-#if HAP_WIFI_DEFAULT_MODE == 1
+#if HAP_WIFI_MODE_DEFAULT == 1
 
 #include "../WiFiCredentials.hpp"
 
@@ -266,15 +325,14 @@
 /**
  * Keystore 
  ********************************************************************/
-#ifndef HAP_KEYSTORE_ENABLED
-#define HAP_KEYSTORE_ENABLED				1
+#ifndef HAP_ENABLE_KEYSTORE
+#define HAP_ENABLE_KEYSTORE				1
 #endif
 
-#if HAP_KEYSTORE_ENABLED
 #define HAP_KEYSTORE_PARTITION_LABEL	 	"keystore_0"
 #define HAP_KEYSTORE_PARTITION_LABEL_ALT 	"keystore_1"
 #define HAP_KEYSTORE_STORAGE_LABEL   		"keystore"
-#endif
+
 
 /**
  * WebServer 
@@ -367,12 +425,12 @@
  * OTA + HAP Update Server
  ********************************************************************/
 
-#ifndef HAP_UPDATE_ENABLE_OTA
-#define HAP_UPDATE_ENABLE_OTA		1		// Enable ArduinoOTA	
-#endif										// Default: 0	
+#ifndef HAP_ENABLE_UPDATE_OTA
+#define HAP_ENABLE_UPDATE_OTA		1		// Enable ArduinoOTA	
+#endif										// Default: 1	
 
-#ifndef HAP_UPDATE_ENABLE_FROM_WEB
-#define HAP_UPDATE_ENABLE_FROM_WEB 	0		// Use HAP update server to check
+#ifndef HAP_ENABLE_UPDATE_WEB
+#define HAP_ENABLE_UPDATE_WEB 	0		// Use HAP update server to check
 #endif										// if a update is available on the
 											// provided webserver
 											// Default: 0
@@ -390,7 +448,7 @@
 #endif
 
 
-#if HAP_UPDATE_ENABLE_FROM_WEB
+#if HAP_ENABLE_UPDATE_WEB
 //#define HAP_UPDATE_SERVER_URL 	"192.168.178.151"	
 #define HAP_UPDATE_SERVER_HOST 		"homebridge"		// HTTP Server url for updates
 #define HAP_UPDATE_SERVER_PORT		3001				// Update Server port
@@ -405,13 +463,13 @@
 /**
  * NTP Settings
  ********************************************************************/
-#ifndef HAP_NTP_ENABLED
-#define HAP_NTP_ENABLED 			1		// Enable SNTP client
+#ifndef HAP_ENABLE_NTP
+#define HAP_ENABLE_NTP 			1		// Enable SNTP client
 											// Default: 1
 #endif										
 
 
-#if HAP_NTP_ENABLED
+#if HAP_ENABLE_NTP
 
 #ifndef HAP_NTP_SERVER_URL
 #define HAP_NTP_SERVER_URL			"time.euro.apple.com"						// NTP server url
@@ -449,7 +507,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #define UNIX_OFFSET					2208988800UL
 
 #endif /* ARDUINO_ARCH_ESP32 */
-#endif /* HAP_NTP_ENABLED */
+#endif /* HAP_ENABLE_NTP */
 
 
 
@@ -467,18 +525,21 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #elif defined(ARDUINO_TEENSY41)        
 #define HAP_EEPROM_SIZE 4284      // Teensy 4.1
 #else
-#define HAP_EEPROM_SIZE 4096
+#define HAP_EEPROM_SIZE 8192
 #endif
 
 #ifndef HAP_EEPROM_OFFSET
 #define HAP_EEPROM_OFFSET 0
 #endif /* HAP_EEPROM_OFFSET */
 
+
+// ToDo: deprecated !
 #define HAP_EEPROM_OFFSET_PAIRINGS    	HAP_EEPROM_OFFSET
 #define HAP_EEPROM_PAIRINGS_SIZE      	(sizeof(HAPPairing) * HAP_PAIRINGS_MAX)
 #define HAP_EEPROM_PAIRINGS_KEYSIZE 	HAP_PAIRINGS_LTPK_LENGTH + HAP_PAIRINGS_LTSK_LENGTH
 #define HAP_EEPROM_CONFIG_OFFSET    	(HAP_EEPROM_OFFSET + HAP_EEPROM_PAIRINGS_KEYSIZE + HAP_EEPROM_PAIRINGS_SIZE)
 #define HAP_EEPROM_CONFIG_SIZE      	(HAP_EEPROM_SIZE - (HAP_EEPROM_OFFSET + HAP_EEPROM_PAIRINGS_KEYSIZE + HAP_EEPROM_PAIRINGS_SIZE))
+
 
 
 /**
@@ -515,7 +576,6 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 
 
 
-
 /**
  * QR Code 
  ********************************************************************/
@@ -531,6 +591,10 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
  * !!! Add new plugins on top here and 
  *     add them as well on top of the define bellow !!!
  ********************************************************************/
+
+#ifndef HAP_PLUGIN_USE_KNX
+#define HAP_PLUGIN_USE_KNX				0
+#endif
 
 #ifndef HAP_PLUGIN_USE_NIMBLE_MIFLORA
 #define HAP_PLUGIN_USE_NIMBLE_MIFLORA 	0		// https://github.com/h2zero/esp-nimble-cpp
@@ -599,10 +663,10 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #endif
 
 #if HAP_PLUGIN_USE_NIMBLE_MIFLORA
-#define HAP_BLE_ENABLED 1
+#define HAP_ENABLE_BLE 1
 #endif
 
-#if HAP_BLE_ENABLED
+#if HAP_ENABLE_BLE
 // disable HTTPS if BLE is enabled
 #undef HAP_WEBSERVER_USE_SSL
 #define HAP_WEBSERVER_USE_SSL 0
@@ -614,8 +678,8 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 
 // shut off pixel indicator if using neo pixel
 #if HAP_PLUGIN_USE_NEOPIXEL
-#undef HAP_PIXEL_INDICATOR_ENABLED
-#define HAP_PIXEL_INDICATOR_ENABLED 0
+#undef HAP_ENABLE_PIXEL_INDICATOR
+#define HAP_ENABLE_PIXEL_INDICATOR 0
 #endif
 
 /**
@@ -673,10 +737,10 @@ STR(HAP_PLUGIN_USE_BME280)
 #define HAP_BUFFER_SEND_SIZE		3192	// 3192 max ?
 #endif
 
-#define HAP_ARDUINOJSON_BUFFER_SIZE 4096	//(ESP.getMaxAllocHeap() - 4096)
+#define HAP_ARDUINOJSON_BUFFER_SIZE 3192	//(ESP.getMaxAllocHeap() - 4096)
 
 #if defined( ARDUINO_ARCH_ESP32 )
-#define HAP_ENCRYPTION_BUFFER_SIZE 	(ESP.getMaxAllocHeap() - 4096)	// 16384
+#define HAP_ENCRYPTION_BUFFER_SIZE 	16384 // (ESP.getMaxAllocHeap() - 4096)	// 16384
 #elif defined( CORE_TEENSY )
 #define HAP_ENCRYPTION_BUFFER_SIZE 	16384
 #endif
@@ -687,9 +751,12 @@ STR(HAP_PLUGIN_USE_BME280)
 
 #define HAP_STRING_LENGTH_MAX		64		// Max length of strings for config validation
 
-#define MAX_BRAND_LENGTH 			32
-#define MAX_FIRMWARE_NAME_LENGTH 	32
-#define MAX_FIRMWARE_VERSION_LENGTH	16		 // sizeof("1000.1000.1000.1000");
+#define HAP_HOMEKIT_DEFAULT_STRING_LENGTH	64
+
+
+#define MAX_BRAND_LENGTH 			12
+#define MAX_FIRMWARE_NAME_LENGTH 	8		 // Homekit == 7 + 1
+#define MAX_FIRMWARE_VERSION_LENGTH	19		 // 1000.1000.1000.1000
 
 
 /**

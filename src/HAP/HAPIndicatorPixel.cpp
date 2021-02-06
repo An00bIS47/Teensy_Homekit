@@ -11,6 +11,8 @@
 #include "HAPLogger.hpp"
 #include "HAPServer.hpp"
 
+#if HAP_ENABLE_PIXEL_INDICATOR
+
 HAPIndicatorPixel::HAPIndicatorPixel(){
     _previousMillis = 0;  
     // _timesBlinked = 0;  
@@ -151,3 +153,5 @@ void HAPIndicatorPixel::blinkWithColor(CRGB color, uint8_t times){
     _timesBlinkedRemaining = times * 2;
     _previousMillis = 0;
 }
+
+#endif

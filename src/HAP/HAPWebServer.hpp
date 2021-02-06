@@ -9,6 +9,10 @@
 #ifndef HAPWEBSERVER_HPP_
 #define HAPWEBSERVER_HPP_
 
+#define HAP_ENABLE_WEBSERVER 1
+#if HAP_ENABLE_WEBSERVER
+
+
 #include <Arduino.h>
 
 #include "HAPGlobals.hpp"
@@ -26,14 +30,14 @@
 
 #include "HAPAccessorySet.hpp"
 #include "HAPLogger.hpp"
-#include "HAPConfig.hpp"
+#include "HAPConfiguration.hpp"
 #include "HAPPlugins.hpp"
 
 #if HAP_API_USE_JWT
 #include "HAPWebServerJWT.hpp"
 #endif
 
-#if HAP_KEYSTORE_ENABLED
+#if HAP_ENABLE_KEYSTORE
 #include "HAPKeystore.hpp"
 #endif
 
@@ -59,7 +63,7 @@ public:
 	static void handle();
 
 	static void setAccessorySet(HAPAccessorySet* accessorySet);
-	static void setConfig(HAPConfig *config);	
+	static void setConfig(HAPConfiguration *config);	
 	// static void registerPluginNode(const std::string name, const std::string path, const std::string method, const HTTPSCallbackFunction * callback, const std::string tag = "");
 
 	static void registerPluginNode(HAPWebServerPluginNode* pluginNode);
@@ -80,7 +84,7 @@ private:
 	static HTTPServer* _secureServer;
 #endif
 	static HAPAccessorySet* _accessorySet;
-	static HAPConfig* _config;
+	static HAPConfiguration* _configuration;
 
 	uint16_t _port;
 
@@ -166,7 +170,7 @@ private:
 // 	static void handleApiCSRGet(HTTPRequest *req, HTTPResponse *res);
 // #endif
 
-#if HAP_KEYSTORE_ENABLED
+#if HAP_ENABLE_KEYSTORE
 	// ====================================================================================================
 	// Keystore
 	// ====================================================================================================
@@ -202,10 +206,12 @@ private:
 
 	static EventManager* _eventManager;
 
-#if HAP_KEYSTORE_ENABLED
+#if HAP_ENABLE_KEYSTORE
 	static HAPKeystore* _keystore;
 #endif
 
 };
 
+
+#endif
 #endif /* HAPWEBSERVER_HPP_ */

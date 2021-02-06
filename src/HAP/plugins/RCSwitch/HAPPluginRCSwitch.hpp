@@ -25,10 +25,17 @@
 #include "HAPPluginRCSwitchDevice.hpp"
 
 
+struct HAPPluginRCSwitchConfig {
+	uint8_t* data = {0,};
+	size_t dataLen = 0;
+};
+
+
 class HAPPluginRCSwitch: public HAPPlugin {
 public:
 
 	HAPPluginRCSwitch();
+	~HAPPluginRCSwitch();
     // HAPPluginRCSwitch(String name_);
 
 	bool begin();
@@ -40,12 +47,20 @@ public:
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 
-	HAPConfigValidationResult validateConfig(JsonObject object);
-	JsonObject getConfigImpl();
-	void setConfigImpl(JsonObject root);
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
+	// JsonObject getConfigImpl();
+	// void setConfigImpl(JsonObject root);
+
+	HAPConfigurationPlugin* setDefaults() override;
+	void internalConfigToJson(Print& prt); 	
+	void setConfiguration(HAPConfigurationPlugin* cfg) override;
+
+
 	
     // void handleRoot(HTTPRequest * req, HTTPResponse * res);
 
+
+#if HAP_ENABLE_WEBSERVER
 	std::vector<HAPWebServerPluginNode*> getResourceNodes();
 	
 	void handleHTTPGet(HTTPRequest * req, HTTPResponse * res);	
@@ -53,6 +68,8 @@ public:
 
 	void handleHTTPPost(HTTPRequest * req, HTTPResponse * res);
 	void handleHTTPFormField(const std::string& fieldName, const std::string& fieldValue);
+#endif
+
 
     void sendDeviceCallback(uint8_t houseAddress_, uint8_t deviceAddress_, bool on_);    
 
@@ -60,7 +77,7 @@ public:
     static void prependZeros(char *dest, String src, uint8_t width);
 private:
 
-	boolCharacteristics*	_stateValue;
+	// boolCharacteristics*	_stateValue;
 
 	int indexOfDevice(HAPPluginRCSwitchDevice* device);
     void configAccessory(uint8_t devPtr);
@@ -69,13 +86,15 @@ private:
     uint32_t bitStringToUInt32(char* input_binary_string);
     String uint32ToBitString(uint32_t dec);
 
-	HAPConfigValidationResult validateName(const char* name);
-	HAPConfigValidationResult validateDeviceAddress(const char* deviceAddress);
-	HAPConfigValidationResult validateHouseAddress(const char* houseAddress);
+	HAPConfigurationValidationResult validateName(const char* name);
+	HAPConfigurationValidationResult validateDeviceAddress(const char* deviceAddress);
+	HAPConfigurationValidationResult validateHouseAddress(const char* houseAddress);
 
     RCSwitch _rcSwitch;
 
 	HAPPluginRCSwitchDevice* _newDevice;
+
+	struct HAPPluginRCSwitchConfig* _configInternal;
 
 	bool fakeGatoCallback();
 	// HAPFakeGatoWeather _fakegato;

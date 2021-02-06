@@ -9,6 +9,8 @@
 #ifndef HAPWEBSERVERBODYPARSERMULTIPART_HPP_
 #define HAPWEBSERVERBODYPARSERMULTIPART_HPP_
 
+#if HAP_ENABLE_WEBSERVER
+
 #include <Arduino.h>
 #include <HTTPSServer.hpp>
 
@@ -25,3 +27,5 @@ private:
 };
 
 #endif /* HAPWEBSERVERBODYPARSERMULTIPART_HPP_ */
+
+#endif

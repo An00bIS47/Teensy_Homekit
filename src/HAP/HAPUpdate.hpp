@@ -10,13 +10,13 @@
 #define HAPUPDATE_HPP_
 
 #include <Arduino.h>
-#if HAP_UPDATE_ENABLE_FROM_WEB
+#if HAP_ENABLE_UPDATE_WEB
 #include <HTTPClient.h>
 #endif
 
 #include "HAPVersion.hpp"
 #include "HAPGlobals.hpp"
-#include "HAPConfig.hpp"
+#include "HAPConfiguration.hpp"
 
 
 struct HAPUpdateVersionInfo {
@@ -32,8 +32,12 @@ public:
 	HAPUpdate();
 	~HAPUpdate();
 
-	void begin(HAPConfig* config);
+	void begin(const char* hostname);
 	void handle();
+
+	void setConfig(HAPConfigurationArduinoOTA* config){
+		_configuration = config;
+	}
 
 	void setHostAndPort(const char* url, int port, uint32_t interval = HAP_UPDATE_WEB_INTERVAL) {
 		_port = port;
@@ -47,7 +51,7 @@ public:
 	
 	bool updateAvailable();
 
-#if HAP_UPDATE_ENABLE_FROM_WEB
+#if HAP_ENABLE_UPDATE_WEB
 	bool checkUpdateAvailable();
 	void execWebupdate();
 #endif
@@ -65,8 +69,11 @@ private:
 	unsigned long 	_previousMillis;	
 	bool 			_available;
 
+	HAPConfigurationArduinoOTA* _configuration;
+
+
  	HAPUpdateVersionInfo _remoteInfo;
-#if HAP_UPDATE_ENABLE_FROM_WEB	
+#if HAP_ENABLE_UPDATE_WEB	
 	HTTPClient* _http;
 #endif	
 	// String getHeaderValue(String header, String headerName);

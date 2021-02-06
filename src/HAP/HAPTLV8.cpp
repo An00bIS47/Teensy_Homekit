@@ -472,13 +472,12 @@ void TLV8::deleteList( TLV8Entry *ptr )
 {
 	TLV8Entry *temp;
 
-	if( _head == NULL ) return;   			// don't try to delete an empty list
+	if ( _head == NULL ) return;   			// don't try to delete an empty list
 
-	if( ptr == _head ) {					// if we are deleting the entire list
+	if ( ptr == _head ) {					// if we are deleting the entire list
 		_head = NULL;						// then reset head and
 		_tail = NULL;						// end to empty
-	}
-	else {
+	} else {
 		temp = _head;						// if it's not the entire list, readjust end
 		while( temp->next != ptr )       	// locate previous node to ptr
 			temp = temp->next;

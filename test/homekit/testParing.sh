@@ -1,5 +1,5 @@
 
-python3 -m homekit.pair -d 04:E9:E5:0C:D8:51 -p 031-45-712 -f ./homekitStorage.json -a t41 --log DEBUG
+python3 -m homekit.pair -d 98:F4:AB:13:99:4C -p 031-45-712 -f ./homekitStorage.json -a knx --log DEBUG
 
 
 python3 -m homekit.get_accessories -f ./homekitstorage.json -a t41 --log DEBUG

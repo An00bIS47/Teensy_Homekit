@@ -16,8 +16,8 @@
 #endif
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       5
-#define VERSION_REVISION    2
+#define VERSION_MINOR       6
+#define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
 #ifndef HAP_PLUGIN_RCSWITCH_PIN
@@ -29,11 +29,10 @@
 #endif
 
 
+
 HAPPluginRCSwitch::HAPPluginRCSwitch(){
     _type           = HAP_PLUGIN_TYPE_ACCESSORY;
-	_name           = "RCSwitch";
-	_isEnabled      = HAP_PLUGIN_USE_RCSWITCH;
-	_interval       = HAP_PLUGIN_RCSWITCH_INTERVAL;
+
 	_previousMillis = 0;
 
     _version.major      = VERSION_MAJOR;
@@ -43,6 +42,19 @@ HAPPluginRCSwitch::HAPPluginRCSwitch(){
 
 
     _newDevice  = nullptr;
+
+    _configInternal = new HAPPluginRCSwitchConfig();
+
+    _config = new HAPConfigurationPlugin("RCSwitch", true, HAP_PLUGIN_RCSWITCH_INTERVAL, (uint8_t*)_configInternal, sizeof(HAPPluginRCSwitchConfig) );
+
+	// Callback for PRINT internal config to json
+	_config->setToJsonCallback(std::bind(&HAPPluginRCSwitch::internalConfigToJson, this, std::placeholders::_1));
+}
+
+
+HAPPluginRCSwitch::~HAPPluginRCSwitch(){
+    if (_configInternal != nullptr) delete _configInternal;
+    if (_config != nullptr) delete _config;
 }
 
 
@@ -104,7 +116,7 @@ void HAPPluginRCSwitch::handleImpl(bool forced){
 
 }	
 
-HAPConfigValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
+HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
 
     /*
         {
@@ -121,7 +133,7 @@ HAPConfigValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
      */
 
 
-    HAPConfigValidationResult result;
+    HAPConfigurationValidationResult result;
 
     result = HAPPlugin::validateConfig(object);
     if (result.valid == false) {
@@ -132,7 +144,7 @@ HAPConfigValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
 
        // plugin._name.devices
     if (object.containsKey("devices") && !object["devices"].is<JsonArray>()) {
-        result.reason = "plugins." + _name + ".devices is not an array";
+        result.reason = "plugins." + String(_config->name) + ".devices is not an array";
         return result;
     }
 
@@ -142,68 +154,68 @@ HAPConfigValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
         
         // plugin._name.devices.count.house
         if (!value.containsKey("houseAddress") ) {
-            result.reason = "plugins." + _name + ".devices." + String(count) + ".houseAddress is required";
+            result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".houseAddress is required";
             return result;
         }
         if (value.containsKey("houseAddress") && !value["houseAddress"].is<uint8_t>()) {
-            result.reason = "plugins." + _name + ".devices." + String(count) + ".houseAddress is not an integer";
+            result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".houseAddress is not an integer";
             return result;
         }
 
         // plugin._name.devices.count.device
         if (!value.containsKey("deviceAddress") ) {
-            result.reason = "plugins." + _name + ".devices." + String(count) + ".deviceAddress is required";
+            result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".deviceAddress is required";
             return result;
         }
         if (value.containsKey("deviceAddress") && !value["deviceAddress"].is<uint8_t>()) {
-            result.reason = "plugins." + _name + ".devices." + String(count) + ".deviceAddress is not an integer";
+            result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".deviceAddress is not an integer";
             return result;
         }    
 
         // optional
         // plugin._name.devices.count.name
         if (value.containsKey("name") && !value["name"].is<const char*>()) {
-            result.reason = "plugins." + _name + ".devices." + String(count) + ".name is not a string";
+            result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".name is not a string";
             return result;
         }   
 
         // plugin._name.devices.count.name - length
         if (value.containsKey("name")) {
             if (strlen(value["name"]) + 1 > HAP_STRING_LENGTH_MAX) {
-                result.reason = "plugins." + _name + ".devices." + String(count) + ".name is too long";
+                result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".name is too long";
                 return result;
             } 
         }   
 
         // plugin._name.devices.count.timer
         if (value.containsKey("timer") && !value["timer"].is<JsonObject>() && !value["timer"].isNull()) {
-            result.reason = "plugins." + _name + ".devices.timer is not an object";
+            result.reason = "plugins." + String(_config->name) + ".devices.timer is not an object";
             return result;
         }        
 
         if (value["timer"].containsKey("enabled") && !value["timer"]["enabled"].is<bool>()) {
-            result.reason = "plugins." + _name + ".devices.timer.enabled is not a bool";
+            result.reason = "plugins." + String(_config->name) + ".devices.timer.enabled is not a bool";
             return result;
         }
 
         if (value["timer"].containsKey("days") && !value["timer"]["days"].is<uint32_t>()) {
-            result.reason = "plugins." + _name + ".devices.timer.enabled is not an uint32_t";
+            result.reason = "plugins." + String(_config->name) + ".devices.timer.enabled is not an uint32_t";
             return result;
         }        
 
         if (value["timer"].containsKey("programs") && !value["timer"]["programs"].is<String>()) {
-            result.reason = "plugins." + _name + ".devices.timer.enabled is not a string";
+            result.reason = "plugins." + String(_config->name) + ".devices.timer.enabled is not a string";
             return result;
         }
 
         // const char* data = value["timer"]["programs"].as<const char*>();
         // if ( (data[0] != '0') && (data[1] != '5') && (data[4] != '0') && (data[5] != '0')) {
-        //     result.reason = "plugins." + _name + ".devices.timer.programs is not valid program";
+        //     result.reason = "plugins." + String(_config->name) + ".devices.timer.programs is not valid program";
         //     return result;
         // }
 
         // if ( (data[2] == '0') && (data[3] == '1') ) {
-        //     result.reason = "plugins." + _name + ".devices.timer.programs - program count is 0";
+        //     result.reason = "plugins." + String(_config->name) + ".devices.timer.programs - program count is 0";
         //     return result;
         // }
 
@@ -214,74 +226,74 @@ HAPConfigValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
     return result;
 }
 
-JsonObject HAPPluginRCSwitch::getConfigImpl(){
+// JsonObject HAPPluginRCSwitch::getConfigImpl(){
 
-    LogD(HAPServer::timeString() + " " + _name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+//     LogD(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
-    DynamicJsonDocument doc(2048);
-    JsonArray devices = doc.createNestedArray("devices");
+//     DynamicJsonDocument doc(2048);
+//     JsonArray devices = doc.createNestedArray("devices");
 
-    for (auto& dev : _devices){
-        JsonObject device_ = devices.createNestedObject();
-        device_["houseAddress"]   = dev->houseAddress;
-        device_["deviceAddress"]  = dev->deviceAddress;
-        device_["name"]    = dev->name;     
+//     for (auto& dev : _devices){
+//         JsonObject device_ = devices.createNestedObject();
+//         device_["houseAddress"]   = dev->houseAddress;
+//         device_["deviceAddress"]  = dev->deviceAddress;
+//         device_["name"]    = dev->name;     
 
-        // get schedules
-        if (!dev->scheduleToJson().isNull()){
-            device_["timer"] = dev->scheduleToJson();           
-        }        
-    }
+//         // get schedules
+//         if (!dev->scheduleToJson().isNull()){
+//             device_["timer"] = dev->scheduleToJson();           
+//         }        
+//     }
 
     
-#if HAP_DEBUG_CONFIG
-    serializeJsonPretty(doc, Serial);
-    Serial.println();
-#endif
+// #if HAP_DEBUG_CONFIG
+//     serializeJsonPretty(doc, Serial);
+//     Serial.println();
+// #endif
 
-#if defined(ARDUINO_ARCH_ESP32)	
-	doc.shrinkToFit();
-#endif
-    return doc.as<JsonObject>();
-}
+// #if defined(ARDUINO_ARCH_ESP32)	
+// 	doc.shrinkToFit();
+// #endif
+//     return doc.as<JsonObject>();
+// }
 
-void HAPPluginRCSwitch::setConfigImpl(JsonObject root){
-#if HAP_DEBUG_RCSWITCH   
-    int count = 0;
-#endif
+// void HAPPluginRCSwitch::setConfigImpl(JsonObject root){
+// #if HAP_DEBUG_RCSWITCH   
+//     int count = 0;
+// #endif
 
 
-    if (root.containsKey("devices")){        
-        for (JsonObject dev : root["devices"].as<JsonArray>()) {
+//     if (root.containsKey("devices")){        
+//         for (JsonObject dev : root["devices"].as<JsonArray>()) {
 
-#if HAP_DEBUG_RCSWITCH
-            LogD(" -- device " + String(count) + ": house "     + dev["houseAddress"].as<String>()   , true);                    
-            LogD(" -- device " + String(count) + ": device "    + dev["deviceAddress"].as<String>()        , true);            
-            LogD(" -- device " + String(count) + ": name "      + dev["name"].as<String>()      , true);                        
+// #if HAP_DEBUG_RCSWITCH
+//             LogD(" -- device " + String(count) + ": house "     + dev["houseAddress"].as<String>()   , true);                    
+//             LogD(" -- device " + String(count) + ": device "    + dev["deviceAddress"].as<String>()        , true);            
+//             LogD(" -- device " + String(count) + ": name "      + dev["name"].as<String>()      , true);                        
 
-            count++;
-#endif
+//             count++;
+// #endif
             
-            HAPPluginRCSwitchDevice* newDevice = new HAPPluginRCSwitchDevice(
-                dev["houseAddress"].as<uint8_t>(),
-                dev["deviceAddress"].as<uint8_t>(),
-                dev["name"].as<String>()
-            );
+//             HAPPluginRCSwitchDevice* newDevice = new HAPPluginRCSwitchDevice(
+//                 dev["houseAddress"].as<uint8_t>(),
+//                 dev["deviceAddress"].as<uint8_t>(),
+//                 dev["name"].as<String>()
+//             );
             
-            // set schedules
-            if (dev.containsKey("timer") && !dev["timer"].isNull()) {                
-                newDevice->scheduleFromJson(dev);      
-            }            
+//             // set schedules
+//             if (dev.containsKey("timer") && !dev["timer"].isNull()) {                
+//                 newDevice->scheduleFromJson(dev);      
+//             }            
 
-            int index = indexOfDevice(newDevice);
-            if ( index == -1 ){
-                _devices.push_back(newDevice);                                
-            } else {
-                _devices[index] = newDevice;
-            }         
-        }        
-    }
-}
+//             int index = indexOfDevice(newDevice);
+//             if ( index == -1 ){
+//                 _devices.push_back(newDevice);                                
+//             } else {
+//                 _devices[index] = newDevice;
+//             }         
+//         }        
+//     }
+// }
 
 int HAPPluginRCSwitch::indexOfDevice(HAPPluginRCSwitchDevice* device){
     // Check if element 22 exists in vector
@@ -327,6 +339,71 @@ void HAPPluginRCSwitch::sendDeviceCallback(uint8_t houseAddress_, uint8_t device
 }
 
 
+
+
+HAPConfigurationValidationResult HAPPluginRCSwitch::validateName(const char* name){
+    HAPConfigurationValidationResult result;
+    result.valid = true;
+
+    if (name == 0) {                    
+        result.reason = "The length of the name is 0";
+        result.valid = false;
+    }
+
+    return result;
+}
+
+HAPConfigurationValidationResult HAPPluginRCSwitch::validateHouseAddress(const char* houseAddress){
+    HAPConfigurationValidationResult result;
+    result.valid = true;
+
+    if (strlen(houseAddress) < 5){
+        result.reason = "houseAddress must be 5 digits long!";
+        result.valid = false;
+        return result;
+    }
+
+    for (int i = 0; i < strlen(houseAddress); i++){
+        if ( (houseAddress[i] == '0' ) || ( houseAddress[i] == '1') ) {
+
+        } else {
+            result.reason = "houseAddress must be a binary string!";
+            result.valid = false;
+            return result;
+        }
+    }
+
+    return result;
+}
+
+
+HAPConfigurationValidationResult HAPPluginRCSwitch::validateDeviceAddress(const char* deviceAddress){
+    HAPConfigurationValidationResult result;
+    result.valid = true;
+
+    if (strlen(deviceAddress) < 5){
+        result.reason = "deviceAddress must 5 digits long!";
+        result.valid = false;
+        return result;
+    }
+
+    for (int i = 0; i < strlen(deviceAddress); i++){
+        if ( (deviceAddress[i] == '0' ) || ( deviceAddress[i] == '1') ) {
+
+        } else {
+            result.reason = "deviceAddress must be a binary string!";
+            result.valid = false;
+            return result;
+        }
+    }
+
+    
+    return result;
+}
+
+
+#if HAP_ENABLE_WEBSERVER
+
 void HAPPluginRCSwitch::handleHTTPGet(HTTPRequest * req, HTTPResponse * res){        
     // template processing    
     auto callback = std::bind(&HAPPluginRCSwitch::handleHTTPGetKeyProcessor, this, std::placeholders::_1, std::placeholders::_2);
@@ -343,7 +420,7 @@ void HAPPluginRCSwitch::handleHTTPGet(HTTPRequest * req, HTTPResponse * res){
 
 void HAPPluginRCSwitch::handleHTTPGetKeyProcessor(const String& key, HTTPResponse * res){
     if (key == "VAR_TITLE") {
-        res->print("Plugins - " + _name);
+        res->print("Plugins - " + String(_config->name));
     } else if (key == "VAR_NAVIGATION") {
         res->print(HAPWebServer::buildNavigation());
     } else if (key == "VAR_CONTENT") {        
@@ -388,66 +465,6 @@ void HAPPluginRCSwitch::handleHTTPGetKeyProcessor(const String& key, HTTPRespons
     }
 }
 
-HAPConfigValidationResult HAPPluginRCSwitch::validateName(const char* name){
-    HAPConfigValidationResult result;
-    result.valid = true;
-
-    if (name == 0) {                    
-        result.reason = "The length of the name is 0";
-        result.valid = false;
-    }
-
-    return result;
-}
-
-HAPConfigValidationResult HAPPluginRCSwitch::validateHouseAddress(const char* houseAddress){
-    HAPConfigValidationResult result;
-    result.valid = true;
-
-    if (strlen(houseAddress) < 5){
-        result.reason = "houseAddress must be 5 digits long!";
-        result.valid = false;
-        return result;
-    }
-
-    for (int i = 0; i < strlen(houseAddress); i++){
-        if ( (houseAddress[i] == '0' ) || ( houseAddress[i] == '1') ) {
-
-        } else {
-            result.reason = "houseAddress must be a binary string!";
-            result.valid = false;
-            return result;
-        }
-    }
-
-    return result;
-}
-
-
-HAPConfigValidationResult HAPPluginRCSwitch::validateDeviceAddress(const char* deviceAddress){
-    HAPConfigValidationResult result;
-    result.valid = true;
-
-    if (strlen(deviceAddress) < 5){
-        result.reason = "deviceAddress must 5 digits long!";
-        result.valid = false;
-        return result;
-    }
-
-    for (int i = 0; i < strlen(deviceAddress); i++){
-        if ( (deviceAddress[i] == '0' ) || ( deviceAddress[i] == '1') ) {
-
-        } else {
-            result.reason = "deviceAddress must be a binary string!";
-            result.valid = false;
-            return result;
-        }
-    }
-
-    
-    return result;
-}
-
 void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){    
 
 
@@ -459,7 +476,7 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
             _newDevice = new HAPPluginRCSwitchDevice();
         }
         
-        HAPConfigValidationResult result;
+        HAPConfigurationValidationResult result;
         result.valid = true;
         
         for (auto param : parameters) {
@@ -567,7 +584,7 @@ void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const 
         _newDevice = new HAPPluginRCSwitchDevice();
     }
 
-    HAPConfigValidationResult result;
+    HAPConfigurationValidationResult result;
     result.valid = true;
     
     if (fieldName == "name") {
@@ -599,6 +616,7 @@ void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const 
 }
 
 
+
 std::vector<HAPWebServerPluginNode*> HAPPluginRCSwitch::getResourceNodes(){
     std::vector<HAPWebServerPluginNode*> vector;
 
@@ -612,4 +630,38 @@ std::vector<HAPWebServerPluginNode*> HAPPluginRCSwitch::getResourceNodes(){
     vector.push_back(postRequest);
 
     return vector;
+}
+
+#endif
+
+HAPConfigurationPlugin* HAPPluginRCSwitch::setDefaults(){	
+	_config->enabled  = HAP_PLUGIN_USE_RCSWITCH;
+	_config->interval = HAP_PLUGIN_RCSWITCH_INTERVAL;	
+	_config->dataPtr = (uint8_t*)_configInternal;
+	_config->dataSize = sizeof(_configInternal);
+	return _config;
+}
+
+void HAPPluginRCSwitch::internalConfigToJson(Print& prt){
+	/*
+		{ >>> is already printed before
+			"mode": 1
+		} >>> will be printed after
+	
+	*/
+	// prt.print("\"data\":");
+	prt.print((const char*) _configInternal->data);
+}
+
+void HAPPluginRCSwitch::setConfiguration(HAPConfigurationPlugin* cfg){
+	_config = cfg;	
+	_configInternal = (HAPPluginRCSwitchConfig*)_config->dataPtr;
+	_config->setToJsonCallback(std::bind(&HAPPluginRCSwitch::internalConfigToJson, this, std::placeholders::_1));
+
+	// Serial.print("BME280 interval:");
+	// Serial.println(_config->interval);
+	// Serial.print("BME280 dataSize:");
+	// Serial.println(_config->dataSize);	
+	// Serial.print("BME280 mode:");
+	// Serial.println(_configInternal->mode);	
 }

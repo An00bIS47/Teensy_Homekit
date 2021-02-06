@@ -6,6 +6,7 @@
 //      Author: michael
 //
 
+#if HAP_ENABLE_WEBSERVER
 #include "HAPWebServerTemplateProcessor.hpp"
 
 #if HAP_WEBSERVER_TEMPLATE_PROCESSING_DEBUG	
@@ -310,4 +311,6 @@ void HAPWebServerTemplateProcessor::sendChunk(HTTPResponse * res, const char* me
 	res->print(message);
 	res->print("\r\n");
 }
+#endif
+
 #endif

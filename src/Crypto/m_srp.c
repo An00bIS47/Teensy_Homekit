@@ -52,8 +52,10 @@
 #include "mbedtls/sha512.h"
 
 
-#if ARDUINO_ARCH_ESP32
+#ifdef ARDUINO_ARCH_ESP32
 #include <esp_log.h>
+#else
+#include <avr/pgmspace.h>
 #endif
 
 #include "m_srp.h"
@@ -77,10 +79,10 @@ static mbedtls_mpi * RR;
 static mbedtls_mpi * H_nn( SRP_HashAlgorithm alg, const mbedtls_mpi * n1, const mbedtls_mpi * n2,int do_pad );
 
 
-
-
 /* All constants here were pulled from Appendix A of RFC 5054 */
 static NGHex global_Ng_constants[] = {
+
+ #if HAP_SRP_SUPPORT_ALL_NG_SIZES
  { /* 512 */
   "D66AAFE8E245F9AC245A199F62CE61AB8FA90A4D80C71CD2ADFD0B9DA163B29F2A34AFBDB3B"
   "1B5D0102559CE63D8B6E86B0AA59C14E79D4AA62D1748E4249DF3",
@@ -109,6 +111,7 @@ static NGHex global_Ng_constants[] = {
    "FBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73",
    "2"
  },
+ #endif
  { /* 3072 */
    "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08"
    "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B"
@@ -126,6 +129,7 @@ static NGHex global_Ng_constants[] = {
    "E0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF",
     "5"
  },
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES 
  { /* 4096 */
    "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08"
    "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B"
@@ -188,6 +192,7 @@ static NGHex global_Ng_constants[] = {
    "60C980DD98EDD3DFFFFFFFFFFFFFFFFF",
    "13"
  },
+#endif 
  {0,0} /* null sentinel */
 };
 
@@ -261,9 +266,9 @@ void srp_ng_delete( NGConstant * ng )
    {
       mbedtls_mpi_free( ng->N );
       mbedtls_mpi_free( ng->g );
-      free(ng->N);
-      free(ng->g);
-      free(ng);
+    //   free(ng->N);
+    //   free(ng->g);
+    //   free(ng);
    }
 }
 
@@ -614,6 +619,19 @@ static void calculate_H_AMK( SRP_HashAlgorithm alg, unsigned char *dest, const m
 }
 
 
+void srp_clear()
+{   
+    if (!g_initialized) return;
+
+    mbedtls_entropy_free( &entropy_ctx);
+    mbedtls_ctr_drbg_free( &ctr_drbg_ctx );
+
+    mbedtls_mpi_free(RR);
+    free(RR);
+
+    g_initialized = false;
+}
+
 static void init_random()
 {
     if (g_initialized)
@@ -778,8 +796,6 @@ void srp_create_salted_verification_key1( SRPSession *session,
 		*bytes_s=NULL;
 		 goto cleanup_and_exit;
 	}
-
-
 
     mbedtls_mpi_write_binary( s, (unsigned char *)*bytes_s, len_s );
     mbedtls_mpi_write_binary( v, (unsigned char *)*bytes_v, *len_v );
@@ -1183,7 +1199,7 @@ const unsigned char * srp_user_get_session_key( SRPUser * usr, int * key_length 
 }
 
 
-int                   srp_user_get_session_key_length( SRPUser * usr )
+int srp_user_get_session_key_length( SRPUser * usr )
 {
     return hash_length( usr->hash_alg );
 }

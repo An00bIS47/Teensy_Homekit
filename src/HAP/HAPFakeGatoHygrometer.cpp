@@ -16,7 +16,7 @@ HAPFakeGatoHygrometer::HAPFakeGatoHygrometer(){
 	_previousMillis = 0;
     _isEnabled      = true;
     _name           = "";
-    _memoryUsed     = 0;
+    _memoryUsed     = 1;    // first entry is reserved for reftime
     _requestedEntry = 0;
     
     _refTime        = 0;
@@ -140,7 +140,7 @@ bool HAPFakeGatoHygrometer::addEntry(HAPFakeGatoHygrometerData data){
     Serial.println(_memoryUsed);
 
     for (int i=0; i< HAP_FAKEGATO_BUFFER_SIZE; i++){
-        HAPFakeGatoWeatherData entryData;    
+        HAPFakeGatoHygrometerData entryData;    
         entryData = (*_vectorBuffer)[i];
 
         if (entryData.timestamp == 0) break;
@@ -171,7 +171,7 @@ void HAPFakeGatoHygrometer::getData(const size_t count, uint8_t *data, size_t* l
     Serial.print("GET DATA: _memoryUsed: ");
     Serial.println(_memoryUsed);
     for (int i=0; i< HAP_FAKEGATO_BUFFER_SIZE; i++){
-        HAPFakeGatoWeatherData entryData;    
+        HAPFakeGatoHygrometerData entryData;    
         entryData = (*_vectorBuffer)[i];
 
         if (entryData.timestamp == 0) break;
@@ -215,10 +215,18 @@ void HAPFakeGatoHygrometer::getData(const size_t count, uint8_t *data, size_t* l
         memcpy(data + offset + currentOffset, (uint8_t *)&size, 1);
         currentOffset += 1;
 
-        // ToDo: Rewrite and remove unions
+        
+        // requested Entry
+        _idxRead = incrementIndex(_idxRead);        
+        
+#if HAP_DEBUG_FAKEGATO   
+        Serial.print("SEND questedEntry: ");
+        Serial.println(_requestedEntry);
+#endif 
+        
         ui32_to_ui8 eC;
         eC.ui32 = _requestedEntry++;
-        memcpy(data + offset + currentOffset, eC.ui8, 4);
+        memcpy(data + offset + 1, eC.ui8, 4);
         currentOffset += 4;
 
         ui32_to_ui8 secs;

@@ -39,6 +39,11 @@ String HAPDeviceID::deviceID(){
     return String(baseMacChr);
 }
 
+void HAPDeviceID::deviceID(char baseMacChr[18]){    
+    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
+    baseMacChr[18] = '\0';    
+}
+
 String HAPDeviceID::chipID(){
     char baseMacChr[18];
     sprintf(baseMacChr, "%02X%02X%02X%02X%02X%02X", _deviceID[5], _deviceID[4], _deviceID[3], _deviceID[2], _deviceID[1], _deviceID[0]);

@@ -85,9 +85,7 @@ class HAPDailyTimer{
     // static void update();    
 
 
-
-
-#ifndef HAS_TIMELIB
+#if !defined( CORE_TEENSY) && !defined( HAS_TIMELIB )
     static time_t now();
     static uint8_t weekday(time_t rawtime = 0);
     static uint8_t day(time_t rawtime= 0);

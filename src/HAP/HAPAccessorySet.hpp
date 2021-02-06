@@ -14,7 +14,9 @@
 
 #include "HAPAccessory.hpp"
 #include "HAPCategories.hpp"
-#include "HAPPairings.hpp"
+// #include "HAPPairings.hpp"
+
+#include "HAPConfiguration.hpp"
 
 class HAPAccessorySet {
 public:
@@ -23,15 +25,54 @@ public:
 
 	static uint32_t configurationNumber;
 
-	int aid(){ return _aid; };
+	uint8_t aid(){ return _aid; };
 	void begin();
 	
 	bool isPaired(){
-		return _pairings.size() > 0;
+		return (_configuration->pairings.size() > 0);
 	}
 	
-	HAPPairings* getPairings() {
-		return &_pairings;
+	// HAPPairings* getPairings() {
+	// 	return &_pairings;
+	// }
+
+	uint8_t numberOfPairings(){
+		return _configuration->pairings.size();
+	}
+
+	void setLongTermKeyPair(const uint8_t* LTSK, const uint8_t* LTPK){
+		_configuration->setLongTermKeyPair(LTSK, LTPK);
+		_configuration->save();
+	}
+
+	uint8_t* LTPK() { return _configuration->LTPKPtr(); }
+	uint8_t* LTSK() { return _configuration->LTSKPtr(); }
+
+	uint8_t* getKeyForPairingWithId(const uint8_t* id){
+		return _configuration->getKeyForPairingWithId(id);
+	}
+
+	HAPConfigurationPairingEntry* getPairingAtIndex(uint8_t index){
+		return _configuration->getPairingAtIndex(index);
+	}
+
+	bool pairingIdIsAdmin(const uint8_t* id){
+		return _configuration->isAdmin(id);
+	}
+
+	void addPairing(const uint8_t* id, const uint8_t* key, bool isAdmin){
+		_configuration->addPairing(id, key, isAdmin);
+		_configuration->save();
+	}
+
+	void removePairing(const uint8_t* id){
+		_configuration->removePairing(id);
+		_configuration->save();
+	}
+
+	void removeAllPairings(){
+		_configuration->clearPairings();
+		_configuration->save();
 	}
 
 	uint8_t accessoryType();
@@ -42,43 +83,55 @@ public:
 	const char* setupID();
 	void generateSetupID();
 
-	void setModelName(String name);
+	void setModelName(const char* name);
 	const char* modelName();
-
-	const char* setupHash();
 
 	void setPinCode(const char* pinCode);
 	const char* pinCode();
-	const char* xhm();
 
-	String describe();
+	const char* xhm();
+	const char* setupHash();
+
+	// String describe();
+	void toJson(JsonArray& array);
+
+	void printTo(Print& print);
+
+
 	bool removeAccessory(HAPAccessory *acc);
 	void addAccessory(HAPAccessory *acc);
+	
 	HAPAccessory* accessoryAtIndex(uint8_t index);
 	HAPAccessory* accessoryWithAID(uint8_t aid);
 
-	int32_t getValueForCharacteristics(int aid, int iid, char* out, size_t* outSize);
-	characteristics* getCharacteristics(int aid, int iid);
+	int32_t getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize);
 
-	characteristics* getCharacteristicsOfType(int aid, uint8_t type);
+	HAPCharacteristic* getCharacteristics(uint8_t aid, uint8_t iid);
+	HAPCharacteristic* getCharacteristicsOfType(uint8_t aid, uint16_t type);
 
 	void setIdentifyCharacteristic(bool value);
 
 	uint8_t numberOfAccessory();
 
+	void setConfiguration(HAPConfigurationAccessory* configuration){
+		_configuration = configuration;
+		configurationNumber += _configuration->initConfigNumber;
+	}
+
+
 protected:
 	
-	enum HAP_ACCESSORY_TYPE 	_accessoryType;
+	uint8_t _accessoryType; // enum HAP_ACCESSORY_TYPE
 
 	// Setup ID can be provided, although, per spec, should be random
 	// every time the instance is started. If not provided on init, will be random.
 	// 4 digit string 0-9 A-Z
-	String 		_setupID;
-	String 		_setupHash;
-	String		_xhm;
+	// String 		_setupID;
+	char		_setupHash[9] = {0,};
+	char		_xhm[21] = {0,};
 
-	String 		_modelName;	
-	String 		_pinCode;	// xxx-xx-xxx
+	// String 		_modelName;	
+	// String 		_pinCode;	// xxx-xx-xxx
 
 private:	
 	void computeSetupHash();
@@ -86,12 +139,12 @@ private:
 
 	void generateXMI();
 
-	HAPPairings _pairings;
-	std::vector<HAPAccessory *> _accessories;
-    int _aid = 0;
+	HAPConfigurationAccessory* 	_configuration;
 
-    //AccessorySet(AccessorySet const&);
-    //void operator=(AccessorySet const&);
+	// HAPPairings _pairings;
+	std::vector<HAPAccessory*> _accessories;
+    
+	uint8_t _aid = 0;
 };
 
 #endif /* HAPACCESSORYSET_HPP_ */

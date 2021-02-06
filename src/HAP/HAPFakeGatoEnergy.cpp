@@ -18,7 +18,7 @@ HAPFakeGatoEnergy::HAPFakeGatoEnergy(){
 	_previousMillis = 0;
     _isEnabled      = true;
     _name           = "";
-    _memoryUsed     = 0;
+    _memoryUsed     = 1;    // first entry is reserved for reftime
     _requestedEntry = 0;
     
     _refTime        = 0;
@@ -198,7 +198,6 @@ void HAPFakeGatoEnergy::getData(const size_t count, uint8_t *data, size_t* lengt
         uint8_t size = 10;
         uint8_t currentOffset = 0;
 
-
         // bitmask 0x1F => all			= 11111
         // bitmask 0x01 => watt			= 00001
         // bitmask 0x02 => voltage		= 00010
@@ -217,9 +216,17 @@ void HAPFakeGatoEnergy::getData(const size_t count, uint8_t *data, size_t* lengt
         currentOffset += 1;
 
         // requestedEntry
+        _idxRead = incrementIndex(_idxRead);    
+
+        // requested Entry                
+#if HAP_DEBUG_FAKEGATO   
+        Serial.print("SEND questedEntry: ");
+        Serial.println(_requestedEntry);
+#endif 
         ui32_to_ui8 eC;
         eC.ui32 = _requestedEntry++;
-        memcpy(data + offset + currentOffset, eC.ui8, 4);
+        memcpy(data + offset + 1, eC.ui8, 4);
+
         currentOffset += 4;
 
         // Timeestamp

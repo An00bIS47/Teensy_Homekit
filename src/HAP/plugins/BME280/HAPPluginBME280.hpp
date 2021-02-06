@@ -24,6 +24,7 @@
 #ifndef HAPPLUGINBME280_HPP_
 #define HAPPLUGINBME280_HPP_
 
+
 #include <Arduino.h>
 #include "HAPPlugins.hpp"
 #include "HAPLogger.hpp"
@@ -56,17 +57,19 @@ enum HAP_PLUGIN_BME280_MODE {
 	HAP_PLUGIN_BME280_GAMING 	= 0x03,
 };
 
+struct HAPPluginBME280Config {
+	uint8_t mode = (uint8_t)HAP_PLUGIN_BME280_INDOOR;
+};
+
 class HAPPluginBME280: public HAPPlugin {
 public:
 
 	HAPPluginBME280();
+	~HAPPluginBME280();
 
 	bool begin();
 
-	HAPAccessory* initAccessory() override;
-	
-	void setValue(int iid, String oldValue, String newValue);
-	
+	HAPAccessory* initAccessory() override;	
 
 	void changeTemp(float oldValue, float newValue);
 	void changeHum(float oldValue, float newValue);
@@ -75,26 +78,27 @@ public:
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 
-	HAPConfigValidationResult validateConfig(JsonObject object);
-	JsonObject getConfigImpl();
-	void setConfigImpl(JsonObject root);
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
 	
-private:
+	HAPConfigurationPlugin* setDefaults() override;
+	void internalConfigToJson(Print& prt); 	
+	void setConfiguration(HAPConfigurationPlugin* cfg) override;
+	
+protected:
+	
+ 	struct HAPPluginBME280Config* _configInternal;
+	
 
-	// HAPAccessory*			_accessory;
-	// HAPService*				_temperatureService;
-	// HAPService*				_humidityService;	
+	void setValue(int iid, String oldValue, String newValue);
 
-	floatCharacteristics*	_humidityValue;
-	floatCharacteristics*	_temperatureValue;
-	uint16Characteristics*	_pressureValue;
+	HAPCharacteristicFloat*		_humidityValue;
+	HAPCharacteristicFloat*		_temperatureValue;
+	HAPCharacteristicUInt16*	_pressureValue;
 
 	Adafruit_BME280* _bme;
 
 	bool fakeGatoCallback();
 	HAPFakeGatoWeather _fakegato;
-
-	enum HAP_PLUGIN_BME280_MODE _mode;
 };
 
 REGISTER_PLUGIN(HAPPluginBME280)

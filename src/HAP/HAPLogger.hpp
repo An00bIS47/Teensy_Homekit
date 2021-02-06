@@ -89,11 +89,11 @@ public:
 	static void colorPrint(const char* color, const __FlashStringHelper * text, bool newLine);
 #endif
 
-	static void logError(String str, bool newLine = true);
-	static void logWarning(String str, bool newLine = true);
-	static void logInfo(String str, bool newLine = true);
-	static void logVerbose(String str, bool newLine = true);
-	static void logDebug(String str, bool newLine = true);
+	static void logError(const String &str, bool newLine = true);
+	static void logWarning(const String &str, bool newLine = true);
+	static void logInfo(const String &str, bool newLine = true);
+	static void logVerbose(const String &str, bool newLine = true);
+	static void logDebug(const String &str, bool newLine = true);
 
 	static void logDebug(uint8_t str, bool newLine);
 

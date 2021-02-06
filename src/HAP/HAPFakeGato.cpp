@@ -28,7 +28,8 @@ HAPFakeGato::HAPFakeGato() {
     
     _rolledOver = false;
 
-    _memoryUsed = 0;    // last physical memory position occupied
+    _memoryUsed = 1;    // last physical memory position occupied
+                        // First entry is reserved for refTime
 
     _idxWrite = 0;      // Write index
     _idxRead = 0;       // Read index
@@ -43,16 +44,18 @@ HAPFakeGato::HAPFakeGato() {
     _transfer = false;
     _interval = 0; 
     _previousMillis = 0;
-
-
-    
 }
 
+
 HAPFakeGato::~HAPFakeGato(){
-    // if (_schedule != nullptr) {
-    //     _schedule->clear();
-    //     delete _schedule;
-    // }
+    if (_s2r1Characteristics != nullptr) delete _s2r1Characteristics;
+    if (_s2r2Characteristics != nullptr) delete _s2r2Characteristics;
+    if (_s2w1Characteristics != nullptr) delete _s2w1Characteristics;
+    if (_s2w2Characteristics != nullptr) delete _s2w2Characteristics;
+
+    if (_configReadCharacteristics != nullptr) delete _configReadCharacteristics;
+    if (_configWriteCharacteristics != nullptr) delete _configWriteCharacteristics;
+        
 }
 
 
@@ -60,56 +63,62 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
         
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    
     
-    stringCharacteristics *accNameCha = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, 32);
-    accNameCha->setValue("EVE " + name + " History");
+    HAPCharacteristicString *accNameCha = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    accNameCha->setValue(name + " History");
     accessory->addCharacteristics(fgService, accNameCha);
 
     // S2R1 Char
-    _s2r1Characteristics = new dataCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, permission_read|permission_notify|permission_hidden, 128);    
+    // _s2r1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, permission_read|permission_notify|permission_hidden, 128);    
+    _s2r1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, permission_read|permission_notify, 128);    
     auto callbackS2R1 = std::bind(&HAPFakeGato::setS2R1Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
-    _s2r1Characteristics->setDescription("History Status");
+    _s2r1Characteristics->setDescription("EVE History Status");
     _s2r1Characteristics->setValue((char*)NULL);    
     _s2r1Characteristics->valueChangeFunctionCall = callbackS2R1;
     accessory->addCharacteristics(fgService, _s2r1Characteristics);
 
     // S2R2 Char
-    _s2r2Characteristics = new dataCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, permission_read|permission_notify|permission_hidden, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+    // _s2r2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, permission_read|permission_notify|permission_hidden, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+    _s2r2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, permission_read|permission_notify, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
     auto callbackS2R2 = std::bind(&HAPFakeGato::setS2R2Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
-    _s2r2Characteristics->setDescription("History Entries");
+    _s2r2Characteristics->setDescription("EVE History Entries");
     _s2r2Characteristics->setValue((char*)NULL);
     _s2r2Characteristics->valueChangeFunctionCall = callbackS2R2;    
 
     auto callbackGetS2R2 = std::bind(&HAPFakeGato::getS2R2Callback, this);            
-    _s2r2Characteristics->valueGetCallback = callbackGetS2R2;
+    _s2r2Characteristics->valueGetFunctionCall = callbackGetS2R2;
 
     accessory->addCharacteristics(fgService, _s2r2Characteristics);
 
     // S2W1 Char
-    _s2w1Characteristics = new dataCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, permission_write|permission_hidden, 128);
+    // _s2w1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, permission_write|permission_hidden, 128);
+    _s2w1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, permission_write, 128);
     auto callbackS2W1 = std::bind(&HAPFakeGato::setS2W1Characteristics, this, std::placeholders::_1, std::placeholders::_2);        
-    _s2w1Characteristics->setDescription("History Request");
+    _s2w1Characteristics->setDescription("EVE History Request");
     _s2w1Characteristics->valueChangeFunctionCall = callbackS2W1;
     accessory->addCharacteristics(fgService, _s2w1Characteristics);
 
     // S2W2 Char
-    _s2w2Characteristics = new dataCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, permission_write|permission_hidden, 128);
+    // _s2w2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, permission_write|permission_hidden, 128);
+    _s2w2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, permission_write, 128);
     auto callbackS2W2 = std::bind(&HAPFakeGato::setS2W2Characteristics, this, std::placeholders::_1, std::placeholders::_2);        
     _s2w2Characteristics->valueChangeFunctionCall = callbackS2W2;
-    _s2w2Characteristics->setDescription("SetTime");
+    _s2w2Characteristics->setDescription("EVE SetTime");
     accessory->addCharacteristics(fgService, _s2w2Characteristics);
     
 
     if (withSchedule){
         
-        _configReadCharacteristics = new dataCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, permission_read|permission_hidden, 512);
-        _configReadCharacteristics->setDescription("Schedule Read");
+        // _configReadCharacteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, permission_read|permission_notify|permission_hidden, 512);
+        _configReadCharacteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, permission_read|permission_notify, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+        _configReadCharacteristics->setDescription("EVE Schedule Read");
         auto callbackConfigRead = std::bind(&HAPFakeGato::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);        
         _configReadCharacteristics->valueChangeFunctionCall = callbackConfigRead;
         accessory->addCharacteristics(fgService, _configReadCharacteristics);
 
 
-        _configWriteCharacteristics = new dataCharacteristics(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, permission_write|permission_hidden, 256);
-        _configWriteCharacteristics->setDescription("Schedule Write");
+        // _configWriteCharacteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, permission_write|permission_hidden, 256);
+        _configWriteCharacteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, permission_write, 256);
+        _configWriteCharacteristics->setDescription("EVE Schedule Write");
         auto callbackConfigWrite = std::bind(&HAPFakeGato::scheduleWrite, this, std::placeholders::_1, std::placeholders::_2);        
         _configWriteCharacteristics->valueChangeFunctionCall = callbackConfigWrite;
         accessory->addCharacteristics(fgService, _configWriteCharacteristics);
@@ -282,7 +291,14 @@ void HAPFakeGato::getS2R2Callback(){
         uint8_t data[HAP_FAKEGATO_CHUNK_BUFFER_SIZE];
         uint16_t offset = 0;
         uint8_t chunksize = HAP_FAKEGATO_CHUNK_SIZE;
-        size_t len = 0;               
+        size_t len = 0; 
+
+        if (_requestedEntry == 1){
+            getRefTime(data, &len, 0);
+            offset += len;
+            len = 0;
+        }
+        
         
         getData(chunksize, data, &len, offset);
 
@@ -299,7 +315,7 @@ void HAPFakeGato::getS2R2Callback(){
         
         _s2r2Characteristics->setValue(String(encodedChr));  
 #endif
-
+        _transfer = false;
         // LogE("Number of entries sent (total): " + String(_noOfEntriesSent), true); 
     } else {
 #if HAP_DEBUG_FAKEGATO
@@ -339,6 +355,7 @@ void HAPFakeGato::setS2W1Characteristics(String oldValue, String newValue){
     LogD(HAPServer::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W1 iid " + String(_s2w1Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
     
     size_t outputLength = 0;   
+    // Serial.println(newValue);
 
     mbedtls_base64_decode(NULL, 0, &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
     uint8_t decoded[outputLength];
@@ -364,10 +381,13 @@ void HAPFakeGato::setS2W1Characteristics(String oldValue, String newValue){
     HAPHelper::array_print("S2W1 address",  address.ui8, 4);
 #endif    
     _requestedEntry = tmp.ui32;
+    _idxRead = _requestedEntry - 1;
 
-#if HAP_DEBUG_FAKEGATO
+#if HAP_DEBUG
     Serial.print("_requestedEntry: ");
     Serial.print(_requestedEntry);
+    Serial.print(" _idxRead: ");
+    Serial.println(_idxRead);
 #endif
 
     // LogE("REQUESTED ENTRY: " + String(_requestedEntry) + " - ALREADY SENT: " +  String(_noOfEntriesSent), true);
@@ -379,34 +399,37 @@ void HAPFakeGato::setS2W1Characteristics(String oldValue, String newValue){
 // #endif        
 
 //     } else 
-    if (_requestedEntry == 0 ) { //|| _requestedEntry == 1) {
-        // set reftime as first entry
-#if HAP_DEBUG_FAKEGATO        
-        Serial.println("_requestedEntry == 0 - > Set Reftime as only entry");
-#endif           
-        uint8_t data[22];
-        size_t len = 0;
-        getRefTime(data, &len, 0);
+//     if (_requestedEntry == 1 ) { //|| _requestedEntry == 1) {
+//         // set reftime as first entry
+// #if HAP_DEBUG_FAKEGATO        
+//         Serial.println("_requestedEntry == 0 - > Set Reftime as only entry");
+// #endif           
+//         uint8_t data[22];
+//         size_t len = 0;
+//         getRefTime(data, &len, 0);
 
-#if defined(ARDUINO_ARCH_ESP32)
-        _s2r2Characteristics->setValue(base64::encode(data, len));  
-#elif defined(CORE_TEENSY)
-        int encodedLen = base64_enc_len(len);
-        char encodedChr[encodedLen];
-        base64_encode(encodedChr, (char*)data, len);
+// #if defined(ARDUINO_ARCH_ESP32)
+//         _s2r2Characteristics->setValue(base64::encode(data, len));  
+// #elif defined(CORE_TEENSY)
+//         int encodedLen = base64_enc_len(len);
+//         char encodedChr[encodedLen];
+//         base64_encode(encodedChr, (char*)data, len);
         
-        _s2r2Characteristics->setValue(String(encodedChr));  
-#endif
+//         _s2r2Characteristics->setValue(String(encodedChr));  
+// #endif
 
 
-    } else {        
-        // set the data entries in S2R2 char for EVE.app   
-#if HAP_DEBUG_FAKEGATO           
-        Serial.println(" - > Set entries data");
-#endif        
-        _transfer = true;
-        getS2R2Callback();   
-    }
+//     } else {       
+//         // set the data entries in S2R2 char for EVE.app   
+// #if HAP_DEBUG_FAKEGATO           
+//         Serial.println(" - > Set entries data");
+// #endif        
+//         _transfer = true;
+//         getS2R2Callback();   
+//     }
+
+    _transfer = true;
+    //getS2R2Callback(); // Is now done in HAPServer getCharacteristic
 }
 
 /**

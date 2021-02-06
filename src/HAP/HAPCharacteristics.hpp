@@ -9,6 +9,19 @@
 #define HAPCHARACTERISTICS_HPP_
 
 #include <Arduino.h>
+#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicsBluetooth.hpp"
+
+#include "HAPCharacteristicBool.hpp"
+#include "HAPCharacteristicData.hpp"
+#include "HAPCharacteristicFloat.hpp"
+#include "HAPCharacteristicInt.hpp"
+#include "HAPCharacteristicString.hpp"
+#include "HAPCharacteristicUInt8.hpp"
+#include "HAPCharacteristicUInt16.hpp"
+#include "HAPCharacteristicUInt32.hpp"
+#include "HAPCharacteristicUInt64.hpp"
+
 
 typedef enum {
     HAP_CHARACTERISTIC_ACCESSORY_FLAGS                          = 0xA6,     //    uint32      pr|ev       
@@ -139,7 +152,7 @@ typedef enum {
 } HAP_CHARACTERISTIC;
 
 
-inline const char* characteristicsName(int type){
+inline const char* characteristicsName(uint16_t type){
     switch(type) {
         case HAP_CHARACTERISTIC_ACCESSORY_FLAGS:                          // 0xA6     ==   166
             return "AccessoryFlags";

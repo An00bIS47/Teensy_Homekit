@@ -13,19 +13,26 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
-#include <DNSServer.h>
+
 #include <functional>
 #include <vector>
 
-#include "HTTPServer.hpp"
-#include "HAPGlobals.hpp"
-#include "HAPConfig.hpp"
 
-#if HAP_PIXEL_INDICATOR_ENABLED
+#include "HAPGlobals.hpp"
+#include "HAPConfiguration.hpp"
+
+#if HAP_ENABLE_PIXEL_INDICATOR
 #include "HAPIndicatorPixelColors.hpp"
 #endif
 
+#if HAP_ENABLE_WEBSERVER
+#include <DNSServer.h>
+#include "HTTPServer.hpp"
 using namespace httpsserver;
+#endif
+
+
+
 
 enum HAP_WIFI_MODE {
 	HAP_WIFI_MODE_AP 			= 0x00,		// 0
@@ -43,7 +50,7 @@ public:
 	HAPWiFiHelper();
 	~HAPWiFiHelper();
 
-	static void begin(HAPConfig* config, std::function<bool(bool)> callbackBegin, const char* hostname);	
+	static void begin(HAPConfigurationWiFi* config, std::function<bool(bool)> callbackBegin, const char* hostname);	
 	static void connect(enum HAP_WIFI_MODE mode);	
 
 	static bool captiveInitialized();
@@ -53,7 +60,7 @@ public:
 		return _isProvisioned;
 	}
 
-#if HAP_PIXEL_INDICATOR_ENABLED
+#if HAP_ENABLE_PIXEL_INDICATOR
 	// static uint32_t getColorForMode(enum HAP_WIFI_MODE mode);
 	// static RgbColor getColorForMode(enum HAP_WIFI_MODE mode);
 	static CRGB getColorForMode(enum HAP_WIFI_MODE mode);
@@ -72,23 +79,29 @@ private:
 #endif
 
 	static void startWPS();
+	static void connectMulti();
+
+#if HAP_ENABLE_WEBSERVER
 	static void startCaptivePortal();
 	static void stopCaptivePortal();
-	static void connectMulti();
+	
+	static HTTPServer* _webserver;
+	static DNSServer* _dnsServer;
 
 	static void handleRootGet(HTTPRequest * req, HTTPResponse * res);
 	static void handleRootPost(HTTPRequest * req, HTTPResponse * res);
 	static void rootKeyProcessor(const String& key, HTTPResponse * res);
+#endif
 
 	static esp_wps_config_t _wpsConfig;
 
 	static WiFiMulti _wifiMulti;
 	static enum HAP_WIFI_MODE _mode;
-	static HAPConfig* _config;
+	static HAPConfigurationWiFi* _config;
 
 	static uint8_t _errorCount;
-	static DNSServer* _dnsServer;
-	static HTTPServer* _webserver;
+	
+	
 
 	static bool _captiveInitialized;
 	static bool _isProvisioned;

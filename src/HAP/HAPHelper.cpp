@@ -253,9 +253,9 @@ void HAPHelper::array_print(const char* tag, const unsigned char* buf, int len)
 void HAPHelper::mpi_print(const char* tag, const mbedtls_mpi* x)
 {
     int len_x = mbedtls_mpi_size(x);
-    unsigned char* num = (unsigned char*) malloc(sizeof(unsigned char) * len_x);
+    uint8_t* num = (uint8_t*) malloc(sizeof(uint8_t) * len_x);
     mbedtls_mpi_write_binary(x, num, len_x);
-	HAPHelper::array_print(tag,num,len_x);
+	HAPHelper::array_print(tag, num, len_x);
     free(num);
 }
 
@@ -364,5 +364,18 @@ bool HAPHelper::isValidNumber(String str){
    return isNum;
 }
 
+void HAPHelper::printHex(const char* suffix, const uint8_t *data, size_t length, bool newline)
+{
+    Serial.print(suffix);
+    for (size_t i = 0; i < length; i++) {
+        if (data[i] < 0x10) { Serial.print("0"); }
+        Serial.print(data[i], HEX);
+        Serial.print(" ");
+    }
+    if (newline)
+    {
+        Serial.println();
+    }
+}
 
 

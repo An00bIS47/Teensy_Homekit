@@ -30,25 +30,22 @@ public:
 	
 	void setValue(int iid, String oldValue, String newValue);	
 	
-
 	void changeHum(float oldValue, float newValue);
-
-
-
 
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 	
-	HAPConfigValidationResult validateConfig(JsonObject object);
-	JsonObject getConfigImpl();
-	void setConfigImpl(JsonObject root);
-	// void handleEvents(int eventCode, struct HAPEvent eventParam);
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
+
+	HAPConfigurationPlugin* setDefaults();
+
 private:
 
-	floatCharacteristics*	_humidityValue;
+
+	HAPCharacteristicFloat*	_humidityValue;
 
 #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
-	uint8Characteristics*	_leakSensor;	
+	HAPCharacteristicUInt8*	_leakSensor;	
 #endif
 
 	bool _leakSensorEnabled;
@@ -58,7 +55,6 @@ private:
 	HAPFakeGatoHygrometer _fakegato;
 
     uint16_t readSensor();
-
 };
 
 REGISTER_PLUGIN(HAPPluginHygrometer)

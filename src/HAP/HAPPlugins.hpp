@@ -27,8 +27,7 @@
 
 #include "EventManager.h"
 
-#include "HAPConfig.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPConfiguration.hpp"
 #include "HAPCharacteristics.hpp"
 #include "HAPServices.hpp"
 
@@ -38,9 +37,13 @@
 
 
 #if defined(ARDUINO_ARCH_ESP32)
+
+#if HAP_ENABLE_WEBSERVER
 #include <HTTPRequest.hpp>
 #include <HTTPResponse.hpp>
 using namespace httpsserver;
+#endif
+
 #endif
 
 
@@ -52,7 +55,8 @@ enum HAP_PLUGIN_TYPE {
 	HAP_PLUGIN_TYPE_DISPLAY
 };
 
-#if defined(ARDUINO_ARCH_ESP32)
+
+#if HAP_ENABLE_WEBSERVER
 struct HAPWebServerPluginNode {			
 	std::string	name;
 	std::string	path;
@@ -61,6 +65,7 @@ struct HAPWebServerPluginNode {
 
 	HAPWebServerPluginNode(const std::string &name_, const std::string &path_, const std::string &method_, std::function<void(HTTPRequest*, HTTPResponse*)> callback_) : name(name_), path(path_), method(method_), callback(callback_) {};
 };
+
 #endif
 
 /* Base class for plugins */
@@ -72,19 +77,34 @@ public:
 	virtual HAPAccessory* initAccessory() = 0;
 	virtual bool begin() = 0;
 
-	virtual JsonObject getConfigImpl() = 0;
-	virtual void setConfigImpl(JsonObject root) = 0;
+	virtual JsonObject getConfigImpl() __attribute__ ((deprecated)) { DynamicJsonDocument doc(1); return doc.as<JsonObject>();};	
+	virtual void setConfigImpl(JsonObject root) __attribute__ ((deprecated)) {};	
 
 	virtual void handleImpl(bool forced = false) = 0;
 
-#if defined(ARDUINO_ARCH_ESP32)
+	virtual void setConfiguration(HAPConfigurationPlugin* cfg){
+		_config = cfg;	
+	}
+
+	virtual HAPConfigurationPlugin* setDefaults(); // = 0;
+
+	virtual void internalConfigToJson(Print& prt) {};
+	
+	void configToJson(Print& prt){
+		_config->toJson(prt);
+	}
+
+
+
+#if HAP_ENABLE_WEBSERVER
 	virtual std::vector<HAPWebServerPluginNode*> getResourceNodes() {
 		return {};
 	}
-#endif
+#endif	
 
-	virtual void stop()  { _isEnabled = false; };
-	virtual void start() { _isEnabled = true;  };
+
+	virtual void stop()  { enable(false); };
+	virtual void start() { enable(true);  };
 	
 
 	virtual void identify(bool oldValue, bool newValue) {
@@ -100,35 +120,35 @@ public:
 
 	// virtual HAPConfigValidationResult validateConfigImpl(JsonObject object) = 0;
 
-	virtual HAPConfigValidationResult validateConfig(JsonObject object){	
+	virtual HAPConfigurationValidationResult validateConfig(JsonObject object){	
 
 		// LogD(String(__PRETTY_FUNCTION__), true);
 
-		HAPConfigValidationResult result;
+		HAPConfigurationValidationResult result;
 		result.valid = false;
 
 		// ToDo: Should validation be only for enabled plugins?		
 		// plugin._name.enabled
 		if (!object.containsKey("enabled")){
-			result.reason = "plugins." + _name + ".enabled is required";
+			result.reason = "plugins." + name() + ".enabled is required";
 			LogW("Config validation failed: " + result.reason, true);
 			return result;
 		}
 		if (object.containsKey("enabled") && !object["enabled"].is<bool>()) {
-			result.reason = "plugins." + _name + ".enabled is not a bool";
+			result.reason = "plugins." + name() + ".enabled is not a bool";
 			LogW("Config validation failed: " + result.reason, true);
 			return result;
 		}
 		
 		// plugin._name.interval
 		if (!object.containsKey("interval")){
-			result.reason = "plugins." + _name + ".interval is required";
+			result.reason = "plugins." + name() + ".interval is required";
 			LogW("Config validation failed: " + result.reason, true);
 			return result;
 		}
 
 		if (object.containsKey("interval") && !object["interval"].is<uint32_t>()) {
-			result.reason = "plugins." + _name + ".interval is not an integer";
+			result.reason = "plugins." + name() + ".interval is not an integer";
 			LogW("Config validation failed: " + result.reason, true);
 			return result;
 		}
@@ -139,8 +159,7 @@ public:
 	}
 
 
-
-	virtual void setConfig(JsonObject root){
+	virtual void setConfig(JsonObject root)  __attribute__ ((deprecated)) {
 
 		// LogD(String(__PRETTY_FUNCTION__), true);
 
@@ -159,7 +178,7 @@ public:
 		// LogD("OK", true);
 	}
 
-	virtual JsonObject getConfig(){	
+	virtual JsonObject getConfig()  __attribute__ ((deprecated)) {	
 		// LogD(String(__PRETTY_FUNCTION__), true);
 
 		const size_t capacity = 2048;
@@ -168,7 +187,7 @@ public:
     	doc["enabled"] = isEnabled();
     	doc["interval"] = interval();	
 
-		DynamicJsonDocument pluginDoc(1024);
+		DynamicJsonDocument pluginDoc(1800);
 		pluginDoc = getConfigImpl();		
 
 		HAPHelper::mergeJson(doc, pluginDoc.as<JsonObject>());
@@ -185,31 +204,31 @@ public:
 	}
 
 	inline String name(){
-		return _name;
+		return _config->name;
 	}
 
 	inline bool isEnabled(){
-		return _isEnabled;
+		return _config->enabled;
 	}
 
 	inline void enable(bool mode){
-		_isEnabled = mode;
+		_config->enabled = mode;
 	}
 
 	inline unsigned long interval(){
-		return _interval;
+		return _config->interval;
 	}	
 
 	inline void setInterval(unsigned long interval){
-		_interval = interval;
+		_config->interval = interval;
 	}
 
 	inline bool shouldHandle(){
 
-		if (_isEnabled) {
+		if (isEnabled()) {
 			unsigned long currentMillis = millis(); // grab current time
 
-			if ((unsigned long)(currentMillis - _previousMillis) >= _interval) {
+			if ((unsigned long)(currentMillis - _previousMillis) >= interval()) {
 
 				// save the last time you blinked the LED
 				_previousMillis = currentMillis;
@@ -239,33 +258,38 @@ public:
 		_accessorySet = accessorySet;
 	}	
 
-
+	inline HAPConfigurationPlugin* getConfiguration() { 
+		return _config; 
+	}
 
 	inline void setFakeGatoFactory(HAPFakeGatoFactory* fakeGatoFactory){
 		_fakeGatoFactory = fakeGatoFactory;
 	}
 
-	inline void registerFakeGato(HAPFakeGato* fakegato, String name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
+	inline void registerFakeGato(HAPFakeGato* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
 		_fakeGatoFactory->registerFakeGato(fakegato, name, callback, interval);
 	}
+
+	
 
 protected:
 	enum HAP_PLUGIN_TYPE 		_type;
 	unsigned long 				_previousMillis;
 	HAPVersion 					_version;
 
-	String 						_name;
-	bool 						_isEnabled;
-	unsigned long 				_interval;
+	// String 						_name;
+	// bool 						_isEnabled;
+	// unsigned long 				_interval;
 	
 	HAPAccessory*				_accessory;
-
 	EventManager*				_eventManager;
 	HAPAccessorySet*			_accessorySet;
 	
 	MemberFunctionCallable<HAPPlugin> _listenerMemberFunctionPlugin;
 	
 	HAPFakeGatoFactory*			_fakeGatoFactory;	
+
+	HAPConfigurationPlugin*		_config;
 };
 
 	/* 
