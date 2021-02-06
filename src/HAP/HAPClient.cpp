@@ -361,7 +361,7 @@ void HAPClient::setHeader(const String& name, const String& value) {
 
 
 #if HAP_API_ADMIN_MODE
-
+// ToDo: Replace with streaming method
 String HAPClient::describe() const {
 	
 	String keys[4];
@@ -404,31 +404,31 @@ String HAPClient::statusMessage(int statusCode){
 
 	switch(statusCode) {
         case 200:                        
-            return "OK";
+            return F("OK");
 		case 201:                        
-            return "Created";	
+            return F("Created");	
 		case 202:                        
-            return "Accepted";			
+            return F("Accepted");			
 		case 204:                        
-            return "No Content";					
+            return F("No Content");	
 		case 400:
-			return "Bad Request";
+			return F("Bad Request");
 		case 401:
-			return "Unauthorized";	
+			return F("Unauthorized");	
 		case 403:
-			return "Forbidden";			
+			return F("Forbidden");			
 		case 404:
-			return "Not Found";		
+			return F("Not Found");		
 		case 405:
-			return "Method not allowed";	
+			return F("Method not allowed");	
 		case 409:
-			return "Conflict";		
+			return F("Conflict");		
 		case 413:
-			return "Payload too large";
+			return F("Payload too large");
 		case 420:
-			return "Enhance your calm";	
+			return F("Enhance your calm");	
 		default:
-			return "";											
+			return F("");
 	}
 }
 

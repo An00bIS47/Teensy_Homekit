@@ -1382,14 +1382,12 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 			break;
 		case HAP_CLIENT_STATE_AVAILABLE:
 #if defined( ARDUINO_ARCH_ESP32 )		
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] available", true );
+			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] available: " + String(hapClient->client.available()), true );
 #elif defined( CORE_TEENSY )		
 			LogD( ">>> client [", false);
 			Serial.print(hapClient->client.remoteIP());
-			LogD("] available", true);
+			LogD("] available: " + String(hapClient->client.available()), true);
 #endif
-			LogD( String(hapClient->client.available()), true );
-
 			handleClientAvailable(hapClient);
 
 			break;
@@ -1443,20 +1441,32 @@ void HAPServer::handleAllPairingsRemoved(){
 void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 	_curLine = "";
 	
-	LogD(F("<<< Handle client available"), true);
+	LogD(F("<<< Handle client available [enrypted:") + String(hapClient->isEncrypted()) + "]" , true);
+
 	
 	while ( hapClient->client.available() ) {
+		// Serial.print("AVAILBALE: ");
+		// Serial.println(hapClient->client.available());
+
+		delay(1);
+
+#if defined(CORE_TEENSY)		
+		Serial.print("_curLine: *");
+		Serial.print(_curLine);
+		Serial.println("*");	
+		delay(1);	
+#endif
 
 		if (hapClient->isEncrypted()) {
 			processIncomingEncryptedRequest( hapClient );	
 		} else {
 			processIncomingRequest( hapClient );	
-		}
-		
-		delay(1);
+		}				
 	}
 
-#if HAP_DEBUG
+	Serial.println(">>>>>>>>>>>>>>> END REQUEST <<<<<<<<<<<<<<<<<<<<");
+
+#if HAP_DEBUG_HOMEKIT
 	if (_curLine != "")
 		LogD(_curLine, true);
 #endif
@@ -1512,10 +1522,10 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient){
 		int availableSize = hapClient->client.available() - HAP_ENCRYPTION_HMAC_SIZE;	// 16 is the size of the HMAC
 		// LogD("\nNeed " + String(trueLength) + " bytes and have " + String(availableSize) + " bytes", true);
 				
-		while (trueLength > availableSize){			
-			// The packet is bigger than the available data; wait till more comes in
-			delay(1);
-		}
+		// while (trueLength > availableSize){			
+		// 	// The packet is bigger than the available data; wait till more comes in
+		// 	delay(1);
+		// }
 
 	    
 
@@ -1740,140 +1750,142 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 
 
 void HAPServer::processIncomingRequest(HAPClient* hapClient){
+	
+	// while(hapClient->client.available()){
 
+		const byte b = hapClient->client.read();
 
-
-	const byte b = hapClient->client.read();
-
-	if ( (char) b == '\n' ) {
-		// if the current line is blank, you got two newline characters in a row.
-		// that's the end of the client HTTP request, so send a response:
-		if (_curLine.length() == 0) {
+		if ( (char) b == '\n' ) {
+			// if the current line is blank, you got two newline characters in a row.
+			// that's the end of the client HTTP request, so send a response:
+			if (_curLine.length() == 0) {
 
 
 #if HAP_DEBUG_HOMEKIT
-			// Handle data
-			LogD( F("request: "), false);
-			LogD(hapClient->request.toString(), true);
+				// Handle data
+				LogD( F("request: "), false);
+				LogD(hapClient->request.toString(), true);
 #endif
 
-			// /identify
-			if ( (hapClient->request.path == "/identify") && (hapClient->request.method == METHOD_POST) ) {
-				handleIdentify(hapClient);
-				hapClient->state = HAP_CLIENT_STATE_IDLE;
-			}
+				// /identify
+				if ( (hapClient->request.path == "/identify") && (hapClient->request.method == METHOD_POST) ) {
+					handleIdentify(hapClient);
+					hapClient->state = HAP_CLIENT_STATE_IDLE;
+				}
 
-			// has content
-			else if ( hapClient->request.contentLength > 0) {
-				// encode tlv8
-				if ( hapClient->request.contentType == "application/pairing+tlv8" )  {
+				// has content
+				else if ( hapClient->request.contentLength > 0) {
+					// encode tlv8
+					if ( hapClient->request.contentType == "application/pairing+tlv8" )  {
 
 
-					if ( !encode(hapClient) ) {
-						LogE( "ERROR: Decoding pairing request failed!", true);
+						if ( !encode(hapClient) ) {
+							LogE( "ERROR: Decoding pairing request failed!", true);
 
-						sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_UNKNOWN);
-						return;
-					}
+							sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_UNKNOWN);
+							return;
+						}
 
-					
-					// pair-setup M1
-					if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M1) ) {
+						
+						// pair-setup M1
+						if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M1) ) {
 
 
 #if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0
 
-						if (_accessorySet->isPaired() == true) {
-							// accessory is already paired
-							LogE( "ERROR: Accessory is already paired!", true);						
-							sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_AUTHENTICATON);
-							return;
-						} else if (_isInPairingMode == true) {
-							// accessory is in pairing mode
-							sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_BUSY);
-							return;								
-						} else if (_homekitFailedLoginAttempts >= 100) {
-							// accessory has more than 100 failed attempts
-							sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_MAX_TRIES);
-							return;								
-						} else {
+							if (_accessorySet->isPaired() == true) {
+								// accessory is already paired
+								LogE( "ERROR: Accessory is already paired!", true);						
+								sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_AUTHENTICATON);
+								return;
+							} else if (_isInPairingMode == true) {
+								// accessory is in pairing mode
+								sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_BUSY);
+								return;								
+							} else if (_homekitFailedLoginAttempts >= 100) {
+								// accessory has more than 100 failed attempts
+								sendErrorTLV(hapClient, HAP_PAIR_STATE_M2, HAP_ERROR_MAX_TRIES);
+								return;								
+							} else {
 #endif							
-							if (!handlePairSetupM1( hapClient ) ) {
-								LogE( "ERROR: Pair-setup failed at M1!", true);
+								if (!handlePairSetupM1( hapClient ) ) {
+									LogE( "ERROR: Pair-setup failed at M1!", true);
+									
+									hapClient->clear();
+									hapClient->client.stop();
+									stopEvents(false);
+
+									hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 								
-								hapClient->clear();
+								}
+#if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0							
+							}
+#endif							
+						}
+
+						// pair-setup M3
+						else if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M3) ) {
+							if (!handlePairSetupM3( hapClient ) ) {
+								LogE( "ERROR: Pair-setup failed at M3!", true);
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->client.stop();
+
+								stopEvents(false);
+							}
+						}
+
+						// pair-setup M5
+						else if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M5) ) {
+							if ( !handlePairSetupM5( hapClient ) ) {
+								LogE( "ERROR: Pair-setup failed at M5!", true);
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 								hapClient->client.stop();
 								stopEvents(false);
-
-								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-							
 							}
-#if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0							
 						}
-#endif							
-					}
 
-					// pair-setup M3
-					else if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M3) ) {
-						if (!handlePairSetupM3( hapClient ) ) {
-							LogE( "ERROR: Pair-setup failed at M3!", true);
-							hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-							hapClient->client.stop();
-
-							stopEvents(false);
+						// pair-verify M1
+						if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M1) ) {
+							if ( !handlePairVerifyM1( hapClient ) ) {
+								LogE( "ERROR: Pair-verify failed at M1!", true);
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->client.stop();
+								stopEvents(false);
+							}
 						}
-					}
 
-					// pair-setup M5
-					else if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M5) ) {
-						if ( !handlePairSetupM5( hapClient ) ) {
-							LogE( "ERROR: Pair-setup failed at M5!", true);
-							hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-							hapClient->client.stop();
-							stopEvents(false);
-						}
-					}
-
-					// pair-verify M1
-					if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M1) ) {
-						if ( !handlePairVerifyM1( hapClient ) ) {
-							LogE( "ERROR: Pair-verify failed at M1!", true);
-							hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-							hapClient->client.stop();
-							stopEvents(false);
-						}
-					}
-
-					// pair-verify M3
-					else if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M3) ) {
-						if ( !handlePairVerifyM3( hapClient ) ) {
-							LogE( "ERROR: Pair-verify failed at M3!", true);
-							hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-							hapClient->client.stop();
-							stopEvents(false);
+						// pair-verify M3
+						else if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M3) ) {
+							if ( !handlePairVerifyM3( hapClient ) ) {
+								LogE( "ERROR: Pair-verify failed at M3!", true);
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->client.stop();
+								stopEvents(false);
+							}
 						}
 					}
 				}
+
+				_curLine = "";
+
+				
+				return;
+			} else {  // if you got a newline, then clear currentLine:				
+				
+				
+				// Handle lines
+				processIncomingLine(hapClient, _curLine);
+				_curLine = "";
 			}
-
-			_curLine = "";
-
-			
-			return;
-		} else {    					// if you got a newline, then clear currentLine:
-			// Handle lines
-			processIncomingLine(hapClient, _curLine);
-			_curLine = "";
+		} else if ( (char) b != '\r') {  	// if you got anything else but a carriage return character,		
+			_curLine += (char) b;      		// add it to the end of the currentLine
 		}
-	} else if ( (char) b != '\r') {  	// if you got anything else but a carriage return character,		
-		_curLine += (char) b;      		// add it to the end of the currentLine
-	}
+
+	// }
+	
 	
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
 
-	// ToDo: DEBUG ??
-	// delay(1);
-	// Serial.println("IDLE");
 }
 
 
@@ -3764,12 +3776,12 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 #if defined( ARDUINO_ARCH_ESP32)	
 		if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
 			LogE( "ERROR: Updating HAP service txt failed!", true);
-			return false;
+			return;
 		}
 #else
 		if ( !updateServiceTxt() ){
 			LogE( "ERROR: Advertising HAP service failed!", true);
-			return false;
+			return;
 		}
 #endif
 
@@ -4061,12 +4073,12 @@ void HAPServer::handleEventUpdateConfigNumber( int eventCode, struct HAPEvent ev
 #if defined( ARDUINO_ARCH_ESP32)	
 	if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
 		LogE( "ERROR: Updating HAP service txt failed!", true);
-		return false;
+		return;
 	}
 #else
 	if ( !updateServiceTxt() ){
 		LogE( "ERROR: Advertising HAP service failed!", true);
-		return false;
+		return;
 	}
 #endif
 }
@@ -4116,12 +4128,12 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 #if defined( ARDUINO_ARCH_ESP32)	
 	if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
 		LogE( "ERROR: Updating HAP service txt failed!", true);
-		return false;
+		return;
 	}
 #else
 	if ( !updateServiceTxt() ){
 		LogE( "ERROR: Advertising HAP service failed!", true);
-		return false;
+		return;
 	}
 #endif
 }
