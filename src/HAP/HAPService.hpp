@@ -36,20 +36,20 @@ public:
     std::vector<HAPCharacteristic *> _characteristics;
     std::vector<uint8_t> _linkedServiceIds;
 
-    inline void setHiddenService(bool mode = true){
+    void setHiddenService(bool mode = true){
         hidden = mode;
     }
 
-    inline void setPrimaryService(bool mode = true){
+    void setPrimaryService(bool mode = true){
         primary = mode;
     }
 
-    inline void addLinkedServiceId(uint8_t serviceId_){
+    void addLinkedServiceId(uint8_t serviceId_){
         _linkedServiceIds.push_back(serviceId_);
     }
 
-    inline uint8_t numberOfCharacteristics() { return _characteristics.size(); }
-    inline HAPCharacteristic *characteristicsAtIndex(uint8_t index) { return _characteristics[index]; }
+    uint8_t numberOfCharacteristics() { return _characteristics.size(); }
+    HAPCharacteristic *characteristicsAtIndex(uint8_t index) { return _characteristics[index]; }
     
 };
 

@@ -56,7 +56,7 @@ public:
 
 	static bool begin();
 
-	static inline void setEventManager(EventManager* eventManager){
+	static void setEventManager(EventManager* eventManager){
 		_eventManager = eventManager;
 	}
 

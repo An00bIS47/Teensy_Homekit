@@ -36,15 +36,15 @@ public:
     void getSignature(uint8_t* signature) override;
 
     
-    inline size_t size() override {
+    size_t size() override {
         return _memoryUsed;
     }
 
-    inline bool isFull() override {
+    bool isFull() override {
         return _memoryUsed == HAP_FAKEGATO_BUFFER_SIZE;
     }
 
-    inline void clear() override{
+    void clear() override{
         _vectorBuffer->clear();
     }
 
@@ -56,19 +56,19 @@ public:
 
     void beginSchedule() override;
 
-    inline void setCallbackTimerStart(std::function<void(uint16_t)> callback){
+    void setCallbackTimerStart(std::function<void(uint16_t)> callback){
         // _callbackTimerStart = callback;
         _schedule->setCallbackTimerStart(callback);
     }
 
-    inline void setCallbackTimerEnd(std::function<void(uint16_t)> callback){
+    void setCallbackTimerEnd(std::function<void(uint16_t)> callback){
         // _callbackTimerEnd = callback;
         _schedule->setCallbackTimerEnd(callback);
     }
 
     void handle(bool forced = false) override;
 
-    inline void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){
+    void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){
         _schedule->setCallbackGetTimestampLastActivity(callback);
     }
 
@@ -76,7 +76,7 @@ public:
     void scheduleFromJson(JsonObject &root);
 
     
-    inline void setCallbackSaveConfig(std::function<void(void)> callback){
+    void setCallbackSaveConfig(std::function<void(void)> callback){
         _callbackSaveConfig = callback;
     }
 

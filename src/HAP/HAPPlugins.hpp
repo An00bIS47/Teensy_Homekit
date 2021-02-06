@@ -111,7 +111,7 @@ public:
 		LogE("Handle identify from plugins", true);
 	}
 	
-	inline void handle(bool forced = false) {
+	void handle(bool forced = false) {
 		if (shouldHandle() || forced) {	
 			handleImpl(forced);
 		}
@@ -195,35 +195,35 @@ public:
 		return doc.as<JsonObject>();
 	}
 
-	inline enum HAP_PLUGIN_TYPE type(){
+	enum HAP_PLUGIN_TYPE type(){
 		return _type;
 	}
 
-	inline String version(){
+	String version(){
 		return _version.toString();
 	}
 
-	inline String name(){
+	String name(){
 		return _config->name;
 	}
 
-	inline bool isEnabled(){
+	bool isEnabled(){
 		return _config->enabled;
 	}
 
-	inline void enable(bool mode){
+	void enable(bool mode){
 		_config->enabled = mode;
 	}
 
-	inline unsigned long interval(){
+	unsigned long interval(){
 		return _config->interval;
 	}	
 
-	inline void setInterval(unsigned long interval){
+	void setInterval(unsigned long interval){
 		_config->interval = interval;
 	}
 
-	inline bool shouldHandle(){
+	bool shouldHandle(){
 
 		if (isEnabled()) {
 			unsigned long currentMillis = millis(); // grab current time
@@ -241,7 +241,7 @@ public:
 		return false;
 	}
 
-	virtual inline void addEventListener(EventManager* eventManager){
+	virtual void addEventListener(EventManager* eventManager){
 		_listenerMemberFunctionPlugin.mObj = this;
 		_listenerMemberFunctionPlugin.mf = &HAPPlugin::handleEvents;
 	
@@ -254,19 +254,19 @@ public:
 		
 	}
 
-	inline void setAccessorySet(HAPAccessorySet* accessorySet){
+	void setAccessorySet(HAPAccessorySet* accessorySet){
 		_accessorySet = accessorySet;
 	}	
 
-	inline HAPConfigurationPlugin* getConfiguration() { 
+	HAPConfigurationPlugin* getConfiguration() { 
 		return _config; 
 	}
 
-	inline void setFakeGatoFactory(HAPFakeGatoFactory* fakeGatoFactory){
+	void setFakeGatoFactory(HAPFakeGatoFactory* fakeGatoFactory){
 		_fakeGatoFactory = fakeGatoFactory;
 	}
 
-	inline void registerFakeGato(HAPFakeGato* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
+	void registerFakeGato(HAPFakeGato* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
 		_fakeGatoFactory->registerFakeGato(fakegato, name, callback, interval);
 	}
 

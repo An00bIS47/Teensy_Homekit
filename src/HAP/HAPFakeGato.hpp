@@ -268,55 +268,55 @@ public:
     virtual void    getData(const size_t count, uint8_t *data, size_t* length, uint16_t offset) = 0;
     // virtual bool    addRefTimeEntry(uint32_t timestmap = 0) = 0;
 
-    inline uint32_t getTimestampRefTime() {
+    uint32_t getTimestampRefTime() {
         return _refTime;
     }
 
-    inline uint32_t getTimestampLastEntry(){
+    uint32_t getTimestampLastEntry(){
         return _timestampLastEntry;
     }   
 
-    inline uint16_t getMemoryUsed(){
+    uint16_t getMemoryUsed(){
         return _memoryUsed;
     } 
 
-    inline uint32_t getRolledOverIndex(){
+    uint32_t getRolledOverIndex(){
         return _idxRead;
     }
 
-    inline void setRefTime(uint32_t reftime){
+    void setRefTime(uint32_t reftime){
         _refTime = reftime;
     }
 
-    inline unsigned long interval(){
+    unsigned long interval(){
 		return _interval;
 	}	
 
-	inline void setInterval(unsigned long interval){
+	void setInterval(unsigned long interval){
 		_interval = interval;
 	}
 
-	inline void setName(String name){
+	void setName(String name){
 		_name = name;
 	}
 
-    inline String name(){
+    String name(){
 		return _name;
 	}
 
-    inline bool isEnabled(){
+    bool isEnabled(){
 		return _isEnabled;
 	}
 
-	inline void enable(bool mode){
+	void enable(bool mode){
 		_isEnabled = mode;
 	}
 
-    inline void registerCallback(std::function<bool()> callback){
+    void registerCallback(std::function<bool()> callback){
         _callbackAddEntry = callback;
     }
 
-    inline void setSerialNumber(String serialNumber) {
+    void setSerialNumber(String serialNumber) {
         _serialNumber = serialNumber;
     }
     
@@ -375,13 +375,13 @@ protected:
 
 
 
-    inline uint32_t incrementIndex(uint32_t index){
+    uint32_t incrementIndex(uint32_t index){
         uint32_t result = (index + 1) % (HAP_FAKEGATO_BUFFER_SIZE);
         //if (result == 0) result += 1;
         return result;
     }
 
-    inline uint32_t decrementIndex(uint32_t index){
+    uint32_t decrementIndex(uint32_t index){
         return (index + HAP_FAKEGATO_BUFFER_SIZE - 1) % HAP_FAKEGATO_BUFFER_SIZE;
     }
 

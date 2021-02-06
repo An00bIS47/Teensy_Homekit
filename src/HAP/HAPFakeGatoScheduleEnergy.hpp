@@ -123,7 +123,7 @@ public:
     bool isEnabled();
     void enable(bool on);
 
-    inline void setSerialNumber(String serialNumber){
+    void setSerialNumber(String serialNumber){
         _serialNumber = serialNumber;
     }
 
@@ -139,15 +139,15 @@ public:
 
     void clear();
 
-    inline void setCallbackTimerStart(std::function<void(uint16_t)> callback){
+    void setCallbackTimerStart(std::function<void(uint16_t)> callback){
         _callbackTimerStart = callback;
     }
 
-    inline void setCallbackTimerEnd(std::function<void(uint16_t)> callback){
+    void setCallbackTimerEnd(std::function<void(uint16_t)> callback){
         _callbackTimerEnd = callback;
     }
 
-    inline void handle() {        
+    void handle() {        
         // _alarms.delay(0);
         _timers.handle();
     }
@@ -156,23 +156,23 @@ public:
     void callbackTimerStart(uint16_t state);
     void callbackTimerEnd(uint16_t state);
 
-    inline void setCallbackGetReftime(std::function<uint32_t(void)> callback){
+    void setCallbackGetReftime(std::function<uint32_t(void)> callback){
         _callbackGetRefTime = callback;
     }
     
-    inline void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){
+    void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){
         _callbackGetTimestampLastActivity = callback;
     }
 
-    inline void setCallbackGetTimestampLastEntry(std::function<uint32_t(void)> callback){
+    void setCallbackGetTimestampLastEntry(std::function<uint32_t(void)> callback){
         _callbackGetTimestampLastEntry = callback;
     }
 
-    inline void setCallbackGetMemoryUsed(std::function<uint16_t(void)> callback){
+    void setCallbackGetMemoryUsed(std::function<uint16_t(void)> callback){
         _callbackGetMemoryUsed = callback;
     }
 
-    inline void setCallbackGetRolledOverIndex(std::function<uint32_t(void)> callback){
+    void setCallbackGetRolledOverIndex(std::function<uint32_t(void)> callback){
         _callbackGetRolledOverIndex = callback;
     }
 

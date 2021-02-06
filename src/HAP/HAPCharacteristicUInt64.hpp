@@ -32,7 +32,7 @@ public:
         _value = minVal;
     }
 
-    inline String value() override {
+    String value() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
             
@@ -41,7 +41,7 @@ public:
         return String(temp);
     }
 
-    inline void setValue(const String& str) override {
+    void setValue(const String& str) override {
         uint64_t temp = atoi(str.c_str());
         
         if (valueChangeFunctionCall)
@@ -50,7 +50,7 @@ public:
         _value = temp;        
     }
 
-    inline void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
+    void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
         if (readable()) {
             root["value"] = _value; 
         }

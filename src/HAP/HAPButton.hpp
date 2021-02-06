@@ -30,19 +30,19 @@ public:
 	HAPBUTTON_STATE checkButton();
 	void dispatchEvents();
 
-	inline void setCallbackClick(std::function<void(void)> callback){
+	void setCallbackClick(std::function<void(void)> callback){
         _callbackClick = callback;
     }
 
-	inline void setCallbackDoubleClick(std::function<void(void)> callback){
+	void setCallbackDoubleClick(std::function<void(void)> callback){
         _callbackDoubleClick = callback;
     }
 
-	inline void setCallbackHold(std::function<void(void)> callback){
+	void setCallbackHold(std::function<void(void)> callback){
         _callbackHold = callback;
     }
 
-	inline void setCallbackLongHold(std::function<void(void)> callback){
+	void setCallbackLongHold(std::function<void(void)> callback){
         _callbackLongHold = callback;
     }
 

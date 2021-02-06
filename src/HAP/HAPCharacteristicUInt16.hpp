@@ -33,7 +33,7 @@ public:
     }
 
 
-    inline String value() override{
+    String value() override{
         if (valueGetFunctionCall)
             valueGetFunctionCall();
         char temp[16];
@@ -41,7 +41,7 @@ public:
         return String(temp);
     }
 
-    inline void setValue(const String& str) override {
+    void setValue(const String& str) override {
         uint16_t temp = atoi(str.c_str());
         
         if (valueChangeFunctionCall)
@@ -51,7 +51,7 @@ public:
         
     }
 
-    inline void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
+    void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
         if (readable()) {
             root["value"] = _value; 
         }

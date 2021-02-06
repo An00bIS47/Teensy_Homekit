@@ -67,19 +67,19 @@ public:
 
 	HAPClientHeader(String name_, String value_) : name(name_), value(value_) {};
 
-	inline size_t printTo(Print& p) const {
+	size_t printTo(Print& p) const {
   		return p.print(name + ": " + value);
   	}
 
-	inline String describe() const {
+	String describe() const {
 		return name + ": " + value;
 	}
 
-	// inline size_t length(){
+	// size_t length(){
 	// 	return (name.length() + 2 + value.length() + 2);
 	// }
 
-	inline bool operator==(const HAPClientHeader &header) const {
+	bool operator==(const HAPClientHeader &header) const {
 		return header.name == name && header.value == value;
 	}	  
 };
@@ -118,19 +118,19 @@ public:
 	int peek();
 	void flush();
 
-	inline void setEncryped(bool mode) {
+	void setEncryped(bool mode) {
 		_isEncrypted = mode;
 	}
 
-	inline bool isEncrypted() {
+	bool isEncrypted() {
 		return _isEncrypted;
 	}
 
-	inline void setChunkedMode(bool mode) {
+	void setChunkedMode(bool mode) {
 		_chunkedMode = mode;
 	}
 
-	inline bool chunkedMode() {
+	bool chunkedMode() {
 		return _chunkedMode;
 	}
 

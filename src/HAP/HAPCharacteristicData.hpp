@@ -38,7 +38,7 @@ public:
         delete[] _value;
     }
 
-    inline String value() override {  
+    String value() override {  
         if (valueGetFunctionCall)
             valueGetFunctionCall(); 
 
@@ -49,7 +49,7 @@ public:
         return "";        
     }
 
-    inline size_t setValueWithoutCallback(uint8_t* data, size_t dataLen){
+    size_t setValueWithoutCallback(uint8_t* data, size_t dataLen){
         if (dataLen > maxDataLen) return 0;        
         
         if (_value != nullptr) {
@@ -64,7 +64,7 @@ public:
         return dataLen;
     }
 
-    inline void setValue(const String& str) override {        
+    void setValue(const String& str) override {        
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(String((char*)_value), str);
         
@@ -75,7 +75,7 @@ public:
         // _value[str.length() > maxDataLen ? maxDataLen : str.length()] = '\0';
     }
 
-    inline void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
+    void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
         
         if (readable()) {
             if (_value[0] == '\0') {

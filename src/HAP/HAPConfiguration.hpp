@@ -79,7 +79,7 @@ public:
 
 	virtual void toJson(Print& prt);		
 
-	inline void registerCallbackUpdate(std::function<void(void)> callback){
+	void registerCallbackUpdate(std::function<void(void)> callback){
         _callbackUpdate = callback;
     }
 

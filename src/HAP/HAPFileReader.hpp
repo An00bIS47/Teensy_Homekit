@@ -67,17 +67,17 @@ public:
         }
     }
 
-    inline bool endOfLine() const
+    bool endOfLine() const
     {
         return mCurrentPosition == 0;
     }
 
-    inline unsigned int getCurrentLine() const
+    unsigned int getCurrentLine() const
     {
         return mCurrentLineNumber;
     }
 
-    inline unsigned int getCurrentPosition() const
+    unsigned int getCurrentPosition() const
     {
         return mCurrentPosition;
     }

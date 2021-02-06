@@ -37,12 +37,12 @@ public:
         if (_value != nullptr) delete[] _value;
     }
 
-    inline void clear() {
+    void clear() {
         if (_value != nullptr) delete[] _value;
         _value = nullptr;
     }
 
-    inline String value() override {
+    String value() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
 
@@ -53,7 +53,7 @@ public:
         return "";         
     }
 
-    inline void setValue(const String& str) override {
+    void setValue(const String& str) override {
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(String(_value), str);
         
@@ -72,7 +72,7 @@ public:
     }
 
 
-    inline void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
+    void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) override {
         
         if (readable()) {
             if (_value != nullptr){

@@ -56,7 +56,7 @@ public:
 	static bool captiveInitialized();
 	static void handle();
 
-	inline static bool isProvisioned(){
+	static bool isProvisioned(){
 		return _isProvisioned;
 	}
 

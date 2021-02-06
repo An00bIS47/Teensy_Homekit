@@ -94,39 +94,39 @@ public:
 
 #if defined( CORE_TEENSY )
 	//converts TimeLib's time representations to time.h's representations
-	static inline void convertToTimeH(tmElements_t &timelib, tm &timeh){
+	static void convertToTimeH(tmElements_t &timelib, tm &timeh){
 		time_t t = makeTime(timelib); // - UNIX_OFFSET;
 		localtime_r(&t, &timeh);
 	}
-	static inline void convertToTimeH(time_t timelib, tm &timeh){
+	static void convertToTimeH(time_t timelib, tm &timeh){
 		time_t t = timelib; // - UNIX_OFFSET;
 		localtime_r(&t, &timeh);
 	}
 
-	static inline time_t convertToTimeH(tmElements_t &timelib){
+	static time_t convertToTimeH(tmElements_t &timelib){
 		return makeTime(timelib); // - UNIX_OFFSET;
 	}
 	
-	static inline time_t convertToTimeH(time_t timelib){
+	static time_t convertToTimeH(time_t timelib){
 		return timelib; // - UNIX_OFFSET;
 	}
 
 	//converts time.h's time representations to TimeLib's representations
-	static inline void convertToTimeLib(tm &timeh, tmElements_t &timelib){
+	static void convertToTimeLib(tm &timeh, tmElements_t &timelib){
 		// breakTime(mktime(&timeh) + UNIX_OFFSET, timelib);
 		breakTime(mktime(&timeh), timelib);
 	}
 	
-	static inline void convertToTimeLib(time_t timeh, tmElements_t &timelib){
+	static void convertToTimeLib(time_t timeh, tmElements_t &timelib){
 		// breakTime(timeh + UNIX_OFFSET, timelib);
 		breakTime(timeh, timelib);
 	}
-	static inline time_t convertToTimeLib(tm &timeh){
+	static time_t convertToTimeLib(tm &timeh){
 		// return mktime(&timeh) + UNIX_OFFSET;
 		return mktime(&timeh); // + UNIX_OFFSET;
 	}
 
-	static inline time_t convertToTimeLib(time_t timeh){
+	static time_t convertToTimeLib(time_t timeh){
 		// return timeh + UNIX_OFFSET;
 		return timeh; // + UNIX_OFFSET;
 	}
@@ -144,7 +144,7 @@ public:
 	
 	// rounds a number to 2 decimal places
 	// example: round(3.14159) -> 3.14
-	static inline double round2(double value) {
+	static double round2(double value) {
    		return (int)(value * 100 + 0.5) / 100.0;
 	}
 	
