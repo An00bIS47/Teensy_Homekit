@@ -35,7 +35,7 @@ HAPFakeGato::HAPFakeGato() {
     _idxRead = 0;       // Read index
 
     _requestedEntry = 0;
-
+    _currentEntryNumber = 0;
 
     _timestampLastEntry = 0;
 
@@ -293,10 +293,12 @@ void HAPFakeGato::getS2R2Callback(){
         uint8_t chunksize = HAP_FAKEGATO_CHUNK_SIZE;
         size_t len = 0; 
 
+        _currentEntryNumber = _requestedEntry;
         if (_requestedEntry == 1){
             getRefTime(data, &len, 0);
             offset += len;
             len = 0;
+            _currentEntryNumber++;
         }
         
         

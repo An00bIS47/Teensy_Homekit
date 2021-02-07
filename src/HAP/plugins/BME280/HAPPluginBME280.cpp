@@ -84,6 +84,16 @@ void HAPPluginBME280::handleImpl(bool forced){
 		float temperature 			= random(200, 401) / 10.0;
 		float relative_humidity 	= random(200, 401) / 10.0;
 		float pressure 				= random(30, 110) * 10;
+
+		// Serial.print(">>>>>>>>>>>>>>>>>> temperature: ");
+		// Serial.print(temperature);
+		// Serial.print(" ");
+		// Serial.print(String(temperature));
+		// Serial.print(" relative_humidity: ");
+		// Serial.print(relative_humidity);
+		// Serial.print(" pressure: ");
+		// Serial.println(pressure);
+
 		setValue(_temperatureValue->iid, _temperatureValue->value(), String(temperature) );
 #else
 

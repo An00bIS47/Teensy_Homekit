@@ -259,7 +259,9 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
 
 
         ui32_to_ui8 eC;
-        eC.ui32 = _requestedEntry++;
+        eC.ui32 = _currentEntryNumber++;
+        _requestedEntry++;
+        
         //_requestedEntry = incrementIndex(_requestedEntry);
         memcpy(data + offset + currentOffset, eC.ui8, 4);
         currentOffset += 4;

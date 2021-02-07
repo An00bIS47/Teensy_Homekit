@@ -408,7 +408,7 @@ private:
 	// Connection states
 	void handleClientState(HAPClient* hapClient);
 	void handleClientAvailable(HAPClient* hapClient);
-	void handleClientDisconnect(HAPClient hapClient);
+	void handleClientDisconnect(HAPClient* hapClient);
 
 
 	//

@@ -225,7 +225,8 @@ void HAPFakeGatoHygrometer::getData(const size_t count, uint8_t *data, size_t* l
 #endif 
         
         ui32_to_ui8 eC;
-        eC.ui32 = _requestedEntry++;
+        eC.ui32 = _currentEntryNumber++;
+        _requestedEntry++;
         memcpy(data + offset + 1, eC.ui8, 4);
         currentOffset += 4;
 

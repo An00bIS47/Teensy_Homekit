@@ -397,9 +397,10 @@ bool HAPServer::begin(bool resume) {
 		if (getLocalTime(&_timeinfo, 10000)) {  // wait up to 10sec to sync
 			//Serial.println(&_timeinfo, "Time set: %B %d %Y %H:%M:%S (%A)");		
 			LogI( " OK", true);
-			LogI("Set time to: " + timeString(), true);
+			LogI("Set time to: " + timeString(), true);			
 
 			_configuration.getPlatformConfig()->setRefTime(timestamp());
+			LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
 			break;
 		} 
 	}
@@ -410,6 +411,9 @@ bool HAPServer::begin(bool resume) {
 
 		LogI( " OK", true);
 		LogI("Set time to: " + timeString(), true);
+		_configuration.getPlatformConfig()->setRefTime(timestamp());
+		LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
+		
 	}
 #endif /* ARDUINO_ARCH_ESP32 */
 #endif /* HAP_ENABLE_NTP */
@@ -1323,7 +1327,7 @@ uint32_t HAPServer::timestamp(){
 	return now.tv_sec;
 #elif defined( CORE_TEENSY )
 	if (timeStatus() != timeNotSet) {
-		return now() - UNIX_OFFSET;
+		return (uint32_t) now();	// - UNIX_OFFSET;
 	}
 	return millis();
 #endif		
@@ -1335,8 +1339,11 @@ uint32_t HAPServer::timestamp(){
 
 
 
-void HAPServer::handleClientDisconnect(HAPClient hapClient) {
-	std::vector<HAPClient>::iterator position = std::find(_clients.begin(), _clients.end(), hapClient);
+void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
+
+	if (hapClient == nullptr) return;
+
+	std::vector<HAPClient>::iterator position = std::find(_clients.begin(), _clients.end(), *hapClient);
 	if (position != _clients.end()) { // == myVector.end() means the element was not found
 
 		if (position->client.connected() ) {
@@ -1365,7 +1372,7 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 			Serial.print(hapClient->client.remoteIP());
 			LogD("] disconnected", true);
 #endif
-			handleClientDisconnect( *hapClient );
+			handleClientDisconnect( hapClient );
 
 			break;
 		case HAP_CLIENT_STATE_CONNECTED:		

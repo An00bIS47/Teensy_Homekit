@@ -31,19 +31,19 @@ public:
     virtual String value() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
-        char temp[16];        
-        snprintf(temp, 16, "%.1f", _value);
+
+        char temp[16] = {0,};  
+        snprintf(temp, 16, "%.2f", _value);
         return String(temp);
     }
     
     virtual void setValue(const String& str) override {
-        float temp = atof(str.c_str());    
-        if (temp == temp) {
-            if (valueChangeFunctionCall)
-                valueChangeFunctionCall(_value, temp);
+        float temp = atof(str.c_str());            
+        if (valueChangeFunctionCall)
+            valueChangeFunctionCall(_value, temp);
 
-            _value = temp;
-        }
+        _value = temp;
+    
     }
 
 

@@ -352,6 +352,7 @@ protected:
     uint32_t                _idxRead;       // Read index, used for rolled over
 
     uint32_t                _requestedEntry;
+    uint32_t                _currentEntryNumber;
 
     bool                    _periodicUpdates;
     uint32_t                _timestampLastEntry;
