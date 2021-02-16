@@ -224,8 +224,24 @@ bool HAPServer::begin(bool resume) {
 
 		LogD(F("\nDevice Information"), true);
 		LogD(F("==================================================="), true);	
+
+		char mbedtlsVersion[32];
+		mbedtls_version_get_string_full(mbedtlsVersion);
+
+		// LogD("", true);	
+		LogD(F("Versions:"), true);    
+#if defined(ARDUINO_ARCH_ESP32)			
+		LogD("   SDK:       " + String(ESP.getSdkVersion()), true);
+#endif		
+		LogD("   mbedtls:   " + String(mbedtlsVersion), true);
+#if HAP_USE_LIBSODIUM		
+		LogD("   libsodium: " + String(sodium_version_string()), true);	
+#endif	
+
+
 		LogD("Device ID:    " + HAPDeviceID::deviceID(), true);	
 		LogD("Chip ID:      " + HAPDeviceID::chipID(), true);
+
 #if defined(ARDUINO_ARCH_ESP32)		
 		LogD("MAC address:  " + WiFi.macAddress(), true);
 
@@ -254,24 +270,24 @@ bool HAPServer::begin(bool resume) {
 		LogD("", true);	
 #endif
 
+		LogD(F("Storage:"), true);
+		LogD(F("   type:  "), false);
+#if HAP_USE_EEPROM
+		LogD(F("EEPROM"), true);
+#elif HAP_USE_PREFERENCES
+		LogD(F("Preferences"), true);
+#elif HAP_USE_SPIFFS_CONFIGURATION
+		LogD(F("SPIFFS (Internal Flash)"), true);
+#endif
+		LogD("", true);
+		
 		LogD(F("Fakegato:"), true);
 		LogD(F("   interval:  "), false);
 		LogD(String(HAP_FAKEGATO_INTERVAL), true);
 		LogD(F("   buffer:    "), false);
 		LogD(String(HAP_FAKEGATO_BUFFER_SIZE), true);		
 
-		char mbedtlsVersion[32];
-		mbedtls_version_get_string_full(mbedtlsVersion);
-
-		// LogD("", true);	
-		LogD(F("Versions:"), true);    
-#if defined(ARDUINO_ARCH_ESP32)			
-		LogD("   SDK:       " + String(ESP.getSdkVersion()), true);
-#endif		
-		LogD("   mbedtls:   " + String(mbedtlsVersion), true);
-#if HAP_USE_LIBSODIUM		
-		LogD("   libsodium: " + String(sodium_version_string()), true);	
-#endif		
+	
 		LogD(F("==================================================="), false);
 
 #if defined(ARDUINO_ARCH_ESP32)	

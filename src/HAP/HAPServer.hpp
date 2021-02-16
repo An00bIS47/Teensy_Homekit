@@ -64,7 +64,14 @@
 
 #elif defined(CORE_TEENSY)
 
+#if HAP_USE_EEPROM
 #include "HAPConfigurationEEPROM.hpp"
+#endif
+
+#if HAP_USE_SPIFFS_CONFIGURATION
+#include "HAPConfigurationT41SPIFFSInt.hpp"
+#endif
+
 
 #ifdef HAP_ENABLE_WEBSERVER
 #undef HAP_ENABLE_WEBSERVER
@@ -263,7 +270,13 @@ protected:
 #elif defined(CORE_TEENSY)		
 	EthernetServer _server;
 	
+
+#if HAP_USE_SPIFFS_CONFIGURATION
+	HAPConfigurationT41SPIFFSInt _configuration;
+#elif HAP_USE_EEPROM
 	HAPConfigurationEEPROM _configuration;	
+#endif
+
 
 	static const fnet_mdns_txt_key_t* HomekitTXTRecord();
 	static HAP_MDNS_TXT _hapMdnsTxt;

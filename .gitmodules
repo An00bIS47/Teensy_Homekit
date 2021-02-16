@@ -7,3 +7,6 @@
 [submodule "lib/NativeEthernet"]
 	path = lib/NativeEthernet
 	url = https://github.com/vjmuzik/NativeEthernet.git
+[submodule "lib/TeensyDebug"]
+	path = lib/TeensyDebug
+	url = https://github.com/ftrias/TeensyDebug.git

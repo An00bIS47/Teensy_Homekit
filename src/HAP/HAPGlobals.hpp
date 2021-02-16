@@ -169,25 +169,7 @@
 
 
 /**
- * Preferences / EEPROM
- ********************************************************************/
-#ifndef HAP_USE_PREFERENCES
-#define HAP_USE_PREFERENCES 		0
-#endif
-
-#ifndef HAP_USE_EEPROM
-#define HAP_USE_EEPROM 				1
-#endif
-
-#if HAP_USE_EEPROM
-	#ifdef HAP_USE_PREFERENCES
-	#undef HAP_USE_PREFERENCES
-	#define HAP_USE_PREFERENCES 	0
-	#endif
-#endif
-
-/**
- * ESP32
+ * Platform: ESP32 / Teensy 4.1
  ********************************************************************/
 #if defined(ARDUINO_ARCH_ESP32)
 #ifndef HAP_ENABLE_WIFI
@@ -219,6 +201,10 @@
 
 #ifndef HAP_ENABLE_WIFI_BUTTON
 #define HAP_ENABLE_WIFI_BUTTON		0
+#endif
+
+#ifndef HAP_USE_PREFERENCES
+#define HAP_USE_PREFERENCES 		1
 #endif
 
 #elif defined ( CORE_TEENSY)
@@ -253,6 +239,10 @@
 
 //#define HAP_SPRINTF_UI32			"%lu"
 
+#ifndef HAP_USE_SPIFFS_CONFIGURATION
+#define HAP_USE_SPIFFS_CONFIGURATION 1
+#endif
+
 #else	/* END CORE_TEENSY */ 
 //#define HAP_SPRINTF_UI32			"%lu"
 #endif
@@ -261,6 +251,65 @@
 #define HAP_SEND_BUFFER_SIZE		1024		// Ethernet Client has problems writing large chunks ( > 3KB)
 
 #define HAP_ETHERNET_TIMEOUT		10000
+
+
+
+
+
+/**
+ * Preferences / EEPROM
+ ********************************************************************/
+#ifndef HAP_USE_EEPROM 
+  #ifndef HAP_USE_SPIFFS_CONFIGURATION
+   #ifndef HAP_USE_PREFERENCES
+	#define HAP_USE_EEPROM 				1
+   #endif
+ #endif  
+#endif
+
+#ifndef HAP_USE_PREFERENCES
+#define HAP_USE_PREFERENCES 		0
+#endif
+
+#ifndef HAP_USE_SPIFFS_CONFIGURATION
+#define HAP_USE_SPIFFS_CONFIGURATION 	0
+#endif
+
+#if HAP_USE_EEPROM == 1
+	#ifdef HAP_USE_PREFERENCES
+	#undef HAP_USE_PREFERENCES
+	#define HAP_USE_PREFERENCES 	0
+	#endif
+
+	#ifdef HAP_USE_SPIFFS_CONFIGURATION
+	#undef HAP_USE_SPIFFS_CONFIGURATION
+	#define HAP_USE_SPIFFS_CONFIGURATION 0
+	#endif
+#endif
+
+#if HAP_USE_PREFERENCES == 1
+	#ifdef HAP_USE_EEPROM
+	#undef HAP_USE_EEPROM
+	#define HAP_USE_EEPROM 	0
+	#endif
+
+	#ifdef HAP_USE_SPIFFS_CONFIGURATION
+	#undef HAP_USE_SPIFFS_CONFIGURATION
+	#define HAP_USE_SPIFFS_CONFIGURATION 0
+	#endif
+#endif
+
+#if HAP_USE_SPIFFS_CONFIGURATION == 1
+	#ifdef HAP_USE_PREFERENCES
+	#undef HAP_USE_PREFERENCES
+	#define HAP_USE_PREFERENCES 	0
+	#endif
+
+	#ifdef HAP_USE_EEPROM
+	#undef HAP_USE_EEPROM
+	#define HAP_USE_EEPROM 	0
+	#endif
+#endif
 
 
 

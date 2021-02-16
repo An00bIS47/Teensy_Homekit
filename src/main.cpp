@@ -15,6 +15,11 @@
 #include "HAP/HAPHelper.hpp"
 #include "HAP/HAPVersion.hpp"
 
+#if defined(CORE_TEENSY)
+#include "TeensyDebug.h"
+#pragma GCC optimize ("O0")
+#endif
+
 
 
 // #if HAP_ENABLE_WEBSERVER_CORE_0
@@ -52,6 +57,11 @@
 void setup(){
 
 	Serial.begin(115200);
+
+#if defined(CORE_TEENSY)
+	// debug.begin(SerialUSB1);
+#endif
+
     while (!Serial) {
         ; // wait for serial port to connect. Needed for Leonardo and Due
     }
@@ -65,6 +75,10 @@ void setup(){
 	LogI( hap.versionString() + String( " ..."), true);
 	LogI( F("Log level: "), false);
 	LogI( String(HAPLogger::getLogLevel() ), true);
+
+#if defined(CORE_TEENSY)
+	// halt();
+#endif
 
 	// Start homekit
 	hap.begin();
