@@ -61,11 +61,20 @@ void HAPPluginBME280::identify(bool oldValue, bool newValue) {
 }
 
 void HAPPluginBME280::changeTemp(float oldValue, float newValue) {
-	Serial.printf("[%s] New temperature: %f\n", _config->name, newValue);
+	
+#if defined(ARDUINO_TEENSY41)
+	Serial.printf("[%s] New temperature: %12.9lf\n", _config->name, newValue);
+#else 
+	Serial.printf("[%s] New temperature: %f\n", _config->name, newValue);	
+#endif
 }
 
-void HAPPluginBME280::changeHum(float oldValue, float newValue) {
-	Serial.printf("[%s] New humidity: %f\n", _config->name, newValue);
+void HAPPluginBME280::changeHum(float oldValue, float newValue) {	
+#if defined(ARDUINO_TEENSY41)
+	Serial.printf("[%s] New humidity: %12.9lf\n", _config->name, newValue);
+#else 
+	Serial.printf("[%s] New humidity: %f\n", _config->name, newValue);	
+#endif
 }
 
 void HAPPluginBME280::changePressure(uint16_t oldValue, uint16_t newValue) {

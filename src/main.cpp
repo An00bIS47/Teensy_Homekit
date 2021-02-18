@@ -15,10 +15,10 @@
 #include "HAP/HAPHelper.hpp"
 #include "HAP/HAPVersion.hpp"
 
-#if defined(CORE_TEENSY)
-#include "TeensyDebug.h"
-#pragma GCC optimize ("O0")
-#endif
+// #if defined(CORE_TEENSY)
+// #include "TeensyDebug.h"
+// #pragma GCC optimize ("O0")
+// #endif
 
 
 
@@ -60,12 +60,11 @@ void setup(){
 
 #if defined(CORE_TEENSY)
 	// debug.begin(SerialUSB1);
-#endif
 
     while (!Serial) {
         ; // wait for serial port to connect. Needed for Leonardo and Due
     }
-    
+#endif    
 
 	// Imprint infos to firmware
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);

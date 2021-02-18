@@ -69,7 +69,7 @@
 #endif
 
 #if HAP_USE_SPIFFS_CONFIGURATION
-#include "HAPConfigurationT41SPIFFSInt.hpp"
+#include "HAPConfigurationT41SPIFFSExt.hpp"
 #endif
 
 
@@ -272,7 +272,7 @@ protected:
 	
 
 #if HAP_USE_SPIFFS_CONFIGURATION
-	HAPConfigurationT41SPIFFSInt _configuration;
+	HAPConfigurationT41SPIFFSExt _configuration;
 #elif HAP_USE_EEPROM
 	HAPConfigurationEEPROM _configuration;	
 #endif

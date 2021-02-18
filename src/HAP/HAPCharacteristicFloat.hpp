@@ -31,9 +31,15 @@ public:
     virtual String value() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
-
+        
+#if defined(ARDUINO_TEENSY41)
+        char temp[64] = {0,};  
+        snprintf(temp, 64, "%12.9lf", _value);
+#else
         char temp[16] = {0,};  
         snprintf(temp, 16, "%.2f", _value);
+#endif
+
         return String(temp);
     }
     

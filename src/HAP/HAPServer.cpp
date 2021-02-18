@@ -171,7 +171,9 @@ bool HAPServer::begin(bool resume) {
 		_configuration.registerCallbackUpdate(callback);
 		_configuration.begin();
 
-#if HAP_RESET_CONFIGURATION
+		
+
+#if HAP_RESET_CONFIGURATION			
 		_configuration.reset();		
 #endif
 
@@ -182,6 +184,9 @@ bool HAPServer::begin(bool resume) {
 
 		if (_configuration.load() == false){
 			LogE(F("ERROR: Could not load configuration! -> Setting defaults ..."), true);
+
+			// _configuration.formatFlash();	
+
 			_configuration.setDefaults();
 			_configuration.save();
 		} else {
@@ -224,6 +229,9 @@ bool HAPServer::begin(bool resume) {
 
 		LogD(F("\nDevice Information"), true);
 		LogD(F("==================================================="), true);	
+		LogD("Device ID:    " + HAPDeviceID::deviceID(), true);	
+		LogD("Chip ID:      " + HAPDeviceID::chipID(), true);
+		
 
 		char mbedtlsVersion[32];
 		mbedtls_version_get_string_full(mbedtlsVersion);
@@ -239,10 +247,10 @@ bool HAPServer::begin(bool resume) {
 #endif	
 
 
-		LogD("Device ID:    " + HAPDeviceID::deviceID(), true);	
-		LogD("Chip ID:      " + HAPDeviceID::chipID(), true);
+		
 
 #if defined(ARDUINO_ARCH_ESP32)		
+		LogD("", true);	
 		LogD("MAC address:  " + WiFi.macAddress(), true);
 
 
@@ -263,28 +271,28 @@ bool HAPServer::begin(bool resume) {
 		
 		LogD("Main stack:   ", false);
 		LogD(String(CONFIG_MAIN_TASK_STACK_SIZE), true);
+#endif
 
 		LogD("", true);	
 		LogD("Endian:       ", false);
 		LogD(IS_BIG_ENDIAN ? "BIG" : "little", true);
 		LogD("", true);	
-#endif
 
 		LogD(F("Storage:"), true);
-		LogD(F("   type:  "), false);
+		LogD(F("   type:      "), false);
 #if HAP_USE_EEPROM
 		LogD(F("EEPROM"), true);
 #elif HAP_USE_PREFERENCES
 		LogD(F("Preferences"), true);
 #elif HAP_USE_SPIFFS_CONFIGURATION
-		LogD(F("SPIFFS (Internal Flash)"), true);
+		LogD(F("SPIFFS (External Flash)"), true);
 #endif
 		LogD("", true);
 		
 		LogD(F("Fakegato:"), true);
 		LogD(F("   interval:  "), false);
 		LogD(String(HAP_FAKEGATO_INTERVAL), true);
-		LogD(F("   buffer:    "), false);
+		LogD(F("   size:      "), false);
 		LogD(String(HAP_FAKEGATO_BUFFER_SIZE), true);		
 
 	

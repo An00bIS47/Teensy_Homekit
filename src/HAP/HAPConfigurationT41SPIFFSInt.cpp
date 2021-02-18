@@ -182,6 +182,7 @@ bool HAPConfigurationT41SPIFFSInt::mount() {
                             0);
 #if HAP_DEBUG_SPIFFS
     LogD("SPIFFS mount result: " + String(res), true);
+    Serial.printf("mount address 0x%X res: %i\n", cfg.phys_addr, res);
 #endif
     return (res == 0);
 }
@@ -254,7 +255,10 @@ size_t HAPConfigurationT41SPIFFSInt::getBytesLength(const char* label){
 bool HAPConfigurationT41SPIFFSInt::getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize){
     char label[20];	
 	sprintf(label, "p%s", name);
-	return getBytesLength(label);
+    size_t read = readBytes(label, data, dataSize);
+    if (read == dataSize) return true;
+
+    return false;
 }
 
 void HAPConfigurationT41SPIFFSInt::reset(){
