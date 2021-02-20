@@ -121,8 +121,8 @@ public:
 	// 
 	// Character specific
 	// 
-	virtual String value() = 0;
-	virtual void setValue(const String& str) = 0;    
+	virtual String valueString() = 0;
+	virtual void setValueString(const String& str) = 0;    
 	virtual void addCharacteristicSpecToJson(JsonObject& root, bool meta = true) = 0;
 
 	// 

@@ -26,7 +26,7 @@ public:
     HAPCharacteristicBool(uint16_t _type, uint8_t _permission): HAPCharacteristic(_type, _permission) { _value = false; }
     HAPCharacteristicBool(const char* _typeString, uint8_t _permission): HAPCharacteristic(_typeString, _permission) { _value = false; }    
 
-    String value() override {
+    String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
         if (_value)
@@ -34,7 +34,7 @@ public:
         return "0";
     }
 
-    void setValue(const String& str) override {
+    void setValueString(const String& str) override {
         bool newValue = false;
         if ( str == "1") {
             newValue = true;

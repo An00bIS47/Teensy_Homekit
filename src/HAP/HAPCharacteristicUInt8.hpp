@@ -56,7 +56,7 @@ public:
         free(_validValues);
     }
 
-    String value() override {
+    String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
         char temp[16];
@@ -64,7 +64,7 @@ public:
         return String(temp);
     }
 
-    void setValue(const String& str) override {
+    void setValueString(const String& str) override {
         uint8_t temp = atoi(str.c_str());
         
         if (valueChangeFunctionCall)

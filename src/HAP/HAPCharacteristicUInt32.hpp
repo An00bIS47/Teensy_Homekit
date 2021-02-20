@@ -33,7 +33,7 @@ public:
     }
 
 
-    String value() override{
+    String valueString() override{
         if (valueGetFunctionCall)
             valueGetFunctionCall();
         char temp[32];
@@ -41,7 +41,7 @@ public:
         return String(temp);
     }
 
-    void setValue(const String& str) override {
+    void setValueString(const String& str) override {
         uint32_t temp = atoi(str.c_str());
         
         if (valueChangeFunctionCall)

@@ -27,8 +27,15 @@ public:
     HAPCharacteristicFloat(uint16_t _type, uint8_t _permission, float minVal, float maxVal, float step, unit charUnit): HAPCharacteristic(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit) { _value = 0; }
     HAPCharacteristicFloat(const char* _type, uint8_t _permission, float minVal, float maxVal, float step, unit charUnit): HAPCharacteristic(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit) { _value = 0; }
     
+
+    float value(bool withCallback = true){
+        if (valueGetFunctionCall && withCallback)
+            valueGetFunctionCall();
+
+        return _value;
+    }
     
-    virtual String value() override {
+    virtual String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
         
@@ -43,13 +50,31 @@ public:
         return String(temp);
     }
     
-    virtual void setValue(const String& str) override {
+    virtual void setValueString(const String& str) override {
         float temp = atof(str.c_str());            
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(_value, temp);
 
+
         _value = temp;
     
+    }
+
+    void setValue(const float value, bool withCallback = true){
+        float temp = _value;
+        if (valueChangeFunctionCall && withCallback) {
+            valueChangeFunctionCall(_value, value);
+        }
+
+        if ( withCallback ) {
+            if (temp == _value) {
+                _value = value;
+            } else {
+                _value = temp;
+            }            
+        } else  {
+            _value = value;
+        }
     }
 
 

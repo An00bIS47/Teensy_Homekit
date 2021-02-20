@@ -2145,7 +2145,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 		hapClient->client.write( HTTP_CRLF );
 
 		if (c != NULL){
-			c->setValue(String(true));
+			c->setValueString(String(true));
 		}
 		
 	} else {
@@ -2169,7 +2169,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 	hapClient->clear();
 	
 	if (c != NULL){
-		c->setValue(String(false));
+		c->setValueString(String(false));
 	}
 }
 
@@ -4049,7 +4049,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 					hapClient->subscribe(aid, iid, jc["ev"].as<bool>());
 
 					if (jc["ev"].as<bool>()) {
-						struct HAPEvent event = HAPEvent(hapClient, aid, iid, character->value());					
+						struct HAPEvent event = HAPEvent(hapClient, aid, iid, character->valueString());					
 						_eventManager.queueEvent( EventManager::kEventNotifyController, event);
 					}
 					
@@ -4063,7 +4063,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 			} else {
 
 				if (character->writable() ) {
-					character->setValue(jc["value"].as<String>());
+					character->setValueString(jc["value"].as<String>());
 					// Add to jsonCharacteristics array				
 					character->toJson(jsonNewChr);
 				} else {

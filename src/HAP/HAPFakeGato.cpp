@@ -64,7 +64,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    
     
     HAPCharacteristicString *accNameCha = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
-    accNameCha->setValue(name + " History");
+    accNameCha->setValueString(name + " History");
     accessory->addCharacteristics(fgService, accNameCha);
 
     // S2R1 Char
@@ -72,7 +72,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
     _s2r1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, permission_read|permission_notify, 128);    
     auto callbackS2R1 = std::bind(&HAPFakeGato::setS2R1Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
     _s2r1Characteristics->setDescription("EVE History Status");
-    _s2r1Characteristics->setValue((char*)NULL);    
+    _s2r1Characteristics->setValueString((char*)NULL);    
     _s2r1Characteristics->valueChangeFunctionCall = callbackS2R1;
     accessory->addCharacteristics(fgService, _s2r1Characteristics);
 
@@ -81,7 +81,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
     _s2r2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, permission_read|permission_notify, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
     auto callbackS2R2 = std::bind(&HAPFakeGato::setS2R2Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
     _s2r2Characteristics->setDescription("EVE History Entries");
-    _s2r2Characteristics->setValue((char*)NULL);
+    _s2r2Characteristics->setValueString((char*)NULL);
     _s2r2Characteristics->valueChangeFunctionCall = callbackS2R2;    
 
     auto callbackGetS2R2 = std::bind(&HAPFakeGato::getS2R2Callback, this);            
@@ -252,7 +252,7 @@ void HAPFakeGato::updateS2R1Value(){
      base64_encode(encodedChr, (char*)data, 13 + sigLength + 14);
      String encoded = String(encodedChr);
 #endif    
-    _s2r1Characteristics->setValue(encoded);    
+    _s2r1Characteristics->setValueString(encoded);    
 }
 
 void HAPFakeGato::updateS2R2Value(){
@@ -315,7 +315,7 @@ void HAPFakeGato::getS2R2Callback(){
         char encodedChr[encodedLen];
         base64_encode(encodedChr,(char*)data, len);
         
-        _s2r2Characteristics->setValue(String(encodedChr));  
+        _s2r2Characteristics->setValueString(String(encodedChr));  
 #endif
         _transfer = false;
         // LogE("Number of entries sent (total): " + String(_noOfEntriesSent), true); 
@@ -323,7 +323,7 @@ void HAPFakeGato::getS2R2Callback(){
 #if HAP_DEBUG_FAKEGATO
         Serial.println("data (next entry): AA==");
 #endif         
-        _s2r2Characteristics->setValue("AA==");   
+        _s2r2Characteristics->setValueString("AA==");   
     }
 }
 

@@ -125,7 +125,7 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                         // serviceName is first -> don't write into db
                         // Serial.println("-- " + curChar->value());
 
-                        name = curChar->value();	
+                        name = curChar->valueString();	
                         name.replace(" ", "");
                         name.replace("\"", "");
                         //Serial.println(name);					
@@ -150,20 +150,20 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                             row.setTimestamp(HAPServer::timestamp());
                             
                             // Serial.print("Handling " + String(name) + " - value: " + String(curChar->value()) + " type: ");
-                            if ( HAPHelper::isValidFloat(curChar->value()) ){
+                            if ( HAPHelper::isValidFloat(curChar->valueString()) ){
                                 // Serial.println(" float");
-                                row.addValue("value", curChar->value().toFloat(), 2);					
-                            } else if ( HAPHelper::isValidNumber(curChar->value()) ) {
+                                row.addValue("value", curChar->valueString().toFloat(), 2);					
+                            } else if ( HAPHelper::isValidNumber(curChar->valueString()) ) {
                                 // Serial.println(" integer");
-                                row.addValue("value", curChar->value().toFloat());
-                            } else if (curChar->value() == "true") {
+                                row.addValue("value", curChar->valueString().toFloat());
+                            } else if (curChar->valueString() == "true") {
                                 // Serial.println(" bool -> 1");
                                 row.addValue("value", 1);					
-                            } else if (curChar->value() == "false") {
+                            } else if (curChar->valueString() == "false") {
                                 // Serial.println(" bool -> 0");
                                 row.addValue("value", 0);					
                             } else {
-                                row.addValueString("value", curChar->value() );					
+                                row.addValueString("value", curChar->valueString() );					
                             }
 
                             // LogD(row.toString() + " - size: " + String(row.serializedSize()), true);

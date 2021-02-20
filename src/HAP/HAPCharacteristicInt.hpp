@@ -34,7 +34,7 @@ public:
     }
 
 
-    virtual String value() override {
+    virtual String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
             
@@ -43,7 +43,7 @@ public:
         return String(temp);
     }
 
-    virtual void setValue(const String& str) override {
+    virtual void setValueString(const String& str) override {
         int32_t temp = atoi(str.c_str());
         
         if (valueChangeFunctionCall)

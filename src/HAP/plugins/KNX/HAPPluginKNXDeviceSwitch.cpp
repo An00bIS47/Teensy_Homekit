@@ -69,14 +69,14 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         _accessory->addService(switchService);
 
         HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
-        plugServiceName->setValue(_name);
+        plugServiceName->setValueString(_name);
         _accessory->addCharacteristics(switchService, plugServiceName);
 
         //
         // Power State 
         // 
         _stateValue = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
-        _stateValue->setValue("0");
+        _stateValue->setValueString("0");
 
         // 
         // Value Changed Function Call (callback when value changed from KNX)
@@ -86,7 +86,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
 
 
         // Read value from knx
-        _stateValue->value();
+        _stateValue->valueString();
 
         // 
         // Value GET Function Call (callback to read state from KNX)
@@ -178,7 +178,7 @@ void HAPPluginKNXDeviceSwitch::readState(){
 bool HAPPluginKNXDeviceSwitch::fakeGatoCallback(){	
 
 
-    return _fakegato->addEntry(_stateValue->value());      
+    return _fakegato->addEntry(_stateValue->valueString());      
 }
 
 void HAPPluginKNXDeviceSwitch::handle(bool forced){
@@ -191,7 +191,7 @@ void HAPPluginKNXDeviceSwitch::writeStateCallback(GroupObject& go){
 
     _shouldSend = false;
     // Serial.println("Temperature: " + String(result));
-    _stateValue->setValue(String(result));
+    _stateValue->setValueString(String(result));
 
     // Add event
 	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _stateValue->iid, String(result));							
@@ -199,7 +199,7 @@ void HAPPluginKNXDeviceSwitch::writeStateCallback(GroupObject& go){
 
     if (_enableFakegato){
         //  Add entry 
-        _fakegato->addEntry(_stateValue->value());    
+        _fakegato->addEntry(_stateValue->valueString());    
     }  
 }
 

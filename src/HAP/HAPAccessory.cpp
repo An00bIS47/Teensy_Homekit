@@ -268,64 +268,64 @@ void HAPAccessory::initIdentify(){
 
 void HAPAccessory::setName(const String& name){
 	initAccessoryName();
-	_accessoryName->setValue(name);
+	_accessoryName->setValueString(name);
 }
 
 String HAPAccessory::name(){
 	if (_accessoryName == nullptr) {
 		return "";    
 	}
-	return _accessoryName->value();
+	return _accessoryName->valueString();
 }
 
 void HAPAccessory::setFirmware(const String& firmware){
 	initFirmware();
-	_firmware->setValue(firmware);
+	_firmware->setValueString(firmware);
 }
 
 String HAPAccessory::firmware(){
 	if (_firmware == nullptr) {
 		return "";    
 	}
-	return _firmware->value();
+	return _firmware->valueString();
 }
 
 
 void HAPAccessory::setManufacturer(const String& manufacturer){
 	initManufacturer();
-	_manufacturer->setValue(manufacturer);
+	_manufacturer->setValueString(manufacturer);
 }
 
 String HAPAccessory::manufacturer(){
 	if (_manufacturer == nullptr) {
 		return "";    
 	}
-	return _manufacturer->value();
+	return _manufacturer->valueString();
 }
 
 
 void HAPAccessory::setModelName(const String& modelName){
 	initModelName();
-	_modelName->setValue(modelName);
+	_modelName->setValueString(modelName);
 }
 
 String HAPAccessory::modelName(){
 	if (_modelName == nullptr) {
 		return "";    
 	}
-	return _modelName->value();
+	return _modelName->valueString();
 }
 
 void HAPAccessory::setSerialNumber(const String& serialNumber){
 	initSerialNumber();
-	_serialNumber->setValue(serialNumber);
+	_serialNumber->setValueString(serialNumber);
 }
 
 String HAPAccessory::serialNumber(){
 	if (_serialNumber == nullptr) {
 		return "";    
 	}
-	return _serialNumber->value();
+	return _serialNumber->valueString();
 }
 
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){

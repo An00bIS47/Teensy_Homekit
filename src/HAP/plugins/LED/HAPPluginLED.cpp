@@ -147,14 +147,14 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
 
     HAPCharacteristicString *lightServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
-    lightServiceName->setValue("LED");
+    lightServiceName->setValueString("LED");
     _accessory->addCharacteristics(_service, lightServiceName);
 
     _powerState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
     if (_isOn)
-        _powerState->setValue("1");
+        _powerState->setValueString("1");
     else
-        _powerState->setValue("0");
+        _powerState->setValueString("0");
     
     auto callbackPowerState = std::bind(&HAPPluginLED::changePower, this, std::placeholders::_1, std::placeholders::_2);        
     _powerState->valueChangeFunctionCall = callbackPowerState;
@@ -165,7 +165,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
         //_brightnessState->valueChangeFunctionCall = &changeBrightness;
 
 #if HAP_LED_ENABLE_BRIGHTNESS   
-    _brightnessState->setValue("50");
+    _brightnessState->setValueString("50");
     auto callbackBrightness = std::bind(&HAPPluginLED::changeBrightness, this, std::placeholders::_1, std::placeholders::_2);        
     _brightnessState->valueChangeFunctionCall = callbackBrightness;
     _accessory->addCharacteristics(_service, _brightnessState);    
@@ -178,15 +178,15 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     _accessory->addService(switchService);
 
     HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
-    plugServiceName->setValue("LED");
+    plugServiceName->setValueString("LED");
     _accessory->addCharacteristics(switchService, plugServiceName);
 
     _enabledState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
     _enabledState->setDescription("Enabled");
     if (_blinkingEnabled)
-        _enabledState->setValue("1");
+        _enabledState->setValueString("1");
     else
-        _enabledState->setValue("0");
+        _enabledState->setValueString("0");
 
     auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);        
     _enabledState->valueChangeFunctionCall = callbackEnabledState;
@@ -212,9 +212,9 @@ void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
             _isOn = false;
         }    
 
-        _powerState->setValue(newValue);
+        _powerState->setValueString(newValue);
 
-        struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _powerState->iid, _powerState->value());							
+        struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _powerState->iid, _powerState->valueString());							
 	    _eventManager->queueEvent( EventManager::kEventNotifyController, event);
  
     }

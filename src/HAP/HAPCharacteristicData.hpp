@@ -38,7 +38,7 @@ public:
         delete[] _value;
     }
 
-    String value() override {  
+    String valueString() override {  
         if (valueGetFunctionCall)
             valueGetFunctionCall(); 
 
@@ -64,7 +64,7 @@ public:
         return dataLen;
     }
 
-    void setValue(const String& str) override {        
+    void setValueString(const String& str) override {        
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(String((char*)_value), str);
         

@@ -398,16 +398,15 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
         _shouldSave = true; 
     }
 
-    _configReadCharacteristics->setValue(_schedule->buildScheduleString());
+    _configReadCharacteristics->setValueString(_schedule->buildScheduleString());
 
     if (_shouldSave){
         _callbackSaveConfig();
     }
-
 }
 
 void HAPFakeGatoEnergy::beginSchedule(){
-    _configReadCharacteristics->setValue(_schedule->buildScheduleString());    
+    _configReadCharacteristics->setValueString(_schedule->buildScheduleString());    
 }
 
 void HAPFakeGatoEnergy::setSerialNumber(String serialNumber) {

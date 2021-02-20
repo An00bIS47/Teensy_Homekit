@@ -290,9 +290,9 @@ void HAPAccessorySet::toJson(JsonArray& array){
 int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
 	HAPCharacteristic *c = getCharacteristics(aid, iid);
 	if (c != nullptr) {		
-		*outSize = c->value().length() + 1;
+		*outSize = c->valueString().length() + 1;
 		if (out != NULL){
-			c->value().toCharArray(out, *outSize);							
+			c->valueString().toCharArray(out, *outSize);							
 		}		
 		return 0;
 	}

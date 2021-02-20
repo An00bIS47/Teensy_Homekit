@@ -107,14 +107,14 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     _accessory->addService(outletService);
 
     HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, 32);
-    plugServiceName->setValue("RCSwitch " + String(houseAddress) + String(deviceAddress));
+    plugServiceName->setValueString("RCSwitch " + String(houseAddress) + String(deviceAddress));
     _accessory->addCharacteristics(outletService, plugServiceName);
 
     //
     // Power State 
     // 
     _stateValue = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
-    _stateValue->setValue("0");
+    _stateValue->setValueString("0");
 
     auto callbackState = std::bind(&HAPPluginRCSwitchDevice::changedState, this, std::placeholders::_1, std::placeholders::_2);        
     _stateValue->valueChangeFunctionCall = callbackState;
@@ -127,14 +127,14 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     _inUseState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_OUTLET_IN_USE, permission_read|permission_notify);        
     // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);        
     // _inUseState->valueChangeFunctionCall = callbackState;
-    _inUseState->setValue("1");
+    _inUseState->setValueString("1");
     _accessory->addCharacteristics(outletService, _inUseState);
 
     //
     // power current (EVE)
     //
     _curPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
-    _curPowerValue->setValue("0.0");
+    _curPowerValue->setValueString("0.0");
     
     auto callbackChangeCurPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerCurrent, this, std::placeholders::_1, std::placeholders::_2);
     _curPowerValue->valueChangeFunctionCall = callbackChangeCurPower;
@@ -145,7 +145,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     // power total (EVE)
     //
     _ttlPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
-    _ttlPowerValue->setValue("0.0");
+    _ttlPowerValue->setValueString("0.0");
     
     auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
     _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
@@ -156,7 +156,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     // parental Lock
     //
     _parentalLock = new HAPCharacteristicBool(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, permission_read|permission_write);        
-    _parentalLock->setValue("0");    
+    _parentalLock->setValueString("0");    
     // auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
     // _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
     _accessory->addCharacteristics(outletService, _parentalLock);
@@ -209,7 +209,7 @@ void HAPPluginRCSwitchDevice::changedPowerCurrent(float oldValue, float newValue
 
         String inUse;
         newValue > 0.1 ? inUse = "1" : inUse = "0";    
-        if (_inUseState->value() != inUse){
+        if (_inUseState->valueString() != inUse){
             _inUseState->setValue(inUse);
 
             struct HAPEvent eventInUse = HAPEvent(nullptr, _accessory->aid, _inUseState->iid, String(newValue));							
@@ -247,7 +247,7 @@ bool HAPPluginRCSwitchDevice::fakeGatoCallback(){
     // LogD(HAPServer::timeString() + " " + "HAPPluginPCA301Device" + "->" + String(__FUNCTION__) + " [   ] " + "fakeGatoCallback()", true);
 
     // Serial.println("power: " + _curPowerValue->value());    
-    return _fakegato.addEntry(0x1F, "0", "0", "0", "0", _stateValue->value());
+    return _fakegato.addEntry(0x1F, "0", "0", "0", "0", _stateValue->valueString());
 }
 
 void HAPPluginRCSwitchDevice::switchCallback(uint16_t state){

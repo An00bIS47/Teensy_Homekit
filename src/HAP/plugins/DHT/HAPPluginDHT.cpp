@@ -92,11 +92,11 @@ void HAPPluginDHT::handleImpl(bool forced){
 #endif
 
 	if (!isnan(sensorEventTemp.temperature)) {
-		setValue(_temperatureValue->iid, _temperatureValue->value(), String(sensorEventTemp.temperature) );
+		setValue(_temperatureValue->iid, _temperatureValue->valueString(), String(sensorEventTemp.temperature) );
 	}
 
 	if (!isnan(sensorEventHum.relative_humidity)) {
-		setValue(_humidityValue->iid, _humidityValue->value(), String(sensorEventHum.relative_humidity) );
+		setValue(_humidityValue->iid, _humidityValue->valueString(), String(sensorEventHum.relative_humidity) );
 	}
 
 #if HAP_PLUGIN_DHT_USE_PRESSURE
@@ -118,10 +118,10 @@ void HAPPluginDHT::handleImpl(bool forced){
 
 void HAPPluginDHT::setValue(int iid, String oldValue, String newValue){
 	if (iid == _temperatureValue->iid) {		
-		_temperatureValue->setValue(newValue);
+		_temperatureValue->setValueString(newValue);
 	} else if (iid == _humidityValue->iid) {
 		//LogW("Setting DHT HUMIDITY oldValue: " + oldValue + " -> newValue: " + newValue, true);
-		_humidityValue->setValue(newValue);
+		_humidityValue->setValueString(newValue);
 	} 
 #if HAP_PLUGIN_DHT_USE_PRESSURE	
 	else if (iid == _pressureValue->iid) {
@@ -213,11 +213,11 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 
 		const char* serviceName = "DHT AirPressure Sensor";
 		HAPCharacteristicString *pressureServiceName = new HAPCharacteristicString(charType_serviceName, permission_read, strlen(serviceName));
-		pressureServiceName->setValue(serviceName);
+		pressureServiceName->setValueString(serviceName);
 		_accessory->addCharacteristics(pressureService, pressureServiceName);
 
 		_pressureValue = new HAPCharacteristicUInt16(charType_FG_airPressure, permission_read|permission_notify, 300, 1100, 1, unit_hpa);
-		_pressureValue->setValue("700");
+		_pressureValue->setValueString("700");
 
 		auto callbackChangePressure = std::bind(&HAPPluginDHT::changePressure, this, std::placeholders::_1, std::placeholders::_2);
 		//_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
@@ -247,9 +247,9 @@ HAPConfigurationValidationResult HAPPluginDHT::validateConfig(JsonObject object)
 bool HAPPluginDHT::fakeGatoCallback(){	
 	// return _fakegato.addEntry(_temperatureValue->value(), _humidityValue->value(), _pressureValue->value());
 #if HAP_PLUGIN_DHT_USE_PRESSURE	
-	return _fakegato.addEntry(0x07, _temperatureValue->value(), _humidityValue->value(), _pressureValue->value());
+	return _fakegato.addEntry(0x07, _temperatureValue->valueString(), _humidityValue->valueString(), _pressureValue->valueString());
 #else
-	return _fakegato.addEntry(0x03, _temperatureValue->value(), _humidityValue->value(), "0");
+	return _fakegato.addEntry(0x03, _temperatureValue->valueString(), _humidityValue->valueString(), "0");
 	// 0102 0202 0302
 	//	|	  |	   +-> Pressure	
 	//  |	  +-> Humidity

@@ -42,7 +42,7 @@ public:
         _value = nullptr;
     }
 
-    String value() override {
+    String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
 
@@ -53,7 +53,7 @@ public:
         return "";         
     }
 
-    void setValue(const String& str) override {
+    void setValueString(const String& str) override {
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(String(_value), str);
         
