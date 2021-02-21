@@ -42,6 +42,35 @@ public:
         _value = nullptr;
     }
 
+
+    String value(bool withCallback = true){
+        if (valueGetFunctionCall && withCallback)
+            valueGetFunctionCall();
+
+        if (_value) {
+            return String(_value);
+        } 
+        
+        return ""; 
+    }
+
+    void setValue(const String& value, bool withCallback = true){
+        String temp = _value;
+        if (valueChangeFunctionCall && withCallback) {
+            valueChangeFunctionCall(_value, value);
+        }
+
+        if ( withCallback ) {
+            if (temp == _value) {
+                setValueFromString(value);
+            } else {
+                setValueFromString(temp);
+            }            
+        } else  {
+            setValueFromString(value);
+        }
+    }
+
     String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
@@ -57,18 +86,22 @@ public:
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(String(_value), str);
         
-        uint16_t dataLen = str.length();
+        setValueFromString(str);       
+    }
+
+    void setValueFromString(const String& str){
+        size_t dataLen = str.length();
 
         if (dataLen > maxLen) return;        
         
         if (_value != nullptr) {
-            delete[] _value;
+            delete[] _value;            
         }
 
         _value = new char[dataLen + 1];
         // _valueLen = dataLen;
         strncpy(_value, str.c_str(), dataLen);
-        _value[dataLen] = '\0';        
+        _value[dataLen] = '\0'; 
     }
 
 
