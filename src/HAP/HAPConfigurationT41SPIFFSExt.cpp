@@ -120,7 +120,11 @@ void HAPConfigurationT41SPIFFSExt::reset(){
 
 void HAPConfigurationT41SPIFFSExt::validateConfig() {
     uint8_t magNum[2];
-    HAPHelper::u16_to_u8(HAP_SPIFFS_MAGIC_BYTE, magNum);    
+    
+    magNum[0] = 0x43;
+    magNum[1] = 0xE7;
+    
+    // HAPHelper::array_print("magicByte validate", magNum, 2);
 
     writeBytes("validate", magNum, 2);    
 }
@@ -130,12 +134,13 @@ bool HAPConfigurationT41SPIFFSExt::validConfig() {
     if (!fileExists("validate")) return false;
 
     uint8_t magNum[2];
-    size_t res = readBytes("validate", magNum, 2);    
+    size_t res = readBytes("validate", magNum, 2);   
+
+    // HAPHelper::array_print("magicByte valid", magNum, 2); 
     
     if (res == 0) return false;
 
-    uint16_t magicNum = HAPHelper::u8_to_u16(magNum);
-    return (magicNum == HAP_SPIFFS_MAGIC_BYTE);
+    return ((magNum[0] == 0x43) && (magNum[1] == 0xE7));
 }
 
 bool HAPConfigurationT41SPIFFSExt::fileExists(const char* name){

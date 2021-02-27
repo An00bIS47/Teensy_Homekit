@@ -62,23 +62,23 @@ bool HAPPluginKNX::begin(){
     Serial.print(">>>>>>>>> knx.configured(): ");
     Serial.println(knx.configured());
 
-    // Serial.printf("Group Obj Table: LoadState: %d\n", knx.bau().groupObjectTable().loadState());
-    // Serial.printf("App Program: LoadState: %d\n", knx.bau().parameters().loadState());
+    Serial.printf("Group Obj Table: LoadState: %d\n", knx.bau().groupObjectTable().loadState());
+    Serial.printf("App Program: LoadState: %d\n", knx.bau().parameters().loadState());
     // Serial.printf("Device Object: LoadState: %d\n", knx.bau().deviceObject().loadState());
     // Serial.printf("idx 1: LoadState: %d\n", knx.bau().getInterfaceObject(1)->loadState());
     // Serial.printf("idx 2: LoadState: %d\n", knx.bau().getInterfaceObject(2)->loadState());
 
-    // Serial.print("_addrTable: ");
-    // Serial.println(knx.bau()._addrTable.loadState());
+    Serial.print("_addrTable: ");
+    Serial.println(knx.bau()._addrTable.loadState());
 
-    // Serial.print("_assocTable: ");
-    // Serial.println(knx.bau()._assocTable.loadState());
+    Serial.print("_assocTable: ");
+    Serial.println(knx.bau()._assocTable.loadState());
 
-    // Serial.print("_groupObjTable: ");
-    // Serial.println(knx.bau()._groupObjTable.loadState());
+    Serial.print("_groupObjTable: ");
+    Serial.println(knx.bau()._groupObjTable.loadState());
 
-    // Serial.print("_appProgram: ");
-    // Serial.println(knx.bau()._appProgram.loadState());
+    Serial.print("_appProgram: ");
+    Serial.println(knx.bau()._appProgram.loadState());
 
     // int offset = 0;
     // for (int i = 0; i< KNX_FLASH_SIZE; i++) {
@@ -95,7 +95,8 @@ bool HAPPluginKNX::begin(){
 
     // is the led active on HIGH or low? Default is LOW
     knx.ledPinActiveOn(HIGH);    
-	knx.buttonPin(0);
+	knx.buttonPin(6);
+    
 #endif
 
     return true;

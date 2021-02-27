@@ -49,4 +49,6 @@ protected:
     uint8_t     _config;
 };
 
+// static extRAM_t4 eRAM __attribute__ ((unused));
+
 #endif /* HAPCONFIGURATIONT41SPIFFSEXT_HPP_ */

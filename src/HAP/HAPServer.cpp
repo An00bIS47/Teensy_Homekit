@@ -4127,7 +4127,7 @@ void HAPServer::handleEventRebootNow(int eventCode, struct HAPEvent eventParam){
 	ESP.restart();
 #elif defined( CORE_TEENSY )
 	// ToDo: Add reboot
-
+	SCB_AIRCR = 0x05FA0004;
 
 #endif
 

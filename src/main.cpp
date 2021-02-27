@@ -60,10 +60,9 @@ void setup(){
 
 #if defined(CORE_TEENSY)
 	// debug.begin(SerialUSB1);
-
-    while (!Serial) {
-        ; // wait for serial port to connect. Needed for Leonardo and Due
-    }
+	while(!Serial){
+		;
+	}
 #endif    
 
 	// Imprint infos to firmware
