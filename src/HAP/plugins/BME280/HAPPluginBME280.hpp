@@ -78,7 +78,7 @@ public:
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 
-	HAPConfigurationValidationResult validateConfig(JsonObject object);
+	// HAPConfigurationValidationResult validateConfig(JsonObject object);
 	
 	HAPConfigurationPlugin* setDefaults() override;
 	void internalConfigToJson(Print& prt); 	

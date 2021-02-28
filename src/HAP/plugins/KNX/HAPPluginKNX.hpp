@@ -49,7 +49,7 @@ public:
     void handleImpl(bool forced = false);	
 
 
-	HAPConfigurationValidationResult validateConfig(JsonObject object);	
+	// HAPConfigurationValidationResult validateConfig(JsonObject object);	
 	
 	HAPConfigurationPlugin* setDefaults();
 	void internalConfigToJson(Print& prt); 	

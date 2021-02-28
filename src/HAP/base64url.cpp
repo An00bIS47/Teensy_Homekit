@@ -1,12 +1,11 @@
 // https://raw.githubusercontent.com/zhicheng/base64/master/base64.c
 /* This is a public domain base64 implementation written by WEI Zhicheng. */
 
-#include <stdio.h>
-
+#include <Arduino.h>
 #include "base64url.h"
 
 /* BASE 64 encode table */
-static const char base64en[] = {
+const char base64en[] PROGMEM = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
 	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -23,7 +22,7 @@ static const char base64en[] = {
 #define BASE64DE_FIRST	'+'
 #define BASE64DE_LAST	'z'
 /* ASCII order for BASE 64 decode, -1 in unused character */
-static const signed char base64de[] = {
+const signed char base64de[] PROGMEM = {
 	/* '+', ',', '-', '.', '/', '0', '1', '2', */ 
 	    62,  -1,  -1,  -1,  63,  52,  53,  54,
 

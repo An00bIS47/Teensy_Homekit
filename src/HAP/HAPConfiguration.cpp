@@ -11,6 +11,9 @@
 #include "HAPPlugins.hpp"
 #include "HAPLogger.hpp"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfiguration::HAPConfiguration(){
 	_platformConfig = new HAPConfigurationPlatform();
 	_platformConfig->setSaveCallback(std::bind(&HAPConfiguration::savePlatformConfig, this));
@@ -40,7 +43,9 @@ HAPConfiguration::HAPConfiguration(){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfiguration::~HAPConfiguration(){
 	clear();
 
@@ -66,10 +71,16 @@ HAPConfiguration::~HAPConfiguration(){
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::begin(){
     return validConfig();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPConfiguration::end(){
 
 }
@@ -79,7 +90,9 @@ void HAPConfiguration::reset(){
     save();
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPConfiguration::clear(){	
     _accessoryConfig->clear();	
 #if HAP_ENABLE_WIFI		
@@ -92,6 +105,9 @@ void HAPConfiguration::clear(){
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPConfiguration::setDefaults(){
 
 	_accessoryConfig->setDefaults();
@@ -133,7 +149,10 @@ void HAPConfiguration::setDefaults(){
 	//
 	//		,
 	// 		"keystore": { ... } 
-    // }	
+    // }
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif    	
 void HAPConfiguration::toJson(Print& prt){
 	prt.print("{");
 
@@ -197,7 +216,7 @@ void HAPConfiguration::update(){
 }
 
 
-    
+#if 0   
 HAPConfigurationValidationResult HAPConfiguration::validateConfig(const JsonObject object){
     
     HAPConfigurationValidationResult result;
@@ -602,7 +621,12 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigPlugins(const J
     result.valid = true;
     return result;
 }
+#endif
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::getDataForPlugin(const char* name, HAPConfigurationPlugin* data, size_t dataSize) { 
     uint8_t buffer[dataSize];
     bool result = getBytesForPlugin(name, buffer, dataSize);
@@ -622,7 +646,9 @@ bool HAPConfiguration::getDataForPlugin(const char* name, HAPConfigurationPlugin
     return false;
 };
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::load() {
 
     LogD(F("   >>> Validation ..."), false);
@@ -696,7 +722,9 @@ bool HAPConfiguration::load() {
 	return result;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::save() {
 
 	bool result = true;
@@ -776,7 +804,9 @@ bool HAPConfiguration::save() {
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::savePluginConfig(){
 	auto &factory = HAPPluginFactory::Instance();        
     std::vector<String> names = factory.names();    
@@ -1074,6 +1104,9 @@ bool HAPConfiguration::loadWiFiConfig(){
 
 #endif
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::savePlatformConfig(){
 
     size_t bufferSize = HAPConfigurationPlatform::getDataSize();
@@ -1098,6 +1131,10 @@ bool HAPConfiguration::savePlatformConfig(){
     return false;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::loadPlatformConfig(){
 	
     size_t bufferSize = HAPConfigurationPlatform::getDataSize();
@@ -1119,7 +1156,9 @@ bool HAPConfiguration::loadPlatformConfig(){
 
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::saveAccessoryConfig(){
 
 
@@ -1176,6 +1215,9 @@ bool HAPConfiguration::saveAccessoryConfig(){
 	return false;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::loadAccessoryConfig(){
 
 
@@ -1241,6 +1283,9 @@ bool HAPConfiguration::loadAccessoryConfig(){
 	return true;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfiguration::isOnlyZeros(const uint8_t* bytearray, int length) {
 
     for (size_t i = 0; i < length; i++){

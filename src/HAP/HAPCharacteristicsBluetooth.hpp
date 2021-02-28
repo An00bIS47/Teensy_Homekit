@@ -10,6 +10,8 @@
 
 #include <Arduino.h>
 
+#if defined(ARDUINO_ARCH_ESP32)
+
 typedef enum {
     HAP_CHARACTERISTIC_BLUETOOTH_PAIR_SETUP             = 0x4C,
     HAP_CHARACTERISTIC_BLUETOOTH_PAIR_VERIFY            = 0x4E,
@@ -18,7 +20,7 @@ typedef enum {
     HAP_CHARACTERISTIC_BLUETOOTH_SERVICE_INSTANCE_ID    = 0x51,
 } HAP_CHARACTERISTIC_BLUETOOTH;
 
-
+#endif
 
 
 #endif /* HAPCHARACTERISTICSBLUETOOTH_HPP_ */

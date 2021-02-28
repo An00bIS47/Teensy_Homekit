@@ -289,6 +289,7 @@ void HAPPluginKNX::handleImpl(bool forced){
     }
 }	
 
+#if 0
 HAPConfigurationValidationResult HAPPluginKNX::validateConfig(JsonObject object){
 
     /*
@@ -398,7 +399,7 @@ HAPConfigurationValidationResult HAPPluginKNX::validateConfig(JsonObject object)
     result.valid = true;
     return result;
 }
-
+#endif
 
 
 int HAPPluginKNX::indexOfDevice(HAPPluginKNXDevice* device){

@@ -14,7 +14,7 @@
 #include <functional>
 #include "HAPConfiguration.hpp"
 #include <EEPROM.h>
-#include <StreamUtils.h>
+// #include <StreamUtils.h>
 
 struct DataEntry {
 	size_t offset;

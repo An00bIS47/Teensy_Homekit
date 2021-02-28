@@ -15,10 +15,10 @@
 #include "HAP/HAPHelper.hpp"
 #include "HAP/HAPVersion.hpp"
 
-// #if defined(CORE_TEENSY)
-// #include "TeensyDebug.h"
-// #pragma GCC optimize ("O0")
-// #endif
+#if defined(CORE_TEENSY)
+#include "TeensyDebug.h"
+#pragma GCC optimize ("O0")
+#endif
 
 
 
@@ -54,12 +54,16 @@
 
 
 
-void setup(){
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+void setup() {
 
 	Serial.begin(115200);
 
 #if defined(CORE_TEENSY)
-	// debug.begin(SerialUSB1);
+	debug.begin(SerialUSB1);
 	while(!Serial){
 		;
 	}

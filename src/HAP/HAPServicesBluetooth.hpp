@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 
+#if defined(ARDUINO_ARCH_ESP32)
 typedef enum {
     HAP_SERVICE_BLUETOOTH_ACCESSORY_INFORMATION     = 0xFED3,
     HAP_SERVICE_BLUETOOTH_CAMERA                    = 0xFEC9,
@@ -23,7 +24,7 @@ typedef enum {
     HAP_SERVICE_BLUETOOTH_SPEAKER                   = 0xFEC7,
     HAP_SERVICE_BLUETOOTH_SWITCH                    = 0xFECD,
 } HAP_SERVICE_BLUETOOTH;
-
+#endif
 
 
 

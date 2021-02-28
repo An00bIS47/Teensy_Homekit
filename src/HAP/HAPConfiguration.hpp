@@ -136,13 +136,6 @@ public:
 	virtual void setWiFiConfig(HAPConfigurationWiFi* data) { _wifiConfig = data; }
 #endif
 
-	// 
-	// JSON parsing ...
-	//
-    HAPConfigurationValidationResult parse(const char *jsonString, bool dryRun = false) { HAPConfigurationValidationResult result; return result; } __attribute__ ((deprecated));	
-    HAPConfigurationValidationResult parse(const String& jsonString, bool dryRun = false) { HAPConfigurationValidationResult result; return result; } __attribute__ ((deprecated));	
-    HAPConfigurationValidationResult parse(const uint8_t* jsonString, size_t length, bool dryRun) { HAPConfigurationValidationResult result; return result; } __attribute__ ((deprecated));	
-
 protected:	
 	std::function<void(void)> 	_callbackUpdate;
 	// std::vector<HAPConfigurationPlugin*> 		_pluginConfigs;			
@@ -218,13 +211,14 @@ protected:
 #endif
 
 
+#if 0
     static HAPConfigurationValidationResult validateConfigHomekit(const JsonObject object) __attribute__ ((deprecated));	
     static HAPConfigurationValidationResult validateConfigAccessory(const JsonObject object) __attribute__ ((deprecated));	
     static HAPConfigurationValidationResult validateConfigWifi(const JsonObject object) __attribute__ ((deprecated));
     static HAPConfigurationValidationResult validateConfigWebserver(const JsonObject object) __attribute__ ((deprecated));	
     static HAPConfigurationValidationResult validateConfigUpdate(const JsonObject object) __attribute__ ((deprecated));	
     static HAPConfigurationValidationResult validateConfigPlugins(const JsonObject object) __attribute__ ((deprecated));
-
+#endif
 	// virtual size_t writeBytes(uint16_t address, const uint8_t* input, const size_t expectedDataLen) = 0;
 	// virtual size_t readBytes(uint16_t address, uint8_t* output, const size_t expectedDataLen) = 0;
 	// virtual size_t getBytesLength(uint16_t address) = 0;

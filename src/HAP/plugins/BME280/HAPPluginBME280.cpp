@@ -275,6 +275,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	return _accessory;
 }
 
+#if 0
 HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject object){
     HAPConfigurationValidationResult result;
     
@@ -307,7 +308,7 @@ HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject obje
 	result.valid = true;
     return result;
 }
-
+#endif
 
 bool HAPPluginBME280::begin(){
 	LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);

@@ -5,6 +5,7 @@
 //  Generated on: 23.09.2019
 //
 
+#if HAP_PRINT_QRCODE
 #include "HAPSVG.hpp"
 
 #define QR_CODE_X_OFFSET    0
@@ -115,3 +116,5 @@ void HAPSVG::drawQRCode(Print& prt, QRCode* qrcode, const char* colorFill, const
 
     end(prt);
 }
+
+#endif

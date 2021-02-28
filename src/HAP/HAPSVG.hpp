@@ -8,10 +8,9 @@
 #ifndef HAPSVG_HPP_
 #define HAPSVG_HPP_
 
+#if HAP_PRINT_QRCODE
 #include <Arduino.h>
 #include "qrcode.h"
-
-
 
 class HAPSVG {
 public:
@@ -22,6 +21,6 @@ private:
     static void rectangle(Print& prt, int width, int height, int x, int y, const char* fill, const char* stroke, int strokeWidth, int radiusx, int radiusy);
     static void end(Print& prt);
 };
-
+#endif
 
 #endif /* HAPSVG_HPP_ */

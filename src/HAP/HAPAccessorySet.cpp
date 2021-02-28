@@ -40,6 +40,10 @@ void HAPAccessorySet::begin(){
 	addAccessoryInfo();
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::addAccessoryInfo(){
 	HAPAccessory *accessory = new HAPAccessory();
 	accessory->addInfoService(modelName(), HAP_MANUFACTURER, HAP_MODELL_NAME, "44-22-777", NULL, hap.versionString());
@@ -63,7 +67,9 @@ const char* HAPAccessorySet::setupID(){
 	return _configuration->setupId;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::generateSetupID(){
 	char setupID[5];
 
@@ -105,6 +111,10 @@ const char* HAPAccessorySet::setupHash(){
 	return _setupHash;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::computeSetupHash(){
 	
 	uint8_t *baseMac = HAPDeviceID::generateID();
@@ -134,16 +144,23 @@ void HAPAccessorySet::computeSetupHash(){
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::setPinCode(const char* pinCode){
 	_configuration->setPincode(pinCode);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 const char* HAPAccessorySet::pinCode(){
 	return _configuration->pincode;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::generateXMI(){
 	
 	String tmp = _configuration->pincode;	
@@ -213,6 +230,9 @@ void HAPAccessorySet::generateXMI(){
 	mbedtls_mpi_free(&bignumHigh);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 const char* HAPAccessorySet::xhm(){
 	return _xhm;
 }
@@ -250,6 +270,9 @@ void HAPAccessorySet::addAccessory(HAPAccessory *acc) {
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPAccessorySet::removeAccessory(HAPAccessory *acc) {
 	bool exist = false;
 	for (std::vector<HAPAccessory *>::iterator it = _accessories.begin(); it != _accessories.end(); it++) {
