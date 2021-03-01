@@ -21,6 +21,9 @@
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginBME280::HAPPluginBME280(){
 	_type 				= HAP_PLUGIN_TYPE_ACCESSORY;
 	// _config->name 				= "BME280";
@@ -47,6 +50,9 @@ HAPPluginBME280::HAPPluginBME280(){
 	_config->setToJsonCallback(std::bind(&HAPPluginBME280::internalConfigToJson, this, std::placeholders::_1));
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginBME280::~HAPPluginBME280(){
 	delete _configInternal;
 	delete _config;
@@ -56,6 +62,9 @@ HAPPluginBME280::~HAPPluginBME280(){
 	delete _pressureValue;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginBME280::identify(bool oldValue, bool newValue) {
 	Serial.printf("Start Identify %s\n", _config->name);
 }
@@ -178,7 +187,9 @@ void HAPPluginBME280::setValue(int iid, String oldValue, String newValue){
 	_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginBME280::initAccessory(){
 	LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
 	
@@ -310,6 +321,10 @@ HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject obje
 }
 #endif
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPPluginBME280::begin(){
 	LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
@@ -435,6 +450,9 @@ bool HAPPluginBME280::fakeGatoCallback(){
 	// 0x04 => pressure		= 100
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationPlugin* HAPPluginBME280::setDefaults(){
 	_configInternal->mode = HAP_PLUGIN_BME280_INDOOR;
 	_config->enabled  = HAP_PLUGIN_USE_BME280;
@@ -444,7 +462,9 @@ HAPConfigurationPlugin* HAPPluginBME280::setDefaults(){
 	return _config;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginBME280::internalConfigToJson(Print& prt){
 	/*
 		{ >>> is already printed before
@@ -456,6 +476,9 @@ void HAPPluginBME280::internalConfigToJson(Print& prt){
 	prt.print(_configInternal->mode);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginBME280::setConfiguration(HAPConfigurationPlugin* cfg){
 	_config = cfg;	
 	_configInternal = (HAPPluginBME280Config*)_config->dataPtr;

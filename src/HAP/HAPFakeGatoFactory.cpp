@@ -22,6 +22,9 @@ void HAPFakeGatoFactory::handle(bool forced){
 	} 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoFactory::registerFakeGato(HAPFakeGato* fakegato, String name, std::function<bool()> callback, uint32_t interval){
 
     fakegato->begin();
@@ -33,7 +36,10 @@ void HAPFakeGatoFactory::registerFakeGato(HAPFakeGato* fakegato, String name, st
     LogD(HAPServer::timeString() + " " + "HAPFakeGatoFactory" + "->" + String(__FUNCTION__) + " [   ] " + "Registered fakegato for: " + name + " (" + String(_fakegatos.size()) + ")", true);      
 }
 
- void HAPFakeGatoFactory::setRefTime(uint32_t refTime){
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+void HAPFakeGatoFactory::setRefTime(uint32_t refTime){
     //  LogD(HAPServer::timeString() + " " + __CLASS_NAME__ + "->" + String(__FUNCTION__) + " [   ] " + "Setting refTime: " + String(refTime), true);      
      _refTime = refTime;
  }

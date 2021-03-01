@@ -120,6 +120,7 @@ public:
 
 	// virtual HAPConfigValidationResult validateConfigImpl(JsonObject object) = 0;
 
+
 	virtual HAPConfigurationValidationResult validateConfig(JsonObject object){	
 
 		// LogD(String(__PRETTY_FUNCTION__), true);

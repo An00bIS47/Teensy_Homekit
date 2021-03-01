@@ -31,7 +31,9 @@
 
 #include "HAPPluginKNXMemory.hpp"
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginKNX::HAPPluginKNX(){
     _type           = HAP_PLUGIN_TYPE_ACCESSORY;
 	_previousMillis = 0;
@@ -45,7 +47,9 @@ HAPPluginKNX::HAPPluginKNX(){
     _config->setToJsonCallback(std::bind(&HAPPluginKNX::internalConfigToJson, this, std::placeholders::_1));
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPPluginKNX::begin(){
 
 
@@ -59,7 +63,7 @@ bool HAPPluginKNX::begin(){
     knx.readMemory();
 
   
-    Serial.print(">>>>>>>>> knx.configured(): ");
+    Serial.print(F(">>>>>>>>> knx.configured(): "));
     Serial.println(knx.configured());
 
     Serial.printf("Group Obj Table: LoadState: %d\n", knx.bau().groupObjectTable().loadState());
@@ -68,16 +72,16 @@ bool HAPPluginKNX::begin(){
     // Serial.printf("idx 1: LoadState: %d\n", knx.bau().getInterfaceObject(1)->loadState());
     // Serial.printf("idx 2: LoadState: %d\n", knx.bau().getInterfaceObject(2)->loadState());
 
-    Serial.print("_addrTable: ");
+    Serial.print(F("_addrTable: "));
     Serial.println(knx.bau()._addrTable.loadState());
 
-    Serial.print("_assocTable: ");
+    Serial.print(F("_assocTable: "));
     Serial.println(knx.bau()._assocTable.loadState());
 
-    Serial.print("_groupObjTable: ");
+    Serial.print(F("_groupObjTable: "));
     Serial.println(knx.bau()._groupObjTable.loadState());
 
-    Serial.print("_appProgram: ");
+    Serial.print(F("_appProgram: "));
     Serial.println(knx.bau()._appProgram.loadState());
 
     // int offset = 0;
@@ -102,9 +106,11 @@ bool HAPPluginKNX::begin(){
     return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginKNX::initAccessory() {
-    LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
+    LogV(F("\nInitializing accessory for plugin: ") + String(_config->name) + F(" ..."), true);
     
     // print values of parameters if device is already configured
     if (knx.configured()){		
@@ -114,13 +120,13 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
 #endif   
         uint8_t idCounter = 1;
 
-        // Serial.print("StartupDelay: ");
+        // Serial.print(F("StartupDelay: ");
         // Serial.println(knx.paramByte(StartupDelay));
 
-        // Serial.print("StartupDelaySelection: ");
+        // Serial.print(F("StartupDelaySelection: ");
         // Serial.println(knx.paramByte(StartupDelaySelection));
 
-        // Serial.print("Heartbeat: ");
+        // Serial.print(F("Heartbeat: ");
         // Serial.println(knx.paramByte(Heartbeat));
 
         for (uint8_t i = 0; i < HAP_PLUGIN_KNX_MAX_DEVICES; i++) {
@@ -128,22 +134,22 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
             uint32_t offset = (i * ETS_HK_CHANNEL_PARAMETER_SIZE);
             uint32_t koOffset = (i * ETS_HK_CHANNEL_COMOBJECT_SIZE);
 
-            Serial.print("========================= ");
-            Serial.print("Sensor ");
+            Serial.print(F("========================= "));
+            Serial.print(F("Sensor "));
             Serial.print(i + 1);
-            Serial.println(" =========================");
-            Serial.print(">>> offset: ");
+            Serial.println(F(" ========================="));
+            Serial.print(F(">>> offset: "));
             Serial.println(offset);
-            Serial.print(">>> koOffset: ");
+            Serial.print(F(">>> koOffset: "));
             Serial.println(koOffset);
 
             // Channel specific values 
-            Serial.print("Service Type: ");
+            Serial.print(F("Service Type: "));
             enum HAPPluginKNXServiceType serviceType = (HAPPluginKNXServiceType)knx.paramByte( (offset + ETS_HK_OFFSET_SERVICE_TYPE) );            
             Serial.print(HAPPluginKNXDevice::serviceEnumToString(serviceType));
-            Serial.println(" RAW: " + String(knx.paramByte( (offset + ETS_HK_OFFSET_SERVICE_TYPE))));
+            Serial.println(F(" RAW: ") + String(knx.paramByte( (offset + ETS_HK_OFFSET_SERVICE_TYPE))));
 
-            Serial.print("Service Name: ");
+            Serial.print(F("Service Name: "));
             char serviceName[41];
             memcpy(serviceName, knx.paramData( (offset + ETS_HK_OFFSET_SERVICE_NAME) ) , 40);
             serviceName[40] = '\0';
@@ -154,31 +160,31 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
             bool enableFakegato = (availableFeatures & 0x80);
             bool enableSchedule = (availableFeatures & 0x40);
 
-            Serial.println("Features: ");
-            Serial.println("    Fakegato: " + String(enableFakegato));
-            Serial.println("    Schedule: " + String(enableSchedule)); 
+            Serial.println(F("Features: "));
+            Serial.println(F("    Fakegato: ") + String(enableFakegato));
+            Serial.println(F("    Schedule: ") + String(enableSchedule)); 
 
 
             // Type specific values 
             if (serviceType == HAPPluginKNXServiceTypeWeather) {
-                Serial.println("Available Sensors: ");        
+                Serial.println(F("Available Sensors: "));        
 
                 uint8_t availableSensors = knx.paramByte((offset + ETS_HK_OFFSET_HAS_TEMPERATURE_SENSOR));
                 bool hasTemperatureSensor   = (availableSensors & 0x80);
                 bool hasHumiditySensor      = (availableSensors & 0x40);
                 bool hasAirPressureSensor   = (availableSensors & 0x20);
 
-                Serial.println("    hasTemperatureSensor: " + String(hasTemperatureSensor));
-                Serial.println("    hasHumidtySensor:     " + String(hasHumiditySensor));
-                Serial.println("    hasAirPressureSensor:    " + String(hasAirPressureSensor));
+                Serial.println(F("    hasTemperatureSensor: ") + String(hasTemperatureSensor));
+                Serial.println(F("    hasHumidtySensor:     ") + String(hasHumiditySensor));
+                Serial.println(F("    hasAirPressureSensor: ") + String(hasAirPressureSensor));
 
-                Serial.println("DTP: ");
-                Serial.print("    Humidity: ");
+                Serial.println(F("DTP: "));
+                Serial.print(F("    Humidity: "));
                 Serial.println(knx.paramByte((offset + ETS_HK_OFFSET_HUMIDITY_DPT_TYPE)));     // 9 oder 5
 
-                Serial.println("#### ComObject: Temperature:  " + String((koOffset + ETS_HK_KO_OFFSET_REMOTE_TEMPERATURE)));
-                Serial.println("#### ComObject: Humidity:     " + String((koOffset + ETS_HK_KO_OFFSET_REMOTE_HUMIDITY)));
-                Serial.println("#### ComObject: Air Pressure: " + String((koOffset + ETS_HK_KO_OFFSET_REMOTE_AIRPRESSURE)));
+                Serial.println(F("#### ComObject: Temperature:  ") + String((koOffset + ETS_HK_KO_OFFSET_REMOTE_TEMPERATURE)));
+                Serial.println(F("#### ComObject: Humidity:     ") + String((koOffset + ETS_HK_KO_OFFSET_REMOTE_HUMIDITY)));
+                Serial.println(F("#### ComObject: Air Pressure: ") + String((koOffset + ETS_HK_KO_OFFSET_REMOTE_AIRPRESSURE)));
 
         
                 HAPPluginKNXDeviceWeather* newDevice = new HAPPluginKNXDeviceWeather(
@@ -194,11 +200,11 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
             } else if (serviceType == HAPPluginKNXServiceTypeOutlet) {
 
 
-                Serial.println("#### ComObject: Switch Read:  " + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_READ)));
-                Serial.println("#### ComObject: Switch Write: " + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_WRITE)));
+                Serial.println(F("#### ComObject: Switch Read:  ") + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_READ)));
+                Serial.println(F("#### ComObject: Switch Write: ") + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_WRITE)));
 
-                Serial.println("#### ComObject: Current:  " + String((koOffset + ETS_HK_KO_OFFSET_OUTLET_CURRENT)));
-                Serial.println("#### ComObject: actEnergy: " + String((koOffset + ETS_HK_KO_OFFSET_OUTLET_ACT_ENERGY)));
+                Serial.println(F("#### ComObject: Current:  ") + String((koOffset + ETS_HK_KO_OFFSET_OUTLET_CURRENT)));
+                Serial.println(F("#### ComObject: actEnergy: ") + String((koOffset + ETS_HK_KO_OFFSET_OUTLET_ACT_ENERGY)));
 
 
                 HAPPluginKNXDeviceOutlet* newDevice = new HAPPluginKNXDeviceOutlet(
@@ -214,8 +220,8 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
                 _devices.push_back(newDevice);
             } else if (serviceType == HAPPluginKNXServiceTypeSwitch) {  
 
-                Serial.println("#### ComObject: Switch Read:  " + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_READ)));
-                Serial.println("#### ComObject: Switch Write: " + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_WRITE)));
+                Serial.println(F("#### ComObject: Switch Read:  ") + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_READ)));
+                Serial.println(F("#### ComObject: Switch Write: ") + String((koOffset + ETS_HK_KO_OFFSET_SWITCH_WRITE)));
 
                 HAPPluginKNXDeviceSwitch* newDevice = new HAPPluginKNXDeviceSwitch(
                     idCounter++, 
@@ -227,11 +233,11 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
                 _devices.push_back(newDevice);
 
             } else  {
-                LogE("NOT YET SUPPORTED!!!", true);
+                LogE(F("NOT YET SUPPORTED!!!"), true);
             }
         }            
     } else {
-		LogE("ERROR: KNX is not configured! Use ETS to parameterize it!", true);
+		LogE(F("ERROR: KNX is not configured! Use ETS to parameterize it!"), true);
 	}	
 
 
@@ -434,15 +440,15 @@ void HAPPluginKNX::handleHTTPGet(HTTPRequest * req, HTTPResponse * res){
 
 void HAPPluginKNX::handleHTTPGetKeyProcessor(const String& key, HTTPResponse * res){
     // if (key == "VAR_TITLE") {
-    //     res->print("Plugins - " + _config->name);
+    //     res->print(F("Plugins - " + _config->name);
     // } else if (key == "VAR_NAVIGATION") {
     //     res->print(HAPWebServer::buildNavigation());
     // } else if (key == "VAR_CONTENT") {        
-    //     res->print("<div class=\"pure-u-1 pure-u-md-1\"><p>Paired Devices:</p>");
-    //     res->print("<table class=\"pure-table pure-table-horizontal\">");
-    //     res->print("<thead> <tr> <th>Name</th> <th>House Code</th> <th>Device Code</th> </tr> </thead>");
-    //     res->print("<tbody>");
-    //     res->print("");
+    //     res->print(F("<div class=\"pure-u-1 pure-u-md-1\"><p>Paired Devices:</p>");
+    //     res->print(F("<table class=\"pure-table pure-table-horizontal\">");
+    //     res->print(F("<thead> <tr> <th>Name</th> <th>House Code</th> <th>Device Code</th> </tr> </thead>");
+    //     res->print(F("<tbody>");
+    //     res->print(F("");
     //     for (auto& dev : _devices){ 
 
     //         char houseCode[6];
@@ -453,29 +459,29 @@ void HAPPluginKNX::handleHTTPGetKeyProcessor(const String& key, HTTPResponse * r
 
     //         res->printf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n", dev->name.c_str(),houseCode ,deviceCode);
     //     }
-    //     res->print("</tbody>");
-    //     res->print("</table>");
-    //     res->print("</div>");
+    //     res->print(F("</tbody>");
+    //     res->print(F("</table>");
+    //     res->print(F("</div>");
         
-    //     res->print("<br>");
-    //     res->print("<br>");
+    //     res->print(F("<br>");
+    //     res->print(F("<br>");
 
 
     //     // Add new device        
-    //     res->print("<div class=\"pure-u-1 pure-u-md-1\">");
-    //     res->print("<form class=\"pure-form\" action=\"/plugin/rcswitch\" method=\"POST\">");
-    //     res->print(" <fieldset>");
-    //     res->print("<legend>Add another outlet</legend>");
-    //     res->print("<input type=\"text\" id=\"name\" placeholder=\"Name\">");
-    //     res->print("<input type=\"text\" id=\"houseAddress\" placeholder=\"System Address\">");
-    //     res->print("<input type=\"text\" id=\"deviceAddress\" placeholder=\"Device Address\">");
-    //     res->print("<button type=\"submit\" class=\"pure-button pure-button-primary\">Add</button>");
-    //     res->print("</fieldset>");
-    //     res->print("</form>");
-    //     res->print("</div>");
+    //     res->print(F("<div class=\"pure-u-1 pure-u-md-1\">");
+    //     res->print(F("<form class=\"pure-form\" action=\"/plugin/rcswitch\" method=\"POST\">");
+    //     res->print(F(" <fieldset>");
+    //     res->print(F("<legend>Add another outlet</legend>");
+    //     res->print(F("<input type=\"text\" id=\"name\" placeholder=\"Name\">");
+    //     res->print(F("<input type=\"text\" id=\"houseAddress\" placeholder=\"System Address\">");
+    //     res->print(F("<input type=\"text\" id=\"deviceAddress\" placeholder=\"Device Address\">");
+    //     res->print(F("<button type=\"submit\" class=\"pure-button pure-button-primary\">Add</button>");
+    //     res->print(F("</fieldset>");
+    //     res->print(F("</form>");
+    //     res->print(F("</div>");
 
     // } else {
-    //     res->print("");
+    //     res->print(F("");
     // }
 }
 #endif
@@ -673,7 +679,7 @@ std::vector<HAPWebServerPluginNode*> HAPPluginKNX::getResourceNodes(){
 #if HAP_PLUGIN_KNX_USE_TASK
 void HAPPluginKNX::taskKNX( void * parameter )
 {
-    Serial.println(">>>>> Started task now");
+    Serial.println(F(">>>>> Started task now");
 	knx.start();    
 
     while( true ){
@@ -682,11 +688,15 @@ void HAPPluginKNX::taskKNX( void * parameter )
         //vTaskDelay(1);    
     }
  
-    // Serial.println("Ending task 1");
+    // Serial.println(F("Ending task 1");
     // vTaskDelete( NULL );
 }
 #endif
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationPlugin* HAPPluginKNX::setDefaults(){
 	_config->enabled  = HAP_PLUGIN_USE_KNX;
 	_config->interval = HAP_PLUGIN_KNX_INTERVAL;	
@@ -695,6 +705,10 @@ HAPConfigurationPlugin* HAPPluginKNX::setDefaults(){
 	return _config;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNX::internalConfigToJson(Print& prt){
 	/*
 		{ >>> is already printed before
@@ -723,19 +737,19 @@ void HAPPluginKNX::internalConfigToJson(Print& prt){
 
     if (!knx.configured()) return;
 
-	prt.print("\"devices\": [");
+	prt.print(F("\"devices\": ["));
 	
     for (uint8_t i = 0; i < HAP_PLUGIN_KNX_MAX_DEVICES; i++) {
 
         uint32_t offset = (i * ETS_HK_CHANNEL_PARAMETER_SIZE);
           
-        enum HAPPluginKNXServiceType serviceType = (HAPPluginKNXServiceType)knx.paramByte( (offset + ETS_HK_OFFSET_SERVICE_TYPE) );            
-        prt.print("{");
-        prt.print("\"type\":");
+        HAPPluginKNXServiceType serviceType = (HAPPluginKNXServiceType)knx.paramByte( (offset + ETS_HK_OFFSET_SERVICE_TYPE) );            
+        prt.print(F("{"));
+        prt.print(F("\"type\":"));
         prt.print(HAPHelper::wrap(HAPPluginKNXDevice::serviceEnumToString(serviceType)));
 
-        prt.print(",");
-        prt.print("\"name\":");
+        prt.print(F(","));
+        prt.print(F("\"name\":"));
         char serviceName[41];
         memcpy(serviceName, knx.paramData( (offset + ETS_HK_OFFSET_SERVICE_NAME) ) , 40);
         serviceName[40] = '\0';
@@ -745,11 +759,11 @@ void HAPPluginKNX::internalConfigToJson(Print& prt){
         uint8_t availableFeatures = knx.paramByte( (offset + ETS_HK_OFFSET_ENABLE_FAKEGATO) );
         bool enableFakegato = (availableFeatures & 0x80);
         bool enableSchedule = (availableFeatures & 0x40);
-        prt.print(",");
-        prt.print("\"enableFakegato\":");
+        prt.print(F(","));
+        prt.print(F("\"enableFakegato\":"));
         prt.print(enableFakegato);
-        prt.print(",");
-        prt.print("\"enableSchedule\":");
+        prt.print(F(","));
+        prt.print(F("\"enableSchedule\":"));
         prt.print(enableSchedule);
 
         if (serviceType == HAPPluginKNXServiceTypeWeather){
@@ -758,43 +772,46 @@ void HAPPluginKNX::internalConfigToJson(Print& prt){
             bool hasHumiditySensor      = (availableSensors & 0x40);
             bool hasAirPressureSensor   = (availableSensors & 0x20);
 
-            prt.print(",");
-            prt.print("\"hasTemperatureSensor\":");
+            prt.print(F(","));
+            prt.print(F("\"hasTemperatureSensor\":"));
             prt.print(hasTemperatureSensor);
 
-            prt.print(",");
-            prt.print("\"hasHumidtySensor\":");
+            prt.print(F(","));
+            prt.print(F("\"hasHumidtySensor\":"));
             prt.print(hasHumiditySensor);
 
-            prt.print(",");
-            prt.print("\"hasAirPressureSensor\":");
+            prt.print(F(","));
+            prt.print(F("\"hasAirPressureSensor\":"));
             prt.print(hasAirPressureSensor);
 
             if (hasHumiditySensor){
-                prt.print(",");
-                prt.print("\"humidityDPT\":");
+                prt.print(F(","));
+                prt.print(F("\"humidityDPT\":"));
                 prt.print(knx.paramByte((offset + ETS_HK_OFFSET_HUMIDITY_DPT_TYPE)));     // 9 / 5
             }
             
         }
 
-        prt.print("}");
+        prt.print(F("}"));
 
         if (i + 1 < HAP_PLUGIN_KNX_MAX_DEVICES){
-            prt.print(",");
+            prt.print(F(","));
         }
     }
-    prt.print("]");
+    prt.print(F("]"));
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNX::setConfiguration(HAPConfigurationPlugin* cfg){
 	_config = cfg;
 	_config->setToJsonCallback(std::bind(&HAPPluginKNX::internalConfigToJson, this, std::placeholders::_1));
 
-	// Serial.print("BME280 interval:");
+	// Serial.print(F("BME280 interval:");
 	// Serial.println(_config->interval);
-	// Serial.print("BME280 dataSize:");
+	// Serial.print(F("BME280 dataSize:");
 	// Serial.println(_config->dataSize);	
-	// Serial.print("BME280 mode:");
+	// Serial.print(F("BME280 mode:");
 	// Serial.println(_configInternal->mode);	
 }

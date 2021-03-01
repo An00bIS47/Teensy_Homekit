@@ -36,20 +36,27 @@ HAPPluginKNXDevice::HAPPluginKNXDevice(){
 HAPPluginKNXDevice::~HAPPluginKNXDevice(){
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDevice::setEventManager(EventManager* eventManager){
       
     _eventManager = eventManager;
     // Serial.printf("event: %p\n", _eventManager);  
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDevice::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
     
     _fakegatoFactory = fakegatoFactory;
     // Serial.printf("fakegato: %p\n", _fakegatoFactory);
 }   
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDevice::identify(bool oldValue, bool newValue) {
     printf("Start Identify knx: %d\n", _id);
 }

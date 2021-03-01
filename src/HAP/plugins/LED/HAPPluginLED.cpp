@@ -34,7 +34,9 @@
 #define HAP_LED_ENABLE_BRIGHTNESS   0
 #endif
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginLED::HAPPluginLED(){
     _type               = HAP_PLUGIN_TYPE_ACCESSORY;
     _previousMillis     = 0;
@@ -55,6 +57,9 @@ HAPPluginLED::HAPPluginLED(){
     _config = new HAPConfigurationPlugin("LED", true, HAP_PLUGIN_LED_INTERVAL);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginLED::changePower(bool oldValue, bool newValue) {
     // LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
@@ -113,6 +118,9 @@ void HAPPluginLED::handleImpl(bool forced){
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPPluginLED::begin(){
     LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
@@ -122,7 +130,9 @@ bool HAPPluginLED::begin(){
     return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginLED::initAccessory(){
     
     LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
@@ -227,10 +237,14 @@ void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
 
 }
 
+
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
     printf("Start Identify Light from member\n");
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object){
     HAPConfigurationValidationResult result;
     
@@ -277,6 +291,9 @@ HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object)
 //     }
 // }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
 	_config->enabled  = HAP_PLUGIN_USE_LED;
 	_config->interval = HAP_PLUGIN_LED_INTERVAL;	
@@ -285,6 +302,10 @@ HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
 	return _config;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginLED::setConfiguration(HAPConfigurationPlugin* cfg){
 	_config = cfg;	
 }

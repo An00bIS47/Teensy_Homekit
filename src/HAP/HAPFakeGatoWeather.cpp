@@ -39,6 +39,9 @@ HAPFakeGatoWeather::~HAPFakeGatoWeather(){
     }
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoWeather::begin(){              
 
     if (_vectorBuffer == nullptr) {
@@ -80,7 +83,9 @@ void HAPFakeGatoWeather::getSignature(uint8_t* signature){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, String stringTemperature, String stringHumidity, String stringPressure){        
 
 
@@ -107,6 +112,9 @@ bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, String stringTemperature, Str
     return addEntry(data);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, uint32_t timestamp, String stringTemperature, String stringHumidity, String stringPressure){        
 
 
@@ -132,7 +140,9 @@ bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, uint32_t timestamp, String st
     return addEntry(data);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoWeather::addEntry(HAPFakeGatoWeatherData data){
 
     //LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);

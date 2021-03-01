@@ -38,12 +38,16 @@ HAPFakeGatoHygrometer::~HAPFakeGatoHygrometer(){
     }
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoHygrometer::begin(){              
 
     if (_vectorBuffer == nullptr) {
         _vectorBuffer = new std::vector<HAPFakeGatoHygrometerData>(HAP_FAKEGATO_BUFFER_SIZE);
     }
 }
+
 
 int HAPFakeGatoHygrometer::signatureLength(){
     return HAP_FAKEGATO_SIGNATURE_LENGTH;    
@@ -66,7 +70,9 @@ void HAPFakeGatoHygrometer::getSignature(uint8_t* signature){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoHygrometer::addEntry(String stringHumidity){        
 
 
@@ -83,6 +89,9 @@ bool HAPFakeGatoHygrometer::addEntry(String stringHumidity){
     return addEntry(data);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoHygrometer::addEntry(uint32_t timestamp, String stringHumidity){        
 
 
@@ -99,7 +108,9 @@ bool HAPFakeGatoHygrometer::addEntry(uint32_t timestamp, String stringHumidity){
     return addEntry(data);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoHygrometer::addEntry(HAPFakeGatoHygrometerData data){
 
     //LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);

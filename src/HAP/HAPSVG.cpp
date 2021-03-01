@@ -12,7 +12,9 @@
 #define QR_CODE_Y_OFFSET    0
 #define QR_CODE_ZOOM_FACTOR 5
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPSVG::begin(Print& prt, QRCode* qrcode){
     int width = (((4 * qrcode->version) + 17) * QR_CODE_ZOOM_FACTOR ) + QR_CODE_X_OFFSET + QR_CODE_Y_OFFSET;
     int height = width;
@@ -36,14 +38,18 @@ void HAPSVG::begin(Print& prt, QRCode* qrcode){
     prt.print(F("px' xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink'>"));
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPSVG::end(Print& prt)
 {
     prt.print(F("</svg>"));
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPSVG::rectangle(Print& prt, int width, int height, int x, int y, const char* fill, const char* stroke, int strokeWidth, int radiusx, int radiusy)
 {       
     prt.print(F("<rect width='"));
@@ -90,6 +96,9 @@ void HAPSVG::rectangle(Print& prt, int width, int height, int x, int y, const ch
     prt.print(F("' />"));       
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPSVG::drawQRCode(Print& prt, QRCode* qrcode, const char* colorFill, const char* colorBackground){
 
     begin(prt, qrcode);

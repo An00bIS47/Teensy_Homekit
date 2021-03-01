@@ -49,9 +49,14 @@ HAPFakeGatoScheduleEnergy::~HAPFakeGatoScheduleEnergy(){
 
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoScheduleEnergy::begin(){
 
 }
+
 
 bool HAPFakeGatoScheduleEnergy::decodeToggleOnOff(uint8_t* data){
 	return data[1] & 0x01;
@@ -285,6 +290,9 @@ void HAPFakeGatoScheduleEnergy::clear(){
 	_programEvents.clear();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoScheduleEnergy::fromJson(JsonObject &root){
 	
 	if (root["timer"].isNull()) return;
@@ -301,7 +309,9 @@ void HAPFakeGatoScheduleEnergy::fromJson(JsonObject &root){
 	
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 JsonObject HAPFakeGatoScheduleEnergy::toJson(){
 	/*
 		"days": uint32_t,
@@ -516,6 +526,9 @@ void HAPFakeGatoScheduleEnergy::programTimers() {
 	} 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoScheduleEnergy::callbackTimerStart(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 	LogI(HAPServer::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: START", true);
@@ -523,6 +536,9 @@ void HAPFakeGatoScheduleEnergy::callbackTimerStart(uint16_t state){
 	if (_callbackTimerStart) _callbackTimerStart(state);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoScheduleEnergy::callbackTimerEnd(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE	
 	LogI(HAPServer::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: END", true);

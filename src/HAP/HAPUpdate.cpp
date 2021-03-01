@@ -70,6 +70,9 @@ HAPUpdate::~HAPUpdate() {
 	// TODO Auto-generated destructor stub
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPUpdate::begin(const char* hostname) {
 
 #if HAP_ENABLE_UPDATE_OTA	
@@ -128,6 +131,9 @@ void HAPUpdate::begin(const char* hostname) {
 	_previousMillis = (millis() + HAP_UPDATE_WEB_INTERVAL) - 3000;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPUpdate::handle() {
 
 #if HAP_ENABLE_UPDATE_OTA	
@@ -148,7 +154,9 @@ void HAPUpdate::handle() {
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPUpdate::updateAvailable(){
 	return _available;
 }

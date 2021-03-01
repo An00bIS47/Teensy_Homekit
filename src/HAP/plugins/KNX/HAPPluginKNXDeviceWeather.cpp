@@ -39,7 +39,9 @@ HAPPluginKNXDeviceWeather::HAPPluginKNXDeviceWeather(uint8_t id_, char name[], b
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
 
     if ( (_koTemperature == 0) && (_koHumidity == 0) && (_koAirPressure == 0) ) {
@@ -181,13 +183,18 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
     return _accessory;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceWeather::setEventManager(EventManager* eventManager){
       
     _eventManager = eventManager;
     // Serial.printf("w event: %p\n", _eventManager);  
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceWeather::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
     
     _fakegatoFactory = fakegatoFactory;

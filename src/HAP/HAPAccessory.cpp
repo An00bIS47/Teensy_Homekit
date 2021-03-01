@@ -50,12 +50,17 @@ HAPAccessory::~HAPAccessory(){
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::addService(HAPService *ser) {
 	ser->serviceID = ++numberOfInstance;
 	_services.push_back(ser);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::addCharacteristics(HAPService *ser, HAPCharacteristic *cha) {
 	cha->iid = ++numberOfInstance;
 	ser->_characteristics.push_back(cha);
@@ -66,6 +71,10 @@ void HAPAccessory::addCharacteristics(HAPService *ser, HAPCharacteristic *cha) {
 	HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPAccessory::removeService(HAPService *ser) {
 	bool exist = false;
 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
@@ -77,6 +86,10 @@ bool HAPAccessory::removeService(HAPService *ser) {
 	return exist;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPAccessory::removeCharacteristics(HAPCharacteristic *cha) {
 	bool exist = false;
 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
@@ -116,6 +129,9 @@ HAPCharacteristic *HAPAccessory::characteristicsAtIndex(uint8_t index) {
 	return NULL;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPCharacteristic *HAPAccessory::characteristicsOfType(int type) {
 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
 		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
@@ -190,6 +206,10 @@ void HAPAccessory::printTo(Print& print){
 // }
 
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
 	
 	setName(accessoryName);
@@ -209,7 +229,9 @@ HAPService* HAPAccessory::addInfoService(const String& accessoryName, const Stri
 	return _infoService;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initInfoService(){
 	if (_infoService == nullptr) {
 		_infoService = new HAPService(HAP_SERVICE_ACCESSORY_INFORMATION);
@@ -217,6 +239,9 @@ void HAPAccessory::initInfoService(){
 	}    
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initAccessoryName(){
 	initInfoService();
 	if (_accessoryName == nullptr) {
@@ -225,6 +250,9 @@ void HAPAccessory::initAccessoryName(){
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initFirmware(){
 	initInfoService();
 	if (_firmware == nullptr) {
@@ -233,6 +261,9 @@ void HAPAccessory::initFirmware(){
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initManufacturer(){
 	initInfoService();
 	if (_manufacturer == nullptr) {
@@ -241,6 +272,9 @@ void HAPAccessory::initManufacturer(){
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initModelName(){
 	initInfoService();
 	if (_modelName == nullptr) {
@@ -249,6 +283,9 @@ void HAPAccessory::initModelName(){
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initSerialNumber(){
 	initInfoService();
 	if (_serialNumber == nullptr) {
@@ -257,6 +294,9 @@ void HAPAccessory::initSerialNumber(){
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::initIdentify(){
 	initInfoService();
 	if (_identify == nullptr) {
@@ -266,6 +306,9 @@ void HAPAccessory::initIdentify(){
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::setName(const String& name){
 	initAccessoryName();
 	_accessoryName->setValueString(name);
@@ -278,10 +321,15 @@ String HAPAccessory::name(){
 	return _accessoryName->valueString();
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::setFirmware(const String& firmware){
 	initFirmware();
 	_firmware->setValueString(firmware);
 }
+
 
 String HAPAccessory::firmware(){
 	if (_firmware == nullptr) {
@@ -291,10 +339,14 @@ String HAPAccessory::firmware(){
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::setManufacturer(const String& manufacturer){
 	initManufacturer();
 	_manufacturer->setValueString(manufacturer);
 }
+
 
 String HAPAccessory::manufacturer(){
 	if (_manufacturer == nullptr) {
@@ -303,7 +355,9 @@ String HAPAccessory::manufacturer(){
 	return _manufacturer->valueString();
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::setModelName(const String& modelName){
 	initModelName();
 	_modelName->setValueString(modelName);
@@ -316,6 +370,9 @@ String HAPAccessory::modelName(){
 	return _modelName->valueString();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::setSerialNumber(const String& serialNumber){
 	initSerialNumber();
 	_serialNumber->setValueString(serialNumber);
@@ -328,6 +385,9 @@ String HAPAccessory::serialNumber(){
 	return _serialNumber->valueString();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
 	initIdentify();
 	_identify->valueChangeFunctionCall = callback;

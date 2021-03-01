@@ -36,6 +36,9 @@ HAPAccessorySet::~HAPAccessorySet(){
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::begin(){
 	addAccessoryInfo();
 }
@@ -55,14 +58,24 @@ void HAPAccessorySet::addAccessoryInfo(){
 	addAccessory(accessory);
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 uint8_t HAPAccessorySet::accessoryType(){
 	return _accessoryType;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::setAccessoryType(enum HAP_ACCESSORY_TYPE accessoryType){
 	_accessoryType = (uint8_t)accessoryType;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 const char* HAPAccessorySet::setupID(){
 	return _configuration->setupId;
 }
@@ -95,18 +108,30 @@ void HAPAccessorySet::generateSetupID(){
   	generateXMI();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 char HAPAccessorySet::randomChar(char* letters) {
    return letters[random(0, strlen(letters)-1)];
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::setModelName(const char* name){
 	_configuration->setModelName(name);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 const char* HAPAccessorySet::modelName(){
 	return _configuration->modelname;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 const char* HAPAccessorySet::setupHash(){
 	return _setupHash;
 }
@@ -238,10 +263,15 @@ const char* HAPAccessorySet::xhm(){
 }
 
 
+
 uint8_t HAPAccessorySet::numberOfAccessory() {
 	return _accessories.size();
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPAccessorySet::accessoryWithAID(uint8_t aid) {
 	for (std::vector<HAPAccessory *>::iterator it = _accessories.begin(); it != _accessories.end(); it++) {
 		if ((*it)->aid == aid) {
@@ -250,6 +280,7 @@ HAPAccessory* HAPAccessorySet::accessoryWithAID(uint8_t aid) {
 	}
 	return nullptr;
 }
+
 
 HAPAccessory* HAPAccessorySet::accessoryAtIndex(uint8_t index){
 	// uint8_t count = 0;
@@ -310,6 +341,9 @@ void HAPAccessorySet::toJson(JsonArray& array){
     }
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
 	HAPCharacteristic *c = getCharacteristics(aid, iid);
 	if (c != nullptr) {		
@@ -322,6 +356,9 @@ int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, ch
 	return HAP_STATUS_RESOURCE_NOT_FOUND;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPCharacteristic* HAPAccessorySet::getCharacteristicsOfType(uint8_t aid, uint16_t type){
 	HAPAccessory *a = accessoryWithAID(aid);
 	if (a != NULL) {		
@@ -332,6 +369,7 @@ HAPCharacteristic* HAPAccessorySet::getCharacteristicsOfType(uint8_t aid, uint16
 	}
 	return NULL;
 }
+
 
 HAPCharacteristic* HAPAccessorySet::getCharacteristics(uint8_t aid, uint8_t iid){
 	HAPAccessory *a = accessoryWithAID(aid);		

@@ -39,6 +39,9 @@ HAPFakeGatoSwitch::~HAPFakeGatoSwitch(){
     }
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoSwitch::begin(){              
 
     if (_vectorBuffer == nullptr) {
@@ -57,7 +60,9 @@ void HAPFakeGatoSwitch::getSignature(uint8_t* signature){
     memcpy(signature, s1.ui8, 2);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoSwitch::addEntry(String status){        
 
     LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: status=" + status, true);
@@ -72,6 +77,10 @@ bool HAPFakeGatoSwitch::addEntry(String status){
     return addEntry(data);
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoSwitch::addEntry(HAPFakeGatoSwitchData data){
     
     // if (_ringbuffer == nullptr) {

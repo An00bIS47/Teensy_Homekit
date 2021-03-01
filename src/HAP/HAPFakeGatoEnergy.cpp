@@ -51,7 +51,9 @@ HAPFakeGatoEnergy::~HAPFakeGatoEnergy(){
     }
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoEnergy::begin(){
     
     if (_vectorBuffer == nullptr) {
@@ -68,6 +70,7 @@ void HAPFakeGatoEnergy::begin(){
     // _configReadCharacteristics->setValue(_schedule->buildScheduleString());
 
 }
+
 
 int HAPFakeGatoEnergy::signatureLength(){
     return HAP_FAKEGATO_SIGNATURE_LENGTH;
@@ -106,7 +109,9 @@ void HAPFakeGatoEnergy::getSignature(uint8_t* signature){
     signature[9] = 1;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPFakeGatoEnergy::addEntry(uint8_t bitmask, String powerWatt, String powerVoltage, String powerCurrent, String stringPower10th, String status){        
 
     LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(size()) + "]: power10th=" + stringPower10th, true);
@@ -405,10 +410,16 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
     }
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoEnergy::beginSchedule(){
     _configReadCharacteristics->setValueString(_schedule->buildScheduleString());    
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoEnergy::setSerialNumber(String serialNumber) {
     _serialNumber = serialNumber;
     _schedule->setSerialNumber(serialNumber);
@@ -435,10 +446,16 @@ void HAPFakeGatoEnergy::handle(bool forced){
     _schedule->handle();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 JsonObject HAPFakeGatoEnergy::scheduleToJson(){
     return _schedule->toJson();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGatoEnergy::scheduleFromJson(JsonObject &root){
     _schedule->fromJson(root);
 }

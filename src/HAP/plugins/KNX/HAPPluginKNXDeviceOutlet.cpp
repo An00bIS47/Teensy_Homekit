@@ -39,7 +39,9 @@ HAPPluginKNXDeviceOutlet::HAPPluginKNXDeviceOutlet(uint8_t id_, char name[], boo
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
 
     if ( (_koReadState == 0) && (_koWriteState == 0) ) {
@@ -187,13 +189,18 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
     return _accessory;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceOutlet::setEventManager(EventManager* eventManager){
       
     _eventManager = eventManager;
     // Serial.printf("w event: %p\n", _eventManager);  
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceOutlet::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
     
     _fakegatoFactory = fakegatoFactory;
@@ -311,15 +318,24 @@ uint32_t HAPPluginKNXDeviceOutlet::getTimestampLastActivity(){
     return _timestampLastActivity;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 JsonObject HAPPluginKNXDeviceOutlet::scheduleToJson(){
     return _fakegato->scheduleToJson();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceOutlet::scheduleFromJson(JsonObject &root){
     _fakegato->scheduleFromJson(root);
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceOutlet::saveConfig(){ 
     LogE(HAPServer::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());

@@ -58,7 +58,9 @@ HAPFakeGato::~HAPFakeGato(){
         
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, bool withSchedule){
         
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    

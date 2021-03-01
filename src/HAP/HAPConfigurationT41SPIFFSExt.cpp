@@ -18,10 +18,16 @@ HAPConfigurationT41SPIFFSExt::~HAPConfigurationT41SPIFFSExt(){
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfigurationT41SPIFFSExt::begin(){
    return mount();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPConfigurationT41SPIFFSExt::formatFlash(){
     int8_t result = _eRAM.begin(_config);
     if(result == 0){
@@ -31,7 +37,9 @@ void HAPConfigurationT41SPIFFSExt::formatFlash(){
     }
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfigurationT41SPIFFSExt::mount(){
     int8_t result = _eRAM.begin(_config);
     if (result == 0){
@@ -41,6 +49,7 @@ bool HAPConfigurationT41SPIFFSExt::mount(){
         return false;
     } 
 }
+
 
 size_t HAPConfigurationT41SPIFFSExt::writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen) {
     // int result = _eRAM.f_writeFile(label, (const char*)input, SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR);

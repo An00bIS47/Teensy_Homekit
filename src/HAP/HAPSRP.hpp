@@ -24,7 +24,7 @@ typedef struct NGHex {
 } NGHex;
 
 /* All constants here were pulled from Appendix A of RFC 5054 */
-static NGHex global_Ng_constants[] = {
+const NGHex global_Ng_constants[] PROGMEM = {
 
  #if HAP_SRP_SUPPORT_ALL_NG_SIZES
 	{ /* 512 */

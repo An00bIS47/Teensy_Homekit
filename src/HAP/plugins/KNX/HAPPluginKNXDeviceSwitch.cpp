@@ -37,7 +37,9 @@ HAPPluginKNXDeviceSwitch::HAPPluginKNXDeviceSwitch(uint8_t id_, char name[], boo
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
 
     if ( (_koReadState == 0) && (_koWriteState == 0) ) {
@@ -138,13 +140,18 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
     return _accessory;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceSwitch::setEventManager(EventManager* eventManager){
       
     _eventManager = eventManager;
     // Serial.printf("w event: %p\n", _eventManager);  
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginKNXDeviceSwitch::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
     
     _fakegatoFactory = fakegatoFactory;
