@@ -35,7 +35,11 @@ public:
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 	
+#if HAP_ENABLE_WEBSERVER	
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
+	JsonObject getConfigImpl();
+	void setConfigImpl(JsonObject root);
+#endif
 
 	HAPConfigurationPlugin* setDefaults();
 

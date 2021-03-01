@@ -295,7 +295,7 @@ void HAPPluginKNX::handleImpl(bool forced){
     }
 }	
 
-#if 0
+#if HAP_ENABLE_WEBSERVER
 HAPConfigurationValidationResult HAPPluginKNX::validateConfig(JsonObject object){
 
     /*

@@ -17,7 +17,7 @@
             "toolchainBinDir": "/Users/michael/.platformio/packages/toolchain-gccarmnoneeabi@1.50401.190816/bin",
             "preLaunchTask": {
                 "type": "PlatformIO",
-                "task": "Pre-Debug"
+                "task": "Pre-Debug (teensy_41)"
             },
             "internalConsoleOptions": "openOnSessionStart"
         },

@@ -248,10 +248,11 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	return _accessory;
 }
 
+#if HAP_ENABLE_WEBSERVER	
 HAPConfigurationValidationResult HAPPluginDHT::validateConfig(JsonObject object){
     return HAPPlugin::validateConfig(object);
 }
-
+#endif
 
 bool HAPPluginDHT::fakeGatoCallback(){	
 	// return _fakegato.addEntry(_temperatureValue->value(), _humidityValue->value(), _pressureValue->value());

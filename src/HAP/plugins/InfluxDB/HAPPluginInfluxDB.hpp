@@ -85,11 +85,12 @@ public:
     void handleImpl(bool forced = false); 
 	void handleEvents(int eventCode, struct HAPEvent eventParam);
 
-	
+#if HAP_ENABLE_WEBSERVER	
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 	
-	// JsonObject getConfigImpl();
-	// void setConfigImpl(JsonObject root);
+	JsonObject getConfigImpl();
+	void setConfigImpl(JsonObject root);
+#endif
 	
 	void addEventListener(EventManager* eventManager);
 

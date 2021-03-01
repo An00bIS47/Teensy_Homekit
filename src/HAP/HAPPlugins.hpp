@@ -77,8 +77,11 @@ public:
 	virtual HAPAccessory* initAccessory() = 0;
 	virtual bool begin() = 0;
 
+#if HAP_ENABLE_WEBSERVER
 	virtual JsonObject getConfigImpl() __attribute__ ((deprecated)) { DynamicJsonDocument doc(1); return doc.as<JsonObject>();};	
 	virtual void setConfigImpl(JsonObject root) __attribute__ ((deprecated)) {};	
+#endif
+
 
 	virtual void handleImpl(bool forced = false) = 0;
 
@@ -108,7 +111,7 @@ public:
 	
 
 	virtual void identify(bool oldValue, bool newValue) {
-		LogE("Handle identify from plugins", true);
+		LogE(F("Handle identify from plugins"), true);
 	}
 	
 	void handle(bool forced = false) {
@@ -120,7 +123,7 @@ public:
 
 	// virtual HAPConfigValidationResult validateConfigImpl(JsonObject object) = 0;
 
-
+#if HAP_ENABLE_WEBSERVER
 	virtual HAPConfigurationValidationResult validateConfig(JsonObject object){	
 
 		// LogD(String(__PRETTY_FUNCTION__), true);
@@ -195,6 +198,8 @@ public:
 		
 		return doc.as<JsonObject>();
 	}
+#endif
+
 
 	enum HAP_PLUGIN_TYPE type(){
 		return _type;

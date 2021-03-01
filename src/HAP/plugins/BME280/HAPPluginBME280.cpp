@@ -286,7 +286,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	return _accessory;
 }
 
-#if 0
+#if HAP_ENABLE_WEBSERVER	
 HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject object){
     HAPConfigurationValidationResult result;
     

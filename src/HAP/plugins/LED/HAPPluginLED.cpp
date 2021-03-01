@@ -242,8 +242,10 @@ void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
 FLASHMEM 
 #endif
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
-    printf("Start Identify Light from member\n");
+    printf(F("Start Identify Light from member\n"));
 }
+
+#if HAP_ENABLE_WEBSERVER
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
@@ -267,32 +269,35 @@ HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object)
     return result;
 }
 
-// JsonObject HAPPluginLED::getConfigImpl(){
+JsonObject HAPPluginLED::getConfigImpl(){
 
-//     LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+    LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
-//     DynamicJsonDocument doc(128);
-//     doc["gpio"] = _gpio;
-//     doc["blinkingEnabled"] = _blinkingEnabled;
+    DynamicJsonDocument doc(128);
+    doc["gpio"] = _gpio;
+    doc["blinkingEnabled"] = _blinkingEnabled;
 
-// #if HAP_DEBUG_CONFIG
-//     serializeJson(doc, Serial);
-//     Serial.println();
-// #endif
+#if HAP_DEBUG_CONFIG
+    serializeJson(doc, Serial);
+    Serial.println();
+#endif
 
-// #if defined(ARDUINO_ARCH_ESP32)	
-// 	doc.shrinkToFit();
-// #endif
-// 	return doc.as<JsonObject>();
-// }
+#if defined(ARDUINO_ARCH_ESP32)	
+	doc.shrinkToFit();
+#endif
+	return doc.as<JsonObject>();
+}
 
-// void HAPPluginLED::setConfigImpl(JsonObject root){
-//     if (root.containsKey("gpio")){
-//         // LogD(" -- password: " + String(root["password"]), true);
-//         _gpio = root["gpio"].as<uint8_t>();
-//         _blinkingEnabled = root["blinkingEnabled"].as<bool>();
-//     }
-// }
+void HAPPluginLED::setConfigImpl(JsonObject root){
+    if (root.containsKey("gpio")){
+        // LogD(" -- password: " + String(root["password"]), true);
+        _gpio = root["gpio"].as<uint8_t>();
+        _blinkingEnabled = root["blinkingEnabled"].as<bool>();
+    }
+}
+
+#endif
+
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 

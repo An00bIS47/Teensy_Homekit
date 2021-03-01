@@ -226,6 +226,7 @@ void HAPPluginInfluxDB::addEventListener(EventManager* eventManager){
 /*
  * Config validation
  */
+#if HAP_ENABLE_WEBSERVER
 HAPConfigurationValidationResult HAPPluginInfluxDB::validateConfig(JsonObject object){
 
     LogD("Validation config " + String(__PRETTY_FUNCTION__), true);
@@ -307,53 +308,54 @@ HAPConfigurationValidationResult HAPPluginInfluxDB::validateConfig(JsonObject ob
  *                  enabled and interval is already present 
  *                  add all other config values except "_enabled" and "_interval"
  */
-// JsonObject HAPPluginInfluxDB::getConfigImpl(){   
+JsonObject HAPPluginInfluxDB::getConfigImpl(){   
 
-//     LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);     
+    LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);     
     
-//     DynamicJsonDocument doc(512);
-//     doc["username"] = _configInternal->username;
-//     doc["password"] = _configInternal->password;
-//     doc["database"] = _configInternal->database;
-//     doc["port"]     = _configInternal->port;
-//     doc["hostname"] = _configInternal->url;
+    DynamicJsonDocument doc(512);
+    doc["username"] = _configInternal->username;
+    doc["password"] = _configInternal->password;
+    doc["database"] = _configInternal->database;
+    doc["port"]     = _configInternal->port;
+    doc["hostname"] = _configInternal->url;
 
-// #if HAP_DEBUG_CONFIG
-//     serializeJson(doc, Serial);
-//     Serial.println();
-// #endif
+#if HAP_DEBUG_CONFIG
+    serializeJson(doc, Serial);
+    Serial.println();
+#endif
 
-//     doc.shrinkToFit();
-//     return doc.as<JsonObject>();
-// }
+    doc.shrinkToFit();
+    return doc.as<JsonObject>();
+}
 
-// void HAPPluginInfluxDB::setConfigImpl(JsonObject root){
+void HAPPluginInfluxDB::setConfigImpl(JsonObject root){
     
-//     if (root.containsKey("username")){
-//         // LogD(" -- username: " + String(root["username"]), true);
-//         _configInternal->username = root["username"].as<String>();
-//     }
+    if (root.containsKey("username")){
+        // LogD(" -- username: " + String(root["username"]), true);
+        _configInternal->username = root["username"].as<String>();
+    }
 
-//     if (root.containsKey("password")){
-//         // LogD(" -- password: " + String(root["password"]), true);
-//         _configInternal->password = root["password"].as<String>();
-//     }
+    if (root.containsKey("password")){
+        // LogD(" -- password: " + String(root["password"]), true);
+        _configInternal->password = root["password"].as<String>();
+    }
 
-//     if (root.containsKey("hostname")){
-//         // LogD(" -- hostname: " + String(root["hostname"]), true);
-//         _configInternal->url =root["hostname"].as<String>();
-//     }
+    if (root.containsKey("hostname")){
+        // LogD(" -- hostname: " + String(root["hostname"]), true);
+        _configInternal->url =root["hostname"].as<String>();
+    }
 
-//     if (root.containsKey("database")){
-//         // LogD(" -- database: " + String(root["database"]), true);
-//         _configInternal->database = root["database"].as<String>();
-//     }
+    if (root.containsKey("database")){
+        // LogD(" -- database: " + String(root["database"]), true);
+        _configInternal->database = root["database"].as<String>();
+    }
 
-//     if (root.containsKey("port")){
-//         // LogD(" -- port: " + String(root["port"]), true);
-//         _configInternal->port = root["port"].as<uint16_t>();
-//     }
-// }
+    if (root.containsKey("port")){
+        // LogD(" -- port: " + String(root["port"]), true);
+        _configInternal->port = root["port"].as<uint16_t>();
+    }
+}
+#endif
 
 
 HAPConfigurationPlugin* HAPPluginInfluxDB::setDefaults(){

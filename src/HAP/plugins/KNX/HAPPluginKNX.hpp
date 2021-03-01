@@ -49,7 +49,9 @@ public:
     void handleImpl(bool forced = false);	
 
 
-	// HAPConfigurationValidationResult validateConfig(JsonObject object);	
+#if HAP_ENABLE_WEBSERVER
+	HAPConfigurationValidationResult validateConfig(JsonObject object);	
+#endif
 	
 	HAPConfigurationPlugin* setDefaults();
 	void internalConfigToJson(Print& prt); 	

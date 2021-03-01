@@ -78,7 +78,10 @@ public:
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 
-	// HAPConfigurationValidationResult validateConfig(JsonObject object);
+#if HAP_ENABLE_WEBSERVER	
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
+
+#endif	
 	
 	HAPConfigurationPlugin* setDefaults() override;
 	void internalConfigToJson(Print& prt); 	

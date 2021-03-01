@@ -280,6 +280,8 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 	return _accessory;
 }
 
+
+#if HAP_ENABLE_WEBSERVER
 HAPConfigurationValidationResult HAPPluginHygrometer::validateConfig(JsonObject object){
 
 #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
@@ -306,35 +308,36 @@ HAPConfigurationValidationResult HAPPluginHygrometer::validateConfig(JsonObject 
 
 }
 
-// JsonObject HAPPluginHygrometer::getConfigImpl(){
-// 	LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
-//     DynamicJsonDocument doc(128);
+JsonObject HAPPluginHygrometer::getConfigImpl(){
+	LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
-// #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED		
-//     doc["leakEnabled"] = _leakSensorEnabled;
-// #endif
+    DynamicJsonDocument doc(128);
 
-// #if HAP_DEBUG_CONFIG
-//     serializeJson(doc, Serial);
-//     Serial.println();
-// #endif
+#if HAP_HYGROMETER_LEAK_SENSOR_ENABLED		
+    doc["leakEnabled"] = _leakSensorEnabled;
+#endif
 
-//     doc.shrinkToFit();
-// 	return doc.as<JsonObject>();
-// }
+#if HAP_DEBUG_CONFIG
+    serializeJson(doc, Serial);
+    Serial.println();
+#endif
 
-// void HAPPluginHygrometer::setConfigImpl(JsonObject root){
+    doc.shrinkToFit();
+	return doc.as<JsonObject>();
+}
+
+void HAPPluginHygrometer::setConfigImpl(JsonObject root){
     
-// #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
-// 	if (root.containsKey("leakEnabled")){
-//         // LogD(" -- password: " + String(root["password"]), true);
-//         _leakSensorEnabled = root["leakEnabled"].as<bool>();
-//     }
-// #endif
+#if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
+	if (root.containsKey("leakEnabled")){
+        // LogD(" -- password: " + String(root["password"]), true);
+        _leakSensorEnabled = root["leakEnabled"].as<bool>();
+    }
+#endif
 
-// }
-
+}
+#endif
 
 bool HAPPluginHygrometer::fakeGatoCallback(){		
 	// return _fakegato.addEntry(0x02, "0", _humidityValue->value(), "0");

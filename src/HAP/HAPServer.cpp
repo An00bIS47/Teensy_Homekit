@@ -1657,16 +1657,12 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient){
 	}		
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
+
 bool HAPServer::stopEvents(){
 	return _stopEvents;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
+
 void HAPServer::stopEvents(bool value) {
 	
 	if (value) {

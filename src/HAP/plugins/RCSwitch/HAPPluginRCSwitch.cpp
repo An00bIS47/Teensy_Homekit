@@ -134,6 +134,9 @@ void HAPPluginRCSwitch::handleImpl(bool forced){
 
 }	
 
+
+#if HAP_ENABLE_WEBSERVER
+
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
@@ -247,74 +250,76 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject ob
     return result;
 }
 
-// JsonObject HAPPluginRCSwitch::getConfigImpl(){
+JsonObject HAPPluginRCSwitch::getConfigImpl(){
 
-//     LogD(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+    LogD(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
-//     DynamicJsonDocument doc(2048);
-//     JsonArray devices = doc.createNestedArray("devices");
+    DynamicJsonDocument doc(2048);
+    JsonArray devices = doc.createNestedArray("devices");
 
-//     for (auto& dev : _devices){
-//         JsonObject device_ = devices.createNestedObject();
-//         device_["houseAddress"]   = dev->houseAddress;
-//         device_["deviceAddress"]  = dev->deviceAddress;
-//         device_["name"]    = dev->name;     
+    for (auto& dev : _devices){
+        JsonObject device_ = devices.createNestedObject();
+        device_["houseAddress"]   = dev->houseAddress;
+        device_["deviceAddress"]  = dev->deviceAddress;
+        device_["name"]    = dev->name;     
 
-//         // get schedules
-//         if (!dev->scheduleToJson().isNull()){
-//             device_["timer"] = dev->scheduleToJson();           
-//         }        
-//     }
+        // get schedules
+        if (!dev->scheduleToJson().isNull()){
+            device_["timer"] = dev->scheduleToJson();           
+        }        
+    }
 
     
-// #if HAP_DEBUG_CONFIG
-//     serializeJsonPretty(doc, Serial);
-//     Serial.println();
-// #endif
+#if HAP_DEBUG_CONFIG
+    serializeJsonPretty(doc, Serial);
+    Serial.println();
+#endif
 
-// #if defined(ARDUINO_ARCH_ESP32)	
-// 	doc.shrinkToFit();
-// #endif
-//     return doc.as<JsonObject>();
-// }
+#if defined(ARDUINO_ARCH_ESP32)	
+	doc.shrinkToFit();
+#endif
+    return doc.as<JsonObject>();
+}
 
-// void HAPPluginRCSwitch::setConfigImpl(JsonObject root){
-// #if HAP_DEBUG_RCSWITCH   
-//     int count = 0;
-// #endif
+void HAPPluginRCSwitch::setConfigImpl(JsonObject root){
+#if HAP_DEBUG_RCSWITCH   
+    int count = 0;
+#endif
 
 
-//     if (root.containsKey("devices")){        
-//         for (JsonObject dev : root["devices"].as<JsonArray>()) {
+    if (root.containsKey("devices")){        
+        for (JsonObject dev : root["devices"].as<JsonArray>()) {
 
-// #if HAP_DEBUG_RCSWITCH
-//             LogD(" -- device " + String(count) + ": house "     + dev["houseAddress"].as<String>()   , true);                    
-//             LogD(" -- device " + String(count) + ": device "    + dev["deviceAddress"].as<String>()        , true);            
-//             LogD(" -- device " + String(count) + ": name "      + dev["name"].as<String>()      , true);                        
+#if HAP_DEBUG_RCSWITCH
+            LogD(" -- device " + String(count) + ": house "     + dev["houseAddress"].as<String>()   , true);                    
+            LogD(" -- device " + String(count) + ": device "    + dev["deviceAddress"].as<String>()        , true);            
+            LogD(" -- device " + String(count) + ": name "      + dev["name"].as<String>()      , true);                        
 
-//             count++;
-// #endif
+            count++;
+#endif
             
-//             HAPPluginRCSwitchDevice* newDevice = new HAPPluginRCSwitchDevice(
-//                 dev["houseAddress"].as<uint8_t>(),
-//                 dev["deviceAddress"].as<uint8_t>(),
-//                 dev["name"].as<String>()
-//             );
+            HAPPluginRCSwitchDevice* newDevice = new HAPPluginRCSwitchDevice(
+                dev["houseAddress"].as<uint8_t>(),
+                dev["deviceAddress"].as<uint8_t>(),
+                dev["name"].as<String>()
+            );
             
-//             // set schedules
-//             if (dev.containsKey("timer") && !dev["timer"].isNull()) {                
-//                 newDevice->scheduleFromJson(dev);      
-//             }            
+            // set schedules
+            if (dev.containsKey("timer") && !dev["timer"].isNull()) {                
+                newDevice->scheduleFromJson(dev);      
+            }            
 
-//             int index = indexOfDevice(newDevice);
-//             if ( index == -1 ){
-//                 _devices.push_back(newDevice);                                
-//             } else {
-//                 _devices[index] = newDevice;
-//             }         
-//         }        
-//     }
-// }
+            int index = indexOfDevice(newDevice);
+            if ( index == -1 ){
+                _devices.push_back(newDevice);                                
+            } else {
+                _devices[index] = newDevice;
+            }         
+        }        
+    }
+}
+
+#endif
 
 int HAPPluginRCSwitch::indexOfDevice(HAPPluginRCSwitchDevice* device){
     // Check if element 22 exists in vector
