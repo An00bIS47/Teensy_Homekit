@@ -223,7 +223,9 @@ namespace
 #define EVTMGR_DEBUG_PRINTLN_PTR( x )
 #endif
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 EventManager::EventManager()
 {
 }
@@ -320,6 +322,9 @@ int EventManager::numListeners()
 	return mListeners.numListeners();
 };
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 boolean EventManager::ListenerList::addListener( int eventCode, EventListener* listener )
 {
 	EVTMGR_DEBUG_PRINT( "addListener() enter " )
@@ -350,7 +355,9 @@ boolean EventManager::ListenerList::addListener( int eventCode, EventListener* l
 	return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 boolean EventManager::ListenerList::removeListener( int eventCode, EventListener* listener )
 {
 	EVTMGR_DEBUG_PRINT( "removeListener() enter " )
@@ -384,7 +391,9 @@ boolean EventManager::ListenerList::removeListener( int eventCode, EventListener
 	return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 int EventManager::ListenerList::removeListener( EventListener* listener )
 {
 	EVTMGR_DEBUG_PRINT( "removeListener() enter " )
@@ -520,7 +529,9 @@ boolean EventManager::ListenerList::setDefaultListener( EventListener* listener 
 	return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void EventManager::ListenerList::removeDefaultListener()
 {
 	mDefaultCallback = 0;

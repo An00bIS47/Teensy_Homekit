@@ -43,6 +43,7 @@ bool HAPDailyTimerFactory::isEnabled(){
 	return _isEnabled;
 }
 
+
 void HAPDailyTimerFactory::addTimer(HAPDailyTimer dailyTimer){
 	_timers.push_back(dailyTimer);
 }

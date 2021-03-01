@@ -75,7 +75,9 @@ unsigned long maxstack(void) {
 	return (unsigned) &_estack - (unsigned) p;
 }
 
-FLASHMEM
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void progInfo(void) {
   Serial.println(__FILE__ " " __DATE__ " " __TIME__ );
   Serial.print(F("Teensyduino version "));
@@ -84,7 +86,9 @@ void progInfo(void) {
 }
 
 
-FLASHMEM
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void flexRamInfo(void) {
 
   //extern unsigned long _stext;
@@ -162,13 +166,20 @@ void flexRamInfo(void) {
 }
 #endif
 
+
 LogLevel HAPLogger::_logLevel(LogLevel::INFO);
 Stream* HAPLogger::_printer(&Serial);
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPLogger::HAPLogger() {
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPLogger::~HAPLogger() {
 	// TODO Auto-generated destructor stub
 }
@@ -281,6 +292,9 @@ void HAPLogger::colorPrint(const char* color, const char* text, bool newLine) {
 #endif			
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPLogger::checkErrorOK(int err_code) {
 	if (err_code != 0) {
 		colorPrint(COLOR_ERROR, " ERROR: ", false);
@@ -291,6 +305,9 @@ void HAPLogger::checkErrorOK(int err_code) {
 	//	Serial.print("Free Heap: "); Serial.println(ESP.getFreeHeap());
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPLogger::checkError(int err_code) {
 	if (err_code != 0) {
 		colorPrint(COLOR_ERROR, " ERROR: ", false);
@@ -298,18 +315,30 @@ void HAPLogger::checkError(int err_code) {
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPLogger::setLogLevel(uint8_t lvl){
 	_logLevel = (LogLevel)lvl;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPLogger::setLogLevel(LogLevel lvl){
 	_logLevel = lvl;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 LogLevel HAPLogger::getLogLevel(){
 	return _logLevel;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPLogger::logOK(const char* color) {
 	colorPrint(color, "OK", true);
 }
@@ -327,7 +356,9 @@ Stream* HAPLogger::stream(){
 	return _printer;
 }
 */
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPLogger::printInfo(){
 	_printer->println();
 	_printer->println(F("These are the color definitions of the log output:"));

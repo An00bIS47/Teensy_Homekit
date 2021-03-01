@@ -11,6 +11,9 @@
 #include "HAPHelper.hpp"
 #include "HAPLogger.hpp"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGato::HAPFakeGato() {
     
     _s2r1Characteristics = nullptr;
@@ -46,7 +49,9 @@ HAPFakeGato::HAPFakeGato() {
     _previousMillis = 0;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGato::~HAPFakeGato(){
     if (_s2r1Characteristics != nullptr) delete _s2r1Characteristics;
     if (_s2r2Characteristics != nullptr) delete _s2r2Characteristics;

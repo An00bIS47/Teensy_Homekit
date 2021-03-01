@@ -14,6 +14,9 @@
 
 #define HAP_KNX_WEATHER_VERSION "0.1"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginKNXDeviceWeather::HAPPluginKNXDeviceWeather(uint8_t id_, char name[], bool enableFakegato, uint16_t koTemperature, uint16_t koHumidity, uint16_t koAirPressure, bool useHumidityDPT9){
     _id = id_;
     strncpy(_name, name, 40);          

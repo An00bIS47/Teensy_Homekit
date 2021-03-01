@@ -10,6 +10,9 @@
 #include "HAPServer.hpp"
 #include "HAPLogger.hpp"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginRCSwitchDevice::HAPPluginRCSwitchDevice(){   
     name    = "";    
     houseAddress = 0;
@@ -28,6 +31,9 @@ HAPPluginRCSwitchDevice::HAPPluginRCSwitchDevice(){
     _timestampLastActivity = 0;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginRCSwitchDevice::HAPPluginRCSwitchDevice(uint8_t houseAddress_, uint8_t deviceAddress_, String name_)
 : houseAddress(houseAddress_)
 , deviceAddress(deviceAddress_)
@@ -44,6 +50,9 @@ HAPPluginRCSwitchDevice::HAPPluginRCSwitchDevice(uint8_t houseAddress_, uint8_t 
     _ttlPowerValue      = nullptr;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginRCSwitchDevice::~HAPPluginRCSwitchDevice(){
     // if (_configInternal != nullptr) delete _configInternal;
     // if (_config != nullptr) delete _config;
@@ -60,7 +69,9 @@ HAPPluginRCSwitchDevice::~HAPPluginRCSwitchDevice(){
     // _config = nullptr;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
 
     String sn = HAPDeviceID::serialNumber("RC", String(houseAddress) + String(deviceAddress));    
@@ -185,16 +196,23 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     return _accessory;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitchDevice::setEventManager(EventManager* eventManager){
     _eventManager = eventManager;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitchDevice::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
     _fakegatoFactory = fakegatoFactory;
 }   
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitchDevice::identify(bool oldValue, bool newValue) {
     printf("Start Identify rcswitch:%d-%d\n", houseAddress, deviceAddress);
 }
@@ -260,15 +278,23 @@ uint32_t HAPPluginRCSwitchDevice::getTimestampLastActivity(){
     return _timestampLastActivity;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 JsonObject HAPPluginRCSwitchDevice::scheduleToJson(){
     return _fakegato.scheduleToJson();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitchDevice::scheduleFromJson(JsonObject &root){
     _fakegato.scheduleFromJson(root);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitchDevice::saveConfig(){ 
     LogE(HAPServer::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());

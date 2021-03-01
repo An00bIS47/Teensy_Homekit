@@ -89,6 +89,10 @@ HAPDailyTimer::HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t Star
 //   	return instanceCount;
 // }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPDailyTimer::begin() {
   	return sync();
 }
@@ -194,6 +198,8 @@ bool HAPDailyTimer::isActive(){
   	return isActive(this);
 }
 
+
+
 bool HAPDailyTimer::isActive(HAPDailyTimer* instance) {
   if (instance->currentDay != weekday() && instance->randomType) // once a day, generate new random offsets
   {
@@ -266,6 +272,7 @@ bool HAPDailyTimer::isActive(HAPDailyTimer* instance) {
     return false;
   }
 }
+
 
 time_t HAPDailyTimer::tmConvert_t(int YYYY, uint8_t MM, uint8_t DD, uint8_t hh, uint8_t mm, uint8_t ss) {
 

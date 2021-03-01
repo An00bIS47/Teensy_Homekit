@@ -101,6 +101,9 @@ bool HAPServer::_isConnected = false;
 HAP_MDNS_TXT HAPServer::_hapMdnsTxt;
 #endif
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 :  _server(port)
 , __HOMEKIT_SIGNATURE("\x25\x48\x4f\x4d\x45\x4b\x49\x54\x5f\x45\x53\x50\x33\x32\x5f\x46\x57\x25")
@@ -133,6 +136,10 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 #endif	
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPServer::~HAPServer() {
 	// TODO Auto-generated destructor stub
 	delete _accessorySet;
@@ -2470,7 +2477,7 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 	response->print();	
 #endif
 
-	int bytesSent = response->decode(*hapClient);
+	int bytesSent = response->decode(hapClient->client);
 
 	// uint8_t outResponse[response->size()];
 	// size_t written = 0;
@@ -2494,7 +2501,9 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 	LogI(F("Homekit PIN: "), false);
@@ -2642,6 +2651,10 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 	return true;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	
@@ -2787,6 +2800,10 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
     return true;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	
 #if defined( ARDUINO_ARCH_ESP32 )		
@@ -3125,9 +3142,9 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 #if defined( ARDUINO_ARCH_ESP32 )		
 	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 1/2 ...", false);
 #elif defined( CORE_TEENSY )					
-	LogV( "<<< Handle client [", false);
+	LogV( F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pair-verify Step 1/2 ...", false);
+	LogV(F("] -> /pair-verify Step 1/2 ..."), false);
 #endif		
 
 	_eventManager.queueEvent(EventManager::kEventVerifyStep1, HAPEvent());
@@ -3644,6 +3661,9 @@ void HAPServer::handleAccessories(HAPClient* hapClient) {
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPServer::handlePairingsList(HAPClient* hapClient){
 	
 	
@@ -3704,6 +3724,9 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifier, const uint8_t* publicKey, bool isAdmin){
 	
 #if defined( ARDUINO_ARCH_ESP32 )		
@@ -3751,6 +3774,10 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	LogV(F("OK"), true);
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identifier){
 	
 
@@ -3841,6 +3868,10 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	LogV(F("OK"), true);
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPServer::handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen){
 
 	

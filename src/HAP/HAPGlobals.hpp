@@ -11,6 +11,10 @@
 
 // ToDo: Use KConfig
 
+// #ifndef DEPRECATED
+// #define DEPRECATED __attribute__ ((deprecated))
+// #endif
+
 /**
  * General
  ********************************************************************/

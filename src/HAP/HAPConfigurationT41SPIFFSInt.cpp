@@ -157,7 +157,9 @@ s32_t HAPConfigurationT41SPIFFSInt::erase(u32_t addr, u32_t size) {
     return SPIFFS_OK;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfigurationT41SPIFFSInt::mount() {
 
     spiffs_config cfg;
@@ -188,6 +190,9 @@ bool HAPConfigurationT41SPIFFSInt::mount() {
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPConfigurationT41SPIFFSInt::begin(){
     return mount();
 }

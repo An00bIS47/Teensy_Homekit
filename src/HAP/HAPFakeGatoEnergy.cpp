@@ -13,6 +13,9 @@
 #define HAP_FAKEGATO_SIGNATURE_LENGTH    5      // number of 16 bits word of the following "signature" portion
 #define HAP_FAKEGATO_DATA_LENGTH        20      // length of the data
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoEnergy::HAPFakeGatoEnergy(){
     _interval       = HAP_FAKEGATO_INTERVAL;
 	_previousMillis = 0;
@@ -38,6 +41,9 @@ HAPFakeGatoEnergy::HAPFakeGatoEnergy(){
     begin(); 
 } 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoEnergy::~HAPFakeGatoEnergy(){
     
     if (_vectorBuffer != nullptr){

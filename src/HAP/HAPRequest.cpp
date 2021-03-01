@@ -9,6 +9,8 @@
 #include "HAPRequest.hpp"
 #include <WString.h>
 
+
+
 HAPRequest::HAPRequest() {
 	path = "";
 	contentType = "";

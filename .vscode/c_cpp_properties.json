@@ -284,7 +284,7 @@
                 "HAP_RESET_EEPROM=0",
                 "HAP_FAKEGATO_INTERVAL=600000",
                 "HAP_RESET_CONFIGURATION=0",
-                "HAP_RESET_PAIRINGS=0",
+                "HAP_RESET_PAIRINGS=1",
                 "HAP_USE_SPIFFS_CONFIGURATION=1",
                 "HAP_FAKEGATO_BUFFER_SIZE=768",
                 "ARDUINO=10805",
@@ -292,6 +292,7 @@
                 "CORE_TEENSY",
                 "F_CPU=600000000",
                 "LAYOUT_US_ENGLISH",
+                "__PLATFORMIO_BUILD_DEBUG__",
                 ""
             ],
             "cppStandard": "c++14",

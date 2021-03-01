@@ -9,12 +9,18 @@
 #include "HAPService.hpp"
 #include "HAPHelper.hpp"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPService::HAPService(uint8_t _uuid)
 : uuid(_uuid), uuidString("") {
     hidden = false;
     primary = false;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPService::HAPService(const String& _uuid)
 : uuid(CHAR_TYPE_NULL), uuidString(_uuid) {
     hidden = false;
@@ -22,7 +28,9 @@ HAPService::HAPService(const String& _uuid)
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPService::toJson(JsonObject& nested) {
     // iid
     nested["iid"] = serviceID;
@@ -64,6 +72,10 @@ void HAPService::toJson(JsonObject& nested) {
     }  
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPService::toJson(JsonArray& array){
     JsonObject nested = array.createNestedObject();
     toJson(nested); 

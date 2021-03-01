@@ -15,7 +15,9 @@
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginDHT::HAPPluginDHT(){
 	_type 				= HAP_PLUGIN_TYPE_ACCESSORY;
 	_previousMillis 	= 0;
@@ -36,6 +38,9 @@ HAPPluginDHT::HAPPluginDHT(){
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPPluginDHT::begin(){
 	LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
@@ -49,7 +54,9 @@ bool HAPPluginDHT::begin(){
 	return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginDHT::identify(bool oldValue, bool newValue) {
 	Serial.printf("Start Identify %s\n", _config->name);
 }
@@ -134,7 +141,9 @@ void HAPPluginDHT::setValue(int iid, String oldValue, String newValue){
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginDHT::initAccessory(){
 	LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
 
@@ -262,6 +271,9 @@ bool HAPPluginDHT::fakeGatoCallback(){
 #endif
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationPlugin* HAPPluginDHT::setDefaults(){	
 	_config->enabled  = HAP_PLUGIN_USE_DHT;
 	_config->interval = HAP_PLUGIN_DHT_INTERVAL;	

@@ -29,7 +29,9 @@
 #endif
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginRCSwitch::HAPPluginRCSwitch(){
     _type           = HAP_PLUGIN_TYPE_ACCESSORY;
 
@@ -51,13 +53,17 @@ HAPPluginRCSwitch::HAPPluginRCSwitch(){
 	_config->setToJsonCallback(std::bind(&HAPPluginRCSwitch::internalConfigToJson, this, std::placeholders::_1));
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginRCSwitch::~HAPPluginRCSwitch(){
     if (_configInternal != nullptr) delete _configInternal;
     if (_config != nullptr) delete _config;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPPluginRCSwitch::begin(){
 
     // Transmitter is connected to Arduino Pin #10  
@@ -74,6 +80,9 @@ String HAPPluginRCSwitch::uint32ToBitString(uint32_t dec){
     return String(dec, BIN);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginRCSwitch::initAccessory() {
 	LogD("\nInitializing plugin: HAPPluginRCSwitch ...", false);
 
@@ -104,18 +113,30 @@ HAPAccessory* HAPPluginRCSwitch::initAccessory() {
     return nullptr;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitch::setValue(int iid, String oldValue, String newValue){
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitch::identify(bool oldValue, bool newValue){
 
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitch::handleImpl(bool forced){
 
 }	
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
 
     /*
@@ -340,7 +361,9 @@ void HAPPluginRCSwitch::sendDeviceCallback(uint8_t houseAddress_, uint8_t device
 
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateName(const char* name){
     HAPConfigurationValidationResult result;
     result.valid = true;
@@ -353,6 +376,9 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateName(const char* nam
     return result;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateHouseAddress(const char* houseAddress){
     HAPConfigurationValidationResult result;
     result.valid = true;
@@ -376,7 +402,9 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateHouseAddress(const c
     return result;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateDeviceAddress(const char* deviceAddress){
     HAPConfigurationValidationResult result;
     result.valid = true;
@@ -634,6 +662,9 @@ std::vector<HAPWebServerPluginNode*> HAPPluginRCSwitch::getResourceNodes(){
 
 #endif
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationPlugin* HAPPluginRCSwitch::setDefaults(){	
 	_config->enabled  = HAP_PLUGIN_USE_RCSWITCH;
 	_config->interval = HAP_PLUGIN_RCSWITCH_INTERVAL;	
@@ -642,6 +673,9 @@ HAPConfigurationPlugin* HAPPluginRCSwitch::setDefaults(){
 	return _config;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitch::internalConfigToJson(Print& prt){
 	/*
 		{ >>> is already printed before
@@ -653,6 +687,9 @@ void HAPPluginRCSwitch::internalConfigToJson(Print& prt){
 	prt.print((const char*) _configInternal->data);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginRCSwitch::setConfiguration(HAPConfigurationPlugin* cfg){
 	_config = cfg;	
 	_configInternal = (HAPPluginRCSwitchConfig*)_config->dataPtr;

@@ -16,6 +16,9 @@
 #include <Base64.h>
 #endif
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoScheduleEnergy::HAPFakeGatoScheduleEnergy(){
 	_statusLED = 0x00;
 
@@ -33,6 +36,9 @@ HAPFakeGatoScheduleEnergy::HAPFakeGatoScheduleEnergy(){
 	_callbackGetRolledOverIndex = nullptr;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoScheduleEnergy::HAPFakeGatoScheduleEnergy(String serialNumber, std::function<void(uint16_t)> callbackStartTimer, std::function<void(uint16_t)> callbackEndTimer, std::function<uint32_t(void)> callbackRefTime, std::function<uint32_t(void)> callbackTimestampLastActivity, std::function<uint32_t(void)> callbackTimestampLastEntry){
 	_serialNumber = serialNumber;
 	_callbackTimerStart = callbackStartTimer;
@@ -45,6 +51,9 @@ HAPFakeGatoScheduleEnergy::HAPFakeGatoScheduleEnergy(String serialNumber, std::f
 	// _callbackGetRolledOverIndex
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoScheduleEnergy::~HAPFakeGatoScheduleEnergy(){
 
 }

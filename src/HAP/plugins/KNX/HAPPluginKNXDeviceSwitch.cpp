@@ -14,7 +14,9 @@
 
 #define HAP_KNX_SWITCH_VERSION "0.1"
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginKNXDeviceSwitch::HAPPluginKNXDeviceSwitch(uint8_t id_, char name[], bool enableFakegato, uint16_t koReadState, uint16_t koWriteState){
     _id = id_;
     strncpy(_name, name, 40);          

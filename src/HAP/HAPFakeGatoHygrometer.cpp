@@ -10,6 +10,9 @@
 
 #define HAP_FAKEGATO_SIGNATURE_LENGTH    3     // number of 16 bits word of the following "signature" portion
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoHygrometer::HAPFakeGatoHygrometer(){    
     
     _interval       = HAP_FAKEGATO_INTERVAL;
@@ -30,6 +33,9 @@ HAPFakeGatoHygrometer::HAPFakeGatoHygrometer(){
     _periodicUpdates = true;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoHygrometer::~HAPFakeGatoHygrometer(){
 
     if (_vectorBuffer != nullptr){

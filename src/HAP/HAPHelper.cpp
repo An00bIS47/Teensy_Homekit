@@ -229,7 +229,9 @@ int HAPHelper::hexToBin(unsigned char *data, const char* hexstring, size_t len)
 // 	result.replace('\r', '\\ r');
 // 	return result;
 // }
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPHelper::array_print(const char* tag, const unsigned char* buf, int len)
 {
     Serial.printf("=== [%s] (len:%d) ===\n", tag, len);
@@ -250,6 +252,9 @@ void HAPHelper::array_print(const char* tag, const unsigned char* buf, int len)
 	}
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPHelper::mpi_print(const char* tag, const mbedtls_mpi* x)
 {
     int len_x = mbedtls_mpi_size(x);
@@ -364,6 +369,9 @@ bool HAPHelper::isValidNumber(String str){
    return isNum;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPHelper::printHex(const char* suffix, const uint8_t *data, size_t length, bool newline)
 {
     Serial.print(suffix);

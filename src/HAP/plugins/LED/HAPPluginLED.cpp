@@ -57,9 +57,7 @@ HAPPluginLED::HAPPluginLED(){
     _config = new HAPConfigurationPlugin("LED", true, HAP_PLUGIN_LED_INTERVAL);
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
+
 void HAPPluginLED::changePower(bool oldValue, bool newValue) {
     // LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
@@ -83,6 +81,9 @@ void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
     }     
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginLED::changeBrightness(int oldValue, int newValue){
     printf("New brightness state: %d\n", newValue);
 }
@@ -237,7 +238,9 @@ void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
     printf("Start Identify Light from member\n");
 }

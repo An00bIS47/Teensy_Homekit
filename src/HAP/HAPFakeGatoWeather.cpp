@@ -11,6 +11,10 @@
 #define HAP_FAKEGATO_SIGNATURE_LENGTH    3     // number of 16 bits word of the following "signature" portion
 #define HAP_FAKEGATO_DATA_LENGTH        16     // length of the data
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoWeather::HAPFakeGatoWeather(){    
     
     _interval       = HAP_FAKEGATO_INTERVAL;
@@ -31,6 +35,10 @@ HAPFakeGatoWeather::HAPFakeGatoWeather(){
     _periodicUpdates = true;
 }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoWeather::~HAPFakeGatoWeather(){
 
     if (_vectorBuffer != nullptr){

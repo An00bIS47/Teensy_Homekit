@@ -14,6 +14,9 @@
 
 #define HAP_KNX_OUTLET_VERSION "0.1"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginKNXDeviceOutlet::HAPPluginKNXDeviceOutlet(uint8_t id_, char name[], bool enableFakegato, bool enableSchedule,  uint16_t koReadState, uint16_t koWriteState, uint16_t koWriteCurrent, uint16_t koWriteActEnergy){
     _id = id_;
     strncpy(_name, name, 40);          

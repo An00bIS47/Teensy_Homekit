@@ -10,6 +10,9 @@
 #include "HAPServer.hpp"
 #include "HAPLogger.hpp"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginKNXDevice::HAPPluginKNXDevice(){   
     // _name    = "";    
     _id = 0;
@@ -33,6 +36,9 @@ HAPPluginKNXDevice::HAPPluginKNXDevice(){
 //     measureMode         = (enum MeasureMode)measureMode_;
 // }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginKNXDevice::~HAPPluginKNXDevice(){
 }
 

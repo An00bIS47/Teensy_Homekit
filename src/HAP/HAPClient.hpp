@@ -84,7 +84,7 @@ public:
 	}	  
 };
 
-class HAPClient : public Stream {
+class HAPClient {
 public:
 	HAPClient();
 	~HAPClient();
@@ -110,13 +110,13 @@ public:
 	struct HAPEncryptionContext 	encryptionContext;	
 
 	// From Stream:
-  	size_t write(const uint8_t* buffer, size_t size);
-  	size_t write(uint8_t b);
+  	// size_t write(const uint8_t* buffer, size_t size);
+  	// size_t write(uint8_t b);
 
 	int available();
-	int read();
-	int peek();
-	void flush();
+	// int read();
+	// int peek();
+	// void flush();
 
 	void setEncryped(bool mode) {
 		_isEncrypted = mode;

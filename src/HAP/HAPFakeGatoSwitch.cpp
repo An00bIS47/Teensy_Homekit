@@ -11,6 +11,9 @@
 #define HAP_FAKEGATO_SIGNATURE_LENGTH    1     // number of 16 bits word of the following "signature" portion
 #define HAP_FAKEGATO_DATA_LENGTH        11     // length of the data
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoSwitch::HAPFakeGatoSwitch(){    
     
     _interval       = HAP_FAKEGATO_INTERVAL;
@@ -31,6 +34,9 @@ HAPFakeGatoSwitch::HAPFakeGatoSwitch(){
     _periodicUpdates = false;       // only write a fakegato entry if an action; not periodic !
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPFakeGatoSwitch::~HAPFakeGatoSwitch(){
     
     if (_vectorBuffer != nullptr){

@@ -118,6 +118,7 @@ const char* HAPCharacteristic::unitString(unit unitValue) {
 	}
 }
 
+
 const char* HAPCharacteristic::unitJson(unit unitValue) {
 	switch (unitValue) {
 		case unit_arcDegree:                

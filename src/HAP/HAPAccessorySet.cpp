@@ -24,6 +24,9 @@
 
 uint32_t HAPAccessorySet::configurationNumber = HOMEKIT_CONFIGURATION_NUMBER;
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessorySet::HAPAccessorySet() 
 : _accessoryType(HAP_ACCESSORY_TYPE_OTHER)
 {
@@ -31,7 +34,9 @@ HAPAccessorySet::HAPAccessorySet()
 	_configuration = nullptr;	
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessorySet::~HAPAccessorySet(){
 
 }
@@ -333,7 +338,9 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *acc) {
     
 //     return result;
 // }
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPAccessorySet::toJson(JsonArray& array){
 	
 	for (int i = 0; i < numberOfAccessory(); i++) {

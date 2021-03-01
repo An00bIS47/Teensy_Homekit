@@ -23,8 +23,9 @@ public:
 
     // String describe();
     void printTo(Print& print);
-    void toJson(JsonArray& array);
-    void toJson(JsonObject& nested);
+
+    void toJson(JsonArray& array) __attribute__ ((deprecated));
+    void toJson(JsonObject& nested) __attribute__ ((deprecated));
 
     uint8_t serviceID;
     uint8_t uuid;

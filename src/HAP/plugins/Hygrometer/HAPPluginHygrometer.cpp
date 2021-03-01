@@ -69,6 +69,9 @@
 #define HAP_DEBUG_HYGROMETER 0
 #endif
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPPluginHygrometer::HAPPluginHygrometer(){
 	_type = HAP_PLUGIN_TYPE_ACCESSORY;
 	// _name = "Hygrometer";
@@ -94,7 +97,9 @@ HAPPluginHygrometer::HAPPluginHygrometer(){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPPluginHygrometer::begin(){
 	LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
@@ -114,7 +119,9 @@ bool HAPPluginHygrometer::begin(){
 	return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPPluginHygrometer::identify(bool oldValue, bool newValue) {
 	Serial.printf("Start Identify %s\n", _config->name);
 }
@@ -178,7 +185,9 @@ void HAPPluginHygrometer::setValue(int iid, String oldValue, String newValue){
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory* HAPPluginHygrometer::initAccessory(){
 	LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
 
@@ -344,6 +353,9 @@ uint16_t HAPPluginHygrometer::readSensor() {
     return 4095 - value;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPConfigurationPlugin* HAPPluginHygrometer::setDefaults(){
 	_config->enabled  = HAP_PLUGIN_USE_HYGROMETER;
 	_config->interval = HAP_PLUGIN_HYGRO_INTERVAL;	

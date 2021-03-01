@@ -54,6 +54,9 @@ typedef enum {
 } HAP_SERVICE;
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 inline String serviceName(int type){
     switch(type) {
         case HAP_SERVICE_ACCESSORY_INFORMATION:                           // 0x3E     ==    62

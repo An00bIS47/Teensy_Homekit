@@ -14,6 +14,10 @@
 #include "HAPCharacteristics.hpp"
 #include "HAPServices.hpp"
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory::HAPAccessory() {
 	aid = 0;
 	
@@ -27,6 +31,9 @@ HAPAccessory::HAPAccessory() {
 }
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 HAPAccessory::~HAPAccessory(){
 	if (_infoService) delete _infoService;
 
