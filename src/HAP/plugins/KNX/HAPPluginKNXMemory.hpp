@@ -9,7 +9,7 @@
 #ifndef HAPPLUGINKNXMEMORY_HPP_
 #define HAPPLUGINKNXMEMORY_HPP_
 
-#define HAP_PLUGIN_KNX_MAX_DEVICES              5
+#define HAP_PLUGIN_KNX_MAX_DEVICES              20
 
 // ==============================================================================================
 //  Parameter Offsets

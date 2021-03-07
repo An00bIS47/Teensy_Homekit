@@ -535,6 +535,8 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #define HAP_NTP_TIME_FORMAT			"%Y-%m-%d %H:%M:%S"							// strftime format
 #endif
 
+
+
 #if defined( ARDUINO_ARCH_ESP32)
 // get the timezones here:
 // https://remotemonitoringsystems.ca/time-zone-abbreviations.php
@@ -555,6 +557,8 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #define NTP_PACKET_SIZE 48 			// NTP time is in the first 48 bytes of message
 #define UNIX_OFFSET					2208988800UL
 
+#define HAP_NTP_TIMEOUT	1500
+#define HAP_TIME_SYNC_INTERVAL 600000   
 #endif /* ARDUINO_ARCH_ESP32 */
 #endif /* HAP_ENABLE_NTP */
 
