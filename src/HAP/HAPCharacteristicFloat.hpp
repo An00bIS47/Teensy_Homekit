@@ -55,9 +55,7 @@ public:
         if (valueChangeFunctionCall)
             valueChangeFunctionCall(_value, temp);
 
-
-        _value = temp;
-    
+        _value = temp;    
     }
 
     void setValue(const float value, bool withCallback = true){

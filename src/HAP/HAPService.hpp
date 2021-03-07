@@ -34,7 +34,7 @@ public:
     bool hidden;
     bool primary;
 
-    std::vector<HAPCharacteristic *> _characteristics;
+    std::vector<HAPCharacteristic*> _characteristics;
     std::vector<uint8_t> _linkedServiceIds;
 
     void setHiddenService(bool mode = true){

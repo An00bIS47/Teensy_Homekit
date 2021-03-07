@@ -56,6 +56,30 @@ public:
         free(_validValues);
     }
 
+    uint8_t value(bool withCallback = true){
+        if (valueGetFunctionCall && withCallback)
+            valueGetFunctionCall();
+
+        return _value;
+    }
+
+    void setValue(const uint8_t value, bool withCallback = true){
+        uint8_t temp = _value;
+        if (valueChangeFunctionCall && withCallback) {
+            valueChangeFunctionCall(_value, value);
+        }
+
+        if ( withCallback ) {
+            if (temp == _value) {
+                _value = value;
+            } else {
+                _value = temp;
+            }            
+        } else  {
+            _value = value;
+        }
+    }
+
     String valueString() override {
         if (valueGetFunctionCall)
             valueGetFunctionCall();
