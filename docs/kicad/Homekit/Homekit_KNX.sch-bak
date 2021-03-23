@@ -1,0 +1,1305 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 3 5
+Title "Homekit KNX"
+Date "2021-03-19"
+Rev "0.1"
+Comp "michael"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Homekit_Library:NCN5120 U$?
+U 1 1 605C8095
+P 8150 3350
+AR Path="/605C8095" Ref="U$?"  Part="1" 
+AR Path="/605817AD/605C8095" Ref="U$?"  Part="1" 
+AR Path="/6258BFC6/605C8095" Ref="US1"  Part="1" 
+F 0 "US1" H 7250 4050 50  0000 L CNN
+F 1 "NCN5120" H 7250 4150 50  0000 L CNN
+F 2 "Package_DFN_QFN:QFN-40-1EP_6x6mm_P0.5mm_EP4.6x4.6mm" H 6300 4350 50  0001 C CNN
+F 3 "" H 7700 4000 50  0001 C CNN
+	1    8150 3350
+	1    0    0    -1  
+$EndComp
+$Comp
+L SparkFun-Jumpers:JUMPER-SMT_2_NO JP?
+U 1 1 605C809C
+P 7900 1850
+AR Path="/605C809C" Ref="JP?"  Part="1" 
+AR Path="/605817AD/605C809C" Ref="JP?"  Part="1" 
+AR Path="/6258BFC6/605C809C" Ref="JP8"  Part="1" 
+F 0 "JP8" H 7800 1900 45  0000 R CNN
+F 1 "SJ HIGH POWER" H 8150 2000 45  0000 R CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" H 7900 2050 20  0001 C CNN
+F 3 "" H 7900 1850 60  0001 C CNN
+F 4 "XXX-00000" V 7816 1746 60  0001 R CNN "PROD_ID"
+	1    7900 1850
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	7900 2500 7900 2000
+Text Label 8100 2300 1    50   ~ 0
+KNX1_SAVE
+Wire Wire Line
+	8100 2300 8100 2500
+Wire Wire Line
+	8400 2500 8400 2300
+Wire Wire Line
+	8400 2300 8600 2300
+Wire Wire Line
+	8600 2500 8600 2300
+Connection ~ 8600 2300
+Wire Wire Line
+	8600 2300 9100 2300
+$Comp
+L Device:C C?
+U 1 1 605C80B1
+P 8200 1550
+AR Path="/605C80B1" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C80B1" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C80B1" Ref="C14"  Part="1" 
+F 0 "C14" V 8150 1350 50  0000 L CNN
+F 1 "9pF / 6.3V" V 8050 1350 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 8238 1400 50  0001 C CNN
+F 3 "~" H 8200 1550 50  0001 C CNN
+	1    8200 1550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 605C80B7
+P 8900 1550
+AR Path="/605C80B7" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C80B7" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C80B7" Ref="C15"  Part="1" 
+F 0 "C15" V 8950 1350 50  0000 L CNN
+F 1 "9pF / 6.3V" V 9050 1350 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 8938 1400 50  0001 C CNN
+F 3 "~" H 8900 1550 50  0001 C CNN
+	1    8900 1550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Crystal_GND24 Y?
+U 1 1 605C80BD
+P 8600 1800
+AR Path="/605C80BD" Ref="Y?"  Part="1" 
+AR Path="/605817AD/605C80BD" Ref="Y?"  Part="1" 
+AR Path="/6258BFC6/605C80BD" Ref="Y1"  Part="1" 
+F 0 "Y1" V 8650 1550 50  0000 L CNN
+F 1 "16MHz" V 8750 1500 50  0000 L CNN
+F 2 "Crystal:Crystal_SMD_2520-4Pin_2.5x2.0mm" H 8600 1800 50  0001 C CNN
+F 3 "~" H 8600 1800 50  0001 C CNN
+	1    8600 1800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8600 2000 8600 2100
+Wire Wire Line
+	8600 2100 8350 2100
+Wire Wire Line
+	8350 2100 8350 1500
+Wire Wire Line
+	8350 1500 8600 1500
+Wire Wire Line
+	8600 1500 8600 1600
+Wire Wire Line
+	8450 1800 8200 1800
+Connection ~ 8200 1800
+Wire Wire Line
+	8200 1800 8200 2500
+Wire Wire Line
+	8300 2500 8300 2200
+Wire Wire Line
+	8300 2200 8900 2200
+Wire Wire Line
+	8900 2200 8900 1800
+Wire Wire Line
+	8750 1800 8900 1800
+Wire Wire Line
+	8200 1700 8200 1800
+Wire Wire Line
+	8900 1700 8900 1800
+Connection ~ 8900 1800
+Wire Wire Line
+	8200 1400 8200 1300
+Wire Wire Line
+	8200 1300 8600 1300
+Wire Wire Line
+	8900 1300 8900 1400
+Wire Wire Line
+	8600 1500 8600 1300
+Connection ~ 8600 1500
+Connection ~ 8600 1300
+Wire Wire Line
+	8600 1300 8900 1300
+Wire Wire Line
+	9100 1100 8600 1100
+Wire Wire Line
+	8600 1100 8600 1300
+Wire Wire Line
+	7900 1700 7900 1100
+Wire Wire Line
+	7900 1100 8600 1100
+Connection ~ 8600 1100
+Wire Wire Line
+	9100 1100 9100 2300
+Wire Wire Line
+	9600 3000 9000 3000
+Wire Wire Line
+	9000 3300 9600 3300
+Connection ~ 9600 3300
+Wire Wire Line
+	9600 3300 9600 3000
+Wire Wire Line
+	9000 3400 9600 3400
+Connection ~ 9600 3400
+Wire Wire Line
+	9600 3400 9600 3300
+Wire Wire Line
+	9000 3500 9600 3500
+Connection ~ 9600 3500
+Wire Wire Line
+	9600 3500 9600 3400
+Wire Wire Line
+	9000 3600 9600 3600
+Wire Wire Line
+	9600 3600 9600 3500
+$Comp
+L Device:C C?
+U 1 1 605C80F7
+P 9600 2550
+AR Path="/605C80F7" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C80F7" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C80F7" Ref="C18"  Part="1" 
+F 0 "C18" H 9715 2596 50  0000 L CNN
+F 1 "100nF / 6.3V" H 9715 2505 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 9638 2400 50  0001 C CNN
+F 3 "~" H 9600 2550 50  0001 C CNN
+	1    9600 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9000 2900 9350 2900
+Wire Wire Line
+	9350 2900 9350 2300
+Wire Wire Line
+	9350 2300 9600 2300
+Wire Wire Line
+	9600 2300 9600 2400
+Wire Wire Line
+	9600 2700 9600 3000
+Connection ~ 9600 3000
+Wire Wire Line
+	9600 2100 9600 2300
+Connection ~ 9600 2300
+$Comp
+L Device:C C?
+U 1 1 605C8111
+P 6900 2150
+AR Path="/605C8111" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C8111" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C8111" Ref="C12"  Part="1" 
+F 0 "C12" H 7015 2196 50  0000 L CNN
+F 1 "100nF / 6.3V" H 7015 2105 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 6938 2000 50  0001 C CNN
+F 3 "~" H 6900 2150 50  0001 C CNN
+	1    6900 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6900 2300 6900 2400
+Wire Wire Line
+	7300 2900 7150 2900
+Wire Wire Line
+	7150 2900 7150 2400
+Wire Wire Line
+	7150 2400 6900 2400
+Wire Wire Line
+	7300 3000 7150 3000
+Wire Wire Line
+	7150 3000 7150 2900
+Connection ~ 7150 2900
+Wire Wire Line
+	6900 1700 6900 1900
+Wire Wire Line
+	6900 1900 7700 1900
+Wire Wire Line
+	7700 1900 7700 2500
+Connection ~ 6900 1900
+Wire Wire Line
+	6900 1900 6900 2000
+Wire Wire Line
+	8000 4450 8000 4200
+$Comp
+L Device:R R?
+U 1 1 605C813A
+P 7900 4850
+AR Path="/605C813A" Ref="R?"  Part="1" 
+AR Path="/605817AD/605C813A" Ref="R?"  Part="1" 
+AR Path="/6258BFC6/605C813A" Ref="R16"  Part="1" 
+F 0 "R16" V 7950 4600 50  0000 L CNN
+F 1 "1R" V 7900 4750 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" V 7830 4850 50  0001 C CNN
+F 3 "~" H 7900 4850 50  0001 C CNN
+	1    7900 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 605C8140
+P 8500 4850
+AR Path="/605C8140" Ref="R?"  Part="1" 
+AR Path="/605817AD/605C8140" Ref="R?"  Part="1" 
+AR Path="/6258BFC6/605C8140" Ref="R17"  Part="1" 
+F 0 "R17" V 8550 4600 50  0000 L CNN
+F 1 "1R" V 8500 4750 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" V 8430 4850 50  0001 C CNN
+F 3 "~" H 8500 4850 50  0001 C CNN
+	1    8500 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7900 4700 7900 4200
+$Comp
+L Device:L_Small L?
+U 1 1 605C8147
+P 8100 4850
+AR Path="/605C8147" Ref="L?"  Part="1" 
+AR Path="/605817AD/605C8147" Ref="L?"  Part="1" 
+AR Path="/6258BFC6/605C8147" Ref="L1"  Part="1" 
+F 0 "L1" V 8150 4700 50  0000 L CNN
+F 1 "220µH" V 8148 4805 50  0000 L CNN
+F 2 "Inductor_SMD:L_7.3x7.3_H4.5" H 8100 4850 50  0001 C CNN
+F 3 "~" H 8100 4850 50  0001 C CNN
+	1    8100 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:L_Small L?
+U 1 1 605C814D
+P 8300 4850
+AR Path="/605C814D" Ref="L?"  Part="1" 
+AR Path="/605817AD/605C814D" Ref="L?"  Part="1" 
+AR Path="/6258BFC6/605C814D" Ref="L2"  Part="1" 
+F 0 "L2" V 8350 4700 50  0000 L CNN
+F 1 "220µH" V 8348 4805 50  0000 L CNN
+F 2 "Inductor_SMD:L_7.3x7.3_H4.5" H 8300 4850 50  0001 C CNN
+F 3 "~" H 8300 4850 50  0001 C CNN
+	1    8300 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8100 4750 8100 4200
+Wire Wire Line
+	8300 4750 8300 4200
+Wire Wire Line
+	7900 5100 7800 5100
+Wire Wire Line
+	7800 5100 7800 4550
+Wire Wire Line
+	7900 5100 7900 5000
+Wire Wire Line
+	7900 5100 8100 5100
+Wire Wire Line
+	8100 5100 8100 4950
+Connection ~ 7900 5100
+Wire Wire Line
+	8300 4950 8300 5100
+Wire Wire Line
+	8300 5100 8500 5100
+Wire Wire Line
+	8500 5100 8500 5000
+Wire Wire Line
+	8500 5100 8600 5100
+Wire Wire Line
+	8600 5100 8600 4200
+Connection ~ 8500 5100
+Wire Wire Line
+	7300 3800 7200 3800
+Wire Wire Line
+	8200 4300 8200 4200
+Wire Wire Line
+	7200 3800 7200 4300
+Wire Wire Line
+	7200 4300 8200 4300
+Wire Wire Line
+	7300 3700 7200 3700
+Wire Wire Line
+	7200 3700 7200 3800
+Connection ~ 7200 3800
+$Comp
+L Device:C C?
+U 1 1 605C8168
+P 9100 4850
+AR Path="/605C8168" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C8168" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C8168" Ref="C16"  Part="1" 
+F 0 "C16" V 9050 4650 50  0000 L CNN
+F 1 "10µF / 6.3V" V 8950 4600 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 9138 4700 50  0001 C CNN
+F 3 "~" H 9100 4850 50  0001 C CNN
+	1    9100 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 605C816E
+P 9550 4850
+AR Path="/605C816E" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C816E" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C816E" Ref="C17"  Part="1" 
+F 0 "C17" V 9600 4650 50  0000 L CNN
+F 1 "10µF / 6.3V" V 9700 4600 50  0000 L CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder" H 9588 4700 50  0001 C CNN
+F 3 "~" H 9550 4850 50  0001 C CNN
+	1    9550 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8500 4200 8500 4550
+Wire Wire Line
+	9100 4700 9350 4700
+Wire Wire Line
+	9350 4550 8800 4550
+Connection ~ 8500 4550
+Wire Wire Line
+	8500 4550 8500 4700
+Wire Wire Line
+	9350 4400 9350 4550
+Connection ~ 9350 4700
+Wire Wire Line
+	9350 4700 9550 4700
+Connection ~ 9350 4550
+Wire Wire Line
+	9350 4550 9350 4700
+$Comp
+L SparkFun-Jumpers:JUMPER-SMT_2_NO JP?
+U 1 1 605C818F
+P 8200 5450
+AR Path="/605C818F" Ref="JP?"  Part="1" 
+AR Path="/605817AD/605C818F" Ref="JP?"  Part="1" 
+AR Path="/6258BFC6/605C818F" Ref="JP9"  Part="1" 
+F 0 "JP9" H 8100 5400 45  0000 R CNN
+F 1 "SJ 3V3 ONLY" H 8450 5300 45  0000 R CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" H 8200 5650 20  0001 C CNN
+F 3 "" H 8200 5450 60  0001 C CNN
+F 4 "XXX-00000" V 8116 5346 60  0001 R CNN "PROD_ID"
+	1    8200 5450
+	1    0    0    -1  
+$EndComp
+Connection ~ 8800 4550
+Wire Wire Line
+	8800 4550 8500 4550
+$Comp
+L Device:C C?
+U 1 1 605C819B
+P 7000 5150
+AR Path="/605C819B" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C819B" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C819B" Ref="C13"  Part="1" 
+F 0 "C13" V 7050 4950 50  0000 L CNN
+F 1 "10µF / 6.3V" V 7150 4900 50  0000 L CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder" H 7038 5000 50  0001 C CNN
+F 3 "~" H 7000 5150 50  0001 C CNN
+	1    7000 5150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6550 5000 6800 5000
+Connection ~ 6800 5000
+Wire Wire Line
+	6800 5000 7000 5000
+Wire Wire Line
+	7800 4550 7500 4550
+Connection ~ 7800 4550
+Wire Wire Line
+	7800 4550 7800 4200
+$Comp
+L Device:R R?
+U 1 1 605C81B4
+P 7500 4850
+AR Path="/605C81B4" Ref="R?"  Part="1" 
+AR Path="/605817AD/605C81B4" Ref="R?"  Part="1" 
+AR Path="/6258BFC6/605C81B4" Ref="R14"  Part="1" 
+F 0 "R14" V 7550 4600 50  0000 L CNN
+F 1 "33k" V 7500 4750 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" V 7430 4850 50  0001 C CNN
+F 3 "~" H 7500 4850 50  0001 C CNN
+	1    7500 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 605C81BA
+P 7500 5350
+AR Path="/605C81BA" Ref="R?"  Part="1" 
+AR Path="/605817AD/605C81BA" Ref="R?"  Part="1" 
+AR Path="/6258BFC6/605C81BA" Ref="R15"  Part="1" 
+F 0 "R15" V 7550 5100 50  0000 L CNN
+F 1 "180k" V 7500 5250 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" V 7430 5350 50  0001 C CNN
+F 3 "~" H 7500 5350 50  0001 C CNN
+	1    7500 5350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7500 5200 7500 5100
+Wire Wire Line
+	7500 4700 7500 4550
+Wire Wire Line
+	7500 5100 7700 5100
+Connection ~ 7500 5100
+Wire Wire Line
+	7500 5100 7500 5000
+Connection ~ 7700 5100
+Wire Wire Line
+	7700 5100 7700 4200
+$Comp
+L Device:C C?
+U 1 1 605C81D6
+P 6800 3550
+AR Path="/605C81D6" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C81D6" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C81D6" Ref="C11"  Part="1" 
+F 0 "C11" H 6650 3650 50  0000 L CNN
+F 1 "47nF / 25V" H 6250 3550 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 6838 3400 50  0001 C CNN
+F 3 "~" H 6800 3550 50  0001 C CNN
+	1    6800 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7050 3700 7050 3600
+Wire Wire Line
+	7050 3600 7300 3600
+Wire Wire Line
+	6800 3700 7050 3700
+Wire Wire Line
+	7050 3400 7050 3500
+Wire Wire Line
+	7050 3500 7300 3500
+Wire Wire Line
+	6800 3400 7050 3400
+$Comp
+L Device:C C?
+U 1 1 605C81E2
+P 6500 3950
+AR Path="/605C81E2" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C81E2" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C81E2" Ref="C8"  Part="1" 
+F 0 "C8" V 6550 3800 50  0000 L CNN
+F 1 "1µF / 50V" V 6650 3700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder" H 6538 3800 50  0001 C CNN
+F 3 "~" H 6500 3950 50  0001 C CNN
+	1    6500 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 605C81E8
+P 5800 3950
+AR Path="/605C81E8" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C81E8" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C81E8" Ref="C6"  Part="1" 
+F 0 "C6" V 5750 3800 50  0000 L CNN
+F 1 "100nF / 50V" V 5650 3700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 5838 3800 50  0001 C CNN
+F 3 "~" H 5800 3950 50  0001 C CNN
+	1    5800 3950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5800 3800 5800 3300
+Wire Wire Line
+	5800 3300 7300 3300
+$Comp
+L Device:CP C?
+U 1 1 605C81F0
+P 6200 3950
+AR Path="/605C81F0" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C81F0" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C81F0" Ref="C7"  Part="1" 
+F 0 "C7" V 6250 3800 50  0000 L CNN
+F 1 "100µF / 35V" V 6350 3600 50  0000 L CNN
+F 2 "Capacitor_SMD:C_Elec_6.3x7.7" H 6238 3800 50  0001 C CNN
+F 3 "~" H 6200 3950 50  0001 C CNN
+	1    6200 3950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7200 3700 7100 3700
+Wire Wire Line
+	7100 3700 7100 3750
+Wire Wire Line
+	7100 3750 6500 3750
+Wire Wire Line
+	6200 3750 6200 3800
+Connection ~ 7200 3700
+Wire Wire Line
+	6500 3800 6500 3750
+Connection ~ 6500 3750
+Wire Wire Line
+	6500 3750 6200 3750
+Wire Wire Line
+	6100 3750 6200 3750
+Connection ~ 6200 3750
+$Comp
+L Device:C C?
+U 1 1 605C8201
+P 6800 3200
+AR Path="/605C8201" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C8201" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C8201" Ref="C10"  Part="1" 
+F 0 "C10" V 6750 3100 50  0000 C CNN
+F 1 "47nF / 50V" V 6850 2900 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 6838 3050 50  0001 C CNN
+F 3 "~" H 6800 3200 50  0001 C CNN
+	1    6800 3200
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6950 3200 7300 3200
+$Comp
+L Device:R R?
+U 1 1 605C8208
+P 6350 3100
+AR Path="/605C8208" Ref="R?"  Part="1" 
+AR Path="/605817AD/605C8208" Ref="R?"  Part="1" 
+AR Path="/6258BFC6/605C8208" Ref="R13"  Part="1" 
+F 0 "R13" V 6250 3100 50  0000 C CNN
+F 1 "22R" V 6350 3100 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" V 6280 3100 50  0001 C CNN
+F 3 "~" H 6350 3100 50  0001 C CNN
+	1    6350 3100
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6500 3100 7300 3100
+Wire Wire Line
+	6200 3100 6100 3100
+Wire Wire Line
+	6100 3100 6100 3200
+Wire Wire Line
+	6100 3400 6750 3400
+Wire Wire Line
+	6750 3400 6750 3350
+Wire Wire Line
+	6750 3350 7100 3350
+Wire Wire Line
+	7100 3350 7100 3400
+Wire Wire Line
+	7100 3400 7300 3400
+Wire Wire Line
+	6650 3200 6100 3200
+Connection ~ 6100 3200
+Wire Wire Line
+	6100 3200 6100 3400
+Wire Wire Line
+	5800 4100 5800 4200
+Wire Wire Line
+	5800 4200 6000 4200
+Wire Wire Line
+	6200 4200 6200 4100
+Wire Wire Line
+	6200 4200 6500 4200
+Wire Wire Line
+	6500 4200 6500 4100
+Connection ~ 6200 4200
+$Comp
+L Device:D D?
+U 1 1 605C8226
+P 5800 3100
+AR Path="/605C8226" Ref="D?"  Part="1" 
+AR Path="/605817AD/605C8226" Ref="D?"  Part="1" 
+AR Path="/6258BFC6/605C8226" Ref="D9"  Part="1" 
+F 0 "D9" H 5800 3000 50  0000 C CNN
+F 1 "D1" H 5800 2974 50  0001 C CNN
+F 2 "Diode_SMD:D_SMA_Handsoldering" H 5800 3100 50  0001 C CNN
+F 3 "~" H 5800 3100 50  0001 C CNN
+	1    5800 3100
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	5950 3100 6100 3100
+Connection ~ 6100 3100
+$Comp
+L Device:D_TVS D?
+U 1 1 605C822E
+P 5500 3600
+AR Path="/605C822E" Ref="D?"  Part="1" 
+AR Path="/605817AD/605C822E" Ref="D?"  Part="1" 
+AR Path="/6258BFC6/605C822E" Ref="D8"  Part="1" 
+F 0 "D8" H 5450 3700 50  0000 L CNN
+F 1 "TVS SMA40" H 5300 3500 50  0000 L CNN
+F 2 "Diode_SMD:D_SMA_Handsoldering" H 5500 3600 50  0001 C CNN
+F 3 "~" H 5500 3600 50  0001 C CNN
+	1    5500 3600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5500 3450 5500 3100
+Wire Wire Line
+	5500 3100 5650 3100
+Wire Wire Line
+	5800 4200 5500 4200
+Wire Wire Line
+	5500 4200 5500 3750
+Connection ~ 5800 4200
+Connection ~ 5500 3100
+NoConn ~ 7800 2500
+NoConn ~ 8000 2500
+NoConn ~ 8500 2500
+NoConn ~ 9000 3700
+NoConn ~ 9000 3800
+Text Notes 700  850  0    74   ~ 0
+NCN5120
+$Comp
+L Device:C C?
+U 1 1 605C8243
+P 6550 5150
+AR Path="/605C8243" Ref="C?"  Part="1" 
+AR Path="/605817AD/605C8243" Ref="C?"  Part="1" 
+AR Path="/6258BFC6/605C8243" Ref="C9"  Part="1" 
+F 0 "C9" V 6500 5000 50  0000 L CNN
+F 1 "10µF / 6.3V" V 6400 4900 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 6588 5000 50  0001 C CNN
+F 3 "~" H 6550 5150 50  0001 C CNN
+	1    6550 5150
+	1    0    0    -1  
+$EndComp
+Text Notes 6750 4150 1    30   Italic 0
+1µF MLCC 1206
+Text Notes 8250 5100 1    30   Italic 0
+220µH inductors
+Text Notes 6150 2950 0    30   Italic 0
+22R resistor 2512
+Text Notes 5650 2950 0    30   Italic 0
+SS16 \nreverse polarity \nprotection diode
+Text Notes 5350 3850 1    30   Italic 0
+SMAJ40CA TVS diode
+Text Notes 750  2150 0    30   Italic 0
+Values on the PCB may differ:\nC6: 4.7nF / 50V\nC9 + 10: 10pF / 50V\nC4 + 11: 10µF / 10V\nC5 + 12: 10µF / 50V\nC1 + 8 + 13: 100nF / 50V\nJP1: 0805 0R\n\nDeactivate / Change VCC2 (5V):\n\nIf you want to get rid of VCC2 (5V): \n* L1, R14, R15, R16, C9 and C13 are not needed. \n* Close JP9 in that case.\n\nTo change VCC2, change R14 and R15 according the \nNCN5120 dataheet. When VCC2 is greater than 10V, \nC9 must be changed so that the voltage rating matches\nor exceeds VCC2 (e.g. when VCC2 = 12V, use a 16V MLCC)\n\nEnable High Bus current:\n\nFor bus current consumption up to 20mA, JP8 must be closed \n(This is the default, closed by a 0R resistor).\n\nFor bus current consumption of 10mA or less, JP8 can be open.
+Text Notes 2100 3150 0    74   ~ 0
+KNX1 Klemme
+$Comp
+L Homekit_Baseplate:Wago_243-211 J?
+U 1 1 605C8258
+P 2600 3050
+AR Path="/605C8258" Ref="J?"  Part="1" 
+AR Path="/605817AD/605C8258" Ref="J?"  Part="1" 
+AR Path="/6258BFC6/605C8258" Ref="J6"  Part="1" 
+F 0 "J6" H 3000 3000 50  0000 L CNN
+F 1 "Wago_243-211" H 2350 3000 50  0000 L CNN
+F 2 "Homekit:WAGO 243-211 KNX" H 2600 3050 50  0001 C CNN
+F 3 "" H 2600 3050 50  0001 C CNN
+	1    2600 3050
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	9100 3100 9000 3100
+Wire Wire Line
+	9100 3200 9000 3200
+$Comp
+L SparkFun-Jumpers:JUMPER-SMT_3_1-NC JP7
+U 1 1 60DD2D18
+P 5000 2800
+F 0 "JP7" H 4750 2850 45  0000 L CNN
+F 1 "SJ KNX1+" H 5100 2800 45  0000 L CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Bridged2Bar12_Pad1.0x1.5mm" H 5000 3050 20  0001 C CNN
+F 3 "" V 5000 2745 60  0001 C CNN
+F 4 "XXX-00000" H 5104 2716 60  0001 L CNN "PROD_ID"
+	1    5000 2800
+	1    0    0    -1  
+$EndComp
+$Comp
+L MicroBCU_Symbol:Konnekting_µBCU GN1
+U 1 1 60EDC6FB
+P 5400 1950
+F 0 "GN1" H 5122 1904 50  0000 R CNN
+F 1 "Konnekting_µBCU" H 5122 1995 50  0000 R CNN
+F 2 "MicroBCU2:MicroBCU2_Solderd_Vertical" H 5300 1500 50  0001 C CNN
+F 3 "" H 5300 1500 50  0001 C CNN
+	1    5400 1950
+	-1   0    0    1   
+$EndComp
+$Comp
+L SparkFun-Jumpers:JUMPER-SMT_3_1-NC JP4
+U 1 1 60DFD915
+P 3450 2400
+F 0 "JP4" V 3550 2600 45  0000 C CNN
+F 1 "SJ KNX1 GND" V 3600 2300 45  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Bridged2Bar12_Pad1.0x1.5mm" H 3450 2650 20  0001 C CNN
+F 3 "" V 3450 2345 60  0001 C CNN
+F 4 "XXX-00000" V 3775 2400 60  0001 C CNN "PROD_ID"
+	1    3450 2400
+	0    1    -1   0   
+$EndComp
+Text Notes 3200 3550 0    74   ~ 0
+KNX2 Klemme
+$Comp
+L Homekit_Baseplate:Wago_243-211 J?
+U 1 1 60F31D4C
+P 3700 3450
+AR Path="/60F31D4C" Ref="J?"  Part="1" 
+AR Path="/605817AD/60F31D4C" Ref="J?"  Part="1" 
+AR Path="/6258BFC6/60F31D4C" Ref="J8"  Part="1" 
+F 0 "J8" H 4050 3400 50  0000 L CNN
+F 1 "Wago_243-211" H 3450 3400 50  0000 L CNN
+F 2 "Homekit:WAGO 243-211 KNX" H 3700 3450 50  0001 C CNN
+F 3 "" H 3700 3450 50  0001 C CNN
+	1    3700 3450
+	-1   0    0    1   
+$EndComp
+$Comp
+L SparkFun-Jumpers:JUMPER-SMT_3_1-NC JP5
+U 1 1 60F4FC57
+P 3950 2400
+F 0 "JP5" V 3850 2200 45  0000 C CNN
+F 1 "SJ KNX2 GND" V 4100 2400 45  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Bridged2Bar12_Pad1.0x1.5mm" H 3950 2650 20  0001 C CNN
+F 3 "" V 3950 2345 60  0001 C CNN
+F 4 "XXX-00000" V 4275 2400 60  0001 C CNN "PROD_ID"
+	1    3950 2400
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	3950 2250 3950 2150
+Wire Wire Line
+	3750 2400 3650 2400
+Wire Wire Line
+	3450 2550 3450 2900
+Wire Wire Line
+	3050 2400 3250 2400
+Wire Wire Line
+	4200 2400 4150 2400
+$Comp
+L SparkFun-Jumpers:JUMPER-SMT_3_1-NC JP6
+U 1 1 6109B20C
+P 4600 2400
+F 0 "JP6" V 4500 2600 45  0000 C CNN
+F 1 "SJ KNX2+" V 4750 2400 45  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Bridged2Bar12_Pad1.0x1.5mm" H 4600 2650 20  0001 C CNN
+F 3 "" V 4600 2345 60  0001 C CNN
+F 4 "XXX-00000" V 4925 2400 60  0001 C CNN "PROD_ID"
+	1    4600 2400
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3950 2150 5050 2150
+Wire Wire Line
+	4550 1950 5050 1950
+Wire Wire Line
+	4550 1850 5050 1850
+Wire Wire Line
+	4550 1750 5050 1750
+Wire Wire Line
+	4550 1650 5050 1650
+Wire Wire Line
+	4600 2250 5050 2250
+Wire Wire Line
+	5000 2400 4800 2400
+Wire Wire Line
+	5000 2600 5000 2400
+Wire Wire Line
+	5000 3100 5000 3000
+Wire Wire Line
+	5000 3100 5500 3100
+Wire Wire Line
+	4200 2400 4200 3300
+Wire Wire Line
+	2600 2800 4850 2800
+Wire Wire Line
+	4400 2400 4400 3200
+Wire Wire Line
+	3700 3300 4200 3300
+Wire Wire Line
+	3700 3200 4400 3200
+Wire Wire Line
+	2600 2900 3450 2900
+Text Notes 750  2450 0    50   ~ 0
+VCC1: +3V3 KNX1\nVCC2: +5V KNX1
+$Comp
+L SparkFun-PowerSymbols:VCC_2 #SUPPLY04
+U 1 1 605EEAFA
+P 6800 4650
+F 0 "#SUPPLY04" H 6850 4650 45  0001 L BNN
+F 1 "VCC_2" H 6800 4820 45  0000 C CNN
+F 2 "KNX1 5V" H 6550 4650 60  0000 C CNN
+F 3 "" H 6800 4650 60  0001 C CNN
+	1    6800 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR031
+U 1 1 605FE152
+P 7500 5600
+F 0 "#PWR031" H 7500 5350 50  0001 C CNN
+F 1 "GND1" H 7500 5450 50  0000 C CNN
+F 2 "" H 7500 5600 50  0001 C CNN
+F 3 "" H 7500 5600 50  0001 C CNN
+	1    7500 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR035
+U 1 1 605FE995
+P 9350 5100
+F 0 "#PWR035" H 9350 4850 50  0001 C CNN
+F 1 "GND1" H 9350 4950 50  0000 C CNN
+F 2 "" H 9350 5100 50  0001 C CNN
+F 3 "" H 9350 5100 50  0001 C CNN
+	1    9350 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR036
+U 1 1 605FED5E
+P 9600 3750
+F 0 "#PWR036" H 9600 3500 50  0001 C CNN
+F 1 "GND1" H 9600 3600 50  0000 C CNN
+F 2 "" H 9600 3750 50  0001 C CNN
+F 3 "" H 9600 3750 50  0001 C CNN
+	1    9600 3750
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR030
+U 1 1 605FF36F
+P 6900 2500
+F 0 "#PWR030" H 6900 2250 50  0001 C CNN
+F 1 "GND1" H 6900 2350 50  0000 C CNN
+F 2 "" H 6900 2500 50  0001 C CNN
+F 3 "" H 6900 2500 50  0001 C CNN
+	1    6900 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR029
+U 1 1 60600214
+P 6800 5400
+F 0 "#PWR029" H 6800 5150 50  0001 C CNN
+F 1 "GND1" H 6800 5250 50  0000 C CNN
+F 2 "" H 6800 5400 50  0001 C CNN
+F 3 "" H 6800 5400 50  0001 C CNN
+	1    6800 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR028
+U 1 1 60600252
+P 6000 4300
+F 0 "#PWR028" H 6000 4050 50  0001 C CNN
+F 1 "GND1" H 6000 4150 50  0000 C CNN
+F 2 "" H 6000 4300 50  0001 C CNN
+F 3 "" H 6000 4300 50  0001 C CNN
+	1    6000 4300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND1 #PWR027
+U 1 1 60608C0C
+P 3050 2500
+F 0 "#PWR027" H 3050 2250 50  0001 C CNN
+F 1 "GND1" H 3050 2350 50  0000 C CNN
+F 2 "" H 3050 2500 50  0001 C CNN
+F 3 "" H 3050 2500 50  0001 C CNN
+	1    3050 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L SparkFun-PowerSymbols:VCC_1 #SUPPLY06
+U 1 1 60638D00
+P 9350 4400
+F 0 "#SUPPLY06" H 9400 4400 45  0001 L BNN
+F 1 "VCC_1" H 9350 4570 45  0000 C CNN
+F 2 "KNX1 3V3" H 9350 4665 60  0000 C CNN
+F 3 "" H 9350 4400 60  0001 C CNN
+	1    9350 4400
+	1    0    0    -1  
+$EndComp
+$Comp
+L SparkFun-PowerSymbols:VCC_1 #SUPPLY07
+U 1 1 606421AB
+P 9600 2100
+F 0 "#SUPPLY07" H 9650 2100 45  0001 L BNN
+F 1 "VCC_1" H 9600 2270 45  0000 C CNN
+F 2 "KNX1 3V3" H 9600 2365 60  0000 C CNN
+F 3 "" H 9600 2100 60  0001 C CNN
+	1    9600 2100
+	1    0    0    -1  
+$EndComp
+$Comp
+L SparkFun-PowerSymbols:VCC_1 #SUPPLY05
+U 1 1 60642DB9
+P 6900 1700
+F 0 "#SUPPLY05" H 6950 1700 45  0001 L BNN
+F 1 "VCC_1" H 6900 1870 45  0000 C CNN
+F 2 "KNX1 3V3" H 6900 1965 60  0000 C CNN
+F 3 "" H 6900 1700 60  0001 C CNN
+	1    6900 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L SparkFun-PowerSymbols:VCC_2 #SUPPLY03
+U 1 1 6064DD56
+P 6100 3750
+F 0 "#SUPPLY03" H 6150 3750 45  0001 L BNN
+F 1 "VCC_2" V 6300 3750 45  0000 L CNN
+F 2 "KNX1 5V" V 6200 3550 60  0000 L CNN
+F 3 "" H 6100 3750 60  0001 C CNN
+	1    6100 3750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND1 #PWR033
+U 1 1 6079E000
+P 8400 4450
+F 0 "#PWR033" H 8400 4200 50  0001 C CNN
+F 1 "GND1" H 8400 4300 50  0000 C CNN
+F 2 "" H 8400 4450 50  0001 C CNN
+F 3 "" H 8400 4450 50  0001 C CNN
+	1    8400 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8400 4450 8400 4200
+$Comp
+L power:GND1 #PWR032
+U 1 1 607D593C
+P 8000 4450
+F 0 "#PWR032" H 8000 4200 50  0001 C CNN
+F 1 "GND1" H 8000 4300 50  0000 C CNN
+F 2 "" H 8000 4450 50  0001 C CNN
+F 3 "" H 8000 4450 50  0001 C CNN
+	1    8000 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9600 3750 9600 3600
+Connection ~ 9600 3600
+$Comp
+L power:GND1 #PWR034
+U 1 1 607164B9
+P 9100 2450
+F 0 "#PWR034" H 9100 2200 50  0001 C CNN
+F 1 "GND1" H 9100 2300 50  0000 C CNN
+F 2 "" H 9100 2450 50  0001 C CNN
+F 3 "" H 9100 2450 50  0001 C CNN
+	1    9100 2450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9100 2450 9100 2300
+Connection ~ 9100 2300
+Wire Wire Line
+	6800 4650 6800 4750
+Wire Wire Line
+	6800 4750 7150 4750
+Wire Wire Line
+	7150 4750 7150 4550
+Wire Wire Line
+	7150 4550 7500 4550
+Connection ~ 6800 4750
+Wire Wire Line
+	6800 4750 6800 5000
+Connection ~ 7500 4550
+Wire Wire Line
+	6550 5300 6800 5300
+Connection ~ 6800 5300
+Wire Wire Line
+	6800 5300 7000 5300
+Wire Wire Line
+	9100 5000 9350 5000
+Wire Wire Line
+	9350 5100 9350 5000
+Connection ~ 9350 5000
+Wire Wire Line
+	9350 5000 9550 5000
+Wire Wire Line
+	6800 5300 6800 5400
+Wire Wire Line
+	7500 5600 7500 5500
+Text Label 4550 2050 2    50   ~ 0
+KNX2_SAVE
+Wire Wire Line
+	4550 2050 5050 2050
+Wire Wire Line
+	6900 2500 6900 2400
+Connection ~ 6900 2400
+Text Label 4550 1950 2    50   ~ 0
+KNX2_RX
+Text Label 4550 1850 2    50   ~ 0
+KNX2_TX
+Text Label 4550 1750 2    50   ~ 0
+KNX2_3V3
+Text Label 4550 1650 2    50   ~ 0
+KNX2_5V
+Text Label 4000 3300 2    50   ~ 0
+KNX2-
+Text Label 4000 3200 2    50   ~ 0
+KNX2+
+Text Label 2900 2800 2    50   ~ 0
+KNX1+
+Text Label 2900 2900 2    50   ~ 0
+KNX1-
+Text Label 9100 3100 0    50   ~ 0
+KNX1_TX
+Text Label 9100 3200 0    50   ~ 0
+KNX1_RX
+Wire Wire Line
+	3050 2500 3050 2400
+Text Label 4550 2150 2    50   ~ 0
+KNX2_GND
+Text Label 1700 6400 3    50   ~ 0
+KNX2_5V
+Text Label 1500 6400 3    50   ~ 0
+KNX2_3V3
+Text Label 1900 6400 3    50   ~ 0
+KNX2_TX
+Text Label 1800 6400 3    50   ~ 0
+KNX2_RX
+Text Label 1600 6400 3    50   ~ 0
+KNX2_GND
+Text HLabel 1250 5850 0    50   Output ~ 0
+KNX2_5V
+Text HLabel 1250 6050 0    50   Output ~ 0
+KNX2_3V3
+Text HLabel 1250 5550 0    50   Output ~ 0
+KNX2_TX
+Text HLabel 1250 5650 0    50   Input ~ 0
+KNX2_RX
+Text HLabel 1250 5950 0    50   UnSpc ~ 0
+KNX2_GND
+Wire Wire Line
+	1900 5550 1900 6400
+Wire Wire Line
+	1250 5550 1900 5550
+Wire Wire Line
+	1250 5650 1800 5650
+Wire Wire Line
+	1800 5650 1800 6400
+Wire Wire Line
+	1700 5850 1250 5850
+Wire Wire Line
+	1700 5850 1700 6400
+Wire Wire Line
+	1600 5950 1250 5950
+Wire Wire Line
+	1600 5950 1600 6400
+Wire Wire Line
+	1500 6400 1500 6050
+Wire Wire Line
+	1500 6050 1250 6050
+Connection ~ 1500 6050
+Wire Wire Line
+	2900 5950 1600 5950
+Connection ~ 1600 5950
+Connection ~ 1700 5850
+Wire Wire Line
+	2900 5750 2300 5750
+Wire Wire Line
+	2300 5750 2300 5650
+Wire Wire Line
+	2300 5650 1800 5650
+Connection ~ 1800 5650
+Wire Wire Line
+	1900 5550 2400 5550
+Wire Wire Line
+	2400 5550 2400 5650
+Wire Wire Line
+	2400 5650 2900 5650
+Connection ~ 1900 5550
+Text Label 1900 4950 3    50   ~ 0
+KNX1_TX
+Text Label 1800 4950 3    50   ~ 0
+KNX1_RX
+Text HLabel 1250 4400 0    50   Output ~ 0
+KNX1_5V
+Text HLabel 1250 4600 0    50   Output ~ 0
+KNX1_3V3
+Text HLabel 1250 4100 0    50   Output ~ 0
+KNX1_TX
+Text HLabel 1250 4200 0    50   Input ~ 0
+KNX1_RX
+Text HLabel 1250 4500 0    50   UnSpc ~ 0
+KNX1_GND
+Wire Wire Line
+	1900 4100 1900 4950
+Wire Wire Line
+	1250 4100 1900 4100
+Wire Wire Line
+	1250 4200 1800 4200
+Wire Wire Line
+	1800 4200 1800 4950
+Wire Wire Line
+	1700 4400 1250 4400
+Wire Wire Line
+	1600 4500 1250 4500
+Wire Wire Line
+	1600 4500 1600 4950
+$Comp
+L SparkFun-PowerSymbols:VCC_1 #SUPPLY01
+U 1 1 60FCC371
+P 1500 3900
+F 0 "#SUPPLY01" H 1550 3900 45  0001 L BNN
+F 1 "VCC_1" H 1450 4050 45  0000 C CNN
+F 2 "KNX1 3V3" H 1250 3900 60  0000 C CNN
+F 3 "" H 1500 3900 60  0001 C CNN
+	1    1500 3900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1250 4600 1500 4600
+Wire Wire Line
+	1500 4600 1500 3900
+$Comp
+L SparkFun-PowerSymbols:VCC_2 #SUPPLY02
+U 1 1 60FF87D0
+P 1700 3900
+F 0 "#SUPPLY02" H 1750 3900 45  0001 L BNN
+F 1 "VCC_2" H 1750 4050 45  0000 C CNN
+F 2 "KNX1 5V" H 1950 3900 60  0000 C CNN
+F 3 "" H 1700 3900 60  0001 C CNN
+	1    1700 3900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1700 4400 1700 3900
+$Comp
+L power:GND1 #PWR026
+U 1 1 61023590
+P 1600 4950
+F 0 "#PWR026" H 1600 4700 50  0001 C CNN
+F 1 "GND1" H 1600 4800 50  0000 C CNN
+F 2 "" H 1600 4950 50  0001 C CNN
+F 3 "" H 1600 4950 50  0001 C CNN
+	1    1600 4950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2900 4500 1600 4500
+Wire Wire Line
+	2900 4300 2300 4300
+Wire Wire Line
+	2300 4300 2300 4200
+Wire Wire Line
+	2300 4200 1800 4200
+Wire Wire Line
+	1900 4100 2400 4100
+Wire Wire Line
+	2400 4100 2400 4200
+Wire Wire Line
+	2400 4200 2900 4200
+Connection ~ 1500 4600
+Connection ~ 1600 4500
+Connection ~ 1700 4400
+Connection ~ 1800 4200
+Connection ~ 1900 4100
+Text Notes 950  3600 0    50   ~ 0
+Connectors
+Text Notes 3200 4750 0    30   Italic 0
+SS16 \nreverse polarity \nprotection diodes
+Text Notes 3200 6200 0    30   Italic 0
+SS16 \nreverse polarity \nprotection diodes
+$Comp
+L Connector_Generic:Conn_01x06 J17
+U 1 1 611A98C8
+P 3100 5850
+F 0 "J17" H 3180 5842 50  0000 L CNN
+F 1 "J KNX2 Breakout" H 3180 5751 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" H 3100 5850 50  0001 C CNN
+F 3 "~" H 3100 5850 50  0001 C CNN
+	1    3100 5850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2400 6250 2400 6150
+Wire Wire Line
+	2400 6150 2900 6150
+Text HLabel 1250 4800 0    50   Output ~ 0
+KNX1_SAVE
+$Comp
+L Connector_Generic:Conn_01x06 J7
+U 1 1 611CB921
+P 3100 4400
+F 0 "J7" H 3180 4392 50  0000 L CNN
+F 1 "J KNX1 Breakout" H 3180 4301 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" H 3100 4400 50  0001 C CNN
+F 3 "~" H 3100 4400 50  0001 C CNN
+	1    3100 4400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2900 4700 2400 4700
+Wire Wire Line
+	2400 4700 2400 4800
+Text Label 1400 6400 3    50   ~ 0
+KNX2_SAVE
+Wire Wire Line
+	1400 6250 2400 6250
+Text Label 1400 4950 3    50   ~ 0
+KNX1_SAVE
+Wire Wire Line
+	1400 4950 1400 4800
+Connection ~ 1400 4800
+Wire Wire Line
+	1400 4800 1250 4800
+Wire Wire Line
+	1400 4800 2400 4800
+Wire Wire Line
+	1400 6250 1400 6400
+Text Notes 8150 5200 1    30   ~ 0
+5V only
+Text Notes 8050 5100 1    30   ~ 0
+5V only
+Text Notes 7650 5100 1    30   ~ 0
+5V only
+Text Notes 7600 5450 1    30   ~ 0
+5V only
+Text Notes 7250 5250 1    30   ~ 0
+5V only
+Text Notes 6350 5250 1    30   ~ 0
+5V only
+Wire Notes Line
+	8200 4400 6250 4400
+Wire Notes Line
+	6250 4400 6250 5800
+Wire Notes Line
+	6250 5800 7800 5800
+Wire Notes Line
+	7800 5800 7800 5250
+Wire Notes Line
+	7800 5250 8200 5250
+Wire Notes Line
+	8200 5250 8200 4400
+Wire Wire Line
+	8050 5450 7700 5450
+Wire Wire Line
+	8350 5450 8800 5450
+Wire Wire Line
+	8800 4550 8800 5450
+Wire Wire Line
+	7700 5100 7700 5450
+Wire Wire Line
+	6000 4300 6000 4200
+Connection ~ 6000 4200
+Wire Wire Line
+	6000 4200 6200 4200
+Text Notes 6550 4500 2    50   ~ 0
+5V only
+Wire Wire Line
+	1500 6050 2900 6050
+Wire Wire Line
+	1700 5850 2900 5850
+Wire Wire Line
+	1500 4600 2900 4600
+Wire Wire Line
+	1700 4400 2900 4400
+$EndSCHEMATC

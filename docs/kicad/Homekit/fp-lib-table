@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name Homekit)(type KiCad)(uri /Users/michael/Development/Teensy/Teensy_Homekit/docs/kicad/libraries/Homekit.pretty)(options "")(descr ""))
+  (lib (name MicroBCU2)(type KiCad)(uri /Users/michael/Development/Teensy/Teensy_Homekit/docs/kicad/libraries/MicroBCU2.pretty)(options "")(descr ""))
+  (lib (name SSD1306)(type KiCad)(uri /Users/michael/Development/Teensy/Teensy_Homekit/docs/kicad/libraries/SSD1306.pretty)(options "")(descr ""))
+)

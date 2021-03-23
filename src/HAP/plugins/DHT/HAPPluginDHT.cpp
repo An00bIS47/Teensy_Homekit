@@ -42,7 +42,7 @@ HAPPluginDHT::HAPPluginDHT(){
 FLASHMEM 
 #endif
 bool HAPPluginDHT::begin(){
-	LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
+	LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
 	LogW("   - Using DHT dummy!", true);
@@ -78,7 +78,7 @@ void HAPPluginDHT::changePressure(uint16_t oldValue, uint16_t newValue) {
 
 void HAPPluginDHT::handleImpl(bool forced){	
 
-	LogV(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+	LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 	
 	sensors_event_t sensorEventTemp;
 	sensors_event_t sensorEventHum;

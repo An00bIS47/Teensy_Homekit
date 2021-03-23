@@ -59,7 +59,7 @@ HAPPluginLED::HAPPluginLED(){
 
 
 void HAPPluginLED::changePower(bool oldValue, bool newValue) {
-    // LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+    // LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
     if (newValue == true) {
         digitalWrite(_gpio, HIGH);     // dont know why to put low here, maybe because of SPI ?  
@@ -69,7 +69,7 @@ void HAPPluginLED::changePower(bool oldValue, bool newValue) {
 }
 
 void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
-    // LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+    // LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
     if (newValue != oldValue) {
         _blinkingEnabled = newValue;
@@ -91,7 +91,7 @@ void HAPPluginLED::changeBrightness(int oldValue, int newValue){
 void HAPPluginLED::handleImpl(bool forced){
     
     if (isEnabled() && _blinkingEnabled) {
-        LogV(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+        LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
         if (_isOn) {            
             setValue(_powerState->iid, "1", "0");
@@ -123,7 +123,7 @@ void HAPPluginLED::handleImpl(bool forced){
 FLASHMEM 
 #endif
 bool HAPPluginLED::begin(){
-    LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
+    LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
     pinMode(_gpio, OUTPUT);    
     digitalWrite(_gpio, _isOn);
@@ -213,7 +213,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
 
 void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
-    LogV(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+    LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
      if (iid == _powerState->iid) {
         
@@ -271,7 +271,7 @@ HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object)
 
 JsonObject HAPPluginLED::getConfigImpl(){
 
-    LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+    LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
     DynamicJsonDocument doc(128);
     doc["gpio"] = _gpio;

@@ -252,7 +252,7 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject ob
 
 JsonObject HAPPluginRCSwitch::getConfigImpl(){
 
-    LogD(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+    LogD(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
     DynamicJsonDocument doc(2048);
     JsonArray devices = doc.createNestedArray("devices");
@@ -355,7 +355,7 @@ void HAPPluginRCSwitch::sendDeviceCallback(uint8_t houseAddress_, uint8_t device
     prependZeros(deviceCode, String(deviceAddress_, BIN), 5);
 
 
-    LogD(HAPServer::timeString() + " " + "HAPPluginRCSwitch" + "->" + String(__FUNCTION__) + " [>>>] " + "Callback send device " + String(houseCode) + ":" + String(deviceCode) + "  - state: " + String(on_), true);
+    LogD(HAPTime::timeString() + " " + "HAPPluginRCSwitch" + "->" + String(__FUNCTION__) + " [>>>] " + "Callback send device " + String(houseCode) + ":" + String(deviceCode) + "  - state: " + String(on_), true);
 
     if (on_ == true){
         _rcSwitch.switchOn(houseCode, deviceCode);

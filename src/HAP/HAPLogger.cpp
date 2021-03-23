@@ -8,6 +8,7 @@
 
 #include "HAPLogger.hpp"
 #include "HAPServer.hpp"
+#include "HAPTime.hpp"
 
 #if defined (ARDUINO_ARCH_ESP32)
 #include <esp_log.h>
@@ -188,7 +189,7 @@ void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 	if (HAPLogger::_logLevel >= LogLevel::DEBUG) {
 		_printer->print(color);
 #if HAP_ENABLE_NTP		
-		_printer->print(HAPServer::timeString() + " ");
+		_printer->print(HAPTime::timeString() + " ");
 #else					
 		_printer->printf(F("%lu "), millis());		
 #endif
@@ -369,3 +370,14 @@ void HAPLogger::printInfo(){
 	LogD(F("DEBUG   - And finally the debug messages"), true);
 	_printer->println();
 }
+
+
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+void HAPLogger::printTeensyInfo(){
+	progInfo();
+	flexRamInfo();
+}
+

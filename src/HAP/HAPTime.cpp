@@ -17,13 +17,10 @@ const char *monthName[12] PROGMEM = {
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-
 const float toRad = M_PI/180.0;
 const float toDeg = 180.0/M_PI;
 const float twoPi = 2 * M_PI;
 const float zenith = 90.83 * toRad;
-
-
 
 int HAPTime::_utcOffset = 0;                                                 
 float HAPTime::_longitude = 0;
@@ -36,21 +33,57 @@ uint8_t HAPTime::_packetBuffer[NTP_PACKET_SIZE] = {0,};
 EthernetUDP HAPTime::_udp;
 #endif
 
-
+#if HAP_ENABLE_KNX_TIME
+uint16_t HAPTime::_koReadTime = 0;
+uint16_t HAPTime::_koWriteTime = 0;
+#endif
 
 HAPTime::HAPTime()
 {
     
 }
 
+HAPTime::~HAPTime(){
 
-bool HAPTime::begin(){
-    setSyncProvider(getDstCorrectedTime);
-    setSyncInterval(HAP_TIME_SYNC_INTERVAL);    
-
-    return true;
 }
 
+
+bool HAPTime::begin(){
+
+    return false;
+
+    setSyncProvider(getDstCorrectedTime);
+    setSyncInterval(HAP_TIME_SYNC_INTERVAL);    
+    return true;
+  
+}
+
+#if HAP_ENABLE_NTP
+bool HAPTime::beginNTP(){
+
+#if defined( ARDUINO_ARCH_ESP32 )
+    for (uint8_t i=0; i < HAP_NTP_SERVER_URLS_SIZE; i++){
+		configTzTime(HAP_NTP_TZ_INFO, HAP_NTP_SERVER_URLS[i]);
+		if (getLocalTime(&_timeinfo, 10000)) {  // wait up to 10sec to sync
+			//Serial.println(&_timeinfo, "Time set: %B %d %Y %H:%M:%S (%A)");		
+			LogI( " OK", true);
+			LogI("Set time to: " + timeString(), true);			
+
+			_configuration.getPlatformConfig()->setRefTime(timestamp());
+			LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
+			return true;
+            break;
+		} 
+	}
+    return false;
+#elif defined (CORE_TEENSY)
+    _udp.begin(8888);
+    return true;
+#else
+    return false
+#endif    
+}    
+#endif
 
 bool HAPTime::setLongitudeLatitude(float longitude, float latitude){
     if ((longitude < -180) || (longitude > 180)) return false;
@@ -189,7 +222,7 @@ uint8_t HAPTime::dstOffset(uint8_t dayValue, uint8_t monthValue, unsigned int ye
 }
 
 /* Alternative SyncProvider that automatically handles Daylight Saving Time (DST) periods,
- * at least in Europe, see below.
+ * at least in Europe, see above.
  */
 time_t HAPTime::getDstCorrectedTime(){
     time_t t = 0;
@@ -214,6 +247,8 @@ time_t HAPTime::getDstCorrectedTime(){
 
 void HAPTime::setCallbackGetTime(callbackGetTime_t callback){
     _callbackGetTime = callback;
+    setSyncProvider(getDstCorrectedTime);
+    setSyncInterval(HAP_TIME_SYNC_INTERVAL);
 }
 
 
@@ -247,6 +282,7 @@ bool HAPTime::getDateFromString(const char *str, TimeElements& tm){
 
 #if HAP_ENABLE_NTP
 time_t HAPTime::getNTPTime(){
+    
 	while (_udp.parsePacket() > 0) ; // discard any previously received packets
 	LogD(F("Transmit NTP Request to "), false);
 	LogD(HAP_NTP_SERVER_URLS[1], false);
@@ -298,19 +334,55 @@ void HAPTime::sendNTPpacket(const char* address){
 }
 #endif
 
-
+/**
+ * @brief Returns current timestamp in seconds
+ * 
+ * @return uint32_t timestamp (in seconds)
+ */
 uint32_t HAPTime::timestamp(){
+#if defined( ARDUINO_ARCH_ESP32 )
+	timeval now;
+	gettimeofday(&now, NULL);	
+	return now.tv_sec;
+#elif defined( CORE_TEENSY )
 	if (timeStatus() != timeNotSet) {
 		return (uint32_t) now();	// - UNIX_OFFSET;
 	}
+	return millis();		
+#else
 	return millis();
+#endif
 }
 
-
+/**
+ * @brief Return current time as string
+ * 		  Format: YYYY-MM-DD HH:MM:SS.sss
+ * 		  example 2019-09-22 21:30:57.239
+ * 
+ * @return String current time
+ */
 String HAPTime::timeString(){	
-	if (timeStatus() != timeNotSet) {
+      
+    char buffer[30];
+#if defined( ARDUINO_ARCH_ESP32 )
+    timeval curTime;
+    gettimeofday(&curTime, NULL);
+    
+    if (String(HAP_NTP_TIME_FORMAT).endsWith(".%f")){
+        const char* timeformat = String(HAP_NTP_TIME_FORMAT).substring(0, String(HAP_NTP_TIME_FORMAT).length() - 3).c_str();
+        strftime(buffer, 30, timeformat, localtime(&curTime.tv_sec));
+
+        int milli = curTime.tv_usec / 1000;
+        char currentTime[45] = "";
+        sprintf(currentTime, "%s.%03d", buffer, milli);
         
-        char buffer [30];	
+        return String(currentTime);
+    } else {
+        strftime(buffer, 30, HAP_NTP_TIME_FORMAT, localtime(&curTime.tv_sec));
+    }
+#elif defined( CORE_TEENSY )      
+	if (timeStatus() != timeNotSet) {
+    	
 		struct tm curTtime;
 		HAPHelper::convertToTimeH(now(), curTtime);
 		strftime(buffer, 30, HAP_NTP_TIME_FORMAT, &curTtime);
@@ -318,5 +390,20 @@ String HAPTime::timeString(){
         return String(buffer);
 	} else {
 		return String(millis());
-	}					
+	}	
+#else
+    return String(millis());
+#endif				
 }
+
+// ToDo: Is this neccessay? Can it be optianed from a global define? 
+// !!! First implement the KNX configuration for this and then add it to the time lib !!!
+// !!! KNX is required to be at HAPServer level for this to get the infos before the plugins are laoded !!!
+#if HAP_ENABLE_KNX_TIME
+void HAPTime::setKNXComObjects(uint16_t koReadTime, uint16_t koWriteTime){
+    _koReadTime = koReadTime;
+    if (koWriteTime > 0){
+        _koWriteTime = koWriteTime;
+    }
+}
+#endif

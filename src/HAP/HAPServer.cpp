@@ -83,17 +83,6 @@
 //
 // init static variables
 //
-#if HAP_ENABLE_NTP
-struct tm HAPServer::_timeinfo;
-
-#if defined(ARDUINO_ARCH_ESP32)
-
-#elif defined( CORE_TEENSY )
-uint8_t HAPServer::_packetBuffer[NTP_PACKET_SIZE] = {0, };
-EthernetUDP HAPServer::_udp;
-#endif
-#endif
-
 EventManager HAPServer::_eventManager;
 bool HAPServer::_isConnected = false;
 
@@ -306,8 +295,10 @@ bool HAPServer::begin(bool resume) {
 		LogD(F("   size:      "), false);
 		LogD(String(HAP_FAKEGATO_BUFFER_SIZE), true);		
 
-	
-		LogD(F("==================================================="), false);
+#if defined (CORE_TEENSY)
+		HAPLogger::printTeensyInfo();
+#endif
+		LogD(F("==================================================="), true);
 
 #if defined(ARDUINO_ARCH_ESP32)	
 		HAPHelper::getPartionTableInfo();
@@ -421,38 +412,28 @@ bool HAPServer::begin(bool resume) {
 #if HAP_ENABLE_PIXEL_INDICATOR
 	_pixelIndicator.off();
 #endif	
-	
-	
 
+
+	_time.begin();
 #if HAP_ENABLE_NTP
 	LogI( "Starting NTP client ...", false);
-#if defined( ARDUINO_ARCH_ESP32 )
-	for (uint8_t i=0; i < HAP_NTP_SERVER_URLS_SIZE; i++){
-		configTzTime(HAP_NTP_TZ_INFO, HAP_NTP_SERVER_URLS[i]);
-		if (getLocalTime(&_timeinfo, 10000)) {  // wait up to 10sec to sync
-			//Serial.println(&_timeinfo, "Time set: %B %d %Y %H:%M:%S (%A)");		
-			LogI( " OK", true);
-			LogI("Set time to: " + timeString(), true);			
-
-			_configuration.getPlatformConfig()->setRefTime(timestamp());
-			LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
-			break;
-		} 
-	}
-#elif defined( CORE_TEENSY )	
 	if (_isConnected) {
-		_udp.begin(8888);
-		setSyncProvider(getNtpTime);
-
-		LogI( " OK", true);
-		LogI("Set time to: " + timeString(), true);
-		_configuration.getPlatformConfig()->setRefTime(timestamp());
-		LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
-		
+		if (_time.beginNTP()){
+			LogI( F("OK"), true);
+		} else {
+			LogE( F("ERROR - Setting time from NTP failed!"), true);
+		}
+#if defined( CORE_TEENSY )	
+		_time.setCallbackGetTime(HAPTime::getNTPTime);
+#endif		
+		LogI( F("OK"), true);
 	}
-#endif /* ARDUINO_ARCH_ESP32 */
 #endif /* HAP_ENABLE_NTP */
 
+
+	LogI("Set time to: " + _time.timeString(), true);
+	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
+	LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
 
 	LogI("Loading pairings ...", false);	
 	LogI(" OK", true);
@@ -898,9 +879,6 @@ bool HAPServer::begin(bool resume) {
 #endif
 #endif
 
-
-
-
 	// Handle any events that are in the queue
 	_eventManager.processEvent();	
 
@@ -917,75 +895,8 @@ bool HAPServer::updateServiceTxt() {
 
 #if defined(ARDUINO_ARCH_ESP32)
 
-	
-
 	uint8_t *baseMac = HAPDeviceID::generateID();
 	
-	// {	
-	// 	// c# - config number
-	// 	char value[HAPHelper::numDigits(_accessorySet->configurationNumber) + 1];
-	// 	sprintf(value, "%" PRIu32, (uint32_t)_accessorySet->configurationNumber );	
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"c#", (const char*)value);
-	// }
-	
-	// {
-	// 	// id - unique identifier
-	// 	char value[18 + 1];	
-	// 	sprintf(value, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"id", (const char*)value);
-	// }
-
-	// {
-	// 	// ff - feature flags
-	// 	// Supports HAP Pairing. This flag is required for all HomeKit accessories.
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"ff", (const char*)_accessorySet->isPaired());		
-	// }
-
-	// {	
-	// 	// md - model name	
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"md", (const char*)_accessorySet->modelName());		
-	// }
-
-	// {	
-	// 	// pv - protocol version
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"pv", (const char*)HOMEKIT_PROTOKOL_VERSION);		
-	// }
-
-	// {	
-	// 	// s# - state number
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"s#", (const char*)"1");		
-	// }	
-
-
-	// {	
-	// 	// sf - state number
-	// 	// Status flags (e.g. "0x04" for bit 3). Value should be an unsigned integer. 
-	// 	// Required if non-zero.
-	// 	// 1 if not paired
-	// 	// 0 if paired ??
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"sf", (const char*)!_accessorySet->isPaired());
-	// }
-
-	// {	
-	// 	// ci - category identifier		
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"ci", (const char*)_accessorySet->accessoryType());
-	// }
-
-	// {	
-	// 	// sh - setup hash	
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"sh", (const char*)_accessorySet->setupHash());
-	// }
-
-	// {	
-	// 	// c# - config number
-	// 	char value[HAPHelper::numDigits(_accessorySet->configurationNumber + 100) + 1];
-	// 	sprintf(value, "%" PRIu32, (uint32_t)_accessorySet->configurationNumber + 100);	
-	// 	mDNSExt.addServiceTxt((const char*)"_hap", (const char*)"_tcp", (const char*)"c#", (const char*)value);
-	// }
-
-
-	// return true;
-
 
 	char valIdentifier[18 + 1];	
 	sprintf(valIdentifier, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
@@ -1003,96 +914,6 @@ bool HAPServer::updateServiceTxt() {
 
 	return mDNSExt.addServiceTxtSet((char*)"_hap", "_tcp", 9, hapTxtData);
 
-
-
-	// // ToDo: Rewrite Teensy like
-	// mdns_txt_item_t hapTxtData[9];
-
-	// // c# - Configuration number
-	// // Current configuration number. Required.
-	// // Must update when an accessory, service, or characteristic is added or removed 
-	// // 
-	// // Accessories must increment the config number after a firmware update. 
-	// // This must have a range of 1-4294967295 and wrap to 1 when it overflows. 
-	// // This value must persist across reboots, power cycles, etc.
-	
-	// char valConfigNum[HAPHelper::numDigits(_accessorySet->configurationNumber) + 1];
-	// sprintf(valConfigNum, "%lu", (unsigned long)_accessorySet->configurationNumber );	
-
-	// hapTxtData[0].key 		= (char*) "c#";
-	// hapTxtData[0].value 	= strdup(valConfigNum);
-	
-
-	// // id - unique identifier
-	// char valIdentifier[18 + 1];	
-	// sprintf(valIdentifier, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
-
-	// hapTxtData[1].key 		= (char*) "id";
-	// hapTxtData[1].value 	= strdup(valIdentifier);	
-	
-
-	// // ff - feature flags
-	// // Supports HAP Pairing. This flag is required for all HomeKit accessories.
-	// char valFF[1 + 1];
-	// sprintf(valFF, "%d", _accessorySet->isPaired());
-
-	// hapTxtData[2].key 		= (char*) "ff";	
-	// hapTxtData[2].value 	= strdup(valFF);
-
-
-	// // md - model name	
-	// char valMd[strlen(_accessorySet->modelName()) + 1];
-	// sprintf(valMd, "%s", _accessorySet->modelName());
-
-	// hapTxtData[3].key 		= (char*) "md";
-	// hapTxtData[3].value 	= strdup(valMd);
-	
-
-	// // pv - protocol version
-	// hapTxtData[4].key 		= (char*) "pv";
-	// hapTxtData[4].value 	= (char*) HOMEKIT_PROTOKOL_VERSION;
-	
-	// // s# - state number
-	// // must have a value of "1"
-	// hapTxtData[5].key 		= (char*) "s#";
-	// hapTxtData[5].value 	= (char*) "1";
-
-	// // sf - feature flags
-	// // Status flags (e.g. "0x04" for bit 3). Value should be an unsigned integer. 
-	// // Required if non-zero.
-	// // 1 if not paired
-	// // 0 if paired ??
-	// char valSF[1 + 1];
-	// sprintf(valSF, "%d", !_accessorySet->isPaired());
-
-	// // ToDo: strdup needs to be freed !!!!!!!!
-	// hapTxtData[6].key 		= (char*) "sf";
-	// hapTxtData[6].value 	= strdup(valSF);
-	
-
-	//  // ci - Accessory category indicator
-	//  char valCI[HAPHelper::numDigits(_accessorySet->accessoryType())+ 1];
-	// sprintf(valCI, "%d", _accessorySet->accessoryType());
-
-	// hapTxtData[7].key 		= (char*) "ci";
-	// hapTxtData[7].value 	= strdup(valCI);
-	// // hapTxtData[7].value 	= (char*) malloc(sizeof(char) * HAPHelper::numDigits(_accessorySet->accessoryType()) );
-	// // sprintf((char*)hapTxtData[7].value, "%d", _accessorySet->accessoryType() );
-
-
-	// // sh - Required for QR Code 
-	// char valQr[strlen(_accessorySet->setupHash()) + 1];
-	// sprintf(valQr, "%s", _accessorySet->setupHash());
-
-	// hapTxtData[8].key 		= (char*) "sh";
-	// hapTxtData[8].value		= strdup(valQr);
-	// // hapTxtData[8].value 	= (char*) malloc(sizeof(char) * strlen(_accessorySet->setupHash()) );
-	// // sprintf((char*)hapTxtData[8].value, "%s", _accessorySet->setupHash() );
-
-
-    // return mDNSExt.addServiceTxtSet((char*)"_hap", "_tcp", 9, hapTxtData);
-
-
 #elif defined( CORE_TEENSY )
 	
 	uint8_t *baseMac = HAPDeviceID::generateID();
@@ -1107,36 +928,6 @@ bool HAPServer::updateServiceTxt() {
 	_hapMdnsTxt.setStateNumber(1);										// Current state number. Required. - This must have a value of ”1”.
 	_hapMdnsTxt.setCi(_accessorySet->accessoryType());					// Accessory Category Identifier. Required. 
 	_hapMdnsTxt.setSh(_accessorySet->setupHash());						// Setup Hash
-
-	// Serial.print("   - id: ");
-	// Serial.println((char*)_hapMdnsTxt.id);
-
-	// Serial.print("   - md: ");
-	// Serial.println((char*)_hapMdnsTxt.md);
-
-	// Serial.print("   - ci: ");
-	// Serial.println((char*)_hapMdnsTxt.ci);
-
-	// Serial.print("   - c#: ");
-	// Serial.println((char*)_hapMdnsTxt.cN);
-
-	// Serial.print("   - ff: ");
-	// Serial.println((char*)_hapMdnsTxt.ff);
-
-	// Serial.print("   - pv: ");
-	// Serial.println((char*)_hapMdnsTxt.pv);
-
-	// Serial.print("   - s#: ");
-	// Serial.println((char*)_hapMdnsTxt.sN);
-
-	// Serial.print("   - sf: ");
-	// Serial.println((char*)_hapMdnsTxt.sf);	
-
-	// Serial.print("   - sh: ");
-	// Serial.println((char*)_hapMdnsTxt.sh);
-
-	
-	// HomekitTXTRecord();
 	return true;
 #endif
 	
@@ -1251,24 +1042,6 @@ void HAPServer::handle() {
 		handleClientState(&hapClient);
 	}
 
-
-
-
-	// Handle ntp client
-#if HAP_ENABLE_NTP
-
-#if defined( ARDUINO_ARCH_ESP32 )
-	getLocalTime(&_timeinfo);
-#elif defined( CORE_TEENSY)
-
-	if (timeStatus() != timeNotSet) {
-		HAPHelper::convertToTimeH(now(), _timeinfo);
-	}
-
-#endif
-    //Serial.println(&_timeinfo, HAP_NTP_TIME_FORMAT);  	
-#endif
-
 	// Handle Webserver
 #if HAP_ENABLE_WEBSERVER
 	if (_configuration.getWebServerConfig()->enabled){	
@@ -1302,74 +1075,6 @@ void HAPServer::handle() {
 
 
 
-
-/**
- * @brief Return current time as string
- * 		  Format: YYYY-MM-DD HH:MM:SS.sss
- * 		  example 2019-09-22 21:30:57.239
- * 
- * @return String current time
- */
-String HAPServer::timeString(){
-
-#if HAP_ENABLE_NTP
-
-	char buffer [30];
-#if defined( ARDUINO_ARCH_ESP32 )
-	timeval curTime;
-	gettimeofday(&curTime, NULL);
-	
-	if (String(HAP_NTP_TIME_FORMAT).endsWith(".%f")){
-		const char* timeformat = String(HAP_NTP_TIME_FORMAT).substring(0, String(HAP_NTP_TIME_FORMAT).length() - 3).c_str();
-		strftime(buffer, 30, timeformat, localtime(&curTime.tv_sec));
-
-		int milli = curTime.tv_usec / 1000;
-		char currentTime[45] = "";
-		sprintf(currentTime, "%s.%03d", buffer, milli);
-		
-		return String(currentTime);
-	} else {
-		strftime(buffer, 30, HAP_NTP_TIME_FORMAT, localtime(&curTime.tv_sec));
-	}
-#elif defined( CORE_TEENSY )	
-	if (timeStatus() != timeNotSet) {
-		struct tm curTtime;
-		HAPHelper::convertToTimeH(now(), curTtime);
-		strftime(buffer, 30, HAP_NTP_TIME_FORMAT, &curTtime);
-	} else {
-		return String(millis());
-	}
-		
-#endif
-	return String(buffer);
-#else
-	return String(millis());
-#endif		
-}
-
-
-/**
- * @brief Returns current timestamp in seconds
- * 
- * @return uint32_t timestamp (in seconds)
- */
-uint32_t HAPServer::timestamp(){
-#if HAP_ENABLE_NTP	
-
-#if defined( ARDUINO_ARCH_ESP32 )
-	timeval now;
-	gettimeofday(&now, NULL);	
-	return now.tv_sec;
-#elif defined( CORE_TEENSY )
-	if (timeStatus() != timeNotSet) {
-		return (uint32_t) now();	// - UNIX_OFFSET;
-	}
-	return millis();
-#endif		
-#else
-	return millis();
-#endif	
-}
 
 
 
@@ -4565,7 +4270,7 @@ void HAPServer::taskButtonRead(void* pvParameters){
 }
 #endif
 
-
+#if 0
 #if HAP_ENABLE_NTP && defined(CORE_TEENSY)
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
@@ -4624,5 +4329,5 @@ void HAPServer::sendNTPpacket(const char* address){
 	_udp.endPacket();
 }
 #endif
-
+#endif
 HAPServer hap;

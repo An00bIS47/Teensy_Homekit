@@ -246,12 +246,12 @@ void HAPPluginRCSwitchDevice::changedPowerTotal(float oldValue, float newValue){
 
 void HAPPluginRCSwitchDevice::changedState(bool oldValue, bool newValue){
 
-    LogD(HAPServer::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Setting new value to " + String(newValue), true);
+    LogD(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Setting new value to " + String(newValue), true);
 
     if (oldValue != newValue) {
         _callbackRCSwitchSend(houseAddress, deviceAddress, newValue);
         
-        _timestampLastActivity = HAPServer::timestamp();
+        _timestampLastActivity = HAPTime::timestamp();
 
         // Add entry to fakegato
         _fakegato.addEntry(0x01, "0", "0", "0", "0", newValue == true ? "1" : "0");
@@ -262,14 +262,14 @@ void HAPPluginRCSwitchDevice::changedState(bool oldValue, bool newValue){
 }
 
 bool HAPPluginRCSwitchDevice::fakeGatoCallback(){
-    // LogD(HAPServer::timeString() + " " + "HAPPluginPCA301Device" + "->" + String(__FUNCTION__) + " [   ] " + "fakeGatoCallback()", true);
+    // LogD(HAPTime::timeString() + " " + "HAPPluginPCA301Device" + "->" + String(__FUNCTION__) + " [   ] " + "fakeGatoCallback()", true);
 
     // Serial.println("power: " + _curPowerValue->value());    
     return _fakegato.addEntry(0x1F, "0", "0", "0", "0", _stateValue->valueString());
 }
 
 void HAPPluginRCSwitchDevice::switchCallback(uint16_t state){
-    LogD(HAPServer::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
+    LogD(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
     // _callbackRCSwitchSend(houseAddress, deviceAddress, state);
     _stateValue->setValue(state == 1 ? "1" : "0");
 }
@@ -296,6 +296,6 @@ void HAPPluginRCSwitchDevice::scheduleFromJson(JsonObject &root){
 FLASHMEM 
 #endif
 void HAPPluginRCSwitchDevice::saveConfig(){ 
-    LogE(HAPServer::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
+    LogE(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
 }

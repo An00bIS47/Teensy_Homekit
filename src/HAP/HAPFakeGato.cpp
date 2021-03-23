@@ -142,7 +142,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
 void HAPFakeGato::handle(bool forced){
     if ( shouldHandle() || forced ){       
         // This line could cause a crash 
-        // LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Handle fakegato ", true);         
+        // LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Handle fakegato ", true);         
         
         if (_periodicUpdates) {
             if (_callbackAddEntry != NULL){
@@ -291,7 +291,7 @@ void HAPFakeGato::updateS2R2Value(){
 // 
 void HAPFakeGato::getS2R2Callback(){
 #if HAP_DEBUG_FAKEGATO    
-    LogD(HAPServer::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Callback S2R2: Set next history entry", true);      
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Callback S2R2: Set next history entry", true);      
 #endif
     if (_transfer) {
 
@@ -337,13 +337,13 @@ void HAPFakeGato::getS2R2Callback(){
 
 // = CALLBACK
 void HAPFakeGato::setS2R1Characteristics(String oldValue, String newValue){
-    LogD(HAPServer::timeString() + " " + __CLASS_NAME__ + "->" + String(__FUNCTION__) + " [   ] " + "Getting S2R1 iid " + String(_s2r1Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);      
+    LogD(HAPTime::timeString() + " " + __CLASS_NAME__ + "->" + String(__FUNCTION__) + " [   ] " + "Getting S2R1 iid " + String(_s2r1Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);      
 }
 
 // = CALLBACK
 void HAPFakeGato::setS2R2Characteristics( String oldValue, String newValue){
 #if HAP_DEBUG_FAKEGATO
-    LogD(HAPServer::timeString() + " " + __CLASS_NAME__ + "->" + String(__FUNCTION__) + " [   ] " + "Getting S2R2 iid " + String(_s2r2Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);      
+    LogD(HAPTime::timeString() + " " + __CLASS_NAME__ + "->" + String(__FUNCTION__) + " [   ] " + "Getting S2R2 iid " + String(_s2r2Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);      
 #endif    
 }
 
@@ -361,7 +361,7 @@ void HAPFakeGato::setS2R2Characteristics( String oldValue, String newValue){
     * @param newValue 
  **/
 void HAPFakeGato::setS2W1Characteristics(String oldValue, String newValue){
-    LogD(HAPServer::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W1 iid " + String(_s2w1Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W1 iid " + String(_s2w1Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
     
     size_t outputLength = 0;   
     // Serial.println(newValue);
@@ -455,7 +455,7 @@ It is probably used to set time/date of the accessory.
  * @param newValue 
  **/
 void HAPFakeGato::setS2W2Characteristics(String oldValue, String newValue){
-    LogD(HAPServer::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W2 iid " + String(_s2w2Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W2 iid " + String(_s2w2Characteristics->iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
     
     // "SPMZIw=="
     size_t outputLength = 0;        
@@ -474,7 +474,7 @@ void HAPFakeGato::setS2W2Characteristics(String oldValue, String newValue){
 void HAPFakeGato::getRefTime(uint8_t *data, size_t* length, const uint16_t offset){
 
 #if HAP_DEBUG_FAKEGATO
-    LogD(HAPServer::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Get ref time entry", true);    
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Get ref time entry", true);    
 #endif
 
     uint8_t size = 21;

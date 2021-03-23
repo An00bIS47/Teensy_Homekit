@@ -251,7 +251,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=50100",
+                "PLATFORMIO=50101",
                 "__IMXRT1062__",
                 "ARDUINO_TEENSY41",
                 "HAP_PIXEL_INDICATOR_ENABLED=0",

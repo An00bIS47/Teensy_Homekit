@@ -91,14 +91,20 @@ protected:
 	
  	struct HAPPluginBME280Config* _configInternal;
 	
-
-	void setValue(int iid, String oldValue, String newValue);
-
 	HAPCharacteristicFloat*		_humidityValue;
 	HAPCharacteristicFloat*		_temperatureValue;
 	HAPCharacteristicUInt16*	_pressureValue;
 
 	Adafruit_BME280* _bme;
+
+	void addToAverage(float temperature, float humidity, uint16_t pressure);
+	void resetAverage();
+
+	float _averageTemperature;
+	float _averageHumidity;
+	uint64_t _averagePressure;
+
+	uint16_t _measurementCount;
 
 	bool fakeGatoCallback();
 	HAPFakeGatoWeather _fakegato;

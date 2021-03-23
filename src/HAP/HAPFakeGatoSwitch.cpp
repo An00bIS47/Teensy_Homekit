@@ -71,12 +71,12 @@ FLASHMEM
 #endif
 bool HAPFakeGatoSwitch::addEntry(String status){        
 
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: status=" + status, true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: status=" + status, true);
     
     uint8_t valueStatus   = status.toInt();    
 
     HAPFakeGatoSwitchData data = (HAPFakeGatoSwitchData){
-        HAPServer::timestamp(),
+        HAPTime::timestamp(),
         valueStatus       
     };    
 
@@ -93,7 +93,7 @@ bool HAPFakeGatoSwitch::addEntry(HAPFakeGatoSwitchData data){
     //     begin();
     // }
     
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);
 
     if (_vectorBuffer == nullptr) {
         begin();
@@ -148,7 +148,7 @@ bool HAPFakeGatoSwitch::addEntry(HAPFakeGatoSwitchData data){
 // TODO: Read from index requested by EVE app
 void HAPFakeGatoSwitch::getData(const size_t count, uint8_t *data, size_t* length, uint16_t offset){
 #if HAP_DEBUG_FAKEGATO      
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
 #endif
 
 #if HAP_DEBUG_FAKEGATO_DETAILED

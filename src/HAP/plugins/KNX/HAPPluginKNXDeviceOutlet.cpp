@@ -232,7 +232,7 @@ void HAPPluginKNXDeviceOutlet::changedState(bool oldValue, bool newValue){
 
     if ( oldValue == newValue) return;
 
-    _timestampLastActivity = HAPServer::timestamp();
+    _timestampLastActivity = HAPTime::timestamp();
 
     // Add event
 	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _stateValue->iid, String(newValue));							
@@ -307,7 +307,7 @@ void HAPPluginKNXDeviceOutlet::writeCurrentCallback(GroupObject& go){
 
 
 void HAPPluginKNXDeviceOutlet::writeStateCallbackFromSchedule(uint16_t state){
-    LogD(HAPServer::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
+    LogD(HAPTime::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
 
     _shouldSend = true;
 
@@ -340,7 +340,7 @@ void HAPPluginKNXDeviceOutlet::scheduleFromJson(JsonObject &root){
 FLASHMEM 
 #endif
 void HAPPluginKNXDeviceOutlet::saveConfig(){ 
-    LogE(HAPServer::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
+    LogE(HAPTime::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
 }
 

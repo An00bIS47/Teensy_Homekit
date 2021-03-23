@@ -89,6 +89,8 @@ public:
 	static void colorPrint(const char* color, const __FlashStringHelper * text, bool newLine);
 #endif
 
+	static void printTeensyInfo();
+
 	static void logError(const String &str, bool newLine = true);
 	static void logWarning(const String &str, bool newLine = true);
 	static void logInfo(const String &str, bool newLine = true);

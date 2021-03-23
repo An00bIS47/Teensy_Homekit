@@ -120,7 +120,7 @@ FLASHMEM
 #endif
 bool HAPFakeGatoEnergy::addEntry(uint8_t bitmask, String powerWatt, String powerVoltage, String powerCurrent, String stringPower10th, String status){        
 
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(size()) + "]: power10th=" + stringPower10th, true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(size()) + "]: power10th=" + stringPower10th, true);
     
     uint16_t valuePowerWatt     = (uint16_t) powerWatt.toInt()          * 10;
     uint16_t valuePowerVoltage  = (uint16_t) powerVoltage.toInt()       * 10;
@@ -129,7 +129,7 @@ bool HAPFakeGatoEnergy::addEntry(uint8_t bitmask, String powerWatt, String power
     bool state                  = status == "1" ? true : false;
 
     HAPFakeGatoEnergyData data = (HAPFakeGatoEnergyData){
-        HAPServer::timestamp(),
+        HAPTime::timestamp(),
         bitmask,
         valuePowerWatt,
         valuePowerVoltage,
@@ -144,7 +144,7 @@ bool HAPFakeGatoEnergy::addEntry(uint8_t bitmask, String powerWatt, String power
 bool HAPFakeGatoEnergy::addEntry(HAPFakeGatoEnergyData data){
 
 #if HAP_DEBUG_FAKEGATO    
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);
 #endif
 
     if (_vectorBuffer == nullptr) {
@@ -183,7 +183,7 @@ bool HAPFakeGatoEnergy::addEntry(HAPFakeGatoEnergyData data){
 
 void HAPFakeGatoEnergy::getData(const size_t count, uint8_t *data, size_t* length, uint16_t offset){
 #if HAP_DEBUG_FAKEGATO      
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
 #endif
     uint32_t tmpRequestedEntry = (_requestedEntry - 1) % HAP_FAKEGATO_BUFFER_SIZE;
 
@@ -367,11 +367,11 @@ void HAPFakeGatoEnergy::getData(const size_t count, uint8_t *data, size_t* lengt
 }
 
 void HAPFakeGatoEnergy::scheduleRead(String oldValue, String newValue){
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Read " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Read " + _name + " ..." , true);
 }
 
 void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Write " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Write " + _name + " ..." , true);
 
     size_t outputLength = 0;        
     mbedtls_base64_decode(NULL, 0, &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
@@ -435,7 +435,7 @@ void HAPFakeGatoEnergy::setSerialNumber(String serialNumber) {
 void HAPFakeGatoEnergy::handle(bool forced){        
     if ( shouldHandle() || forced ){       
         // This line could cause a crash 
-        // LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Handle fakegato ", true);         
+        // LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Handle fakegato ", true);         
         
         if (_periodicUpdates) {
             if (_callbackAddEntry != NULL){

@@ -1,6 +1,6 @@
 // 
 // HAPTime.hpp
-// Teensy_Homekit
+// Homekit
 //
 //  Created on: 07.03.2021
 //      Author: michael
@@ -14,6 +14,13 @@
 #include <math.h>
 #include <functional>
 #include "HAPGlobals.hpp"
+
+
+#define HAP_ENABLE_KNX_TIME 1
+
+#if HAP_ENABLE_KNX_TIME
+#include <knx.h>
+#endif
 
 
 #if HAP_ENABLE_NTP
@@ -45,6 +52,7 @@ public:
 
 #if HAP_ENABLE_NTP
     static time_t getNTPTime();
+    bool beginNTP();
 #endif
 
     static void setCallbackGetTime(callbackGetTime_t callback);
@@ -66,6 +74,12 @@ protected:
     static EthernetUDP _udp;
     static void sendNTPpacket(const char* address);
 #endif    
+
+#if HAP_ENABLE_KNX_TIME
+    static void setKNXComObjects(uint16_t koReadTime, uint16_t koWriteTime = 0);
+    static uint16_t _koReadTime;
+    static uint16_t _koWriteTime;
+#endif
     
     
     // zenith:      Sun's zenith for sunrise/sunset

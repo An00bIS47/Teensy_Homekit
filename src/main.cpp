@@ -15,7 +15,7 @@
 #include "HAP/HAPHelper.hpp"
 #include "HAP/HAPVersion.hpp"
 
-#if defined(CORE_TEENSY)
+#if defined(TEENSY_DEBUG)
 #include "TeensyDebug.h"
 #pragma GCC optimize ("O0")
 #endif
@@ -62,12 +62,12 @@ void setup() {
 
 	Serial.begin(115200);
 
-#if defined(CORE_TEENSY)
+#if defined(TEENSY_DEBUG)
 	debug.begin(SerialUSB1);
+#endif    
 	while(!Serial){
 		;
 	}
-#endif    
 
 	// Imprint infos to firmware
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);
@@ -78,7 +78,7 @@ void setup() {
 	LogI( F("Log level: "), false);
 	LogI( String(HAPLogger::getLogLevel() ), true);
 
-#if defined(CORE_TEENSY)
+#if defined(TEENSY_DEBUG)
 	// halt();
 #endif
 

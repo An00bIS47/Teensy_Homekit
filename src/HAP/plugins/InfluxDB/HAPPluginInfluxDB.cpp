@@ -90,7 +90,7 @@ HAPAccessory* HAPPluginInfluxDB::initAccessory(){
 }
 
 bool HAPPluginInfluxDB::begin(){
-    LogV(HAPServer::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
+    LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
     _influxdb = new Influxdb(_configInternal->url, _configInternal->port);	
     _influxdb->setDbAuth(_configInternal->database, _configInternal->username, _configInternal->password);
 
@@ -101,7 +101,7 @@ bool HAPPluginInfluxDB::begin(){
 
 void HAPPluginInfluxDB::handleImpl(bool forced){	
 
-    LogV(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+    LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
     
     // first accessory is bridge -> don't write
     for (int i=1; i < _accessorySet->numberOfAccessory(); i++){
@@ -147,7 +147,7 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                             // row.addTag("sensor", name);
                             row.addTag("type", String(curChar->type));
 
-                            row.setTimestamp(HAPServer::timestamp());
+                            row.setTimestamp(HAPTime::timestamp());
                             
                             // Serial.print("Handling " + String(name) + " - value: " + String(curChar->value()) + " type: ");
                             if ( HAPHelper::isValidFloat(curChar->valueString()) ){
@@ -169,7 +169,7 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                             // LogD(row.toString() + " - size: " + String(row.serializedSize()), true);
                     
                             if (_usedSize + row.serializedSize() > HAP_PLUGIN_INFLUXDB_BUFFER_SIZE){
-                                LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Sending data to InfluxDB server [" + String(_usedSize) + " bytes] ...", false);
+                                LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Sending data to InfluxDB server [" + String(_usedSize) + " bytes] ...", false);
                                 _influxdb->write();
                                 _usedSize = 0;
                                 LogD("OK", true);
@@ -310,7 +310,7 @@ HAPConfigurationValidationResult HAPPluginInfluxDB::validateConfig(JsonObject ob
  */
 JsonObject HAPPluginInfluxDB::getConfigImpl(){   
 
-    LogD(HAPServer::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);     
+    LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);     
     
     DynamicJsonDocument doc(512);
     doc["username"] = _configInternal->username;

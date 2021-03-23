@@ -9,6 +9,7 @@
 #ifndef HAPPLUGINKNXDEVICEWEATHER_HPP_
 #define HAPPLUGINKNXDEVICEWEATHER_HPP_
 
+#define HAP_PLUGIN_KNX_ENABLE_AVERAGE_FOR_WEATHER 0
 
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
@@ -55,7 +56,18 @@ protected:
 	HAPCharacteristicFloat*	_temperatureValue;
 	HAPCharacteristicUInt16*	_pressureValue;
 
-    // HAPCharacteristicString* 	_lastUpdate;
+#if HAP_PLUGIN_KNX_ENABLE_AVERAGE_FOR_WEATHER
+    float       _averageTemperature;
+	float       _averageHumidity;
+	uint64_t    _averagePressure;
+
+	uint16_t    _measurementCountTemperature;
+    uint16_t    _measurementCountHumidity;
+    uint16_t    _measurementCountPressure;
+
+    void addToAverage(float temperature, float humidity, uint16_t pressure);
+	void resetAverage();
+#endif
 
     HAPFakeGatoWeather*     _fakegato;
 
@@ -69,6 +81,7 @@ protected:
     void writeHumidityCallback(GroupObject& go);
     void writePressureCallback(GroupObject& go);
 
+    
 
     bool fakeGatoCallback() override;  
 };

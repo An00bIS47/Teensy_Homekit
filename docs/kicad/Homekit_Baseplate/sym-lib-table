@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name Homekit_Baseplate-cache)(type Legacy)(uri ${KIPRJMOD}/Homekit_Baseplate-cache.lib)(options "")(descr "")(disabled))
+  (lib (name Homekit_Baseplate)(type Legacy)(uri ${KIPRJMOD}/Homekit_Baseplate.lib)(options "")(descr ""))
+  (lib (name MicroBCU_Symbol)(type Legacy)(uri /Users/michael/Development/Teensy/Teensy_Homekit/docs/kicad/libraries/MicroBCU_KiCad_Symbol/MicroBCU_Symbol.lib)(options "")(descr ""))
+)

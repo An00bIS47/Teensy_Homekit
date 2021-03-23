@@ -540,7 +540,7 @@ FLASHMEM
 #endif
 void HAPFakeGatoScheduleEnergy::callbackTimerStart(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-	LogI(HAPServer::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: START", true);
+	LogI(HAPTime::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: START", true);
 #endif	
 	if (_callbackTimerStart) _callbackTimerStart(state);
 }
@@ -550,7 +550,7 @@ FLASHMEM
 #endif
 void HAPFakeGatoScheduleEnergy::callbackTimerEnd(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE	
-	LogI(HAPServer::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: END", true);
+	LogI(HAPTime::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: END", true);
 #endif	
 	if (_callbackTimerEnd)  _callbackTimerEnd(state);
 }

@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name Homekit_Baseplate)(type KiCad)(uri ${KIPRJMOD}/Homekit_Baseplate.pretty)(options "")(descr ""))
+  (lib (name MicroBCU2)(type KiCad)(uri /Users/michael/Development/Teensy/Teensy_Homekit/docs/kicad/libraries/MicroBCU2.pretty)(options "")(descr ""))
+)

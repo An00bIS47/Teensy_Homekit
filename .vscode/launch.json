@@ -1,5 +1,5 @@
 // AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
-
+//
 // PIO Unified Debugger
 //
 // Documentation: https://docs.platformio.org/page/plus/debugging.html
@@ -15,11 +15,11 @@
             "executable": "/Users/michael/Development/Teensy/Teensy_Homekit/.pio/build/teensy_41/firmware.elf",
             "projectEnvName": "teensy_41",
             "toolchainBinDir": "/Users/michael/.platformio/packages/toolchain-gccarmnoneeabi@1.50401.190816/bin",
+            "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug (teensy_41)"
-            },
-            "internalConsoleOptions": "openOnSessionStart"
+            }
         },
         {
             "type": "platformio-debug",

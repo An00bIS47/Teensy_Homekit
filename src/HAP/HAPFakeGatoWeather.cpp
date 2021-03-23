@@ -97,7 +97,7 @@ FLASHMEM
 bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, String stringTemperature, String stringHumidity, String stringPressure){        
 
 
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: temp=" + stringTemperature + " hum=" + stringHumidity + " pres=" + stringPressure, true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: temp=" + stringTemperature + " hum=" + stringHumidity + " pres=" + stringPressure, true);
     
     uint16_t valueTemperature   = (uint16_t) (stringTemperature.toFloat()    * 100);
     uint16_t valueHumidity      = (uint16_t) (stringHumidity.toFloat()       * 100);
@@ -109,7 +109,7 @@ bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, String stringTemperature, Str
 
 
     HAPFakeGatoWeatherData data = (HAPFakeGatoWeatherData){
-        HAPServer::timestamp(),
+        HAPTime::timestamp(),
         // false,
         bitmask,
         valueTemperature,
@@ -126,7 +126,7 @@ FLASHMEM
 bool HAPFakeGatoWeather::addEntry(uint8_t bitmask, uint32_t timestamp, String stringTemperature, String stringHumidity, String stringPressure){        
 
 
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: temp=" + stringTemperature + " hum=" + stringHumidity + " pres=" + stringPressure, true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Adding entry for " + _name + " [size=" + String(_memoryUsed) + "]: temp=" + stringTemperature + " hum=" + stringHumidity + " pres=" + stringPressure, true);
     
     uint16_t valueTemperature   = (uint16_t) (stringTemperature.toFloat()    * 100);
     uint16_t valueHumidity      = (uint16_t) (stringHumidity.toFloat()       * 100);
@@ -153,7 +153,7 @@ FLASHMEM
 #endif
 bool HAPFakeGatoWeather::addEntry(HAPFakeGatoWeatherData data){
 
-    //LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);
+    //LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Add fakegato data for " + _name + " ..." , true);
 
     if (_vectorBuffer == nullptr) {
         begin();
@@ -218,7 +218,7 @@ bool HAPFakeGatoWeather::addEntry(HAPFakeGatoWeatherData data){
 void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* length, uint16_t offset){
 
 #if HAP_DEBUG_FAKEGATO      
-    LogD(HAPServer::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
+    LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Get fakegato data for " + _name + " ..." , true);
 #endif
 
 #if HAP_DEBUG_FAKEGATO_DETAILED

@@ -22,8 +22,6 @@
 #include "HAPVersion.hpp"
 
 
-
-
 #include "HAPSRP.hpp"
 
 #include "HAPTLV8Types.hpp"
@@ -78,12 +76,9 @@
 #endif
 
 #include <NativeEthernet.h>
-#if HAP_ENABLE_NTP	
-#include <NativeEthernetUdp.h>
-#include <TimeLib.h>
-#include <time.h>
 #endif
-#endif
+
+#include "HAPTime.hpp"
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 #include "HAPIndicatorPixel.hpp"
@@ -222,28 +217,18 @@ public:
 	void __setBrand(const char* brand);
 
 	HAPAccessorySet* getAccessorySet();
-
-
-	static String timeString();
-	static uint32_t timestamp();
-
-
 	
 	bool isPaired();	
 
 	static EventManager _eventManager;
 protected:
-
-	// HAPConfig _config;
-
-
-
-	// struct HAPPairSetup* _pairSetup;
 	
 	void updateConfig();
 
 	HAPAccessorySet* _accessorySet;
 	std::vector<HAPClient> _clients;
+	
+	HAPTime _time;
 
 #if defined(ARDUINO_ARCH_ESP32)
 	WiFiServer _server;
@@ -270,7 +255,6 @@ protected:
 #elif defined(CORE_TEENSY)		
 	EthernetServer _server;
 	
-
 #if HAP_USE_SPIFFS_CONFIGURATION
 	HAPConfigurationT41SPIFFSExt _configuration;
 #elif HAP_USE_EEPROM
@@ -280,20 +264,12 @@ protected:
 
 	static const fnet_mdns_txt_key_t* HomekitTXTRecord();
 	static HAP_MDNS_TXT _hapMdnsTxt;
-
-#if HAP_ENABLE_NTP	
-	static EthernetUDP _udp;
-	static void sendNTPpacket(const char * address);
-	static time_t getNtpTime();
-
-	static uint8_t _packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
-#endif		
+		
+	
+	
 
 #endif
-
-#if HAP_ENABLE_NTP	
-	static struct tm _timeinfo;
-#endif	
+	
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
 	HAPFakeGatoFactory _fakeGatoFactory;
