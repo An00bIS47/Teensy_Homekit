@@ -392,7 +392,7 @@ protected:
 //  Numeric Base Characteristic
 // 
 template <class T>
-class HAPCharacteristicNumericBase: public HAPCharacteristicBaseValue<T> {
+class HAPCharacteristicNumericBase : public HAPCharacteristicBaseValue<T> {
 
 public:
     HAPCharacteristicNumericBase(uint16_t iid, uint16_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(iid, type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
@@ -458,7 +458,7 @@ protected:
 //  Data Base Characteristic
 // 
 template <class T>
-class HAPCharacteristicDataBase: public HAPCharacteristicBase {
+class HAPCharacteristicDataBase : public HAPCharacteristicBase {
 
 public:
     HAPCharacteristicDataBase(uint16_t iid, uint16_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(iid, type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
