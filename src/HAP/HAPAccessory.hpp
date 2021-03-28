@@ -29,71 +29,38 @@ public:
 
 	void addService(HAPService *service);
 
-	template <class T>
-	void addCharacteristic(HAPService *service, HAPCharacteristicT<T>* characteristic);
+	void addCharacteristic(HAPService *service, HAPCharacteristicBase* characteristic);
 
 	bool removeService(HAPService *service);
 
-	template <class T>
-	bool removeCharacteristic(HAPCharacteristicT<T>* characteristic);
+	bool removeCharacteristic(HAPCharacteristicBase* characteristic);
 
 	size_t numberOfServices() const;
 	std::shared_ptr<HAPService*> serviceAtIndex(size_t index);
 
-	template <class T>
-	std::shared_ptr<HAPCharacteristicT<T>*> characteristicsAtIndex(size_t index);
+	
+	std::shared_ptr<HAPCharacteristicBase*> characteristicAtIndex(size_t index);
 	// HAPCharacteristic *characteristicsOfType(int type);
 
 	void printTo(Print& print);
-	// void toJson(JsonArray& array);
-	// String describe() const;
 
 	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");
 	
-	// void setName(const String& name);
-	// String name();
-	
-	// void setFirmware(const String& firmware);
-	// String firmware();
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
+	
+	void setFirmware(const String& firmwareRev);
 
-
-	// String serialNumber();
-	// void setSerialNumber(const String& serialNumber);
-
-
-	// String modelName();
-	// void setModelName(const String& serialNumber);
-
-
-	// String manufacturer();
-	// void setManufacturer(const String& serialNumber);
 
 protected:
 
-	// void initInfoService();
-	// void initAccessoryName();
-	// void initFirmware();
-	// void initSerialNumber();
-	// void initIdentify();
-	// void initModelName();
-	// void initManufacturer();
-	// String _accessoryName;
+	void initInfoService();
 
 	uint8_t _aid;    
 	uint32_t _numberOfInstances = 0;
 
 	std::vector<std::shared_ptr<HAPService*>> _services;
 	
-
-	// HAPCharacteristicString*  _accessoryName;
-	// HAPCharacteristicString*  _firmware;
-	// HAPCharacteristicString*  _manufacturer;
-	// HAPCharacteristicString*  _modelName;
-	// HAPCharacteristicString*  _serialNumber;	
-	// HAPCharacteristicBool*    _identify;
-
 	HAPService*	_infoService;
 	HAPCharacteristicT<bool>* 	_identify;
 	HAPCharacteristicT<String>* _accessoryName;

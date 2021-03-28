@@ -41,6 +41,10 @@ public:
         _linkedServiceIds.push_back(serviceId_);
     }
 
+    std::vector<std::shared_ptr<HAPCharacteristicBase*>> characteristics(){
+        return _characteristics;
+    }
+
 #if defined(ARDUINO_TEENSY41)
     FLASHMEM 
 #endif
@@ -50,8 +54,8 @@ public:
 #if defined(ARDUINO_TEENSY41)
     FLASHMEM 
 #endif
-	std::shared_ptr<HAPCharacteristicT<T>*> characteristicAtIndex(size_t index) {
-        _characteristics[index];
+	std::shared_ptr<HAPCharacteristicBase*> characteristicAtIndex(size_t index) {
+        return _characteristics[index];
     }
 
 	void* operator new(size_t size);

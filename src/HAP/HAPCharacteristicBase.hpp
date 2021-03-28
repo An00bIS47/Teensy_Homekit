@@ -79,7 +79,7 @@ typedef enum {
 class HAPCharacteristicBase {
 public:
 
-    HAPCharacteristicBase(uint16_t type, uint8_t permissions): _iid(0), _type(type), _permissions(permissions), _typeString(nullptr) {
+    HAPCharacteristicBase(uint8_t type, uint8_t permissions): _iid(0), _type(type), _permissions(permissions), _typeString(nullptr) {
 #if HAP_ADD_DESC_TO_JSON		
         _desc = nullptr;
 #endif 		
@@ -298,7 +298,7 @@ public:
 protected:
 
     uint32_t  _iid;
-	const uint16_t  _type;
+	const uint8_t   _type;
 	const uint8_t   _permissions;	
 	const char*     _typeString;    
 
@@ -319,11 +319,11 @@ class HAPCharacteristicBaseValue : public HAPCharacteristicBase {
 
 public:
     
-    HAPCharacteristicBaseValue(uint16_t type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
-        _value = 0;
+    HAPCharacteristicBaseValue(uint8_t type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
+        
     }
     HAPCharacteristicBaseValue(const char* type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
-        _value = 0;
+        
     }
 
     ~HAPCharacteristicBaseValue(){
@@ -419,7 +419,7 @@ template <class T>
 class HAPCharacteristicNumericBase : public HAPCharacteristicBaseValue<T> {
 
 public:
-    HAPCharacteristicNumericBase(uint16_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
+    HAPCharacteristicNumericBase(uint8_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
         this->_value = minVal;
     }
 
@@ -486,7 +486,7 @@ template <class T>
 class HAPCharacteristicDataBase : public HAPCharacteristicBase {
 
 public:
-    HAPCharacteristicDataBase(uint16_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(uint8_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -574,6 +574,9 @@ protected:
 template <class T>
 class HAPCharacteristicT : public HAPCharacteristicBase {
 public:
+
+
+
     virtual void valueToJson(JsonObject& root) = 0;
     virtual void metaToJson(JsonObject& root)  = 0;
 
@@ -601,6 +604,13 @@ template <>
 class HAPCharacteristicT<bool> : public HAPCharacteristicBaseValue<bool> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
+        _value = false;    
+    }
+    HAPCharacteristicT(const char* type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
+        _value = false;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
             root[F("value")] = (uint8_t)_value;     
@@ -618,7 +628,7 @@ public:
     }
 #else
     String valueString(){
-        return _value == 1 ? "1" : "0";
+        return _value == 1 ? F("1") : F("0");
     }
 #endif
 
@@ -640,6 +650,13 @@ protected:
 template <>
 class HAPCharacteristicT<float> : public HAPCharacteristicNumericBase<float> {    
 public:
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, float minVal, float maxVal, float step, HAP_UNIT unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, float minVal, float maxVal, float step, HAP_UNIT unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
@@ -688,7 +705,7 @@ template <>
 class HAPCharacteristicT<uint8_t> : public HAPCharacteristicNumericBase<uint8_t> {    
 public:
 
-    HAPCharacteristicT(uint16_t type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
+    HAPCharacteristicT(uint8_t type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
         _value = minVal;
         _iid = 0;
 
@@ -773,6 +790,15 @@ template <>
 class HAPCharacteristicT<uint16_t> : public HAPCharacteristicNumericBase<uint16_t> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, uint16_t minVal, uint16_t maxVal, uint16_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint16_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, uint16_t minVal, uint16_t maxVal, uint16_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint16_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
             root[F("value")] = _value;
@@ -818,6 +844,14 @@ protected:
 template <>
 class HAPCharacteristicT<uint32_t> : public HAPCharacteristicNumericBase<uint32_t> {    
 public:
+
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, uint32_t minVal, uint32_t maxVal, uint32_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint32_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, uint32_t minVal, uint32_t maxVal, uint32_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint32_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
@@ -865,6 +899,14 @@ protected:
 template <>
 class HAPCharacteristicT<uint64_t> : public HAPCharacteristicNumericBase<uint64_t> {    
 public:
+
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, uint64_t minVal, uint64_t maxVal, uint64_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint64_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, uint64_t minVal, uint64_t maxVal, uint64_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint64_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
@@ -914,6 +956,15 @@ template <>
 class HAPCharacteristicT<String> : public HAPCharacteristicBaseValue<String> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
             root[F("value")] = _value;
@@ -954,6 +1005,15 @@ template <>
 class HAPCharacteristicT<std::string> : public HAPCharacteristicBaseValue<std::string> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxlen) : HAPCharacteristicBaseValue<std::string>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxlen) : HAPCharacteristicBaseValue<std::string>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
             root[F("value")] = _value;
@@ -987,12 +1047,14 @@ protected:
 };
 
 
+// ToDo: Add uint8_t*
 // 
 // uint8_t*
 // 
 template <>
 class HAPCharacteristicT<uint8_t*> : public HAPCharacteristicDataBase<uint8_t*> {    
 public:
+
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
@@ -1020,7 +1082,7 @@ public:
     }
 
 protected:
-    
+    size_t _maxLen = 512;
 };
 
 
