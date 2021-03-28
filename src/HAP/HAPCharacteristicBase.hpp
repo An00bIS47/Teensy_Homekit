@@ -79,13 +79,13 @@ typedef enum {
 class HAPCharacteristicBase {
 public:
 
-    HAPCharacteristicBase(uint16_t iid, uint16_t type, uint8_t permissions): _iid(iid), _type(type), _permissions(permissions), _typeString(nullptr) {
+    HAPCharacteristicBase(uint16_t type, uint8_t permissions): _iid(0), _type(type), _permissions(permissions), _typeString(nullptr) {
 #if HAP_ADD_DESC_TO_JSON		
         _desc = nullptr;
 #endif 		
 	}
 
-	HAPCharacteristicBase(uint16_t iid, const char* typeString, uint8_t permissions): _iid(iid), _type(CHAR_TYPE_NULL), _permissions(permissions), _typeString(typeString) {        
+	HAPCharacteristicBase(const char* typeString, uint8_t permissions): _iid(0), _type(CHAR_TYPE_NULL), _permissions(permissions), _typeString(typeString) {        
 		       
 		// typeString = new char[HAP_UUID_LENGTH + 1];
 		// strncpy(typeString, _typeString, HAP_UUID_LENGTH + 1);
@@ -105,8 +105,8 @@ public:
 
     }
 
-
-    uint16_t iid() { return _iid; }
+    void setIID(uint32_t iid){ _iid = iid; }
+    uint32_t iid() { return _iid; }
 
 
 #if HAP_ADD_DESC_TO_JSON
@@ -297,7 +297,7 @@ public:
 
 protected:
 
-    const uint16_t  _iid;
+    uint32_t  _iid;
 	const uint16_t  _type;
 	const uint8_t   _permissions;	
 	const char*     _typeString;    
@@ -319,10 +319,10 @@ class HAPCharacteristicBaseValue : public HAPCharacteristicBase {
 
 public:
     
-    HAPCharacteristicBaseValue(uint16_t iid, uint16_t type, uint8_t permissions) : HAPCharacteristicBase(iid, type, permissions) {
+    HAPCharacteristicBaseValue(uint16_t type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
         _value = 0;
     }
-    HAPCharacteristicBaseValue(uint16_t iid, const char* type, uint8_t permissions) : HAPCharacteristicBase(iid, type, permissions) {
+    HAPCharacteristicBaseValue(const char* type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
         _value = 0;
     }
 
@@ -380,6 +380,30 @@ public:
         _valueChangeFunctionCall = callback;
     }
 
+	void* operator new(size_t size)
+    {
+        Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
+        //void * p = ::operator new(size);
+
+#if defined(ARDUINO_TEENSY41)
+		void* ptr = extmem_malloc(size);		
+#else		
+        void* ptr = malloc(size); // will also work fine
+#endif     
+        return ptr;
+    }
+ 
+    void operator delete(void* ptr)
+    {
+        Serial.println(F("Overloading delete operator"));
+        
+#if defined(ARDUINO_TEENSY41)
+		extmem_free(ptr);
+#else		
+        free(ptr);
+#endif 		
+    }
+
 protected:
     T _value;    
     std::function<T(void)>      _valueGetFunctionCall       = nullptr;
@@ -395,11 +419,11 @@ template <class T>
 class HAPCharacteristicNumericBase : public HAPCharacteristicBaseValue<T> {
 
 public:
-    HAPCharacteristicNumericBase(uint16_t iid, uint16_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(iid, type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
+    HAPCharacteristicNumericBase(uint16_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
         this->_value = minVal;
     }
 
-    HAPCharacteristicNumericBase(uint16_t iid, const char* type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(iid, type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
+    HAPCharacteristicNumericBase(const char* type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
         this->_value = minVal;
     }
 
@@ -444,6 +468,7 @@ public:
 #endif
 
 
+
     virtual void valueFromString(const char* value) = 0;     
    
 protected:        
@@ -461,7 +486,7 @@ template <class T>
 class HAPCharacteristicDataBase : public HAPCharacteristicBase {
 
 public:
-    HAPCharacteristicDataBase(uint16_t iid, uint16_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(iid, type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(uint16_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -469,7 +494,7 @@ public:
         _value = nullptr;
     }
 
-    HAPCharacteristicDataBase(uint16_t iid, const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(iid, type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -663,8 +688,9 @@ template <>
 class HAPCharacteristicT<uint8_t> : public HAPCharacteristicNumericBase<uint8_t> {    
 public:
 
-    HAPCharacteristicT(uint16_t iid, uint16_t type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(iid, type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
+    HAPCharacteristicT(uint16_t type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
         _value = minVal;
+        _iid = 0;
 
         if (validValuesSize > 0){
             _validValues = new uint8_t[validValuesSize];
@@ -674,8 +700,9 @@ public:
         }           
     }
 
-    HAPCharacteristicT(uint16_t iid, const char* type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(iid, type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
+    HAPCharacteristicT(const char* type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
         _value = minVal;
+        _iid = 0;
 
         if (validValuesSize > 0){
             _validValues = new uint8_t[validValuesSize];

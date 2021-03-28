@@ -11,6 +11,7 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <memory>
 #include <ArduinoJson.h>
 
 #include "HAPService.hpp"
@@ -26,70 +27,80 @@ public:
 	HAPAccessory();
 	~HAPAccessory();
 
-	uint8_t aid;    
-	uint8_t numberOfInstance = 0;
-	
-	std::vector<HAPService *>_services;
+	void addService(HAPService *service);
 
-	void addService(HAPService *ser);   
-	void addCharacteristics(HAPService *ser, HAPCharacteristic *cha);
-	bool removeService(HAPService *ser);
-	bool removeCharacteristics(HAPCharacteristic *cha);
+	template <class T>
+	void addCharacteristic(HAPService *service, HAPCharacteristicT<T>* characteristic);
 
-	
+	bool removeService(HAPService *service);
 
-	uint8_t numberOfService() const;
-	HAPService *serviceAtIndex(uint8_t index);
+	template <class T>
+	bool removeCharacteristic(HAPCharacteristicT<T>* characteristic);
 
-	HAPCharacteristic *characteristicsAtIndex(uint8_t index);
-	HAPCharacteristic *characteristicsOfType(int type);
+	size_t numberOfServices() const;
+	std::shared_ptr<HAPService*> serviceAtIndex(size_t index);
+
+	template <class T>
+	std::shared_ptr<HAPCharacteristicT<T>*> characteristicsAtIndex(size_t index);
+	// HAPCharacteristic *characteristicsOfType(int type);
 
 	void printTo(Print& print);
-	void toJson(JsonArray& array);
+	// void toJson(JsonArray& array);
 	// String describe() const;
 
 	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");
 	
-	void setName(const String& name);
-	String name();
+	// void setName(const String& name);
+	// String name();
 	
-	void setFirmware(const String& firmware);
-	String firmware();
+	// void setFirmware(const String& firmware);
+	// String firmware();
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
 
 
-	String serialNumber();
-	void setSerialNumber(const String& serialNumber);
+	// String serialNumber();
+	// void setSerialNumber(const String& serialNumber);
 
 
-	String modelName();
-	void setModelName(const String& serialNumber);
+	// String modelName();
+	// void setModelName(const String& serialNumber);
 
 
-	String manufacturer();
-	void setManufacturer(const String& serialNumber);
+	// String manufacturer();
+	// void setManufacturer(const String& serialNumber);
 
-private:
+protected:
 
-	void initInfoService();
-	void initAccessoryName();
-	void initFirmware();
-	void initSerialNumber();
-	void initIdentify();
-	void initModelName();
-	void initManufacturer();
-
+	// void initInfoService();
+	// void initAccessoryName();
+	// void initFirmware();
+	// void initSerialNumber();
+	// void initIdentify();
+	// void initModelName();
+	// void initManufacturer();
 	// String _accessoryName;
 
-	HAPService*               _infoService;
+	uint8_t _aid;    
+	uint32_t _numberOfInstances = 0;
 
-	HAPCharacteristicString*  _accessoryName;
-	HAPCharacteristicString*  _firmware;
-	HAPCharacteristicString*  _manufacturer;
-	HAPCharacteristicString*  _modelName;
-	HAPCharacteristicString*  _serialNumber;
-	HAPCharacteristicBool*    _identify;
+	std::vector<std::shared_ptr<HAPService*>> _services;
+	
+
+	// HAPCharacteristicString*  _accessoryName;
+	// HAPCharacteristicString*  _firmware;
+	// HAPCharacteristicString*  _manufacturer;
+	// HAPCharacteristicString*  _modelName;
+	// HAPCharacteristicString*  _serialNumber;	
+	// HAPCharacteristicBool*    _identify;
+
+	HAPService*	_infoService;
+	HAPCharacteristicT<bool>* 	_identify;
+	HAPCharacteristicT<String>* _accessoryName;
+	HAPCharacteristicT<String>* _firmware;
+	HAPCharacteristicT<String>* _manufacturer;
+	HAPCharacteristicT<String>* _modelName;
+	HAPCharacteristicT<String>* _serialNumber;
 };
 
 
