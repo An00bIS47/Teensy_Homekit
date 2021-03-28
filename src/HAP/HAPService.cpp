@@ -28,58 +28,58 @@ HAPService::HAPService(const String& _uuid)
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPService::toJson(JsonObject& nested) {
-    // iid
-    nested["iid"] = serviceID;
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM 
+// #endif
+// void HAPService::toJson(JsonObject& nested) {
+//     // iid
+//     nested["iid"] = serviceID;
     
-    // type
-    if (uuid == 0x00) { 
-        nested["type"] = uuidString;                
-    } else {
-#if HAP_LONG_UUID    
-        char uuidStr[HAP_UUID_LENGTH];
-        snprintf(uuidStr, HAP_UUID_LENGTH, HAP_UUID, uuid);        
-#else    
-        char uuidStr[8];
-        snprintf(uuidStr, 8, "%X", uuid);    
-#endif  
-        nested["type"] = uuidStr;                                  
-    }
+//     // type
+//     if (uuid == 0x00) { 
+//         nested["type"] = uuidString;                
+//     } else {
+// #if HAP_LONG_UUID    
+//         char uuidStr[HAP_UUID_LENGTH];
+//         snprintf(uuidStr, HAP_UUID_LENGTH, HAP_UUID, uuid);        
+// #else    
+//         char uuidStr[8];
+//         snprintf(uuidStr, 8, "%X", uuid);    
+// #endif  
+//         nested["type"] = uuidStr;                                  
+//     }
 
-    // characteristics
-    JsonArray charsArray = nested.createNestedArray("characteristics");
-    for (int i = 0; i < numberOfCharacteristics(); i++) {
-        // services[i] = _services[i]->describe();
-        _characteristics[i]->addToJsonArray(charsArray);
-    }  
+//     // characteristics
+//     JsonArray charsArray = nested.createNestedArray("characteristics");
+//     for (int i = 0; i < numberOfCharacteristics(); i++) {
+//         // services[i] = _services[i]->describe();
+//         _characteristics[i]->addToJsonArray(charsArray);
+//     }  
 
-    // hidden
-    nested["hidden"] = hidden ? "true" : "false";
+//     // hidden
+//     nested["hidden"] = hidden ? "true" : "false";
     
-    // primary
-    nested["primary"] = primary ? "true" : "false";
+//     // primary
+//     nested["primary"] = primary ? "true" : "false";
 
-    // linked serviceIds
-    if (_linkedServiceIds.size() > 0){
-        JsonArray LinkedIdsArray = nested.createNestedArray("linked");
-        for (int i = 0; i < _linkedServiceIds.size(); i++) {
-            // services[i] = _services[i]->describe();
-            LinkedIdsArray.add(_linkedServiceIds[i]);
-        } 
-    }  
-}
+//     // linked serviceIds
+//     if (_linkedServiceIds.size() > 0){
+//         JsonArray LinkedIdsArray = nested.createNestedArray("linked");
+//         for (int i = 0; i < _linkedServiceIds.size(); i++) {
+//             // services[i] = _services[i]->describe();
+//             LinkedIdsArray.add(_linkedServiceIds[i]);
+//         } 
+//     }  
+// }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPService::toJson(JsonArray& array){
-    JsonObject nested = array.createNestedObject();
-    toJson(nested); 
-}
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM 
+// #endif
+// void HAPService::toJson(JsonArray& array){
+//     JsonObject nested = array.createNestedObject();
+//     toJson(nested); 
+// }
 
 // String HAPService::describe() {
 	
@@ -162,15 +162,15 @@ void HAPService::toJson(JsonArray& array){
 // }
 
 void HAPService::printTo(Print& print){
-	print.print("{");
+	print.print(F("{"));
     
     // iid
-    print.print("\"iid\":");
+    print.print(F("\"iid\":"));
     print.print(serviceID);    
-    print.print(",");
+    print.print(F(","));
 
     // type
-    print.print("\"type\":");    
+    print.print(F("\"type\":"));    
     if (uuid == 0x00) { 
         print.print(HAPHelper::wrap(uuidString));
     } else {
@@ -179,53 +179,53 @@ void HAPService::printTo(Print& print){
         snprintf(uuidStr, HAP_UUID_LENGTH, HAP_UUID, uuid);        
 #else    
         char uuidStr[8];
-        snprintf(uuidStr, 8, "%X", uuid);    
+        snprintf(uuidStr, 8, PSTR("%X"), uuid);    
 #endif  
         print.print(HAPHelper::wrap(uuidStr));                                
     }
-    print.print(",");
+    print.print(F(","));
 
     // hidden
-    print.print("\"hidden\":");
+    print.print(F("\"hidden\":"));
     if (hidden) {
         print.print(1);    
     } else {
         print.print(0);    
     }    
-    print.print(",");
+    print.print(F(","));
 
     // primary
-    print.print("\"primary\":");
+    print.print(F("\"primary\":"));
     if (primary) {
         print.print(1);    
     } else {
         print.print(0);    
     }    
-    print.print(",");
+    print.print(F(","));
 
     // linked
     if (_linkedServiceIds.size() > 0 ){
-        print.print("\"linked\":[");
+        print.print(F("\"linked\":["));
         for (uint8_t i = 0; i < _linkedServiceIds.size(); i++){
             print.print(_linkedServiceIds[i]);
             if ( i + 1 < _linkedServiceIds.size()){
-                print.print(",");
+                print.print(F(","));
             }
         }
-        print.print("]");
-        print.print(",");
+        print.print(F("]"));
+        print.print(F(","));
     }
 
     // _characteristics
-    print.print("\"characteristics\":[");    
+    print.print(F("\"characteristics\":["));    
 	for (int i = 0; i < numberOfCharacteristics(); i++) {
         _characteristics[i]->printTo(print);
 
 		if (i+1 < numberOfCharacteristics()){
-			print.print(",");
+			print.print(F(","));
 		}
     }
-	print.print("]");
+	print.print(F("]"));
 
-    print.print("}");
+    print.print(F("}"));
 }

@@ -93,7 +93,7 @@ public:
 	const char* setupHash();
 
 	// String describe();
-	void toJson(JsonArray& array) __attribute__ ((deprecated));
+	// void toJson(JsonArray& array) __attribute__ ((deprecated));
 
 	void printTo(Print& print);
 

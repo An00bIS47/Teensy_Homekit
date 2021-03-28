@@ -45,7 +45,7 @@ public:
 	HAPCharacteristic *characteristicsOfType(int type);
 
 	void printTo(Print& print);
-	void toJson(JsonArray& array);
+	// void toJson(JsonArray& array);
 	// String describe() const;
 
 	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");

@@ -169,6 +169,33 @@ public:
 	virtual const char* unitString(unit unitValue);
 	virtual const char* unitJson(unit unitValue);
 
+
+	// 
+	// NEW and DELETE overloads
+	// 
+// 	void* operator new(size_t size)
+//     {
+//         Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
+//         //void * p = ::operator new(size);
+
+// #if defined(ARDUINO_TEENSY41)
+// 		void* ptr = extmem_malloc(size);		
+// #else		
+//         void* ptr = malloc(size); // will also work fine
+// #endif     
+//         return ptr;
+//     }
+ 
+//     void operator delete(void* ptr)
+//     {
+//         Serial.println(F("Overloading delete operator"));
+        
+// #if defined(ARDUINO_TEENSY41)
+// 		extmem_free(ptr);
+// #else		
+//         free(ptr);
+// #endif 		
+//     }
 };
 
 

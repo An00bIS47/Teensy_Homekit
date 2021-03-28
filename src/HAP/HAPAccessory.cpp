@@ -151,17 +151,17 @@ HAPCharacteristic *HAPAccessory::characteristicsOfType(int type) {
 }
 
 
-void HAPAccessory::toJson(JsonArray& array){
+// void HAPAccessory::toJson(JsonArray& array){
 
-	JsonObject nested = array.createNestedObject();
-	nested["aid"] = aid;
+// 	JsonObject nested = array.createNestedObject();
+// 	nested["aid"] = aid;
 	
-	JsonArray servicesArray = nested.createNestedArray("services");
-	for (int i = 0; i < numberOfService(); i++) {
-		// services[i] = _services[i]->describe();
-		_services[i]->toJson(servicesArray);
-	}        
-}
+// 	JsonArray servicesArray = nested.createNestedArray("services");
+// 	for (int i = 0; i < numberOfService(); i++) {
+// 		// services[i] = _services[i]->describe();
+// 		_services[i]->toJson(servicesArray);
+// 	}        
+// }
 
 void HAPAccessory::printTo(Print& print){
 	print.print("{");

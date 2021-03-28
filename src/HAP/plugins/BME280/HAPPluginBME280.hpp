@@ -90,7 +90,7 @@ public:
 protected:
 	
  	struct HAPPluginBME280Config* _configInternal;
-	
+		
 	HAPCharacteristicFloat*		_humidityValue;
 	HAPCharacteristicFloat*		_temperatureValue;
 	HAPCharacteristicUInt16*	_pressureValue;
