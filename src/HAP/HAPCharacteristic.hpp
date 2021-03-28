@@ -175,8 +175,8 @@ public:
 	// 
 // 	void* operator new(size_t size)
 //     {
-//         Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
-//         //void * p = ::operator new(size);
+//         // Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
+//         // void* ptr = ::operator new(size);
 
 // #if defined(ARDUINO_TEENSY41)
 // 		void* ptr = extmem_malloc(size);		
@@ -188,7 +188,7 @@ public:
  
 //     void operator delete(void* ptr)
 //     {
-//         Serial.println(F("Overloading delete operator"));
+//         // Serial.println(F("Overloading delete operator"));
         
 // #if defined(ARDUINO_TEENSY41)
 // 		extmem_free(ptr);
