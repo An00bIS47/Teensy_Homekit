@@ -11,7 +11,7 @@
 
 #include <Arduino.h>
 #include <vector>
-
+// #include <memory>
 #include "HAPCharacteristic.hpp"
 
 class HAPService {
@@ -35,6 +35,8 @@ public:
     bool primary;
 
     std::vector<HAPCharacteristic*> _characteristics;
+    // std::vector<std::unique_ptr<HAPCharacteristicBase*>> _chars;
+
     std::vector<uint8_t> _linkedServiceIds;
 
     void setHiddenService(bool mode = true){
