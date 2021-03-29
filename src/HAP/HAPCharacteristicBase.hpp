@@ -108,6 +108,13 @@ public:
     void setIID(uint32_t iid){ _iid = iid; }
     uint32_t iid() { return _iid; }
 
+    uint8_t type(){
+        return _type;
+    }
+
+    const char* typeString(){
+        return _typeString;
+    }
 
 #if HAP_ADD_DESC_TO_JSON
 	void setDescription(const char* str){

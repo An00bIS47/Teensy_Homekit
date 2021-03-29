@@ -1866,7 +1866,7 @@ FLASHMEM
 void HAPServer::handleIdentify(HAPClient* hapClient){
 	LogI( "<<< Handle /identify: ", true );
 
-	HAPCharacteristic* c = _accessorySet->getCharacteristicsOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY);
+	HAPCharacteristic* c = _accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY);
 
 	if ( !isPaired() ) {
 		// Send 204
@@ -3682,7 +3682,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		JsonObject jsonCharacteristic = jsonCharacteristics.createNestedObject();
 		jsonCharacteristic["aid"] = aid;
 
-		HAPCharacteristic* characteristic = _accessorySet->getCharacteristics(aid, iid);
+		HAPCharacteristic* characteristic = _accessorySet->getCharacteristic(aid, iid);
 		if (characteristic) {
 			if (characteristic->readable()){
 				
@@ -3782,7 +3782,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 
 		
 		
-		HAPCharacteristic *character = _accessorySet->getCharacteristics(aid, iid);		
+		HAPCharacteristic *character = _accessorySet->getCharacteristic(aid, iid);		
 		
 		JsonObject jsonNewChr = responseArray.createNestedObject();
 		jsonNewChr[F("aid")] = aid;
@@ -3989,7 +3989,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 
 				if ( hapClient.isSubscribed(aid, iid) ) {										
-					HAPCharacteristic *character = _accessorySet->getCharacteristics(aid, iid);
+					HAPCharacteristic *character = _accessorySet->getCharacteristic(aid, iid);
 					
 					if (character) {
 

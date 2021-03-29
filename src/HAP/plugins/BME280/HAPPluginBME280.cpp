@@ -9,7 +9,6 @@
 #include "HAPPluginBME280.hpp"
 #include "HAPServer.hpp"
 
-
 #define BME280_BASE_ADDRESS        	0x76
 #define HAP_PLUGIN_BME280_INTERVAL	5000
 
@@ -190,17 +189,17 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	// temperatureService->setPrimaryService(true);
 	_accessory->addService(temperatureService);
 	{
-		HAPCharacteristicString *tempServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
+		HAPCharacteristicT<String> *tempServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read);
 		tempServiceName->setValueString("BME280 Temperature Sensor");
-		_accessory->addCharacteristics(temperatureService, tempServiceName);
+		_accessory->addCharacteristicToService(temperatureService, tempServiceName);
 
 		//HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
-		_temperatureValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, permission_read|permission_notify, -50, 100, 0.1, unit_celsius);
+		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, permission_read|permission_notify, -50, 100, 0.1, unit_celsius);
 		_temperatureValue->setValue(0.0F);
 		auto callbackChangeTemp = std::bind(&HAPPluginBME280::changeTemp, this, std::placeholders::_1, std::placeholders::_2);
 		//_temperatureValue->valueChangeFunctionCall = std::bind(&changeTemp);
-		_temperatureValue->valueChangeFunctionCall = callbackChangeTemp;
-		_accessory->addCharacteristics(temperatureService, _temperatureValue);
+		_temperatureValue->setValueChangeCallback(callbackChangeTemp);
+		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 	}
 
 
@@ -210,17 +209,17 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
 	_accessory->addService(humidityService);
 	{	
-		HAPCharacteristicString *humServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
+		HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read);
 		humServiceName->setValueString("BME280 Humidity Sensor");
-		_accessory->addCharacteristics(humidityService, humServiceName);
+		_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-		_humidityValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, permission_read|permission_notify, 0, 100, 0.1, unit_percentage);
+		_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, permission_read|permission_notify, 0, 100, 0.1, unit_percentage);
 		_humidityValue->setValue(0.0F);
 
 		auto callbackChangeHum = std::bind(&HAPPluginBME280::changeHum, this, std::placeholders::_1, std::placeholders::_2);
 		//_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
-		_humidityValue->valueChangeFunctionCall = callbackChangeHum;
-		_accessory->addCharacteristics(humidityService, _humidityValue);
+		_humidityValue->setValueChangeCallback(callbackChangeHum);
+		_accessory->addCharacteristicToService(humidityService, _humidityValue);
 	}
 
 	//
@@ -230,17 +229,17 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	_accessory->addService(pressureService);
 
 	{	
-		HAPCharacteristicString *pressureServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
+		HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read);
 		pressureServiceName->setValueString("BME280 AirPressure Sensor");
-		_accessory->addCharacteristics(pressureService, pressureServiceName);
+		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
 		
 		_pressureValue = new HAPCharacteristicUInt16(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, permission_read|permission_notify, 0, 1100, 1, unit_hpa);
 		_pressureValue->setValueString("320");
 
 		auto callbackChangePressure = std::bind(&HAPPluginBME280::changePressure, this, std::placeholders::_1, std::placeholders::_2);
 		//_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
-		_pressureValue->valueChangeFunctionCall = callbackChangePressure;
-		_accessory->addCharacteristics(pressureService, _pressureValue);
+		_pressureValue->setValueChangeCallback(callbackChangePressure);
+		_accessory->addCharacteristicToService(pressureService, _pressureValue);
 	}
 
 	// 

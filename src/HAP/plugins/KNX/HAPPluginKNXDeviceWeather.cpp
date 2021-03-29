@@ -76,7 +76,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPCharacteristicString *tempServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
         tempServiceName->setValueString("Temperature Sensor " + String(_id));
 
-        _accessory->addCharacteristics(temperatureService, tempServiceName);
+        _accessory->addCharacteristicToService(temperatureService, tempServiceName);
 
         //HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
         _temperatureValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, permission_read|permission_notify, -50, 100, 0.1, unit_celsius);
@@ -84,7 +84,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         auto callbackChangeTemp = std::bind(&HAPPluginKNXDeviceWeather::changeTemp, this, std::placeholders::_1, std::placeholders::_2);
         //_temperatureValue->valueChangeFunctionCall = std::bind(&changeTemp);
         _temperatureValue->valueChangeFunctionCall = callbackChangeTemp;
-        _accessory->addCharacteristics(temperatureService, _temperatureValue);
+        _accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 
         // if (tmpService == nullptr) tmpService = temperatureService;
 
@@ -106,7 +106,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
 
         HAPCharacteristicString *humServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
         humServiceName->setValueString("Humidity Sensor " + String(_id));
-        _accessory->addCharacteristics(humidityService, humServiceName);
+        _accessory->addCharacteristicToService(humidityService, humServiceName);
 
         _humidityValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, permission_read|permission_notify, 0, 100, 0.1, unit_percentage);
         _humidityValue->setValueString("0.0");
@@ -114,7 +114,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         auto callbackChangeHum = std::bind(&HAPPluginKNXDeviceWeather::changeHum, this, std::placeholders::_1, std::placeholders::_2);
         //_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
         _humidityValue->valueChangeFunctionCall = callbackChangeHum;
-        _accessory->addCharacteristics(humidityService, _humidityValue);
+        _accessory->addCharacteristicToService(humidityService, _humidityValue);
 
         // if (tmpService == nullptr) tmpService = humidityService;
 
@@ -139,7 +139,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
 
         HAPCharacteristicString *pressureServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
         pressureServiceName->setValueString("Pressure Sensor " + String(_id));
-        _accessory->addCharacteristics(pressureService, pressureServiceName);
+        _accessory->addCharacteristicToService(pressureService, pressureServiceName);
         
         _pressureValue = new HAPCharacteristicUInt16(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, permission_read|permission_notify, 0, 1100, 1, unit_hpa);
         _pressureValue->setValueString("320");
@@ -147,7 +147,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         auto callbackChangePressure = std::bind(&HAPPluginKNXDeviceWeather::changePressure, this, std::placeholders::_1, std::placeholders::_2);
         //_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
         _pressureValue->valueChangeFunctionCall = callbackChangePressure;
-        _accessory->addCharacteristics(pressureService, _pressureValue);
+        _accessory->addCharacteristicToService(pressureService, _pressureValue);
 
         // if (tmpService == nullptr) tmpService = pressureService;
 
@@ -171,7 +171,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
 
     //     auto callbackChangeLastUpdate = std::bind(&HAPPluginKNXDeviceWeather::changeLastUpdate, this, std::placeholders::_1, std::placeholders::_2);
     //     _lastUpdate->valueChangeFunctionCall = callbackChangeLastUpdate;
-    //     _accessory->addCharacteristics(tmpService, _lastUpdate);
+    //     _accessory->addCharacteristicToService(tmpService, _lastUpdate);
     // }
 
 

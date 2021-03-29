@@ -74,7 +74,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
 
         HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
         plugServiceName->setValueString(_name);
-        _accessory->addCharacteristics(switchService, plugServiceName);
+        _accessory->addCharacteristicToService(switchService, plugServiceName);
 
         //
         // Power State 
@@ -99,7 +99,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         _stateValue->valueGetFunctionCall = callbackReadState;
 
 
-        _accessory->addCharacteristics(switchService, _stateValue);
+        _accessory->addCharacteristicToService(switchService, _stateValue);
   
 
 
@@ -124,7 +124,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
 
         //     auto callbackChangeLastUpdate = std::bind(&HAPPluginKNXDeviceWeather::changeLastUpdate, this, std::placeholders::_1, std::placeholders::_2);
         //     _lastUpdate->valueChangeFunctionCall = callbackChangeLastUpdate;
-        //     _accessory->addCharacteristics(tmpService, _lastUpdate);
+        //     _accessory->addCharacteristicToService(tmpService, _lastUpdate);
         // }
 
 

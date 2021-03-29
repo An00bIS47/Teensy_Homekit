@@ -76,7 +76,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
 
         HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
         plugServiceName->setValueString(_name);
-        _accessory->addCharacteristics(outletService, plugServiceName);
+        _accessory->addCharacteristicToService(outletService, plugServiceName);
 
         //
         // Power State 
@@ -93,7 +93,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         auto callbackReadState = std::bind(&HAPPluginKNXDeviceOutlet::readState, this);        
         _stateValue->valueGetFunctionCall = callbackReadState;
 
-        _accessory->addCharacteristics(outletService, _stateValue);
+        _accessory->addCharacteristicToService(outletService, _stateValue);
   
 
         //
@@ -103,7 +103,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);        
         // _inUseState->valueChangeFunctionCall = callbackState;
         _inUseState->setValueString("1");
-        _accessory->addCharacteristics(outletService, _inUseState);
+        _accessory->addCharacteristicToService(outletService, _inUseState);
 
         //
         // power current (EVE)
@@ -120,7 +120,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         // Read value from knx
         _curPowerValue->valueString();
 
-        _accessory->addCharacteristics(outletService, _curPowerValue);
+        _accessory->addCharacteristicToService(outletService, _curPowerValue);
         
 
         //
@@ -139,7 +139,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         _ttlPowerValue->valueString();
 
 
-        _accessory->addCharacteristics(outletService, _ttlPowerValue);
+        _accessory->addCharacteristicToService(outletService, _ttlPowerValue);
 
 
         //
@@ -147,7 +147,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         _parentalLock = new HAPCharacteristicBool(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, permission_read|permission_write);        
         _parentalLock->setValueString("0");    
-        _accessory->addCharacteristics(outletService, _parentalLock);
+        _accessory->addCharacteristicToService(outletService, _parentalLock);
 
 
         // if (tmpService == nullptr) tmpService = temperatureService;

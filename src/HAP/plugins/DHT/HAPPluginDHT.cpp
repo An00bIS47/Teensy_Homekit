@@ -177,7 +177,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 		HAPCharacteristicString *tempServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, strlen(serviceName));
 		tempServiceName->setValue(serviceName);
 
-		_accessory->addCharacteristics(temperatureService, tempServiceName);
+		_accessory->addCharacteristicToService(temperatureService, tempServiceName);
 
 		//HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
 		_temperatureValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, permission_read|permission_notify, -50, 100, 0.1, unit_celsius);
@@ -185,7 +185,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 		auto callbackChangeTemp = std::bind(&HAPPluginDHT::changeTemp, this, std::placeholders::_1, std::placeholders::_2);
 		//_temperatureValue->valueChangeFunctionCall = std::bind(&changeTemp);
 		_temperatureValue->valueChangeFunctionCall = callbackChangeTemp;
-		_accessory->addCharacteristics(temperatureService, _temperatureValue);
+		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 
 	}	
 
@@ -205,8 +205,8 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 
 		auto callbackChangeHum = std::bind(&HAPPluginDHT::changeHum, this, std::placeholders::_1, std::placeholders::_2);
 		_humidityValue->valueChangeFunctionCall = callbackChangeHum;
-		// _accessory->addCharacteristics(humidityService, _humidityValue);
-		_accessory->addCharacteristics(temperatureService, _humidityValue);
+		// _accessory->addCharacteristicToService(humidityService, _humidityValue);
+		_accessory->addCharacteristicToService(temperatureService, _humidityValue);
 	}
 
 	
@@ -223,7 +223,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 		const char* serviceName = "DHT AirPressure Sensor";
 		HAPCharacteristicString *pressureServiceName = new HAPCharacteristicString(charType_serviceName, permission_read, strlen(serviceName));
 		pressureServiceName->setValueString(serviceName);
-		_accessory->addCharacteristics(pressureService, pressureServiceName);
+		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
 
 		_pressureValue = new HAPCharacteristicUInt16(charType_FG_airPressure, permission_read|permission_notify, 300, 1100, 1, unit_hpa);
 		_pressureValue->setValueString("700");
@@ -231,7 +231,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 		auto callbackChangePressure = std::bind(&HAPPluginDHT::changePressure, this, std::placeholders::_1, std::placeholders::_2);
 		//_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
 		_pressureValue->valueChangeFunctionCall = callbackChangePressure;
-		_accessory->addCharacteristics(pressureService, _pressureValue);
+		_accessory->addCharacteristicToService(pressureService, _pressureValue);
 	}
 #endif
 

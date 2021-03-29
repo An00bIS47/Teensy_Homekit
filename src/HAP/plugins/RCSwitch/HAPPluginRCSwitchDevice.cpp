@@ -91,7 +91,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
 
     // stringCharacteristics *plugServiceName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
     // plugServiceName->setValue(name);
-    // _accessory->addCharacteristics(outletService, plugServiceName);
+    // _accessory->addCharacteristicToService(outletService, plugServiceName);
 
     // //
     // // Power State 
@@ -101,7 +101,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
 
     // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::changedState, this, std::placeholders::_1, std::placeholders::_2);        
     // _stateValue->valueChangeFunctionCall = callbackState;
-    // _accessory->addCharacteristics(outletService, _stateValue);
+    // _accessory->addCharacteristicToService(outletService, _stateValue);
 
   
     // // 
@@ -119,7 +119,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
 
     HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, 32);
     plugServiceName->setValueString("RCSwitch " + String(houseAddress) + String(deviceAddress));
-    _accessory->addCharacteristics(outletService, plugServiceName);
+    _accessory->addCharacteristicToService(outletService, plugServiceName);
 
     //
     // Power State 
@@ -129,7 +129,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
 
     auto callbackState = std::bind(&HAPPluginRCSwitchDevice::changedState, this, std::placeholders::_1, std::placeholders::_2);        
     _stateValue->valueChangeFunctionCall = callbackState;
-    _accessory->addCharacteristics(outletService, _stateValue);
+    _accessory->addCharacteristicToService(outletService, _stateValue);
 
 
     //
@@ -139,7 +139,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);        
     // _inUseState->valueChangeFunctionCall = callbackState;
     _inUseState->setValueString("1");
-    _accessory->addCharacteristics(outletService, _inUseState);
+    _accessory->addCharacteristicToService(outletService, _inUseState);
 
     //
     // power current (EVE)
@@ -149,7 +149,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     
     auto callbackChangeCurPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerCurrent, this, std::placeholders::_1, std::placeholders::_2);
     _curPowerValue->valueChangeFunctionCall = callbackChangeCurPower;
-    _accessory->addCharacteristics(outletService, _curPowerValue);
+    _accessory->addCharacteristicToService(outletService, _curPowerValue);
     
 
     //
@@ -160,7 +160,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     
     auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
     _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
-    _accessory->addCharacteristics(outletService, _ttlPowerValue);
+    _accessory->addCharacteristicToService(outletService, _ttlPowerValue);
 
 
     //
@@ -170,7 +170,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     _parentalLock->setValueString("0");    
     // auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
     // _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
-    _accessory->addCharacteristics(outletService, _parentalLock);
+    _accessory->addCharacteristicToService(outletService, _parentalLock);
 
 
     

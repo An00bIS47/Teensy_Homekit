@@ -91,9 +91,14 @@ protected:
 	
  	struct HAPPluginBME280Config* _configInternal;
 	
-	HAPCharacteristicFloat*		_humidityValue;
-	HAPCharacteristicFloat*		_temperatureValue;
-	HAPCharacteristicUInt16*	_pressureValue;
+	HAPCharacteristicT<float>*		_humidityValue;
+	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPCharacteristicT<uint16_t>*	_pressureValue;
+
+	
+	// HAPCharacteristicFloat*		_humidityValue;
+	// HAPCharacteristicFloat*		_temperatureValue;
+	// HAPCharacteristicUInt16*	_pressureValue;
 
 	Adafruit_BME280* _bme;
 

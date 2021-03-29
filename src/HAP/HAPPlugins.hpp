@@ -29,6 +29,7 @@
 
 #include "HAPConfiguration.hpp"
 #include "HAPCharacteristics.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "HAPServices.hpp"
 
 #include "HAPFakeGato.hpp"

@@ -402,3 +402,19 @@ void HAPAccessorySet::printTo(Print& print){
     }
 	print.print(F("]}"));
 }
+
+HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, uint8_t type){
+	HAPAccessory* accessory = accessoryWithAID(aid);
+	if (accessory){
+		return accessory->characteristicsOfType(type);
+	}
+	return nullptr;
+}
+
+HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, const char* type){
+	HAPAccessory* accessory = accessoryWithAID(aid);
+	if (accessory){
+		return accessory->characteristicsOfType(type);
+	}
+	return nullptr;
+}

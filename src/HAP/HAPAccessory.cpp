@@ -136,20 +136,30 @@ HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
 
 
 
-// #if defined(ARDUINO_TEENSY41)
-// FLASHMEM 
-// #endif
-// HAPCharacteristic *HAPAccessory::characteristicsOfType(int type) {
-// 	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-// 		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
-// 			if ((*jt)->type == type) {
-// 				return *jt;
-// 			}
-// 		}
-// 	}
-// 	return NULL;
-// }
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+HAPCharacteristicBase* HAPAccessory::characteristicsOfType(int type) {
+	for (auto it = _services.begin(); it != _services.end(); it++) {
+		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+			if ((*jt)->type() == type) {
+				return &(*jt->get());
+			}
+		}
+	}
+	return nullptr;
+}
 
+HAPCharacteristicBase* HAPAccessory::characteristicsOfType(const char* typeString){
+	for (auto it = _services.begin(); it != _services.end(); it++) {
+		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+			if (strcmp((*jt)->typeString(), typeString) == 0) {
+				return &(*jt->get());
+			}
+		}
+	}
+	return nullptr;
+}
 
 // void HAPAccessory::toJson(JsonArray& array){
 

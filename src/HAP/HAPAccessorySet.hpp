@@ -104,9 +104,14 @@ public:
 	HAPAccessory* accessoryAtIndex(uint8_t index);
 	HAPAccessory* accessoryWithAID(uint8_t aid);
 
+	
+
 	int32_t getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize);
 
 	HAPCharacteristicBase* getCharacteristic(uint8_t aid, uint32_t iid);	
+
+	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, uint8_t type);	
+	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, const char* type);
 
 	void setIdentifyCharacteristic(bool value);
 
