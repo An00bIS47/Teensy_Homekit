@@ -29,17 +29,16 @@ public:
 
 	void addService(HAPService *service);
 
-	void addCharacteristic(HAPService *service, HAPCharacteristicBase* characteristic);
+	void addCharacteristicToService(HAPService *service, HAPCharacteristicBase* characteristic);
 
 	bool removeService(HAPService *service);
-
-	bool removeCharacteristic(HAPCharacteristicBase* characteristic);
+	bool removeCharacteristicFromService(HAPService *service, HAPCharacteristicBase* characteristic);
 
 	size_t numberOfServices() const;
-	std::shared_ptr<HAPService*> serviceAtIndex(size_t index);
+	HAPService* serviceAtIndex(size_t index);
 
-	
-	std::shared_ptr<HAPCharacteristicBase*> characteristicAtIndex(size_t index);
+	HAPCharacteristicBase* characteristicWithIID(uint32_t iid);
+	HAPCharacteristicBase* characteristicAtIndex(HAPService *service, size_t index);
 	// HAPCharacteristic *characteristicsOfType(int type);
 
 	void printTo(Print& print);
@@ -51,15 +50,17 @@ public:
 	
 	void setFirmware(const String& firmwareRev);
 
-
+	uint8_t aid() { return _aid; }
+    void setAID(uint8_t aid) { _aid = aid; }
+	
 protected:
 
 	void initInfoService();
 
-	uint8_t _aid;    
+	uint8_t _aid;	// only 150 accessories are allowed!
 	uint32_t _numberOfInstances = 0;
 
-	std::vector<std::shared_ptr<HAPService*>> _services;
+	std::vector<std::unique_ptr<HAPService>> _services;
 	
 	HAPService*	_infoService;
 	HAPCharacteristicT<bool>* 	_identify;

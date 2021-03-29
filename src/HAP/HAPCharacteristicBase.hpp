@@ -294,6 +294,21 @@ public:
         }
     }
 
+#if HAP_USE_STD_STRING
+    virtual std::string valueString() = 0;
+
+    virtual void valueFromString(const std::string& value){
+        valueFromString(value.c_str());
+    }    
+#else
+    virtual String valueString() = 0;
+    
+    virtual void valueFromString(const String& value){
+        valueFromString(value.c_str());
+    }
+#endif
+
+    virtual void valueFromString(const char* value) = 0; 
 
 protected:
 
@@ -486,7 +501,7 @@ template <class T>
 class HAPCharacteristicDataBase : public HAPCharacteristicBase {
 
 public:
-    HAPCharacteristicDataBase(uint8_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(uint8_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _valueLen(0), _maxDataLen(maxDataLen) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -494,7 +509,7 @@ public:
         _value = nullptr;
     }
 
-    HAPCharacteristicDataBase(const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _valueLen(0), _maxDataLen(maxDataLen) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -503,10 +518,10 @@ public:
     }
 
     ~HAPCharacteristicDataBase(){
-        if (_value) delete[] _value;
+        if (_value) free(_value);
     }
 
-    virtual size_t setValueRaw(const T* data, const size_t dataLen) {
+    virtual size_t setValueRaw(const T data, const size_t dataLen) {
 
         if (dataLen > _maxDataLen) return 0;        
         
@@ -516,33 +531,33 @@ public:
             delete[] _value;
         }
 
-        _value = new T[dataLen + 1];
+        _value = (T) malloc(sizeof(T) * dataLen + 1);
         _valueLen = dataLen;
-        memcpy((T*)_value, data, dataLen);
+        memcpy((T)_value, data, dataLen);
         _value[_valueLen] = '\0'; 
 
         return dataLen;
     }
 
 
-    virtual void setValue(const T* value, const size_t dataLen, bool withCallback = true){
+    virtual void setValue(const T value, const size_t dataLen, bool withCallback = true){
         
-        if (_valueChangeFunctionCall && withCallback) {
-            _valueChangeFunctionCall(value, dataLen);                 
+        if (_dataChangeFunctionCall && withCallback) {
+            _dataChangeFunctionCall(value, dataLen);                 
         } 
 
         setValueRaw(value, dataLen);               
     } 
 
-    virtual void value(T* output, size_t* dataLen, bool withCallback = true){  
+    virtual void value(T output, size_t* dataLen, bool withCallback = true){  
 
-        if (_valueGetFunctionCall && withCallback){
+        if (_dataGetFunctionCall && withCallback){
 
             T bufferCallback[_maxDataLen];
             size_t valueLenCallback = 0;
-            valueGetFunctionCall(bufferCallback, &valueLenCallback); 
+            // _dataGetFunctionCall(bufferCallback, &valueLenCallback); 
             
-            setValueRaw(bufferCallback, valueLenCallback);            
+            // setValueRaw(bufferCallback, valueLenCallback);            
         }
         
         if (output){
@@ -555,14 +570,23 @@ public:
     virtual void valueToJson(JsonObject& root) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
 
-protected:        
-    std::function<void(T*, size_t*)>  _valueGetFunctionCall       = nullptr;
-    std::function<void(T*, size_t)>   _valueChangeFunctionCall    = nullptr;    
+    void setDataGetCallback(std::function<void(T, size_t*)> callback){
+        _dataGetFunctionCall = callback;
+    }
+
+    void setDataChangeCallback(std::function<void(T, size_t)> callback){
+        _dataChangeFunctionCall = callback;
+    }
 
     
-    const size_t _maxDataLen;
+protected:        
+    std::function<void(T, size_t*)>  _dataGetFunctionCall       = nullptr;
+    std::function<void(T, size_t)>   _dataChangeFunctionCall    = nullptr;    
+
+    T _value;
     size_t _valueLen;
-    T* _value;
+    size_t _maxDataLen;
+    
 };
 
 
@@ -639,6 +663,9 @@ public:
             _value = false;
         }
     }
+
+
+
 
 protected:
     
@@ -1047,13 +1074,29 @@ protected:
 };
 
 
-// ToDo: Add uint8_t*
+
 // 
 // uint8_t*
 // 
 template <>
 class HAPCharacteristicT<uint8_t*> : public HAPCharacteristicDataBase<uint8_t*> {    
 public:
+
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicDataBase(type, permissions, maxDataLen, desc){
+        if (strcmp(desc, "") == 0){
+            setDescription(desc);
+        }
+
+        _value = nullptr;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicDataBase(type, permissions, maxDataLen, desc){
+        if (strcmp(desc, "") == 0){
+            setDescription(desc);
+        }
+
+        _value = nullptr;
+    }
 
 
     void valueToJson(JsonObject& root) override {
@@ -1078,7 +1121,7 @@ public:
 #endif
 
     void valueFromString(const char* value) {
-
+        setValueRaw((uint8_t*)value, strlen(value));
     }
 
 protected:

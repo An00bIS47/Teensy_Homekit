@@ -82,7 +82,7 @@ void HAPService::printTo(Print& print){
     // _characteristics
     print.print(F("\"characteristics\":["));
 	for (int i = 0; i < numberOfCharacteristics(); i++) {
-        (*_characteristics[i])->printTo(print);
+        _characteristics[i]->printTo(print);
 
 		if (i+1 < numberOfCharacteristics()){
 			print.print(F(","));

@@ -62,17 +62,17 @@ FLASHMEM
 #endif
 void HAPAccessory::addService(HAPService *service) {
 	service->setAID(++_numberOfInstances);
-	_services.emplace_back(service);
+	_services.emplace_back(std::move(service));
 }
 
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPAccessory::addCharacteristic(HAPService *service, HAPCharacteristicBase* characteristic) {
+void HAPAccessory::addCharacteristicToService(HAPService *service, HAPCharacteristicBase* characteristic) {
 		
 	characteristic->setIID(++_numberOfInstances);
-	service->characteristics().emplace_back(characteristic);
+	service->_characteristics.emplace_back(std::move(characteristic));
 
 	// ToDo: Refactor Eventmanager	
 	struct HAPEvent event = HAPEvent(NULL, _aid, characteristic->iid(), "");					
@@ -84,10 +84,9 @@ void HAPAccessory::addCharacteristic(HAPService *service, HAPCharacteristicBase*
 FLASHMEM 
 #endif
 bool HAPAccessory::removeService(HAPService *service) {	
-	for (std::vector<std::shared_ptr<HAPService*>>::iterator it = _services.begin(); it != _services.end(); it++) {
-		if (*it->get() == service) {
-			// ToDo: Refactor Eventmanager	
-			_services.erase(it);
+	for (int i=0; i < _services.size(); i++){
+		if (_services[i]->aid() == service->aid()){
+			_services.erase(_services.begin() + i);
 			return true;
 		}
 	}
@@ -98,37 +97,11 @@ bool HAPAccessory::removeService(HAPService *service) {
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-bool HAPAccessory::removeCharacteristic(HAPCharacteristicBase* characteristic) {
-	
-	// for (std::vector<std::shared_ptr<HAPService*>>::iterator it = _services.begin(); it != _services.end(); it++) {
-
-	// 	for (std::vector<std::shared_ptr<HAPCharacteristicBase*>>::iterator jt = (*it)->characteristics()->begin(); jt != (*it)->characteristics()->end(); jt++) {
-	// 		if (*jt->get() == characteristic) {
-	// 			(*it)->_characteristics.erase(jt);
-				
-
-	// 			// ToDo: Add event for update mdns config                                                     
-	// 			struct HAPEvent event = HAPEvent(NULL, _aid, (*jt)->iid(), "");					
-	// 			HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
-	// 			return true;
-	// 		}
-	// 	}
-
-	// }
-	// return false;s
-
-	for (size_t i=0; i < _services.size(); i++){
-		for (size_t j=0; j < (*_services[i])->characteristics().size(); j++){
-			if ((*(*_services[i])->characteristics()[j]) == characteristic){
-				
-				// ToDo: Add event for update mdns config                                                     
-				struct HAPEvent event = HAPEvent(NULL, _aid, characteristic->iid(), "");					
-				HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
-
-				(*_services[i])->characteristics().erase((*_services[i])->characteristics().begin() + j);
-
-				return true;
-			}
+bool HAPAccessory::removeCharacteristicFromService(HAPService *service, HAPCharacteristicBase* characteristic) {
+	for (int i=0; i < service->_characteristics.size(); i++){
+		if (service->_characteristics[i]->iid() == characteristic->iid()){
+			service->_characteristics.erase(service->_characteristics.begin() + i);
+			return true;
 		}
 	}
 	return false;
@@ -141,21 +114,27 @@ size_t HAPAccessory::numberOfServices() const {
 }
 
 
-std::shared_ptr<HAPService*> HAPAccessory::serviceAtIndex(size_t index) {
-	return _services[index];
+HAPService* HAPAccessory::serviceAtIndex(size_t index) {
+	return _services.at(index).get();
 }
 
 
-std::shared_ptr<HAPCharacteristicBase*> HAPAccessory::characteristicAtIndex(size_t index) {
-	for (size_t i=0; i < _services.size(); i++){
-		for (size_t j=0; j < (*_services[i])->characteristics().size(); j++){
-			if ((*(*_services[i])->characteristics()[j])->iid() == index){			
-				return (*_services[i])->characteristics()[j];
-			}
-		}
+HAPCharacteristicBase* HAPAccessory::characteristicAtIndex(HAPService *service, size_t index) {
+	return service->_characteristics.at(index).get();
+}
+
+
+HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
+	for (int i=0; i < _services.size(); i++){
+		HAPCharacteristicBase* chr = _services[i]->characteristicWithIID(iid);
+		if (chr != nullptr){
+			return chr;
+		}		
 	}
 	return nullptr;
 }
+
+
 
 // #if defined(ARDUINO_TEENSY41)
 // FLASHMEM 
@@ -195,7 +174,7 @@ void HAPAccessory::printTo(Print& print){
 	// services
 	print.print("\"services\":[");    
 	for (int i = 0; i < numberOfServices(); i++) {
-		(*_services[i])->printTo(print);
+		_services[i]->printTo(print);
 
 		if (i+1 < numberOfServices()){
 			print.print(",");
@@ -246,26 +225,26 @@ HAPService* HAPAccessory::addInfoService(const String& accessoryName, const Stri
 	if (_accessoryName == nullptr) {
 		HAPCharacteristicT<String> a(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
 		
-		addCharacteristic(_infoService, _accessoryName);
+		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
 
 	if (_manufacturer == nullptr) {
 		_manufacturer = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MANUFACTURER, (uint8_t)1);
-		addCharacteristic(_infoService, _manufacturer);
+		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);	
 
 	if (_modelName == nullptr) {
 		_modelName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MODEL, (uint8_t)1);
-		addCharacteristic(_infoService, _modelName);
+		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);	
 
 	if (_serialNumber == nullptr) {
 		_serialNumber = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, (uint8_t)1);
-		addCharacteristic(_infoService, _serialNumber);
+		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);			
 
@@ -297,7 +276,7 @@ void HAPAccessory::setFirmware(const String& firmwareRev){
 	initInfoService();
 	if (_firmware == nullptr) {
 		_firmware = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ);
-		addCharacteristic(_infoService, _firmware);
+		addCharacteristicToService(_infoService, _firmware);
 	}
 	_firmware->setValue(firmwareRev, false);	
 }
@@ -309,7 +288,7 @@ void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
 	initInfoService();
 	if (_identify == nullptr) {
 		_identify = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_IDENTIFY, HAP_PERMISSION_WRITE);
-		addCharacteristic(_infoService, _identify);
+		addCharacteristicToService(_infoService, _identify);
 	}	
 	_identify->setValueChangeCallback(callback);
 }

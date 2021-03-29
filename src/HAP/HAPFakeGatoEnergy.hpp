@@ -83,8 +83,8 @@ public:
 
 protected:
     // Schedules
-    void scheduleRead(String oldValue, String newValue) override;
-    void scheduleWrite(String oldValue, String newValue) override;
+    void scheduleRead(uint8_t* data, size_t len) override;
+    void scheduleWrite(uint8_t* data, size_t len) override;
 
 private:
     bool _shouldSave;

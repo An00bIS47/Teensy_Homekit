@@ -12,7 +12,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <memory>
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 
 class HAPService {
 public:
@@ -21,8 +21,8 @@ public:
     HAPService(uint8_t _uuid);
     HAPService(const String& _uuid);
 
-    uint16_t aid() { return _aid; }
-    void setAID(uint16_t aid) { _aid = aid; }
+    uint32_t aid() { return _aid; }
+    void setAID(uint32_t aid) { _aid = aid; }
 
     // String describe();
     void printTo(Print& print);
@@ -41,29 +41,42 @@ public:
         _linkedServiceIds.push_back(serviceId_);
     }
 
-    std::vector<std::shared_ptr<HAPCharacteristicBase*>> characteristics(){
-        return _characteristics;
-    }
+    // std::vector< std::unique_ptr< HAPCharacteristicBase > > characteristics(){
+    //     return _characteristics;
+    // }
 
 #if defined(ARDUINO_TEENSY41)
     FLASHMEM 
 #endif
     size_t numberOfCharacteristics() { return _characteristics.size(); }
 
-    template <class T>
+    
 #if defined(ARDUINO_TEENSY41)
     FLASHMEM 
 #endif
-	std::shared_ptr<HAPCharacteristicBase*> characteristicAtIndex(size_t index) {
-        return _characteristics[index];
+	HAPCharacteristicBase* characteristicAtIndex(size_t index) {
+        return _characteristics.at(index).get();
     }
+
+    
+#if defined(ARDUINO_TEENSY41)
+    FLASHMEM 
+#endif
+	HAPCharacteristicBase* characteristicWithIID(uint32_t iid) {
+        for (int i=0; i < _characteristics.size(); i++){
+            if (_characteristics[i]->iid() == iid){
+                return characteristicAtIndex(i);
+            }
+        }
+        return nullptr;
+    }    
 
 	void* operator new(size_t size);
     void operator delete(void* ptr);
 
-
+    std::vector<std::unique_ptr<HAPCharacteristicBase>> _characteristics;
 protected:
-    uint16_t    _aid;
+    uint32_t    _aid;
     uint8_t     _uuid;
     String      _uuidString;
     
@@ -72,7 +85,7 @@ protected:
     // bool        _hidden;
     // bool        _primary;
 
-    std::vector<std::shared_ptr<HAPCharacteristicBase*>> _characteristics;
+    
     std::vector<uint8_t> _linkedServiceIds;
 
 };

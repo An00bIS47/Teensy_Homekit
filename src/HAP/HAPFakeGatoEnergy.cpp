@@ -366,18 +366,18 @@ void HAPFakeGatoEnergy::getData(const size_t count, uint8_t *data, size_t* lengt
     }         
 }
 
-void HAPFakeGatoEnergy::scheduleRead(String oldValue, String newValue){
+void HAPFakeGatoEnergy::scheduleRead(uint8_t* data, size_t len){
     LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Read " + _name + " ..." , true);
 }
 
-void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
+void HAPFakeGatoEnergy::scheduleWrite(uint8_t* data, size_t len){
     LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Write " + _name + " ..." , true);
 
     size_t outputLength = 0;        
-    mbedtls_base64_decode(NULL, 0, &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
+    mbedtls_base64_decode(NULL, 0, &outputLength, data, len);
     uint8_t decoded[outputLength];
 
-    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());    
+    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, data, len);    
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE	
     HAPHelper::array_print("decoded", decoded, outputLength);    
@@ -409,7 +409,7 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
         _shouldSave = true; 
     }
 
-    _configReadCharacteristics->setValueString(_schedule->buildScheduleString());
+    _configReadCharacteristics->valueFromString(_schedule->buildScheduleString().c_str());
 
     if (_shouldSave){
         _callbackSaveConfig();
@@ -420,7 +420,7 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
 FLASHMEM 
 #endif
 void HAPFakeGatoEnergy::beginSchedule(){
-    _configReadCharacteristics->setValueString(_schedule->buildScheduleString());    
+    _configReadCharacteristics->valueFromString(_schedule->buildScheduleString().c_str());    
 }
 
 #if defined(ARDUINO_TEENSY41)

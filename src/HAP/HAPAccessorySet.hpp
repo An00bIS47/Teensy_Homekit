@@ -93,7 +93,7 @@ public:
 	const char* setupHash();
 
 	// String describe();
-	void toJson(JsonArray& array) __attribute__ ((deprecated));
+	// void toJson(JsonArray& array) __attribute__ ((deprecated));
 
 	void printTo(Print& print);
 
@@ -106,12 +106,11 @@ public:
 
 	int32_t getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize);
 
-	HAPCharacteristic* getCharacteristics(uint8_t aid, uint8_t iid);
-	HAPCharacteristic* getCharacteristicsOfType(uint8_t aid, uint16_t type);
+	HAPCharacteristicBase* getCharacteristic(uint8_t aid, uint32_t iid);	
 
 	void setIdentifyCharacteristic(bool value);
 
-	uint8_t numberOfAccessory();
+	uint8_t numberOfAccessories();
 
 	void setConfiguration(HAPConfigurationAccessory* configuration){
 		_configuration = configuration;
@@ -142,7 +141,7 @@ private:
 	HAPConfigurationAccessory* 	_configuration;
 
 	// HAPPairings _pairings;
-	std::vector<HAPAccessory*> _accessories;
+	std::vector<std::unique_ptr<HAPAccessory>> _accessories;
     
 	uint8_t _aid = 0;
 };

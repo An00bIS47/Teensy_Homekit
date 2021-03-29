@@ -269,7 +269,7 @@ const char* HAPAccessorySet::xhm(){
 
 
 
-uint8_t HAPAccessorySet::numberOfAccessory() {
+uint8_t HAPAccessorySet::numberOfAccessories() {
 	return _accessories.size();
 }
 
@@ -278,9 +278,9 @@ uint8_t HAPAccessorySet::numberOfAccessory() {
 FLASHMEM 
 #endif
 HAPAccessory* HAPAccessorySet::accessoryWithAID(uint8_t aid) {
-	for (std::vector<HAPAccessory *>::iterator it = _accessories.begin(); it != _accessories.end(); it++) {
-		if ((*it)->aid == aid) {
-			return *it;
+	for (uint8_t i=0; i < _accessories.size(); i++){
+		if (_accessories[i]->aid() == aid){			
+			return _accessories.at(i).get();
 		}
 	}
 	return nullptr;
@@ -288,37 +288,27 @@ HAPAccessory* HAPAccessorySet::accessoryWithAID(uint8_t aid) {
 
 
 HAPAccessory* HAPAccessorySet::accessoryAtIndex(uint8_t index){
-	// uint8_t count = 0;
-	// for (std::vector<HAPAccessory *>::iterator it = _accessories.begin(); it != _accessories.end(); it++) {
-	// 	if (count == index) {
-	// 		return *it;
-	// 	}
-	// 	count++;
-	// }
-	return _accessories[index];
+	return _accessories.at(index).get();
 }
 
 
-void HAPAccessorySet::addAccessory(HAPAccessory *acc) {
-	acc->aid = ++_aid;
-	_accessories.push_back(acc);
-	configurationNumber++;
+void HAPAccessorySet::addAccessory(HAPAccessory *accessory) {
+	accessory->setAID(++_aid);
+	_accessories.emplace_back(std::move(accessory));	
 }
 
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-bool HAPAccessorySet::removeAccessory(HAPAccessory *acc) {
-	bool exist = false;
-	for (std::vector<HAPAccessory *>::iterator it = _accessories.begin(); it != _accessories.end(); it++) {
-		if (*it == acc) {
-			_accessories.erase(it);
-			configurationNumber++;
-			exist = true;
+bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
+	for (int i=0; i < _accessories.size(); i++){
+		if (_accessories[i]->aid() == accessory->aid()){
+			_accessories.erase(_accessories.begin() + i);
+			return true;
 		}
 	}
-	return exist;
+	return false;
 }
 
 
@@ -338,91 +328,77 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *acc) {
     
 //     return result;
 // }
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessorySet::toJson(JsonArray& array){
+
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM 
+// #endif
+// void HAPAccessorySet::toJson(JsonArray& array){
 	
-	for (int i = 0; i < numberOfAccessory(); i++) {
-        _accessories[i]->toJson(array);
-    }
-}
+// 	for (int i = 0; i < numberOfAccessory(); i++) {
+//         _accessories[i]->toJson(array);
+//     }
+// }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
 int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
-	HAPCharacteristic *c = getCharacteristics(aid, iid);
-	if (c != nullptr) {		
-		*outSize = c->valueString().length() + 1;
+	HAPCharacteristicBase* chr = getCharacteristic(aid, iid);
+	
+	if (chr != nullptr) {		
+		*outSize = chr->valueString().length() + 1;
 		if (out != NULL){
-			c->valueString().toCharArray(out, *outSize);							
+			chr->valueString().toCharArray(out, *outSize);							
 		}		
 		return 0;
 	}
 	return HAP_STATUS_RESOURCE_NOT_FOUND;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-HAPCharacteristic* HAPAccessorySet::getCharacteristicsOfType(uint8_t aid, uint16_t type){
-	HAPAccessory *a = accessoryWithAID(aid);
-	if (a != NULL) {		
-		HAPCharacteristic *c = a->characteristicsOfType(type);
-		if (c != NULL){
-			return c;
-		}
-	}
-	return NULL;
-}
 
-
-HAPCharacteristic* HAPAccessorySet::getCharacteristics(uint8_t aid, uint8_t iid){
-	HAPAccessory *a = accessoryWithAID(aid);		
+HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t iid){
+	HAPAccessory* accessory = accessoryWithAID(aid);		
 		
-		if (a == NULL) {
+	if (accessory == nullptr) {
 
-			LogE("[ERROR] Accessory with aid: ", false);
-    		LogE(String(aid), false);
-    		LogE(" not found! - ErrorCode: ", false);
-    		LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
+		LogE("[ERROR] Accessory with aid: ", false);
+		LogE(String(aid), false);
+		LogE(" not found! - ErrorCode: ", false);
+		LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
 
-    		//error_code = HAP_STATUS_RESOURCE_NOT_FOUND;
-    		//errorOccured = true;	
-    		return nullptr;	    			
-		} 
-		else {
+		//error_code = HAP_STATUS_RESOURCE_NOT_FOUND;
+		//errorOccured = true;	
+		return nullptr;	    			
+	} else {
 
-			HAPCharacteristic *c = a->characteristicsAtIndex(iid);
+		HAPCharacteristicBase* chr = accessory->characteristicWithIID(iid);
 
-			if (c == NULL) {
-				LogE("[ERROR] Characteristics with aid: ", false);
-	    		LogE(String(aid), false);
-	    		LogE(" - iid: ", false);
-	    		LogE(String(iid), false);
-				LogE(" not found! - ErrorCode: ", false);
-    			LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
-    			return nullptr;
-			} else {
+		if (chr == nullptr) {
+			LogE("[ERROR] Characteristics with aid: ", false);
+			LogE(String(aid), false);
+			LogE(" - iid: ", false);
+			LogE(String(iid), false);
+			LogE(" not found! - ErrorCode: ", false);
+			LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
+			return nullptr;
+		} else {
+			return chr;
+		}			
 
-				return c;
-			}			
-
-		}
+	}
 
 	return nullptr;
 }
 
 
 void HAPAccessorySet::printTo(Print& print){
-	print.print("{\"accessories\":[");
-	for (int i = 0; i < numberOfAccessory(); i++) {
+	print.print(F("{\"accessories\":["));
+	for (int i = 0; i < numberOfAccessories(); i++) {
         _accessories[i]->printTo(print);
 
-		if (i+1 < numberOfAccessory()){
-			print.print(",");
+		if (i+1 < numberOfAccessories()){
+			print.print(F(","));
 		}
     }
-	print.print("]}");
+	print.print(F("]}"));
 }

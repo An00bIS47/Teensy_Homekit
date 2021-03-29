@@ -169,7 +169,6 @@ public:
 	virtual const char* unitString(unit unitValue);
 	virtual const char* unitJson(unit unitValue);
 
-<<<<<<< Updated upstream
 
 	// 
 	// NEW and DELETE overloads
@@ -196,22 +195,7 @@ public:
 #else		
         free(ptr);
 #endif 		
-=======
-	void* operator new(size_t size)
-    {
-        // void *ptr = ::operator new(size);
-        void *ptr = malloc(size); // will also work fine
-     
-        return ptr;
-    }
-
-
-	void operator delete(void* ptr)
-    {
-        // cout<< "Overloading delete operator " << endl;
-        free(ptr);
->>>>>>> Stashed changes
-    }
+	}
 
 };
 
