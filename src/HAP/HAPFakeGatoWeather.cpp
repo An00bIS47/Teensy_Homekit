@@ -54,6 +54,7 @@ void HAPFakeGatoWeather::begin(){
 
     if (_vectorBuffer == nullptr) {
         _vectorBuffer = new std::vector<HAPFakeGatoWeatherData>(HAP_FAKEGATO_BUFFER_SIZE);
+        // _vectorBuffer = (std::vector<HAPFakeGatoWeatherData>*) extmem_malloc(sizeof(std::vector<HAPFakeGatoWeatherData>) * HAP_FAKEGATO_BUFFER_SIZE);
     }
 }
 

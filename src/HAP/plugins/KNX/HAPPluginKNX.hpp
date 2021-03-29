@@ -75,6 +75,10 @@ public:
 	
 private:	
 
+#if SMALL_GROUPOBJECT
+	void callbackReceived(GroupObject& go);
+#endif
+
 	int indexOfDevice(HAPPluginKNXDevice* device);    	
 
 	std::vector<HAPPluginKNXDevice*> _devices;

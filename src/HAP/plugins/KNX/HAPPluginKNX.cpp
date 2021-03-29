@@ -115,6 +115,12 @@ HAPAccessory* HAPPluginKNX::initAccessory() {
     // print values of parameters if device is already configured
     if (knx.configured()){		
 
+
+#if SMALL_GROUPOBJECT
+        GroupObject::classCallback(resetCallback); //** callbacks are now handled per class, not per instance
+#endif
+
+
 #if HAP_DEBUG
         printHex("configuration ", knx.paramData(0), ((ETS_HK_CHANNEL_PARAMETER_SIZE * HAP_PLUGIN_KNX_MAX_DEVICES) + 1 ));
 #endif   
@@ -815,3 +821,22 @@ void HAPPluginKNX::setConfiguration(HAPConfigurationPlugin* cfg){
 	// Serial.print(F("BME280 mode:");
 	// Serial.println(_configInternal->mode);	
 }
+
+#if SMALL_GROUPOBJECT
+void HAPPluginKNX::callbackReceived(GroupObject& go){
+    //** callbacks are now handled in the class, not per instance,
+    //** this means, we have to check, which GroupObject is calling back
+    // if (go.asap() == goReset.asap())
+    // {
+    //     if (go.value(DPT_Trigger)) //** each value access needs to done with according DPT parameter
+    //     {
+    //         maxValue = 0;
+    //         minValue = 10000;
+    //     }
+    // }
+
+    for (auto& dev : _devices){           
+        if ()
+    }
+}
+#endif
