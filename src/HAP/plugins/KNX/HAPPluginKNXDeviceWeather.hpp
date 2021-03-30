@@ -52,9 +52,9 @@ protected:
 
     bool                    _useHumdityDPT9;
    
-	HAPCharacteristicFloat*	_humidityValue;
-	HAPCharacteristicFloat*	_temperatureValue;
-	HAPCharacteristicUInt16*	_pressureValue;
+	HAPCharacteristicT<float>*	    _humidityValue;
+	HAPCharacteristicT<float>*	    _temperatureValue;
+	HAPCharacteristicT<uint16_t>*	_pressureValue;
 
 #if HAP_PLUGIN_KNX_ENABLE_AVERAGE_FOR_WEATHER
     float       _averageTemperature;

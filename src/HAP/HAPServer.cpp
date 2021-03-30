@@ -1866,7 +1866,7 @@ FLASHMEM
 void HAPServer::handleIdentify(HAPClient* hapClient){
 	LogI( "<<< Handle /identify: ", true );
 
-	HAPCharacteristic* c = _accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY);
+	HAPCharacteristicT<bool>* c = reinterpret_cast< HAPCharacteristicT<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY));
 
 	if ( !isPaired() ) {
 		// Send 204
@@ -1874,7 +1874,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 		hapClient->client.write( HTTP_CRLF );
 
 		if (c != NULL){
-			c->setValueString(String(true));
+			c->setValue(true);
 		}
 		
 	} else {
@@ -1898,7 +1898,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 	hapClient->clear();
 	
 	if (c != NULL){
-		c->setValueString(String(false));
+		c->setValue(false);
 	}
 }
 
@@ -3682,9 +3682,10 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		JsonObject jsonCharacteristic = jsonCharacteristics.createNestedObject();
 		jsonCharacteristic["aid"] = aid;
 
-		HAPCharacteristic* characteristic = _accessorySet->getCharacteristic(aid, iid);
+		HAPCharacteristicBase* characteristic = _accessorySet->getCharacteristic(aid, iid);
 		if (characteristic) {
 			if (characteristic->readable()){
+				
 				
 				if (characteristic->valueGetFunctionCall){
 					characteristic->valueGetFunctionCall();
@@ -3782,7 +3783,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 
 		
 		
-		HAPCharacteristic *character = _accessorySet->getCharacteristic(aid, iid);		
+		HAPCharacteristicBase* character = _accessorySet->getCharacteristic(aid, iid);		
 		
 		JsonObject jsonNewChr = responseArray.createNestedObject();
 		jsonNewChr[F("aid")] = aid;
@@ -3816,7 +3817,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 			} else {
 
 				if (character->writable() ) {
-					character->setValueString(jc["value"].as<String>());
+					character->valueFromString(jc["value"].as<String>());
 					// Add to jsonCharacteristics array				
 					character->toJson(jsonNewChr);
 				} else {
@@ -3989,7 +3990,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 
 				if ( hapClient.isSubscribed(aid, iid) ) {										
-					HAPCharacteristic *character = _accessorySet->getCharacteristic(aid, iid);
+					HAPCharacteristicBase* character = _accessorySet->getCharacteristic(aid, iid);
 					
 					if (character) {
 

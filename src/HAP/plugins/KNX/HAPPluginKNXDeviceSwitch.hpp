@@ -13,7 +13,7 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 #include "HAPFakeGato.hpp"
 #include "HAPFakeGatoFactory.hpp"
@@ -44,7 +44,7 @@ protected:
     uint16_t                _koReadState;
     uint16_t                _koWriteState;    
 
-    HAPCharacteristicBool*    _stateValue;
+    HAPCharacteristicT<bool>*  _stateValue;
 
     // HAPCharacteristicString* 	_lastUpdate;
 
@@ -52,7 +52,7 @@ protected:
 
     void changedState(bool oldValue, bool newValue);
     
-    void readState();
+    bool readState();
     void writeStateCallback(GroupObject& go);
 
     bool fakeGatoCallback() override;  

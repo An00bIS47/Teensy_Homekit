@@ -37,7 +37,7 @@ public:
     bool isPrimary() { return (_features && 0x02); }
     void setPrimary(bool mode = true){ _features = mode << 1; }
 
-    void addLinkedServiceId(uint8_t serviceId_){
+    void addLinkedServiceId(uint32_t serviceId_){
         _linkedServiceIds.push_back(serviceId_);
     }
 
@@ -86,7 +86,7 @@ protected:
     // bool        _primary;
 
     
-    std::vector<uint8_t> _linkedServiceIds;
+    std::vector<uint32_t> _linkedServiceIds;
 
 };
 

@@ -94,7 +94,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 	// if (shouldHandle() || forced) {		
 	LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
-		if (_accessory->aid == 0){
+		if (_accessory->aid() == 0){
 			return;
 		}
 
@@ -115,7 +115,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 #endif		
 		_temperatureValue->setValue(temperature);
 		{
-			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _temperatureValue->iid, String(temperature));							
+			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _temperatureValue->iid(), String(temperature));							
 			_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 		}
 
@@ -132,7 +132,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 #endif
 		_humidityValue->setValue(relative_humidity);
 		{
-			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _humidityValue->iid, String(relative_humidity));							
+			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _humidityValue->iid(), String(relative_humidity));							
 			_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 		}
 
@@ -143,9 +143,9 @@ void HAPPluginBME280::handleImpl(bool forced){
 		pressure = _bme->readPressure() / 100.0F;		
 #endif
 
-	_pressureValue->setValueString(String(pressure));
+	_pressureValue->setValue(pressure);
 	{
-		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _pressureValue->iid, String(pressure));							
+		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _pressureValue->iid(), String(pressure));							
 		_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 	}
 
@@ -189,12 +189,12 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	// temperatureService->setPrimaryService(true);
 	_accessory->addService(temperatureService);
 	{
-		HAPCharacteristicT<String> *tempServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read);
-		tempServiceName->setValueString("BME280 Temperature Sensor");
+		HAPCharacteristicT<String> *tempServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		tempServiceName->setValue("BME280 Temperature Sensor");
 		_accessory->addCharacteristicToService(temperatureService, tempServiceName);
 
 		//HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
-		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, permission_read|permission_notify, -50, 100, 0.1, unit_celsius);
+		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
 		_temperatureValue->setValue(0.0F);
 		auto callbackChangeTemp = std::bind(&HAPPluginBME280::changeTemp, this, std::placeholders::_1, std::placeholders::_2);
 		//_temperatureValue->valueChangeFunctionCall = std::bind(&changeTemp);
@@ -209,11 +209,11 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
 	_accessory->addService(humidityService);
 	{	
-		HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read);
-		humServiceName->setValueString("BME280 Humidity Sensor");
+		HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		humServiceName->setValue("BME280 Humidity Sensor");
 		_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-		_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, permission_read|permission_notify, 0, 100, 0.1, unit_percentage);
+		_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
 		_humidityValue->setValue(0.0F);
 
 		auto callbackChangeHum = std::bind(&HAPPluginBME280::changeHum, this, std::placeholders::_1, std::placeholders::_2);
@@ -229,12 +229,12 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	_accessory->addService(pressureService);
 
 	{	
-		HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read);
-		pressureServiceName->setValueString("BME280 AirPressure Sensor");
+		HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		pressureServiceName->setValue("BME280 AirPressure Sensor");
 		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
 		
-		_pressureValue = new HAPCharacteristicUInt16(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, permission_read|permission_notify, 0, 1100, 1, unit_hpa);
-		_pressureValue->setValueString("320");
+		_pressureValue = new HAPCharacteristicT<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
+		_pressureValue->setValue(320);
 
 		auto callbackChangePressure = std::bind(&HAPPluginBME280::changePressure, this, std::placeholders::_1, std::placeholders::_2);
 		//_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
@@ -245,8 +245,8 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	// 
 	// Link services
 	// 
-	temperatureService->addLinkedServiceId(humidityService->serviceID);
-	temperatureService->addLinkedServiceId(pressureService->serviceID);
+	temperatureService->addLinkedServiceId(humidityService->aid());
+	temperatureService->addLinkedServiceId(pressureService->aid());
 
 	//
 	// FakeGato

@@ -72,21 +72,21 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
         _accessory->addService(switchService);
 
-        HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
-        plugServiceName->setValueString(_name);
+        HAPCharacteristicT<String> *plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
+        plugServiceName->setValue(_name);
         _accessory->addCharacteristicToService(switchService, plugServiceName);
 
         //
         // Power State 
         // 
-        _stateValue = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
-        _stateValue->setValueString("0");
+        _stateValue = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
+        _stateValue->setValue(false);
 
         // 
         // Value Changed Function Call (callback when value changed from KNX)
         // 
         auto callbackState = std::bind(&HAPPluginKNXDeviceSwitch::changedState, this, std::placeholders::_1, std::placeholders::_2);        
-        _stateValue->valueChangeFunctionCall = callbackState;
+        _stateValue->setValueChangeCallback(callbackState);
 
 
         // Read value from knx
@@ -96,7 +96,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         // Value GET Function Call (callback to read state from KNX)
         // 
         auto callbackReadState = std::bind(&HAPPluginKNXDeviceSwitch::readState, this);        
-        _stateValue->valueGetFunctionCall = callbackReadState;
+        _stateValue->setValueGetCallback(callbackReadState);
 
 
         _accessory->addCharacteristicToService(switchService, _stateValue);
@@ -173,9 +173,11 @@ void HAPPluginKNXDeviceSwitch::changedState(bool oldValue, bool newValue){
 }
 
 
-void HAPPluginKNXDeviceSwitch::readState(){
+bool HAPPluginKNXDeviceSwitch::readState(){
     Serial.printf("[KNX:%X] Read state\n", _id);
-    _stateValue->_value = knx.getGroupObject(_koReadState).value();
+    bool result = knx.getGroupObject(_koReadState).value();
+    _stateValue->setValue(result, false);
+    return result;
 }
 
 
@@ -200,10 +202,10 @@ void HAPPluginKNXDeviceSwitch::writeStateCallback(GroupObject& go){
 
     _shouldSend = false;
     // Serial.println("Temperature: " + String(result));
-    _stateValue->setValueString(String(result));
+    _stateValue->setValue(result);
 
     // Add event
-	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _stateValue->iid, String(result));							
+	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _stateValue->iid(), String(result));							
 	_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 
     if (_enableFakegato){

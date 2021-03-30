@@ -96,6 +96,9 @@ public:
 
 	} 
 
+
+    std::function<void(void)> valueGetFunctionCall = nullptr;
+
     virtual ~HAPCharacteristicBase() {
         //if (_typeString) delete[] _typeString;
 
@@ -318,6 +321,8 @@ public:
     virtual void valueFromString(const char* value) = 0; 
 
 protected:
+
+    
 
     uint32_t  _iid;
 	const uint8_t   _type;
