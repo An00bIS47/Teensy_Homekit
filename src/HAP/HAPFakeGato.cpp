@@ -69,15 +69,14 @@ FLASHMEM
 void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, bool withSchedule){
         
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    
-    
-    Serial.println(">>>>>>> HERE 1"); Serial.send_now();
+        
 
     // HAPCharacteristicString *accNameCha = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     HAPCharacteristicT<String>* accNameCha = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     accNameCha->setValue(name + " History");
     accessory->addCharacteristicToService(fgService, accNameCha);
 
-    Serial.println(">>>>>>> HERE 2"); Serial.send_now();
+    
     // S2R1 Char
     // _s2r1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, permission_read|permission_notify, 128);
     _s2r1Characteristics = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 128);    
@@ -88,7 +87,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
     accessory->addCharacteristicToService(fgService, _s2r1Characteristics);
 
 
-    Serial.println(">>>>>>> HERE 3"); Serial.send_now();
+    
     // S2R2 Char
     // _s2r2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, permission_read|permission_notify|permission_hidden, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
     _s2r2Characteristics = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
@@ -102,7 +101,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
 
     accessory->addCharacteristicToService(fgService, _s2r2Characteristics);
 
-    Serial.println(">>>>>>> HERE 4"); Serial.send_now();
+    
     // S2W1 Char
     // _s2w1Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, permission_write|permission_hidden, 128);
     _s2w1Characteristics = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE, 128);
@@ -111,8 +110,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
     _s2w1Characteristics->setValueChangeCallback(callbackS2W1);
     accessory->addCharacteristicToService(fgService, _s2w1Characteristics);
 
-
-    Serial.println(">>>>>>> HERE 5"); Serial.send_now();
+    
     // S2W2 Char
     // _s2w2Characteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, permission_write|permission_hidden, 128);
     _s2w2Characteristics = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE, 128);
@@ -124,7 +122,6 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
 
     if (withSchedule){
         
-        Serial.println(">>>>>>> HERE 6"); Serial.send_now();
         // _configReadCharacteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, permission_read|permission_notify|permission_hidden, 512);
         _configReadCharacteristics = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
         _configReadCharacteristics->setDescription("EVE Schedule Read");
@@ -132,7 +129,7 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
         _configReadCharacteristics->setValueChangeCallback(callbackConfigRead);
         accessory->addCharacteristicToService(fgService, _configReadCharacteristics);
 
-        Serial.println(">>>>>>> HERE 7"); Serial.send_now();
+    
         // _configWriteCharacteristics = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, permission_write|permission_hidden, 256);
         _configWriteCharacteristics = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE, 256);
         _configWriteCharacteristics->setDescription("EVE Schedule Write");
@@ -141,10 +138,8 @@ void HAPFakeGato::registerFakeGatoService(HAPAccessory* accessory, String name, 
         accessory->addCharacteristicToService(fgService, _configWriteCharacteristics);
     }
 
-    Serial.println(">>>>>>> HERE 8"); Serial.send_now();
     accessory->addService(fgService);
-
-    Serial.println(">>>>>>> HERE 9"); Serial.send_now();
+    
     begin();   
 
     enable(true);
