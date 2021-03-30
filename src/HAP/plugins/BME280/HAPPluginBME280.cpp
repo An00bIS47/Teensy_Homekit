@@ -182,6 +182,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
    	_accessory->addInfoService("Weather", "ACME", "BME280 " + String(hex), sn, callbackIdentify, version());
 
+	
 	//
 	// Temperature
 	//
@@ -202,7 +203,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 	}
 
-
+	
 	//
 	// Humidity
 	//
@@ -222,6 +223,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_accessory->addCharacteristicToService(humidityService, _humidityValue);
 	}
 
+	
 	//
 	// AirPressure
 	//
@@ -242,12 +244,14 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_accessory->addCharacteristicToService(pressureService, _pressureValue);
 	}
 
+
 	// 
 	// Link services
 	// 
 	temperatureService->addLinkedServiceId(humidityService->aid());
 	temperatureService->addLinkedServiceId(pressureService->aid());
 
+	
 	//
 	// FakeGato
 	// 		

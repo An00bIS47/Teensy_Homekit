@@ -366,18 +366,18 @@ void HAPFakeGatoEnergy::getData(const size_t count, uint8_t *data, size_t* lengt
     }         
 }
 
-void HAPFakeGatoEnergy::scheduleRead(uint8_t* data, size_t len){
+void HAPFakeGatoEnergy::scheduleRead(String oldValue, String newValue){
     LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Read " + _name + " ..." , true);
 }
 
-void HAPFakeGatoEnergy::scheduleWrite(uint8_t* data, size_t len){
+void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
     LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Write " + _name + " ..." , true);
 
     size_t outputLength = 0;        
-    mbedtls_base64_decode(NULL, 0, &outputLength, data, len);
+    mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
     uint8_t decoded[outputLength];
 
-    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, data, len);    
+    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());    
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE	
     HAPHelper::array_print("decoded", decoded, outputLength);    

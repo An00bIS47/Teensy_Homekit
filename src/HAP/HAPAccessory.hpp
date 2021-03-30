@@ -16,6 +16,7 @@
 
 #include "HAPService.hpp"
 #include "HAPCharacteristics.hpp"
+#include "HAPCharacteristicBase.hpp"
 
 
 // typedef void (*identifyFunction)(bool oldValue, bool newValue);

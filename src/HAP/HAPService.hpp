@@ -71,8 +71,8 @@ public:
         return nullptr;
     }    
 
-	void* operator new(size_t size);
-    void operator delete(void* ptr);
+	// void* operator new(size_t size);
+    // void operator delete(void* ptr);
 
     std::vector<std::unique_ptr<HAPCharacteristicBase>> _characteristics;
 protected:

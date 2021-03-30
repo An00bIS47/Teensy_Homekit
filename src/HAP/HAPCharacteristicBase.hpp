@@ -60,6 +60,18 @@ typedef enum {
     HAP_UNIT_PPM,               // ppm    
 } HAP_UNIT;
 
+typedef enum {
+	HAP_BATTERY_LEVEL_NORMAL    = 0,
+	HAP_BATTERY_LEVEL_LOW       = 1    
+} HAP_BATTERY_LEVEL;
+
+
+typedef enum {
+	HAP_CHARGING_STATE_NOT_CHARGING     = 0,
+	HAP_CHARGING_STATE_CHARGING         = 1,
+	HAP_CHARGING_STATE_NOT_CHARGEABLE   = 2
+} HAP_CHARGING_STATE;
+
 
 // 
 //  Base Characteristic
@@ -407,29 +419,29 @@ public:
         _valueChangeFunctionCall = callback;
     }
 
-	void* operator new(size_t size)
-    {
-        Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
-        //void * p = ::operator new(size);
+// 	void* operator new(size_t size)
+//     {
+//         Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
+//         //void * p = ::operator new(size);
 
-#if defined(ARDUINO_TEENSY41)
-		void* ptr = extmem_malloc(size);		
-#else		
-        void* ptr = malloc(size); // will also work fine
-#endif     
-        return ptr;
-    }
+// #if defined(ARDUINO_TEENSY41)
+// 		void* ptr = extmem_malloc(size);		
+// #else		
+//         void* ptr = malloc(size); // will also work fine
+// #endif     
+//         return ptr;
+//     }
  
-    void operator delete(void* ptr)
-    {
-        Serial.println(F("Overloading delete operator"));
+//     void operator delete(void* ptr)
+//     {
+//         Serial.println(F("Overloading delete operator"));
         
-#if defined(ARDUINO_TEENSY41)
-		extmem_free(ptr);
-#else		
-        free(ptr);
-#endif 		
-    }
+// #if defined(ARDUINO_TEENSY41)
+// 		extmem_free(ptr);
+// #else		
+//         free(ptr);
+// #endif 		
+//     }
 
 protected:
     T _value;    
@@ -565,11 +577,17 @@ public:
 
         if (_dataGetFunctionCall && withCallback){
 
-            T bufferCallback[_maxDataLen];
-            size_t valueLenCallback = 0;
-            // _dataGetFunctionCall(bufferCallback, &valueLenCallback); 
+            T bufferCallback;
             
-            // setValueRaw(bufferCallback, valueLenCallback);            
+            size_t valueLenCallback = 0;
+            _dataGetFunctionCall(nullptr, &valueLenCallback); 
+
+            bufferCallback = (T) malloc(sizeof(T) * valueLenCallback);
+
+            _dataGetFunctionCall(bufferCallback, &valueLenCallback); 
+            
+            setValueRaw(bufferCallback, valueLenCallback);  
+            free(bufferCallback);
         }
         
         if (output){

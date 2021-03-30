@@ -14,7 +14,7 @@
 #include <knx.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "HAPFakeGato.hpp"
 #include "HAPFakeGatoFactory.hpp"
 #include "EventManager.h"

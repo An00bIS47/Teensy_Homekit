@@ -10,7 +10,7 @@
 #include "HAPServer.hpp"
 #include "EventManager.h"
 #include "HAPCharacteristics.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "HAPServices.hpp"
 
 
@@ -229,39 +229,39 @@ FLASHMEM
 #endif
 HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufacturerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
 	
-
+	
 	initInfoService();
 
+	
 	if (_accessoryName == nullptr) {
-		HAPCharacteristicT<String> a(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-		
+		_accessoryName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);		
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
-
+	
 	if (_manufacturer == nullptr) {
 		_manufacturer = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MANUFACTURER, (uint8_t)1);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);	
 
+	
 	if (_modelName == nullptr) {
 		_modelName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MODEL, (uint8_t)1);
 		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);	
 
+	
 	if (_serialNumber == nullptr) {
 		_serialNumber = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, (uint8_t)1);
 		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);			
-
 		
 	setFirmware(firmwareRev);
 
-	
 	setIdentifyCallback(callback);
 	
 	return _infoService;

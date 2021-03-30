@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 #include "HAPFakeGato.hpp"
 #include "HAPFakeGatoFactory.hpp"

@@ -328,13 +328,13 @@ protected:
     String                _name;
     String                _serialNumber;
 
-    HAPCharacteristicT<uint8_t*>* _s2r1Characteristics;
-    HAPCharacteristicT<uint8_t*>* _s2r2Characteristics;
-    HAPCharacteristicT<uint8_t*>* _s2w1Characteristics;
-    HAPCharacteristicT<uint8_t*>* _s2w2Characteristics;
+    HAPCharacteristicT<String>* _s2r1Characteristics;
+    HAPCharacteristicT<String>* _s2r2Characteristics;
+    HAPCharacteristicT<String>* _s2w1Characteristics;
+    HAPCharacteristicT<String>* _s2w2Characteristics;
 
-    HAPCharacteristicT<uint8_t*>* _configReadCharacteristics;
-    HAPCharacteristicT<uint8_t*>* _configWriteCharacteristics;
+    HAPCharacteristicT<String>* _configReadCharacteristics;
+    HAPCharacteristicT<String>* _configWriteCharacteristics;
 
     // // History Characteristics
     // HAPCharacteristicData*  _s2r1Characteristics;
@@ -394,7 +394,7 @@ protected:
         return (index + HAP_FAKEGATO_BUFFER_SIZE - 1) % HAP_FAKEGATO_BUFFER_SIZE;
     }
 
-    void getS2R2Callback(uint8_t* dataOut, size_t* len);
+    String getS2R2Callback();
 
     void updateS2R1Value();
     void updateS2R2Value();
@@ -402,15 +402,15 @@ protected:
     bool shouldHandle();
 
 
-    void setS2R1Characteristics(uint8_t* data, size_t len);
-    void setS2R2Characteristics(uint8_t* data, size_t len);
+    void setS2R1Characteristics(String oldValue, String newValue);
+    void setS2R2Characteristics(String oldValue, String newValue);
 
-    void setS2W1Characteristics(uint8_t* data, size_t len);
-    void setS2W2Characteristics(uint8_t* data, size_t len);
+    void setS2W1Characteristics(String oldValue, String newValue);
+    void setS2W2Characteristics(String oldValue, String newValue);
 
     // Schedules
-    virtual void scheduleRead(uint8_t* data, size_t len) {};
-    virtual void scheduleWrite(uint8_t* data, size_t len) {};
+    virtual void scheduleRead(String oldValue, String newValue) {};
+    virtual void scheduleWrite(String oldValue, String newValue) {};
 
     
     // std::function<uint8_t*()> _callbackReadSchedule = NULL;  
