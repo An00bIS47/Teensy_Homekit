@@ -498,7 +498,7 @@ bool HAPServer::begin(bool resume) {
 	
 	// 
 	// Event Manager
-	//
+	//	
 	LogI( "Adding listener to event manager ...", false);
 	// Incoming
   	listenerNotificaton.mObj = this;

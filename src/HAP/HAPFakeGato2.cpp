@@ -1,0 +1,425 @@
+// 
+// HAPFakeGato2.cpp
+// Homekit
+//
+//  Created on: 31.03.2021
+//      Author: michael
+//
+
+#include "HAPFakeGato2.hpp"
+
+
+HAPFakeGato2::HAPFakeGato2(){
+
+}
+
+
+HAPFakeGato2::~HAPFakeGato2(){
+
+}
+
+
+void HAPFakeGato2::handle(bool forced){
+    if ( shouldHandle() || forced ){       
+        // This line could cause a crash 
+        // LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Handle fakegato ", true);         
+        
+        if (_periodicUpdates) {
+            if (_callbackAddEntry != NULL){
+                bool overwritten = !_callbackAddEntry();  
+                
+                // ToDo: Persist history ??
+                if (overwritten) {
+                    LogW("A fakegato history entry was overwritten!", true);
+                }                      
+            }   
+        }
+                                         
+    }
+}
+
+bool HAPFakeGato2::shouldHandle(){
+
+    if (_isEnabled) {
+        unsigned long currentMillis = millis(); // grab current time
+
+        if ((unsigned long)(currentMillis - _previousMillis) >= _interval) {
+
+            // save the last time you blinked the LED
+            _previousMillis = currentMillis;
+
+            //LogD("Handle plugin: " + String(_name), true);			
+            return true;			
+        }
+    }
+
+    return false;
+}
+
+
+// 
+// t == temperature - float     >> calculate value * 100
+// h == humidity    - float
+// p == airpressure - uint16_t
+// ...
+void HAPFakeGato2::addEntry(uint8_t bitmask, const char* fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+
+    // calculating needed buffer size   
+    uint8_t bufferSize = 0;
+
+    const char* fmt2 = fmt;
+    while (*fmt2 != '\0') {
+        if ((*fmt2 == 't') || (*fmt2 == 'h') || (*fmt2 == 'p')) {
+            // All values with length of 2
+            //    + Temperature 
+            //    + Humidity    
+            //    + Air Pressure                            
+            bufferSize += 2;
+        }
+        ++fmt2;
+    }
+    
+    uint8_t buffer[bufferSize];
+    uint8_t offset = 0;
+
+    while (*fmt != '\0') {
+        if ( (*fmt == 't') || (*fmt == 'h') ) {
+            // Calculate FLOAT value * 100:
+            //    + Temperature 
+            //    + Humidity
+            float value = va_arg(args, float);
+            value = value * 100;
+            ui16_to_ui8 bytesUnion;
+            bytesUnion.ui16 = value;                
+            memcpy(buffer + offset, bytesUnion.ui8, 2);                
+            offset += 2;
+        } else if (*fmt == 'p') {
+            // Calculate UINT16_T value * 100:
+            //    + Air Pressure
+            uint16_t value = va_arg(args, uint16_t);
+            value = value * 10;
+            ui16_to_ui8 bytesUnion;
+            bytesUnion.ui16 = value;                
+            memcpy(buffer + offset, bytesUnion.ui8, 2);                
+            offset += 2;                
+        }
+        ++fmt;
+    }
+
+    va_end(args);
+
+    addDataToBuffer(bitmask, buffer, offset);
+}
+
+
+void HAPFakeGato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
+
+    // Entry will be overwritten ...
+    if (_entries.capacity - _entries.size() < 1) {
+        // ToDo: Add a dispatcher for overwritten objects? 
+        //       Probably first just a LOG message ?
+        //       Therefore a reference to the aid and iid would be needed ...
+    }
+
+    size_t indexLast = _entries.size() - 1;        
+    bool overwritten = !_entries.push(HAPFakegatoDataEntry(bitmask, HAPTime::now(), data. length));
+    if (overwritten == true) {
+        // ToDo: Add overwritten handling..
+        _rolledOver = true;
+    }
+
+    // ToDo: Update History Info Characteristic with new size
+}
+
+/**
+ * @brief 
+ *  E863F117-079E-48FF-8F27-9C2605A29F52
+ *
+ *  This read-only characteristics is used to send the actual log entry to Eve.app It is an array of logs with each entry having x bytes as determined by Byte 1. The first portion up to byte 10 included is common, the last portion contain the data specific for each accessory.
+ *
+ *  Byte 1: Length (i.e. 14 for 20 Bytes)
+ *  Bytes 2-5: entry counter
+ *  Bytes 6-9: Seconds since reference time set with type 0x81 entry. In order to account for multiple iOS devices, the actual reference time and offset are apparently always reported also in E863F116
+ *  Byte 10: Entry type
+ *  0x81 Entry to set the reference timestamp, to be written on bytes 11-14. A negative offset can be written on bytes 6-9, and it's probably neeeded when the clock is updated (21 bytes in total).
+ *  0x07 Entry for Eve Weather log.
+ *  0x1f Entry for Eve Energy log (20 bytes in total)
+ *  0x1e Entry for Eve Energy log (18 bytes in total - not working)
+ *  0x0f Entry for Eve Room log.
+ *  0x02 Entry for Eve Motion log.
+ *  0x01 Entry for Eve Door log.
+ *  0x1f Entry for Eve Thermo log.
+ *  0x05 Entry for Eve Aqua, valve on, 13 bytes in total
+ *  0x07 Entry for Eve Aqua, valve off + water usage, 21 bytes in total
+ *
+ *
+ * // ToDo: Rewrite as READ callback for Characteristic
+ *       Be aware that you have to add the reftime entry if requestedIndex was ?? 01 oder 00 ?  idk
+ *       and that you have to base64 encode if you use a string value
+ *       basically have a look at the old implementation
+ **/
+void HAPFakeGato2::getData(uint8_t* data, size_t* length){
+    *length = 0;
+
+    size_t offset = 0;
+
+    for (uint8_t i=0; i < HAP_FAKEGATO_BATCH_SIZE; i++) {    
+        // Exit if size if smaller than i 
+        if (i > _entries.size()) {  
+            *length = offset;          
+            return;
+        }
+
+        size_t currentIndex = (_requestedIndex - 1 + i);
+        HAPFakegatoDataEntry entry = _entries[currentIndex];
+        uint8_t currentOffset = 0;
+
+        // size
+        // ToDo: Calculate size for each signature !
+        uint8_t size = 10;
+        if (_fakegatoType == HAP_FAKEGATO_TYPE_WEATHER) {            
+            size += ((entry.bitmask & 0x04) >> 1);  
+            size +=  (entry.bitmask & 0x02);  
+            size += ((entry.bitmask & 0x01) * 2); 
+        }
+
+        data[offset + currentOffset] = size;
+        currentOffset += 1; 
+
+        // requestedEntry == index
+        ui32_to_ui8 entryCount;
+        entryCount.ui32 = _requestedIndex++;
+        memcpy(data + offset + currentOffset, entryCount.ui8, 4);
+        currentOffset += 4;
+
+        // timestamp
+        ui32_to_ui8 secs;
+        secs.ui32 = entry.timestamp - _refTime;
+        memcpy(data + offset + currentOffset, secs.ui8, 4);
+        currentOffset += 4;
+
+        // data includes all values including bitmask
+        memcpy(data + offset + currentOffset, _entries[i].data, _entries[i].length);
+        currentOffset += _entries[i].length;
+
+        offset += currentOffset;
+        *length = offset; 
+    }
+}
+
+
+/**
+ * @brief 
+ *  In this write-only characteristics a time stamp is written by Eve.app every second if the accessory is selected in the app. 
+ *  Format from https://gist.github.com/gomfunkel/b1a046d729757120907c#gistcomment-1841206:
+ *  
+ *  The current timestamp is in seconds since 1.1.2001 e.g.: 
+ *  written value: cf1b521d -> reverse 1d521bcf -> hex2dec 491920335 
+ *  Epoch Timestamp 1.1.2001 = 978307200; 978307200 + 491920335 = 1470227535 
+ *  = Wed, 03 Aug 2016 12:32:15 GMT = 3.8.2016, 14:32:15 GMT+2:00 DST (MEST)
+ *
+ *  It is probably used to set time/date of the accessory.
+ *
+ * @param oldValue 
+ * @param newValue 
+ **/
+void HAPFakeGato2::callbackHistorySetTime(String oldValue, String newValue){
+    
+    if (_isTimeSource){
+            
+        // "SPMZIw==" == 588903240
+        size_t outputLength = 0;        
+        mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+        uint8_t decoded[outputLength];
+
+
+        mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength,(uint8_t*)newValue.c_str(), newValue.length());
+
+#if HAP_DEBUG_FAKEGATO 
+        HAPHelper::array_print("History Set Time", decoded, outputLength);
+#endif
+
+        uint32_t timestamp = HAPHelper::u8_to_u32(decoded) + HAP_FAKEGATO_EPOCH;
+        
+        LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting Time to: " + String(timestamp), true);    
+
+        // 978307200 + 588903240 = 1567210440
+        HAPTime::setTimeFromTimestamp(timestamp);        
+    }      
+}
+
+/**
+ * @brief 
+ *  This write-only characteristic seem to control data flux from accessory to Eve.app. 
+ *
+ *  A typical value when reading from a fake Eve Weather accessory is 
+ *    01140100 000000
+ *   
+ *   byte 1: ??
+ *   byte 2: ??
+ *   byte 3-6: Requested memory entry, based on the last entry that Eve.app downloaded. 
+ *           If set to 0000, asks the accessory the start restart from the beginning of the memory
+ *   byte 7-8: ??
+ *
+ * @param oldValue 
+ * @param newValue 
+ **/
+void HAPFakeGato2::callbackHistoryRequest(String oldValue, String newValue){
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W1 iid " + String(_s2w1Characteristics->iid()) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
+    
+    size_t outputLength = 0;   
+    // Serial.println(newValue);
+
+    mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    uint8_t decoded[outputLength];
+    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());    
+
+#if HAP_DEBUG_FAKEGATO    
+    HAPHelper::array_print("History Request", decoded, outputLength);
+#endif
+
+    ui32_to_ui8 requestedIndex;
+    int n = 0;
+    for (unsigned idx = 2; idx < 6; idx++) {
+        requestedIndex.ui8[n++] = decoded[idx];
+    }    
+
+#if HAP_DEBUG_FAKEGATO    
+    ui32_to_ui8 address;
+    address.ui32 = __builtin_bswap32(tmp.ui32);
+    HAPHelper::array_print("History Request address",  address.ui8, 4);
+#endif
+
+    _requestedIndex = requestedIndex.ui32;
+
+#if HAP_DEBUG_FAKEGATO
+    Serial.print("_requestedIndex: ");
+    Serial.print(_requestedIndex);
+#endif 
+}
+
+
+
+/**
+ * @brief 
+ *  E863F116-079E-48FF-8F27-9C2605A29F52 (tentative)
+ *
+ *  This read-only characteristic is used by the accessory to signal how many entries are in the log
+ *  (and other infos). 
+ *  Comparing this characteristics over different type of accessory, it was possible to obtain the 
+ *  following partial decoding. 
+ * 
+ *  Data is composed by a fixed size portion (12 bytes) with info about time, 
+ *  1 byte indicating the length of the following variable length portion with 
+ *  accessory "signature" and finally a fixed length portion with info about memory status.
+ *
+ *   4 bytes: Actual time, in seconds from last time update
+ *   4 bytes: negative offset of reference time
+ *   4 bytes: reference time/last Accessory time update (taken from E863F117-079E-48FF-8F27-9C2605A29F52)
+ *   1 byte: number of 16 bits word of the following "signature" portion
+ *   2-12 bytes: variable length "signature"
+ *   2 bytes: last physical memory position occupied (used by Eve.app to understand how many transfers are needed). If set to an address lower than the last successfully uploaded entry, forces Eve.app to start from the beginning of the memory, asking address 00 in E863F11C. Accessory answers with entry 01. Once the memory is fully written and memory overwriting is necessary this field remains equal to history size.
+ *   2 bytes: history size
+ *   4 bytes: once memory rolling occurred it indicates the address of the oldest entry present in memory (if memory rolling did not occur yet, these bytes are at 0)
+ *   4 bytes:??
+ *   2 bytes:?? always 01ff or 0101
+ *
+ *  Energy (working, tweeking from Room): 
+ *   4 16bits word, "0102 0202 0702 0f03", 
+ *
+ *  example of full data 
+ *   "58020000 00000000 cd8f0220 04 0102 0202 0702 0f03 0300 c00f 00000000 00000000 0101"
+ * 
+ *  // ToDo: Rewrite as READ callback for characteristic
+ *           Check for base64 encoding - better use mbedtls if possible 
+ **/     
+void HAPFakeGato2::updateS2R1Value(){
+
+    
+    // ToDo: Signature for calculating buffersize and length !!!
+    int sigLength = signatureLength() * 2;    
+    // uint8_t signature[sigLength];        
+    // getSignature(signature);
+
+
+    uint8_t buffer[buffersize];
+    uint8_t offset = 0;
+
+    // evetime
+    // Time from last update in seconds
+    ui32_to_ui8 evetime;
+    evetime.ui32 = timestampLastEntry() - _refTime;
+    memcpy(data + offset, evetime.ui8, 4);
+    offset += 4;
+
+    // negativOffset
+    // Negativ offset of reference time
+    ui32_to_ui8 negativOffset;
+    negativOffset.ui32 = 0x00;
+    memcpy(data + offset, negativOffset.ui8, 4);
+    offset += 4;
+
+    // refTimeLastUpdate
+    // reference time/last Accessory time update (taken from E863F117-079E-48FF-8F27-9C2605A29F52)
+    ui32_to_ui8 refTimeLastUpdate;
+    refTimeLastUpdate.ui32 = _refTime - FAKEGATO_EPOCH_OFFSET;
+    memcpy(data + offset, refTimeLastUpdate.ui8, 4);
+    offset += 4;
+
+    // ToDo: Signature
+    //  Length / 2
+    // signature length -> stefdude comment
+
+    // used Memory
+    // last physical memory position occupied
+    ui32_to_ui8 usedMemory;
+    usedMemory.ui32 = _entries.size();
+    memcpy(data + offset, usedMemory.ui8, 4);
+    offset += 4;
+
+    // size
+    // capacity of circular buffer
+    ui32_to_ui8 memorySize;
+    memorySize.ui32 = _entries.capacity;
+    memcpy(data + offset, memorySize.ui8, 4);
+    offset += 4;
+
+
+    // rolled over
+    // once memory rolling occurred it indicates the address of the oldest entry present in memory
+    // (if memory rolling did not occur yet, these bytes are at 0)
+    ui32_to_ui8 rolledOver;
+    if (_rolledOver){ 
+        // ToDo: Check if that works ??
+        rolledOver.ui32 = 0x01;
+    } else {
+        rolledOver.ui32 = 0x00;
+    }
+    memcpy(data + offset, memorySize.ui8, 4);
+    offset += 4;
+
+    data[offset++] = 0x00;
+    data[offset++] = 0x01;
+    data[offset++] = 0x01;
+
+
+#if HAP_DEBUG_FAKEGATO   
+    HAPHelper::array_print("SET S2R1", data, 13 + sigLength + 14);
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32)
+    String encoded = base64::encode(data, 13 + sigLength + 14);
+#elif defined(CORE_TEENSY)
+    
+    int encodedLen = base64_enc_len(13 + sigLength + 14);
+    char encodedChr[encodedLen];
+
+     base64_encode(encodedChr, (char*)data, 13 + sigLength + 14);
+     String encoded = String(encodedChr);
+#endif    
+    _historyInfo->setValue(encoded.c_str());  
+}
+
+

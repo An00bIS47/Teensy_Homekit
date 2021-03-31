@@ -55,6 +55,10 @@ public:
     bool beginNTP();
 #endif
 
+    static void setTimeFromTimestamp(time_t date = 0) {
+        setTime(date);
+    }
+    
     static void setCallbackGetTime(callbackGetTime_t callback);
 
 protected:

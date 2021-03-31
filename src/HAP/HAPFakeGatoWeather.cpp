@@ -294,6 +294,7 @@ void HAPFakeGatoWeather::getData(const size_t count, uint8_t *data, size_t* leng
         memcpy(data + offset + currentOffset, (uint8_t*)&entryData.bitmask, 1);
         currentOffset += 1;        
 
+        
         // temperature
         if ((entryData.bitmask & 0x01) == 1) {            
             ui16_to_ui8 temp;

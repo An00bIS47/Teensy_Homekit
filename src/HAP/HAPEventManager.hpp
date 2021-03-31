@@ -28,13 +28,39 @@ typedef enum {
 
 typedef enum {
     HAP_EVENT_ALL = 0x00,
-
-    HAP_EVENT_NOTIFY,
-
-    HAP_EVENT_RESTART,
     
-    HAP_EVENT_CONFIG_NEEDS_UPDATE,
+    //
+    // Errors
+    //
+    HAP_EVENT_ERROR_FATAL = 0x01,    
+
+    // 
+    // System
+    //
+    HAP_EVENT_SYSTEM_RESTART = 0x20,
+    
+    // 
+    // Homekit
+    // 
+    HAP_EVENT_HOMEKIT_NOTIFY = 0x50,
+    HAP_EVENT_HOMEKIT_UPDATE_CONFIGNUM,
+    HAP_EVENT_HOMEKIT_PAIRINGS_DELETED_ALL,
+    HAP_EVENT_HOMEKIT_PAIRINGS_ADDED,
+
+    // 
+    // Fakegato
+    // 
+    HAP_EVENT_TIMER_EVENT_START = 0x70,
+    HAP_EVENT_TIMER_EVENT_END,
+    
+    // 
+    // Config
+    // 
+    HAP_EVENT_CONFIG_NEEDS_UPDATE = 0x90,
     HAP_EVENT_CONFIG_NEEDS_SAVE,
+    HAP_EVENT_CONFIG_NEEDS_LOAD,
+    HAP_EVENT_CONFIG_RESET,
+
 } HAP_EVENT_TYPE;
 
 
@@ -84,11 +110,11 @@ public:
     void queueNotifyEvent(uint8_t aid, uint32_t iid, const char* value, HAP_EVENT_PRIORITY priority = HAP_EVENT_PRIORITY_LOW){
         HAPEventNotifyPayload eventPayload(aid, iid, value);
 
-        HAPEvent event(HAP_EVENT_NOTIFY, &event); 
+        HAPEvent event(HAP_EVENT_HOMEKIT_NOTIFY, &event); 
         queueEvent(event);       
     }
 
-    void queueEvent(const HAPEvent event){
+    void queueEvent(const HAPEvent& event){
         if (event.priority == HAP_EVENT_PRIORITY_HIGH){
             // handle Event immediately
             handleEvent(event);
@@ -138,7 +164,6 @@ public:
     }
 
 protected:
-    
 
     std::vector<HAPEvent> _eventqueue;
     std::vector<HAPEventListener> _listeners;
