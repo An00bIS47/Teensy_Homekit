@@ -15,10 +15,19 @@
 #include <CircularBuffer.h>
 #include "HAPAccessory.hpp"
 
+#ifndef HAP_FAKEGATO_BUFFER_SIZE
 #define HAP_FAKEGATO_BUFFER_SIZE 100
+#endif
+
+#ifndef HAP_FAKEGATO_BATCH_SIZE
 #define HAP_FAKEGATO_BATCH_SIZE  16
+#endif
+
 #define HAP_FAKEGATO_EPOCH       978307200
+
+#ifndef HAP_FAKEGATO_CHUNK_BUFFER_SIZE
 #define HAP_FAKEGATO_CHUNK_BUFFER_SIZE      512     // base64 256 bits = 344
+#endif
 
 #define HAP_FAKEGATO_TYPE_REFTIME       0x81
 
@@ -99,7 +108,6 @@
 enum HAP_FAKEGATO_TYPE {
     HAP_FAKEGATO_TYPE_NONE      = 0x00,
     HAP_FAKEGATO_TYPE_WEATHER,
-
     HAP_FAKEGATO_TYPE_CUSTOM   
 };
 
@@ -109,7 +117,6 @@ public:
     ~HAPFakeGato2();
 
     virtual void begin() {};
-    virtual void enable(bool mode = true) {};
 
     virtual void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
 
@@ -119,10 +126,16 @@ public:
     // p == airpressure - uint16_t                              >>> int 
     // ...
     virtual void addEntry(uint8_t bitmask, const char* fmt, ...);
+    
+    String name() { return _name; }
 
     uint32_t timestampLastEntry(){
         return _entries[_entries.size() - 1].timestamp;
     }
+
+    void setInterval(uint32_t interval){
+		_interval = interval;
+	}
 
     size_t memoryUsed(){
         return _entries.size();
@@ -140,11 +153,19 @@ public:
         _fakegatoType = fakegatoType;
     }
 
-    void setCallbackAddEntry(std::function<bool()> callback){
+    void registerCallbackAddEntry(std::function<bool()> callback){
         _callbackAddEntry = callback;
     }
 
-    void handle(bool forced);
+    bool isEnabled(){
+		return _isEnabled;
+	}
+
+	void enable(bool mode){
+		_isEnabled = mode;
+	}
+
+    void handle(bool forced = false);
 
     void setSignature(const uint8_t* signature, const size_t sigLength){
         memcpy(_signature, signature, sigLength);
@@ -157,6 +178,10 @@ public:
 
     uint8_t signatureLength(){
         return (_sigLength / 2);
+    }
+
+    void enablePeriodicUpdates(bool mode = true){
+        _periodicUpdates = mode;
     }
 
 protected:
@@ -227,6 +252,7 @@ protected:
 
     std::function<bool()> _callbackAddEntry = nullptr;
 
+    String  _name;
     uint8_t _signature[12] = {0, };
     uint8_t _sigLength;
     uint8_t _fakegatoType = 0;
@@ -238,7 +264,8 @@ protected:
     bool    _isTimeSource = false;
     bool    _rolledOver = false;
     bool    _isEnabled = true;
-    bool    _periodicUpdates;
+    bool    _periodicUpdates = true;
+    
 
     CircularBuffer<HAPFakegatoDataEntry, HAP_FAKEGATO_BUFFER_SIZE> _entries;
 };

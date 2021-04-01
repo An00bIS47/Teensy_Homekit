@@ -167,26 +167,26 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         // FakeGato
         // 	
-        if (_enableFakegato){
-            _fakegato = new HAPFakeGatoEnergy();
-            _fakegato->registerFakeGatoService(_accessory, _name, true);    
+        // if (_enableFakegato){
+        //     _fakegato = new HAPFakeGatoEnergy();
+        //     _fakegato->registerFakeGatoService(_accessory, _name, true);    
 
 
-            if (_enableSchedule) {
-                // Fakegato Schedule
-                // _fakegato->setSerialNumber(sn);        
-                _fakegato->setCallbackTimerStart(std::bind(&HAPPluginKNXDeviceOutlet::writeStateCallbackFromSchedule, this, std::placeholders::_1));
-                // _fakegato.setCallbackTimerEnd(std::bind(&HAPPluginKNXDeviceOutlet::switchCallback, this));
-                _fakegato->setCallbackGetTimestampLastActivity(std::bind(&HAPPluginKNXDeviceOutlet::getTimestampLastActivity, this));
+        //     if (_enableSchedule) {
+        //         // Fakegato Schedule
+        //         // _fakegato->setSerialNumber(sn);        
+        //         _fakegato->setCallbackTimerStart(std::bind(&HAPPluginKNXDeviceOutlet::writeStateCallbackFromSchedule, this, std::placeholders::_1));
+        //         // _fakegato.setCallbackTimerEnd(std::bind(&HAPPluginKNXDeviceOutlet::switchCallback, this));
+        //         _fakegato->setCallbackGetTimestampLastActivity(std::bind(&HAPPluginKNXDeviceOutlet::getTimestampLastActivity, this));
                 
-                _fakegato->setCallbackSaveConfig(std::bind(&HAPPluginKNXDeviceOutlet::saveConfig, this));
+        //         _fakegato->setCallbackSaveConfig(std::bind(&HAPPluginKNXDeviceOutlet::saveConfig, this));
 
-                _fakegato->beginSchedule();
-            }
+        //         _fakegato->beginSchedule();
+        //     }
 
-            auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceOutlet::fakeGatoCallback, this);
-            _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
-        }
+        //     auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceOutlet::fakeGatoCallback, this);
+        //     _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
+        // }
 
     }
     return _accessory;

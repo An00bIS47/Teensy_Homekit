@@ -58,17 +58,17 @@ extern "C" {
 // for example weather: 0x07 = 00111 => 1x temp, 1x hum 1x, pres 
 //             energy:  0x1f = 11111 => 1x w, 1x v etc
 // ToDo: Remove 
-#define HAP_FAKEGATO_TYPE_REFTIME       0x81
-#define HAP_FAKEGATO_TYPE_WEATHER       0x07    // --> not unique
-#define HAP_FAKEGATO_TYPE_ENERGY        0x1F    // --> not unique
-#define HAP_FAKEGATO_TYPE_ENERGY_18     0x1E
-#define HAP_FAKEGATO_TYPE_ROOM          0x0F
-#define HAP_FAKEGATO_TYPE_MOTION        0x02
-#define HAP_FAKEGATO_TYPE_DOOR          0x01
-#define HAP_FAKEGATO_TYPE_THERMO        0x1F    // --> not unique
-#define HAP_FAKEGATO_TYPE_AQUA          0x05    // Entry for Eve Aqua, valve on, 13 bytes in total
-#define HAP_FAKEGATO_TYPE_AQUA_21       0x07    // --> not unique
-#define HAP_FAKEGATO_TYPE_SWITCH        0x01
+// #define HAP_FAKEGATO_TYPE_REFTIME       0x81
+// #define HAP_FAKEGATO_TYPE_WEATHER       0x07    // --> not unique
+// #define HAP_FAKEGATO_TYPE_ENERGY        0x1F    // --> not unique
+// #define HAP_FAKEGATO_TYPE_ENERGY_18     0x1E
+// #define HAP_FAKEGATO_TYPE_ROOM          0x0F
+// #define HAP_FAKEGATO_TYPE_MOTION        0x02
+// #define HAP_FAKEGATO_TYPE_DOOR          0x01
+// #define HAP_FAKEGATO_TYPE_THERMO        0x1F    // --> not unique
+// #define HAP_FAKEGATO_TYPE_AQUA          0x05    // Entry for Eve Aqua, valve on, 13 bytes in total
+// #define HAP_FAKEGATO_TYPE_AQUA_21       0x07    // --> not unique
+// #define HAP_FAKEGATO_TYPE_SWITCH        0x01
 
 
 

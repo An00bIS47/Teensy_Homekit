@@ -12,20 +12,17 @@
 #include <vector>
 #include <memory>
 
-#include "HAPFakeGato.hpp"
+#include "HAPFakeGato2.hpp"
 
 class HAPFakeGatoFactory {
 public:
-    HAPFakeGatoFactory() : _refTime(0) {}
-
-    void setRefTime(uint32_t refTime);
+    HAPFakeGatoFactory() {}
 
     void handle(bool forced = false);
-    void registerFakeGato(HAPFakeGato* fakegato, String name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL);
+    void registerFakeGato(HAPFakeGato2* fakegato, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL);
 
 private:    
-    std::vector<HAPFakeGato*> _fakegatos;    
-    uint32_t                  _refTime;    
+    std::vector<HAPFakeGato2*> _fakegatos;    
 };
 
 #endif /* HAPFAKEGATOFACTORY_HPP_ */

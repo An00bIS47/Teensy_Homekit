@@ -46,15 +46,16 @@ HAPFakeGato2::~HAPFakeGato2(){
 FLASHMEM 
 #endif
 void HAPFakeGato2::registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule){
-        
+    _name = name;
+
+    Serial.println(">>>> 11"); Serial.send_now();
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    
-        
 
     HAPCharacteristicT<String>* accNameCha = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     accNameCha->setValue(name + " History");
     accessory->addCharacteristicToService(fgService, accNameCha);
 
-    
+    Serial.println(">>>> 12"); Serial.send_now();
     // History Info
     _historyInfo = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 128);    
     _historyInfo->setDescription("EVE History Info");
@@ -62,9 +63,13 @@ void HAPFakeGato2::registerFakeGatoService(HAPAccessory* accessory, const String
     // auto callbackS2R1 = std::bind(&HAPFakeGato::setS2R1Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
     // _historyInfo->setValueChangeCallback(callbackS2R1);
     auto callbackGetHistoryInfo = std::bind(&HAPFakeGato2::callbackGetHistoryInfo, this);            
-    _historyEntries->setValueGetCallback(callbackGetHistoryInfo);    
+    _historyInfo->setValueGetCallback(callbackGetHistoryInfo);    
     accessory->addCharacteristicToService(fgService, _historyInfo);
     
+
+    Serial.println(">>>> 13"); Serial.send_now();
+
+
     // History Entries
     _historyEntries = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);    
     _historyEntries->setDescription("EVE History Entries");
@@ -76,6 +81,10 @@ void HAPFakeGato2::registerFakeGatoService(HAPAccessory* accessory, const String
 
     accessory->addCharacteristicToService(fgService, _historyEntries);
     
+
+    Serial.println(">>>> 14"); Serial.send_now();
+
+
     // History Request
     _historyRequest = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE, 128);
     _historyRequest->setDescription("EVE History Request");        
@@ -90,6 +99,8 @@ void HAPFakeGato2::registerFakeGatoService(HAPAccessory* accessory, const String
     _historySetTime->setValueChangeCallback(callbackSetTime);
     accessory->addCharacteristicToService(fgService, _historySetTime);
     
+
+    Serial.println(">>>> 15"); Serial.send_now();
 
     if (withSchedule){        
         // Config Read
@@ -137,7 +148,7 @@ void HAPFakeGato2::handle(bool forced){
 
 bool HAPFakeGato2::shouldHandle(){
 
-    if (_isEnabled) {
+    if (_isEnabled && _periodicUpdates) {
         unsigned long currentMillis = millis(); // grab current time
 
         if ((unsigned long)(currentMillis - _previousMillis) >= _interval) {
@@ -455,7 +466,7 @@ void HAPFakeGato2::callbackHistoryRequest(String oldValue, String newValue){
 
 #if HAP_DEBUG_FAKEGATO    
     ui32_to_ui8 address;
-    address.ui32 = __builtin_bswap32(tmp.ui32);
+    address.ui32 = __builtin_bswap32(requestedIndex.ui32);
     HAPHelper::array_print("History Request address",  address.ui8, 4);
 #endif
 

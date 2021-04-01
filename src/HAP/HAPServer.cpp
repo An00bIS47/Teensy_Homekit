@@ -479,23 +479,13 @@ bool HAPServer::begin(bool resume) {
 // 		LogD(F("OK"), true);
 // 	}
 
-	LogI( "Setup accessory ...", false);
-	Serial.println(">>>> 1");
-	Serial.send_now();
+	LogI( "Setup accessory ...", false);	
 	_accessorySet->setModelName(hostname);	
-	Serial.println(">>>> 2");
-	Serial.send_now();
 	_accessorySet->setAccessoryType(HAP_ACCESSORY_TYPE_BRIDGE);
-	Serial.println(">>>> 3");
-	Serial.send_now();
 	_accessorySet->setPinCode(HAP_PIN_CODE);
-	Serial.println(">>>> 4");
-	Serial.send_now();
 	_accessorySet->begin();
-	Serial.println(">>>> 5");
-	Serial.send_now();
 	LogI(" OK", true);
-	Serial.send_now();
+
 	
 	// 
 	// Event Manager
@@ -652,9 +642,9 @@ bool HAPServer::begin(bool resume) {
   	// Loading fakegato factory
   	// 
 	// Setting Reference Time to FakeGato
-	LogI( "Setting EVE reference time ...", false);
-	_fakeGatoFactory.setRefTime(_configuration.getPlatformConfig()->refTime());
-	LogI(" OK", true);
+	// LogI( "Setting EVE reference time ...", false);
+	// _fakeGatoFactory.setRefTime(_configuration.getPlatformConfig()->refTime());
+	// LogI(" OK", true);
 	
 
   	// 

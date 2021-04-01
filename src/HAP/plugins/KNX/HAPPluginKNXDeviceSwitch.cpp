@@ -131,12 +131,12 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         //
         // FakeGato
         // 	
-        if (_enableFakegato){
-            _fakegato = new HAPFakeGatoSwitch();
-            _fakegato->registerFakeGatoService(_accessory, _name);    
-            auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceSwitch::fakeGatoCallback, this);
-            _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
-        }
+        // if (_enableFakegato){
+        //     _fakegato = new HAPFakeGatoSwitch();
+        //     _fakegato->registerFakeGatoService(_accessory, _name);    
+        //     auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceSwitch::fakeGatoCallback, this);
+        //     _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
+        // }
 
     }
     return _accessory;

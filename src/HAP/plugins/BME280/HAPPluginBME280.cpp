@@ -252,15 +252,18 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	temperatureService->addLinkedServiceId(pressureService->aid());
 
 	
+	Serial.println(">>>> 1"); Serial.send_now();
+
 	//
 	// FakeGato
 	// 		
 	_fakegato.registerFakeGatoService(_accessory, _config->name);
+	Serial.println(">>>> 2"); Serial.send_now();
+		
 	auto callbackAddEntry = std::bind(&HAPPluginBME280::fakeGatoCallback, this);
-	// _fakegato.registerCallback(callbackAddEntry);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
 
-
+	Serial.println(">>>> 3"); Serial.send_now();
 	return _accessory;
 }
 
@@ -417,6 +420,7 @@ bool HAPPluginBME280::begin(){
 
 bool HAPPluginBME280::fakeGatoCallback(){	
 
+	Serial.println("ADD FAKEGATO ENTRY");
 	addToAverage(_temperatureValue->value(), _humidityValue->value(), _pressureValue->value());
 	
 	float avgTemp = _averageTemperature / _measurementCount;
@@ -424,8 +428,9 @@ bool HAPPluginBME280::fakeGatoCallback(){
 	float avgPres = _averagePressure / _measurementCount;
 	
 	resetAverage();
-
-	return _fakegato.addEntry(0x07, String(avgTemp), String(avgHum), String(avgPres));
+	_fakegato.addEntry(0x07, "thp", avgTemp, avgHum, avgPres);
+	return true;
+	// return _fakegato.addEntry(0x07, String(avgTemp), String(avgHum), String(avgPres));
 	// 0102 0202 0302
 	//	|	  |	   +-> Pressure	
 	//  |	  +-> Humidity

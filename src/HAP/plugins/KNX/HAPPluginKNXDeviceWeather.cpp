@@ -178,12 +178,12 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
 	//
 	// FakeGato
 	// 	    
-    if (_enableFakegato){
-        _fakegato = new HAPFakeGatoWeather();
-        _fakegato->registerFakeGatoService(_accessory, _name);    
-        auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceWeather::fakeGatoCallback, this);
-        _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
-    }
+    // if (_enableFakegato){
+    //     _fakegato = new HAPFakeGatoWeather();
+    //     _fakegato->registerFakeGatoService(_accessory, _name);    
+    //     auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceWeather::fakeGatoCallback, this);
+    //     _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
+    // }
     
 	
 
