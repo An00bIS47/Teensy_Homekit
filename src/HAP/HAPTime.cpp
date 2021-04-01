@@ -25,6 +25,7 @@ const float zenith = 90.83 * toRad;
 int HAPTime::_utcOffset = 0;                                                 
 float HAPTime::_longitude = 0;
 float HAPTime::_latitude = 0;
+uint32_t HAPTime::_refTime = 0;
 
 callbackGetTime_t HAPTime::_callbackGetTime = nullptr;  
 

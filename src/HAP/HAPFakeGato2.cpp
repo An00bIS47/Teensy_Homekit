@@ -7,7 +7,24 @@
 //
 
 #include "HAPFakeGato2.hpp"
+#include "HAPLogger.hpp"
+#include "HAPTime.hpp"
 
+
+
+#if defined ( ARDUINO_ARCH_ESP32 )
+#if ESP_IDF_VERSION_MAJOR == 4
+#include "mbedtls/base64.h"
+#else
+extern "C" {
+    #include "crypto/base64.h"
+    
+}
+#endif
+#elif defined(CORE_TEENSY)
+#include <Base64.h>
+#include "mbedtls/base64.h"
+#endif
 
 HAPFakeGato2::HAPFakeGato2(){
 
@@ -15,7 +32,87 @@ HAPFakeGato2::HAPFakeGato2(){
 
 
 HAPFakeGato2::~HAPFakeGato2(){
+    if (_historyInfo != nullptr) delete _historyInfo;
+    if (_historyEntries != nullptr) delete _historyEntries;
+    if (_historyRequest != nullptr) delete _historyRequest;
+    if (_historySetTime != nullptr) delete _historySetTime;
 
+    if (_configRead != nullptr) delete _configRead;
+    if (_configWrite != nullptr) delete _configWrite;
+   
+}
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+void HAPFakeGato2::registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule){
+        
+    HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    
+        
+
+    HAPCharacteristicT<String>* accNameCha = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    accNameCha->setValue(name + " History");
+    accessory->addCharacteristicToService(fgService, accNameCha);
+
+    
+    // History Info
+    _historyInfo = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 128);    
+    _historyInfo->setDescription("EVE History Info");
+    _historyInfo->setValue((char*)NULL);    
+    // auto callbackS2R1 = std::bind(&HAPFakeGato::setS2R1Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
+    // _historyInfo->setValueChangeCallback(callbackS2R1);
+    auto callbackGetHistoryInfo = std::bind(&HAPFakeGato2::callbackGetHistoryInfo, this);            
+    _historyEntries->setValueGetCallback(callbackGetHistoryInfo);    
+    accessory->addCharacteristicToService(fgService, _historyInfo);
+    
+    // History Entries
+    _historyEntries = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);    
+    _historyEntries->setDescription("EVE History Entries");
+    _historyEntries->setValue((char*)NULL);  
+    // auto callbackS2R2 = std::bind(&HAPFakeGato::setS2R2Characteristics, this, std::placeholders::_1, std::placeholders::_2);            
+    // _historyEntries->setValueChangeCallback(callbackS2R2);
+    auto callbackGetHistoryEntries = std::bind(&HAPFakeGato2::callbackGetHistoryEntries, this);            
+    _historyEntries->setValueGetCallback(callbackGetHistoryEntries);
+
+    accessory->addCharacteristicToService(fgService, _historyEntries);
+    
+    // History Request
+    _historyRequest = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE, 128);
+    _historyRequest->setDescription("EVE History Request");        
+    auto callbackHistoryRequest = std::bind(&HAPFakeGato2::callbackHistoryRequest, this, std::placeholders::_1, std::placeholders::_2);        
+    _historyRequest->setValueChangeCallback(callbackHistoryRequest);
+    accessory->addCharacteristicToService(fgService, _historyRequest);
+    
+    // Set Time
+    _historySetTime = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE, 128);
+    _historySetTime->setDescription("EVE SetTime");
+    auto callbackSetTime = std::bind(&HAPFakeGato2::callbackHistorySetTime, this, std::placeholders::_1, std::placeholders::_2);        
+    _historySetTime->setValueChangeCallback(callbackSetTime);
+    accessory->addCharacteristicToService(fgService, _historySetTime);
+    
+
+    if (withSchedule){        
+        // Config Read
+        _configRead = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+        _configRead->setDescription("EVE Schedule Read");
+        auto callbackConfigRead = std::bind(&HAPFakeGato2::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);        
+        _configRead->setValueChangeCallback(callbackConfigRead);
+        accessory->addCharacteristicToService(fgService, _configRead);
+
+    
+        // Config Write
+        _configWrite = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE, 256);
+        _configWrite->setDescription("EVE Schedule Write");
+        auto callbackConfigWrite = std::bind(&HAPFakeGato2::scheduleWrite, this, std::placeholders::_1, std::placeholders::_2);        
+        _configWrite->setValueChangeCallback(callbackConfigWrite);
+        accessory->addCharacteristicToService(fgService, _configWrite);
+    }
+
+    accessory->addService(fgService);
+    
+    begin();   
+
+    enable(true);
 }
 
 
@@ -59,9 +156,12 @@ bool HAPFakeGato2::shouldHandle(){
 
 // 
 // t == temperature - float     >> calculate value * 100
-// h == humidity    - float
-// p == airpressure - uint16_t
+// h == humidity    - float     >> calculate value * 100
+// p == airpressure - uint16_t  >> calculate value * 10
 // ...
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGato2::addEntry(uint8_t bitmask, const char* fmt, ...){
     va_list args;
     va_start(args, fmt);
@@ -89,7 +189,7 @@ void HAPFakeGato2::addEntry(uint8_t bitmask, const char* fmt, ...){
             // Calculate FLOAT value * 100:
             //    + Temperature 
             //    + Humidity
-            float value = va_arg(args, float);
+            double value = va_arg(args, double);
             value = value * 100;
             ui16_to_ui8 bytesUnion;
             bytesUnion.ui16 = value;                
@@ -98,10 +198,10 @@ void HAPFakeGato2::addEntry(uint8_t bitmask, const char* fmt, ...){
         } else if (*fmt == 'p') {
             // Calculate UINT16_T value * 100:
             //    + Air Pressure
-            uint16_t value = va_arg(args, uint16_t);
+            int value = va_arg(args, int);
             value = value * 10;
             ui16_to_ui8 bytesUnion;
-            bytesUnion.ui16 = value;                
+            bytesUnion.ui16 = (uint16_t)value;                
             memcpy(buffer + offset, bytesUnion.ui8, 2);                
             offset += 2;                
         }
@@ -113,7 +213,9 @@ void HAPFakeGato2::addEntry(uint8_t bitmask, const char* fmt, ...){
     addDataToBuffer(bitmask, buffer, offset);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
 
     // Entry will be overwritten ...
@@ -124,13 +226,14 @@ void HAPFakeGato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t lengt
     }
 
     size_t indexLast = _entries.size() - 1;        
-    bool overwritten = !_entries.push(HAPFakegatoDataEntry(bitmask, HAPTime::now(), data. length));
+    bool overwritten = !_entries.push(HAPFakegatoDataEntry(bitmask, HAPTime::timestamp(), data, length));
     if (overwritten == true) {
         // ToDo: Add overwritten handling..
         _rolledOver = true;
     }
 
     // ToDo: Update History Info Characteristic with new size
+    //       Required ?? should be getting the update via the read callback ?!
 }
 
 /**
@@ -160,16 +263,22 @@ void HAPFakeGato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t lengt
  *       and that you have to base64 encode if you use a string value
  *       basically have a look at the old implementation
  **/
-void HAPFakeGato2::getData(uint8_t* data, size_t* length){
-    *length = 0;
-
+String HAPFakeGato2::callbackGetHistoryEntries(){
     size_t offset = 0;
+
+    uint8_t data[HAP_FAKEGATO_CHUNK_BUFFER_SIZE];
+    uint8_t length = 0;
+
+    if (_requestedIndex == 1){
+        getRefTime(data, &length);
+        offset += length;
+        _requestedIndex++;       
+    }
 
     for (uint8_t i=0; i < HAP_FAKEGATO_BATCH_SIZE; i++) {    
         // Exit if size if smaller than i 
         if (i > _entries.size()) {  
-            *length = offset;          
-            return;
+            break;
         }
 
         size_t currentIndex = (_requestedIndex - 1 + i);
@@ -196,7 +305,7 @@ void HAPFakeGato2::getData(uint8_t* data, size_t* length){
 
         // timestamp
         ui32_to_ui8 secs;
-        secs.ui32 = entry.timestamp - _refTime;
+        secs.ui32 = entry.timestamp - HAPTime::refTime();
         memcpy(data + offset + currentOffset, secs.ui8, 4);
         currentOffset += 4;
 
@@ -205,8 +314,63 @@ void HAPFakeGato2::getData(uint8_t* data, size_t* length){
         currentOffset += _entries[i].length;
 
         offset += currentOffset;
-        *length = offset; 
+        length += currentOffset; 
     }
+
+#if HAP_DEBUG_FAKEGATO
+    HAPHelper::array_print("History Entries", data, length);
+#endif        
+
+#if defined(ARDUINO_ARCH_ESP32)
+    _s2r2Characteristics->setValue(base64::encode(data, length));  
+#elif defined(CORE_TEENSY)
+    int encodedLen = base64_enc_len(length);
+    char encodedChr[encodedLen];
+    base64_encode(encodedChr,(char*)data, length);
+
+    // _s2r2Characteristics->valueFromString(encodedChr);  
+#endif
+
+    return String(encodedChr);    
+}
+
+void HAPFakeGato2::getRefTime(uint8_t* data, uint8_t* length){
+
+#if HAP_DEBUG_FAKEGATO
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Get ref time entry", true);    
+#endif
+    
+    uint8_t offset = 0;
+    uint8_t size = 21;
+    uint8_t typ = HAP_FAKEGATO_TYPE_REFTIME;
+
+    data[offset] = size;
+    offset += 1;
+
+    ui32_to_ui8 eC;
+    eC.ui32 = _requestedIndex;
+    memcpy(data + offset, eC.ui8, 4);
+    offset += 4;
+
+    ui32_to_ui8 secs;
+    secs.ui32 = 0;
+    memcpy(data + offset, secs.ui8, 4);
+    offset += 4;
+
+    data[offset] = typ;
+    offset += 1;
+
+    ui32_to_ui8 refTime;
+    refTime.ui32 = HAPTime::refTime() - HAP_FAKEGATO_EPOCH;
+    memcpy(data + offset, refTime.ui8, 4);
+    offset += 4;
+
+#if HAP_DEBUG_FAKEGATO
+    LogD(">>>>> Fakegato RefTime: " + String( refTime.ui32 ), true);
+#endif
+    memset(data + offset, 0x00, 7); 
+    offset += 7;               
+    *length = offset;    
 }
 
 
@@ -266,8 +430,11 @@ void HAPFakeGato2::callbackHistorySetTime(String oldValue, String newValue){
  * @param oldValue 
  * @param newValue 
  **/
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPFakeGato2::callbackHistoryRequest(String oldValue, String newValue){
-    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W1 iid " + String(_s2w1Characteristics->iid()) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
+    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Setting S2W1 iid " + String(_historyRequest->iid()) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);    
     
     size_t outputLength = 0;   
     // Serial.println(newValue);
@@ -335,22 +502,19 @@ void HAPFakeGato2::callbackHistoryRequest(String oldValue, String newValue){
  *  // ToDo: Rewrite as READ callback for characteristic
  *           Check for base64 encoding - better use mbedtls if possible 
  **/     
-void HAPFakeGato2::updateS2R1Value(){
+String HAPFakeGato2::callbackGetHistoryInfo(){
 
     
-    // ToDo: Signature for calculating buffersize and length !!!
-    int sigLength = signatureLength() * 2;    
-    // uint8_t signature[sigLength];        
-    // getSignature(signature);
+    // ToDo: Signature for calculating buffersize and length !!!              
+    uint8_t buffersize = (13 + _sigLength + 14);
 
-
-    uint8_t buffer[buffersize];
+    uint8_t data[buffersize];
     uint8_t offset = 0;
 
     // evetime
     // Time from last update in seconds
     ui32_to_ui8 evetime;
-    evetime.ui32 = timestampLastEntry() - _refTime;
+    evetime.ui32 = timestampLastEntry() - HAPTime::refTime();
     memcpy(data + offset, evetime.ui8, 4);
     offset += 4;
 
@@ -364,13 +528,14 @@ void HAPFakeGato2::updateS2R1Value(){
     // refTimeLastUpdate
     // reference time/last Accessory time update (taken from E863F117-079E-48FF-8F27-9C2605A29F52)
     ui32_to_ui8 refTimeLastUpdate;
-    refTimeLastUpdate.ui32 = _refTime - FAKEGATO_EPOCH_OFFSET;
+    refTimeLastUpdate.ui32 = HAPTime::refTime() - HAP_FAKEGATO_EPOCH;
     memcpy(data + offset, refTimeLastUpdate.ui8, 4);
     offset += 4;
 
-    // ToDo: Signature
-    //  Length / 2
-    // signature length -> stefdude comment
+    // signature
+    // 
+    memcpy(data + offset, _signature, _sigLength);
+    offset += _sigLength;
 
     // used Memory
     // last physical memory position occupied
@@ -406,20 +571,20 @@ void HAPFakeGato2::updateS2R1Value(){
 
 
 #if HAP_DEBUG_FAKEGATO   
-    HAPHelper::array_print("SET S2R1", data, 13 + sigLength + 14);
+    HAPHelper::array_print("SET History Info", data, 13 + _sigLength + 14);
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
-    String encoded = base64::encode(data, 13 + sigLength + 14);
+    String encoded = base64::encode(data, 13 + _sigLength + 14);
 #elif defined(CORE_TEENSY)
     
-    int encodedLen = base64_enc_len(13 + sigLength + 14);
+    int encodedLen = base64_enc_len(13 + _sigLength + 14);
     char encodedChr[encodedLen];
 
-     base64_encode(encodedChr, (char*)data, 13 + sigLength + 14);
-     String encoded = String(encodedChr);
+     base64_encode(encodedChr, (char*)data, 13 + _sigLength + 14);     
 #endif    
-    _historyInfo->setValue(encoded.c_str());  
+    //_historyInfo->setValue(encodedChr);  
+    return String(encodedChr);
 }
 
 

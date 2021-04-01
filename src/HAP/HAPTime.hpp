@@ -60,11 +60,20 @@ public:
     }
     
     static void setCallbackGetTime(callbackGetTime_t callback);
+    
+    static void setReftime(const uint32_t reftime){
+        _refTime = reftime;
+    }
+
+    static uint32_t refTime() {
+        return _refTime;
+    }
 
 protected:
     static int _utcOffset;      // GMP? offset in minutes
     static float _longitude;
     static float _latitude;
+    static uint32_t _refTime;
 
     static callbackGetTime_t _callbackGetTime;      
     

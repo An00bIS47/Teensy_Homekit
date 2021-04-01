@@ -426,15 +426,16 @@ bool HAPServer::begin(bool resume) {
 #if defined( CORE_TEENSY )	
 		_time.setCallbackGetTime(HAPTime::getNTPTime);
 #endif		
-		LogI( F("OK"), true);
+		LogI( F("OK"), true);		
 	}
 #endif /* HAP_ENABLE_NTP */
 
 
 	LogI("Set time to: " + _time.timeString(), true);
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
-	LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
-
+	_time.setReftime(_configuration.getPlatformConfig()->refTime());
+	LogI("Current refTime is: " + String(_time.refTime()), true);	
+	
 	LogI("Loading pairings ...", false);	
 	LogI(" OK", true);
 	LogI("Loaded " + String(_accessorySet->numberOfPairings()) + " pairings from EEPROM", true);
