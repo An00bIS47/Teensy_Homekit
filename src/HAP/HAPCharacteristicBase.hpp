@@ -109,7 +109,7 @@ public:
 	} 
 
 
-    std::function<void(void)> valueGetFunctionCall = nullptr;
+    // std::function<void(void)> valueGetFunctionCall = nullptr;
 
     virtual ~HAPCharacteristicBase() {
         //if (_typeString) delete[] _typeString;
@@ -146,6 +146,11 @@ public:
             root[F("description")] = _desc;            
         }
     }  
+
+    virtual void valueGetFunctionCall(){
+
+    }
+
 #endif
 
     bool readable()       { return _permissions & HAP_PERMISSION_READ;            }
@@ -185,6 +190,9 @@ public:
         
         root[F("iid")] = _iid;	       
 	    
+        valueGetFunctionCall();
+
+
         valueToJson(root);
 
         if (meta){
@@ -393,6 +401,11 @@ public:
 
     virtual void valueToJson(JsonObject& root) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
+
+    virtual void valueGetFunctionCall() {
+        if (readable() && _valueGetFunctionCall) _value = _valueGetFunctionCall();
+    }
+
 
 #if HAP_USE_STD_STRING
     virtual std::string valueString() = 0;

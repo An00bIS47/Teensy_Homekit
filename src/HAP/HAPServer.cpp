@@ -2175,7 +2175,6 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 		hapClient->setHeader("Connection", "keep-alive");
 	}
 
-	// hapClient->sendStatusAndHeader(200, 0);
 
 #if HAP_DEBUG_ENCRYPTION
 	response->print();	
@@ -2183,17 +2182,6 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 
 	int bytesSent = response->decode(*hapClient);
 
-	// uint8_t outResponse[response->size()];
-	// size_t written = 0;
-
-	// response->decode(outResponse, &written);
-
-	// if (written == 0) {
-	// 	LogE("[ERROR] Failed to decode tlv8!", true);
-	// 	result = false;		
-	// }
-
-	// size_t bytesSent = hapClient->write(outResponse, written);
 
 	LogV("\nSent " + String(bytesSent) + " bytes", true);
 
@@ -2204,7 +2192,9 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 	return result;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 	LogI(F("Homekit PIN: "), false);
@@ -2353,7 +2343,9 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	
@@ -2499,7 +2491,9 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
     return true;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	
 #if defined( ARDUINO_ARCH_ESP32 )		
@@ -3680,11 +3674,8 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		HAPCharacteristicBase* characteristic = _accessorySet->getCharacteristic(aid, iid);
 		if (characteristic) {
 			if (characteristic->readable()){
-				
-				
-				if (characteristic->valueGetFunctionCall){
-					characteristic->valueGetFunctionCall();
-				}
+								
+				characteristic->valueGetFunctionCall();
 
 				characteristic->toJson(jsonCharacteristic, hasParamType, hasParamPerms, hasParamEvent, hasParamMeta);
 

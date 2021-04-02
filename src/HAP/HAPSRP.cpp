@@ -333,7 +333,9 @@ void HAPSRP::calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const m
 	hash.clear();
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPSRP::initRandom()
 {
     if (_isInitialized) return;

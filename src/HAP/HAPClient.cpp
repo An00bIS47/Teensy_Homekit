@@ -69,59 +69,41 @@ bool HAPClient::isSubscribed(int aid, int iid) const {
 	return subscribtions.find(item) != subscribtions.end();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 int HAPClient::available(){
 	return client.available();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 int HAPClient::peek(){
 	return client.peek();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 int HAPClient::read(){
 	return client.read();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPClient::flush(){
 	client.flush();
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 String HAPClient::buildHeaderAndStatus(int statusCode, size_t size){
 	
 	String response = "";
 	if (_headerSent == true) return response;
-
-	// Status code and Status message
-	response += "HTTP/1.1 ";
-	response += String(statusCode) + " " + statusMessage(statusCode);
-	response += "\r\n";		
-
-	// Headers
-	for (auto & elem : _headers){
-		response += elem.describe();
-		response += "\r\n";
-	}	
-
-	// Transfer-Encoding or Content length
-	if (_chunkedMode) {
-		response += "Transfer-Encoding: chunked\r\n";
-	} else {
-		response += "Content-Length: ";
-		response += String(size);
-		response += "\r\n";
-	}
-		
-	// end of headers
-	response += "\r\n";
-
-	return response;
-}
-
-void HAPClient::sendStatusAndHeader(int statusCode, size_t size){
-	
-	if (_headerSent == true) return;
-
-	String response = "";
 
 	// Status code and Status message
 	response += F("HTTP/1.1 ");
@@ -131,7 +113,7 @@ void HAPClient::sendStatusAndHeader(int statusCode, size_t size){
 	// Headers
 	for (auto & elem : _headers){
 		response += elem.describe();
-		response += F("\r\n");		
+		response += F("\r\n");
 	}	
 
 	// Transfer-Encoding or Content length
@@ -140,40 +122,20 @@ void HAPClient::sendStatusAndHeader(int statusCode, size_t size){
 	} else {
 		response += F("Content-Length: ");
 		response += String(size);
-		response += F("\r\n");	
+		response += F("\r\n");
 	}
 		
 	// end of headers
-	response += F("\r\n");	
+	response += F("\r\n");
 
-	client.print(response);
-	// if (_headerSent == true) return;
-
-	// // Status code and Status message
-	// client.print(F("HTTP/1.1 "));
-	// client.print(String(statusCode) + " " + statusMessage(statusCode));
-	// client.print(F("\r\n"));		
-
-	// // Headers
-	// for (auto & elem : _headers){
-	// 	client.print(elem.describe());
-	// 	client.print(F("\r\n"));		
-	// }	
-
-	// // Transfer-Encoding or Content length
-	// if (_chunkedMode) {
-	// 	client.print(F("Transfer-Encoding: chunked\r\n"));
-	// } else {
-	// 	client.print(F("Content-Length: "));
-	// 	client.print(String(size));
-	// 	client.print(F("\r\n"));
-	// }
-		
-	// // end of headers
-	// client.print(F("\r\n"));
+	return response;
 }
 
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 size_t HAPClient::write(const uint8_t* buffer, size_t size) {	
 
 	size_t bytesSend = 0;
@@ -193,7 +155,7 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 
 	if (!_isEncrypted) {
 
-		LogV("\nSending unencrypted response!", true);
+		LogV(F("\nSending unencrypted response!"), true);
 
 		size_t bytesChunk = 0;	
 
@@ -223,7 +185,7 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 			writeBufferUsed += toWrite;
 
 #if HAP_DEBUG_REQUESTS_DETAILED	
-			HAPHelper::array_print("Response:", writeBuffer, writeBufferUsed);
+			HAPHelper::array_print(F("Response:"), writeBuffer, writeBufferUsed);
 #endif
 
 			bytesSend += client.write(writeBuffer, writeBufferUsed);
@@ -260,146 +222,155 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 		bytesSend += client.write((uint8_t*) "\r\n", 2);			
 
 		
-	} else {
+	}
+	//  else {
 
-		LogV("\nSending encrypted response!", true);
+	// 	LogV("\nSending encrypted response!", true);
 
-		size_t bytesHeader = 0;
-		size_t bytesChunk = 0;
+	// 	size_t bytesHeader = 0;
+	// 	size_t bytesChunk = 0;
 
-		int ret;
+	// 	int ret;
 
-		mbedtls_chachapoly_context chachapoly_ctx;
-		mbedtls_chachapoly_init(&chachapoly_ctx);
-		mbedtls_chachapoly_setkey(&chachapoly_ctx, encryptionContext.encryptKey);
-
-
-		if (headerStr != ""){
-			memcpy(writeBuffer, headerStr.c_str(), headerStr.length());
-			writeBufferUsed += headerStr.length();
-			bytesHeader = headerStr.length();			
-		}	
-
-		// chunk size for payload
-		if (_chunkedMode) {
-			char chunkSize[8];
-			sprintf(chunkSize, "%x\r\n", size);
-
-			memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
-			writeBufferUsed	+= strlen(chunkSize);
-			bytesChunk += strlen(chunkSize);		
-		}
-
-		uint8_t nonce[12] = {0,};
-		nonce[4] = encryptionContext.encryptCount % 256;
-		nonce[5] = encryptionContext.encryptCount++ / 256;
+	// 	mbedtls_chachapoly_context chachapoly_ctx;
+	// 	mbedtls_chachapoly_init(&chachapoly_ctx);
+	// 	mbedtls_chachapoly_setkey(&chachapoly_ctx, encryptionContext.encryptKey);
 
 
-		ret = mbedtls_chachapoly_starts( &chachapoly_ctx, nonce, MBEDTLS_CHACHAPOLY_ENCRYPT );
-		if( ret != 0 ) {
-			LogE("Error: mbedtls_chachapoly_starts failed", true);
-		}
+	// 	if (headerStr != ""){
+	// 		memcpy(writeBuffer, headerStr.c_str(), headerStr.length());
+	// 		writeBufferUsed += headerStr.length();
+	// 		bytesHeader = headerStr.length();			
+	// 	}	
+
+	// 	// chunk size for payload
+	// 	if (_chunkedMode) {
+	// 		char chunkSize[8];
+	// 		sprintf(chunkSize, "%x\r\n", size);
+
+	// 		memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
+	// 		writeBufferUsed	+= strlen(chunkSize);
+	// 		bytesChunk += strlen(chunkSize);		
+	// 	}
+
+	// 	uint8_t nonce[12] = {0,};
+	// 	nonce[4] = encryptionContext.encryptCount % 256;
+	// 	nonce[5] = encryptionContext.encryptCount++ / 256;
+
+
+	// 	ret = mbedtls_chachapoly_starts( &chachapoly_ctx, nonce, MBEDTLS_CHACHAPOLY_ENCRYPT );
+	// 	if( ret != 0 ) {
+	// 		LogE("Error: mbedtls_chachapoly_starts failed", true);
+	// 	}
 
 		
-		uint8_t aad[HAP_ENCRYPTION_AAD_SIZE];
-		aad[0] = size % 256;
-		aad[1] = size / 256;			
+	// 	uint8_t aad[HAP_ENCRYPTION_AAD_SIZE];
+	// 	aad[0] = size % 256;
+	// 	aad[1] = size / 256;			
 
-		ret = mbedtls_chachapoly_update_aad( &chachapoly_ctx, aad, HAP_ENCRYPTION_AAD_SIZE );
-		if( ret != 0 ) {
-			LogE("Error: mbedtls_chachapoly_update_aad failed", true);
-		}		
+	// 	ret = mbedtls_chachapoly_update_aad( &chachapoly_ctx, aad, HAP_ENCRYPTION_AAD_SIZE );
+	// 	if( ret != 0 ) {
+	// 		LogE("Error: mbedtls_chachapoly_update_aad failed", true);
+	// 	}		
 
-		int remainingSize = size;
-		size_t written = 0;
+	// 	int remainingSize = size;
+	// 	size_t written = 0;
 
 
-		while (remainingSize > 0){
-			int toWrite = (remainingSize > 1360 - writeBufferUsed) ? 1360 - writeBufferUsed : remainingSize;
+	// 	while (remainingSize > 0){
+	// 		int toWrite = (remainingSize > 1360 - writeBufferUsed) ? 1360 - writeBufferUsed : remainingSize;
 			
-			uint8_t encryptedBuffer[toWrite + bytesHeader + bytesChunk];
+	// 		uint8_t encryptedBuffer[toWrite + bytesHeader + bytesChunk];
 
-			if (!_headerSent){
-				bytesHeader = 0;
-				_headerSent = true;
-				bytesChunk = 0;
-			}
+	// 		if (!_headerSent){
+	// 			bytesHeader = 0;
+	// 			_headerSent = true;
+	// 			bytesChunk = 0;
+	// 		}
 
 
-			memcpy(writeBuffer + writeBufferUsed, buffer + written, toWrite);
+	// 		memcpy(writeBuffer + writeBufferUsed, buffer + written, toWrite);
 
-			ret = mbedtls_chachapoly_update( &chachapoly_ctx, toWrite, writeBuffer, encryptedBuffer);
-			if( ret != 0 ) {
-				LogE("Error: mbedtls_chachapoly_update failed", true);
-			}				
-			writeBufferUsed += toWrite + bytesHeader + bytesChunk;
+	// 		ret = mbedtls_chachapoly_update( &chachapoly_ctx, toWrite, writeBuffer, encryptedBuffer);
+	// 		if( ret != 0 ) {
+	// 			LogE("Error: mbedtls_chachapoly_update failed", true);
+	// 		}				
+	// 		writeBufferUsed += toWrite + bytesHeader + bytesChunk;
 			
-			// bytesSend += bufferedWifiClient.write(encryptedBuffer, sizeof(encryptedBuffer));
-			bytesSend += client.write(encryptedBuffer, sizeof(encryptedBuffer));
+	// 		// bytesSend += bufferedWifiClient.write(encryptedBuffer, sizeof(encryptedBuffer));
+	// 		bytesSend += client.write(encryptedBuffer, sizeof(encryptedBuffer));
 
-			writeBufferUsed = 0;
+	// 		writeBufferUsed = 0;
 			
-			written += toWrite;
-			remainingSize -= toWrite + bytesHeader + bytesChunk;
-		}
+	// 		written += toWrite;
+	// 		remainingSize -= toWrite + bytesHeader + bytesChunk;
+	// 	}
 
-		memset(writeBuffer, 0, 1360);
+	// 	memset(writeBuffer, 0, 1360);
 
-		{
-			const char* chunkSize = "\r\n";
-			memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
-			writeBufferUsed	+= strlen(chunkSize);
-		}
+	// 	{
+	// 		const char* chunkSize = "\r\n";
+	// 		memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
+	// 		writeBufferUsed	+= strlen(chunkSize);
+	// 	}
 
 
-		// End of request
-		// send end chunk
-		if (_chunkedMode) {
-			char chunkSize[8];
-			sprintf(chunkSize, "%x\r\n", 0);
-			memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
-			writeBufferUsed	+= strlen(chunkSize);						
-		}
+	// 	// End of request
+	// 	// send end chunk
+	// 	if (_chunkedMode) {
+	// 		char chunkSize[8];
+	// 		sprintf(chunkSize, "%x\r\n", 0);
+	// 		memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
+	// 		writeBufferUsed	+= strlen(chunkSize);						
+	// 	}
 
-		{
-			const char* chunkSize = "\r\n";
-			memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
-			writeBufferUsed	+= strlen(chunkSize);
-		}
+	// 	{
+	// 		const char* chunkSize = "\r\n";
+	// 		memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
+	// 		writeBufferUsed	+= strlen(chunkSize);
+	// 	}
 
 		
-		uint8_t encryptedBuffer[writeBufferUsed];
-		ret = mbedtls_chachapoly_update( &chachapoly_ctx, writeBufferUsed, writeBuffer, encryptedBuffer);
-		if( ret != 0 ) {
-			LogE("Error: mbedtls_chachapoly_update failed", true);
-		}
+	// 	uint8_t encryptedBuffer[writeBufferUsed];
+	// 	ret = mbedtls_chachapoly_update( &chachapoly_ctx, writeBufferUsed, writeBuffer, encryptedBuffer);
+	// 	if( ret != 0 ) {
+	// 		LogE("Error: mbedtls_chachapoly_update failed", true);
+	// 	}
 
-		// bytesSend += bufferedWifiClient.write(encryptedBuffer, writeBufferUsed);
-		bytesSend += client.write(encryptedBuffer, writeBufferUsed);
+	// 	// bytesSend += bufferedWifiClient.write(encryptedBuffer, writeBufferUsed);
+	// 	bytesSend += client.write(encryptedBuffer, writeBufferUsed);
 		
-		uint8_t tag[16];
-		ret = mbedtls_chachapoly_finish( &chachapoly_ctx, tag );
-		if( ret != 0 ) {
-			LogE("Error: mbedtls_chachapoly_finish failed", true);
-		}
+	// 	uint8_t tag[16];
+	// 	ret = mbedtls_chachapoly_finish( &chachapoly_ctx, tag );
+	// 	if( ret != 0 ) {
+	// 		LogE("Error: mbedtls_chachapoly_finish failed", true);
+	// 	}
 		
-		// bytesSend += bufferedWifiClient.write(tag, 16);		
-		bytesSend += client.write(tag, 16);
-	}	
+	// 	// bytesSend += bufferedWifiClient.write(tag, 16);		
+	// 	bytesSend += client.write(tag, 16);
+	// }	
 
 	// bufferedWifiClient.flush();
 	return bytesSend;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 size_t HAPClient::write(uint8_t b){
 	return client.write(b);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPClient::setHeader(HAPClientHeader header){
 	setHeader(header.name, header.value);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 void HAPClient::setHeader(const String& name, const String& value) {
 	bool found = false;
 	for (auto & elem : _headers)
@@ -457,6 +428,9 @@ String HAPClient::describe() const {
 
 #endif
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
 String HAPClient::statusMessage(int statusCode){
 
 	switch(statusCode) {
