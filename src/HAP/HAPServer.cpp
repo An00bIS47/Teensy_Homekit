@@ -2203,9 +2203,6 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
 bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 	LogI(F("Homekit PIN: "), false);
@@ -2354,9 +2351,7 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
+
 bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	
@@ -2503,9 +2498,6 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
 bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	
 #if defined( ARDUINO_ARCH_ESP32 )		
