@@ -2175,11 +2175,13 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 		hapClient->setHeader("Connection", "keep-alive");
 	}
 
+	// hapClient->sendStatusAndHeader(200, 0);
+
 #if HAP_DEBUG_ENCRYPTION
 	response->print();	
 #endif
 
-	int bytesSent = response->decode(hapClient->client);
+	int bytesSent = response->decode(*hapClient);
 
 	// uint8_t outResponse[response->size()];
 	// size_t written = 0;
