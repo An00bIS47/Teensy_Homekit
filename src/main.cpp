@@ -79,7 +79,7 @@ void setup() {
 	LogI( String(HAPLogger::getLogLevel() ), true);
 
 #if defined(TEENSY_DEBUG)
-	// halt();
+	halt();
 #endif
 
 	// Start homekit
