@@ -93,7 +93,7 @@ public:
 		return _humidityAverage.getAverage();
 	}
 
-	inline float getAveragedPressureValue(){
+	inline uint16_t getAveragedPressureValue(){
 		return _pressureAverage.getAverage();
 	}
 

@@ -134,7 +134,7 @@ public:
     String name() { return _name; }
 
     uint32_t timestampLastEntry(){
-        return _entries[_entries.size() - 1].timestamp;
+        return _entries[_entries.size() - 1]->timestamp;
     }
 
     void setInterval(uint32_t interval){
@@ -300,7 +300,7 @@ protected:
     bool    _transfer = false;    
 
     std::vector< std::unique_ptr<HAPFakegatoCharacteristic> > _signatures;
-    CircularBuffer<HAPFakegatoDataEntry, HAP_FAKEGATO_BUFFER_SIZE> _entries;
+    CircularBuffer<HAPFakegatoDataEntry*, HAP_FAKEGATO_BUFFER_SIZE> _entries;
 };
 
 

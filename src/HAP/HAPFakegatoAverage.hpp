@@ -16,7 +16,7 @@ public:
 
     }
     ~HAPFakegatoAverage(){
-        
+
     }
 
     void addValue(T value){
@@ -25,7 +25,9 @@ public:
     }
 
     T getAverage(){
-        return (_averagedValue / _measureCount);
+        T value = (_averagedValue / _measureCount);
+        reset();
+        return value;
     }
 
     void reset(){

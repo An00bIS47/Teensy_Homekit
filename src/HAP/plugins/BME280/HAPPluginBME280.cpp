@@ -443,10 +443,6 @@ bool HAPPluginBME280::fakeGatoCallback(){
 	// resetAverage();
 	_fakegato.addEntry(0x07); //, "thp", avgTemp, avgHum, avgPres);
 	
-	_temperatureAverage.reset();
-	_humidityAverage.reset();
-	_pressureAverage.reset();
-
 	return true;
 	// return _fakegato.addEntry(0x07, String(avgTemp), String(avgHum), String(avgPres));
 	// 0102 0202 0302

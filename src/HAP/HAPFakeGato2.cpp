@@ -261,7 +261,7 @@ void HAPFakegato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t lengt
     HAPHelper::array_print("FAKEGATO ENTRY DATA", data, length);
 
     size_t indexLast = _entries.size() - 1;        
-    bool overwritten = !_entries.push(HAPFakegatoDataEntry(bitmask, HAPTime::timestamp(), data, length));
+    bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, HAPTime::timestamp(), data, length)));
     if (overwritten == true) {
         // ToDo: Add overwritten handling..
         _rolledOver = true;        
@@ -304,14 +304,19 @@ String HAPFakegato2::callbackGetHistoryEntries(){
     
     uint8_t offset = 0;
     uint8_t data[HAP_FAKEGATO_CHUNK_BUFFER_SIZE];
+    uint8_t entryCounter = 0;
 
     if (_requestedIndex == 0){
         // ToDo: 
 
     } else if (_requestedIndex == 1){
-        getRefTime(data, &offset);                   
-    } else {
+        getRefTime(data, &offset); 
+        entryCounter = _requestedIndex + 1;
         _requestedIndex--;   
+        
+    } else {
+        _requestedIndex--; 
+        entryCounter = _requestedIndex + 1;
     }
 
     for (uint8_t i=0; i < HAP_FAKEGATO_BATCH_SIZE; i++) {    
@@ -334,35 +339,36 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         //     size += ((_entries[_requestedIndex].bitmask & 0x01) * 2); 
         // }
 
-        size += getEntryValueLength(_entries[_requestedIndex].bitmask);
+        size += getEntryValueLength(_entries[_requestedIndex]->bitmask);
         
         Serial.print(">>>> size: ");
         Serial.println(size);
          
         // size
-        data[currentOffset++] = size;        
+        data[offset + currentOffset++] = size;        
 
         // requestedEntry == index
         ui32_to_ui8 entryCount;
-        entryCount.ui32 = (_requestedIndex + 1);
+        entryCount.ui32 = entryCounter;
         memcpy(data + offset + currentOffset, entryCount.ui8, 4);
         currentOffset += 4;
 
         // timestamp
         ui32_to_ui8 secs;
-        secs.ui32 = (_entries[_requestedIndex].timestamp - HAPTime::refTime());
+        secs.ui32 = (_entries[_requestedIndex]->timestamp - HAPTime::refTime());
         memcpy(data + offset + currentOffset, secs.ui8, 4);
         currentOffset += 4;
 
         // data includes all values including bitmask
-        memcpy(data + offset + currentOffset, _entries[_requestedIndex].data, _entries[_requestedIndex].length);
-        currentOffset += _entries[_requestedIndex].length;
+        memcpy(data + offset + currentOffset, _entries[_requestedIndex]->data, _entries[_requestedIndex]->length);
+        currentOffset += _entries[_requestedIndex]->length + 1;  // + 1 for bitmask !
 
-        String t = "History Entry " + String(_requestedIndex);
+        String t = "History Entry " + String(entryCounter);
         HAPHelper::array_print(t.c_str(), data + offset, currentOffset);
 
         offset += currentOffset;
         _requestedIndex++;
+        entryCounter++;
     }
 
 #if HAP_DEBUG_FAKEGATO
