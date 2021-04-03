@@ -54,7 +54,7 @@ void HAPPluginKNXDevice::setEventManager(EventManager* eventManager){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPPluginKNXDevice::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
+void HAPPluginKNXDevice::setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory){
     
     _fakegatoFactory = fakegatoFactory;
     // Serial.printf("fakegato: %p\n", _fakegatoFactory);

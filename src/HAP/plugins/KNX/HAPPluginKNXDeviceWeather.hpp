@@ -17,7 +17,7 @@
 #include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 #include "HAPFakeGato.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 #include "HAPFakeGatoWeather.hpp"
 #include "HAPPluginKNXDevice.hpp"
 #include "HAPVersion.hpp"
@@ -35,7 +35,7 @@ public:
     
     // void identify(bool oldValue, bool newValue);
     void setEventManager(EventManager* eventManager);
-    void setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory);
+    void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
 
     // uint8_t id;

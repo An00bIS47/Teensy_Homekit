@@ -206,7 +206,7 @@ void HAPPluginRCSwitchDevice::setEventManager(EventManager* eventManager){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPPluginRCSwitchDevice::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
+void HAPPluginRCSwitchDevice::setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory){
     _fakegatoFactory = fakegatoFactory;
 }   
 

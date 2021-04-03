@@ -76,13 +76,13 @@ void HAPFakeGatoWeather::getSignature(uint8_t* signature){
 	// bitmask 0x04 => pressure		= 100
 
 
-    signature[0] = (uint8_t)HAPFakeGatoSignature_Temperature;
+    signature[0] = (uint8_t)HAPFakegatoSignature_Temperature;
     signature[1] = 2;
 
-    signature[2] = (uint8_t)HAPFakeGatoSignature_Humidity;
+    signature[2] = (uint8_t)HAPFakegatoSignature_Humidity;
     signature[3] = 2;
     
-    signature[4] = (uint8_t)HAPFakeGatoSignature_AirPressure;
+    signature[4] = (uint8_t)HAPFakegatoSignature_AirPressure;
     signature[5] = 2;     
 
 #if HAP_DEBUG_FAKEGATO

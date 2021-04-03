@@ -99,19 +99,19 @@ void HAPFakeGatoEnergy::getSignature(uint8_t* signature){
     // bitmask 0x10 => on/off		= 10000
 
     // bitmask for all: 11111 = 0x1F
-    signature[0] = (uint8_t)HAPFakeGatoSignature_PowerWatt;
+    signature[0] = (uint8_t)HAPFakegatoSignature_PowerWatt;
     signature[1] = 2;
 
-    signature[2] = (uint8_t)HAPFakeGatoSignature_PowerVoltage;
+    signature[2] = (uint8_t)HAPFakegatoSignature_PowerVoltage;
     signature[3] = 2;
 
-    signature[4] = (uint8_t)HAPFakeGatoSignature_PowerCurrent;
+    signature[4] = (uint8_t)HAPFakegatoSignature_PowerCurrent;
     signature[5] = 2;
 
-    signature[6] = (uint8_t)HAPFakeGatoSignature_Power10thWh;
+    signature[6] = (uint8_t)HAPFakegatoSignature_Power10thWh;
     signature[7] = 2;
 
-    signature[8] = (uint8_t)HAPFakeGatoSignature_PowerOnOff;
+    signature[8] = (uint8_t)HAPFakegatoSignature_PowerOnOff;
     signature[9] = 1;
 }
 

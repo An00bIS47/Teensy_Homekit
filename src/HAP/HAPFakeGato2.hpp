@@ -1,19 +1,21 @@
 // 
-// HAPFakeGato2.hpp
+// HAPFakegato2.hpp
 // Teensy_Homekit
 //
 //  Created on: 31.03.2021
 //      Author: michael
 //
 
-#ifndef HAPFAKEGATO2_HPP_
-#define HAPFAKEGATO2_HPP_
+#ifndef HAPFakegato2_HPP_
+#define HAPFakegato2_HPP_
 
 #include <Arduino.h>
 #include <functional>
+#include <vector>
 #include <cstdarg>
 #include <CircularBuffer.h>
 #include "HAPAccessory.hpp"
+#include "HAPFakegatoCharacteristic.hpp"
 
 #ifndef HAP_FAKEGATO_BUFFER_SIZE
 #define HAP_FAKEGATO_BUFFER_SIZE 100
@@ -103,48 +105,7 @@
 #define HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE                "E863F11D-079E-48FF-8F27-9C2605A29F52"  // 11D  => Config Write
 
 
-enum HAPFakeGatoSignature {
-    HAPFakeGatoSignature_Temperature                = 0x01,     // Length: 2  = temperature   x 100
-    HAPFakeGatoSignature_Humidity                   = 0x02,     // Length: 2  = humidity      x 100
-    HAPFakeGatoSignature_AirPressure                = 0x03,     // Length: 2  = air pressure  x 10
-    HAPFakeGatoSignature_AirQuality                 = 0x04,     // Length: 2  == PPM
-    HAPFakeGatoSignature_PowerApparent              = 0x05,
-    HAPFakeGatoSignature_Door                       = 0x06,     // Length: 1
-    HAPFakeGatoSignature_Power10thWh                = 0x07,     // Length: 2  = W             x 10
-    HAPFakeGatoSignature_WaterFlow                  = 0x08,
-    HAPFakeGatoSignature_WaterTemperature           = 0x09,
-    HAPFakeGatoSignature_WaterEnergy                = 0x0A, 
-    HAPFakeGatoSignature_PowerWatt                  = 0x0B,     // Length: 2
-    HAPFakeGatoSignature_PowerVoltage               = 0x0C,     // Length: 2  = volt          x 10
-    HAPFakeGatoSignature_PowerCurrent               = 0x0D,     // Length: 2
-    HAPFakeGatoSignature_PowerOnOff                 = 0x0E,     // Length: 1
-    HAPFakeGatoSignature_VOCHeatSense               = 0x0F,     // Length: 3
-    HAPFakeGatoSignature_ValvePercent               = 0x10,     // Length: 1
-    HAPFakeGatoSignature_TargetTemperature          = 0x11,     // Length: 2
-    HAPFakeGatoSignature_ThermoTarget               = 0x12,     // Length: 1 or current heating mode
-    HAPFakeGatoSignature_Motion                     = 0x13,
-    HAPFakeGatoSignature_Switch                     = 0x14,
-    HAPFakeGatoSignature_PowerOnOff2                = 0x15,
-    HAPFakeGatoSignature_SmokeDetected              = 0x16,
-    HAPFakeGatoSignature_CurrentPosition            = 0x17,
-    HAPFakeGatoSignature_TargetPosition             = 0x18,
-    HAPFakeGatoSignature_PositionState              = 0x19,
-    HAPFakeGatoSignature_ObstructionDetected        = 0x1A,
-    HAPFakeGatoSignature_SmokeDetectorStatus        = 0x1B,
-    HAPFakeGatoSignature_MotionActive               = 0x1C,     // Length: 1
-    HAPFakeGatoSignature_OpenWindow                 = 0x1D,     // Length: 1 or target heating mode
-    // 1E unknown                                   = 0x1E,
-    HAPFakeGatoSignature_InUse                      = 0x1F,     // Length: 3 ??
-    HAPFakeGatoSignature_WindowState                = 0x20,
-    HAPFakeGatoSignature_PotState                   = 0x21,
-    HAPFakeGatoSignature_VOCDensity                 = 0x22,
-    HAPFakeGatoSignature_BatteryLevelMillivolts     = 0x23,     // Length: 2
-    HAPFakeGatoSignature_StatelessSwitchEvent       = 0x24,
-    HAPFakeGatoSignature_BatteryLevelPercent        = 0x25,
-    HAPFakeGatoSignature_Lock                       = 0x26,
-    HAPFakeGatoSignature_AirPressureChange          = 0x27,
-    // unknown                                      = 0x28,     // Length: 8
-};
+
 
 enum HAP_FAKEGATO_TYPE {
     HAP_FAKEGATO_TYPE_NONE      = 0x00,
@@ -152,10 +113,10 @@ enum HAP_FAKEGATO_TYPE {
     HAP_FAKEGATO_TYPE_CUSTOM   
 };
 
-class HAPFakeGato2 {
+class HAPFakegato2 {
 public:
-    HAPFakeGato2();
-    ~HAPFakeGato2();
+    HAPFakegato2();
+    ~HAPFakegato2();
 
     virtual void begin() {};
 
@@ -166,7 +127,9 @@ public:
     // h == humidity    - float                                 >>> double
     // p == airpressure - uint16_t                              >>> int 
     // ...
-    virtual void addEntry(uint8_t bitmask, const char* fmt, ...);
+    // virtual void addEntry(uint8_t bitmask, const char* fmt, ...);
+
+    void addEntry(uint8_t bitmask);
     
     String name() { return _name; }
 
@@ -190,9 +153,6 @@ public:
         _isTimeSource = mode;
     }
 
-    void setType(HAP_FAKEGATO_TYPE fakegatoType){
-        _fakegatoType = fakegatoType;
-    }
 
     void registerCallbackAddEntry(std::function<bool()> callback){
         _callbackAddEntry = callback;
@@ -208,24 +168,51 @@ public:
 
     void handle(bool forced = false);
 
-    void setSignature(const uint8_t* signature, const size_t sigLength){
-        memcpy(_signature, signature, sigLength);
-        _sigLength = sigLength;
+
+    void getSignature(uint8_t* bytes){
+        
+        uint8_t offset = 0;
+        for (auto &chr : _signatures){            
+            uint8_t len = 0;
+            chr->getSignatureBytes(bytes + offset, &len);
+            offset += len;
+        }
     }
 
-    const uint8_t* signature(){
-        return _signature;
+    uint8_t getEntryValueLength(uint8_t bitmask){
+        uint8_t length = 0;
+        for (uint8_t i=0; i < _signatures.size(); i++){
+            if (bitmask && (1 << i)){                        
+                length += _signatures[i]->valueLength();
+            }
+        }
+        return length;    
+    }
+
+    uint8_t valueLength(){
+        uint8_t length = 0;
+        for (auto &chr : _signatures){
+            length += chr->valueLength();
+        }
+        return length;
     }
 
     uint8_t signatureLength(){
-        return (_sigLength / 2);
-    }
+        return (_signatures.size() * 2);
+    }    
 
     void enablePeriodicUpdates(bool mode = true){
         _periodicUpdates = mode;
     }
 
+
+    void addCharacteristic(HAPFakegatoCharacteristic* characteristic){
+        _signatures.emplace_back(std::move(characteristic));
+    }
+
 protected:
+
+
 
     struct HAPFakegatoDataEntry {
         uint8_t bitmask = 0;
@@ -262,15 +249,7 @@ protected:
 #endif
     };
 
-    union ui32_to_ui8 {
-        uint32_t ui32;
-        uint8_t ui8[4];
-    };
 
-    union ui16_to_ui8 {
-        uint16_t ui16;
-        uint8_t ui8[2];
-    };
 
 
     bool shouldHandle();
@@ -305,9 +284,9 @@ protected:
     std::function<bool()> _callbackAddEntry = nullptr;
 
     String  _name;
-    uint8_t _signature[12] = {0, };
-    uint8_t _sigLength;
-    uint8_t _fakegatoType = 0;
+    // uint8_t _signature[12] = {0, };
+    // uint8_t _sigLength;
+    // uint8_t _fakegatoType = 0;
     size_t  _requestedIndex = 0;    
     
     uint32_t _previousMillis = 0;
@@ -320,8 +299,9 @@ protected:
 
     bool    _transfer = false;    
 
+    std::vector< std::unique_ptr<HAPFakegatoCharacteristic> > _signatures;
     CircularBuffer<HAPFakegatoDataEntry, HAP_FAKEGATO_BUFFER_SIZE> _entries;
 };
 
 
-#endif /* HAPFAKEGATO2_HPP_ */
+#endif /* HAPFakegato2_HPP_ */

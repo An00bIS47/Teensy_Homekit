@@ -160,58 +160,58 @@ enum HAPFakeGatoType{
 };
   
 
-// enum HAPFakeGatoSignature{
-//     HAPFakeGatoSignature_Temperature                = 0x01,     // Length: 2  = temperature   x 100
-//     HAPFakeGatoSignature_Humidity                   = 0x02,     // Length: 2  = humidity      x 100
-//     HAPFakeGatoSignature_AirPressure                = 0x03,     // Length: 2  = air pressure  x 10
-//     HAPFakeGatoSignature_AirQuality                 = 0x04,     // Length: 2  == PPM
-//     HAPFakeGatoSignature_PowerApparent              = 0x05,
-//     HAPFakeGatoSignature_Door                       = 0x06,     // Length: 1
-//     HAPFakeGatoSignature_Power10thWh                = 0x07,     // Length: 2  = W             x 10
-//     HAPFakeGatoSignature_WaterFlow                  = 0x08,
-//     HAPFakeGatoSignature_WaterTemperature           = 0x09,
-//     HAPFakeGatoSignature_WaterEnergy                = 0x0A, 
-//     HAPFakeGatoSignature_PowerWatt                  = 0x0B,     // Length: 2
-//     HAPFakeGatoSignature_PowerVoltage               = 0x0C,     // Length: 2  = volt          x 10
-//     HAPFakeGatoSignature_PowerCurrent               = 0x0D,     // Length: 2
-//     HAPFakeGatoSignature_PowerOnOff                 = 0x0E,     // Length: 1
-//     HAPFakeGatoSignature_VOCHeatSense               = 0x0F,     // Length: 3
-//     HAPFakeGatoSignature_ValvePercent               = 0x10,     // Length: 1
-//     HAPFakeGatoSignature_TargetTemperature          = 0x11,     // Length: 2
-//     HAPFakeGatoSignature_ThermoTarget               = 0x12,     // Length: 1 or current heating mode
-//     HAPFakeGatoSignature_Motion                     = 0x13,
-//     HAPFakeGatoSignature_Switch                     = 0x14,
-//     HAPFakeGatoSignature_PowerOnOff2                = 0x15,
-//     HAPFakeGatoSignature_SmokeDetected              = 0x16,
-//     HAPFakeGatoSignature_CurrentPosition            = 0x17,
-//     HAPFakeGatoSignature_TargetPosition             = 0x18,
-//     HAPFakeGatoSignature_PositionState              = 0x19,
-//     HAPFakeGatoSignature_ObstructionDetected        = 0x1A,
-//     HAPFakeGatoSignature_SmokeDetectorStatus        = 0x1B,
-//     HAPFakeGatoSignature_MotionActive               = 0x1C,     // Length: 1
-//     HAPFakeGatoSignature_OpenWindow                 = 0x1D,     // Length: 1 or target heating mode
+// enum HAPFakegatoSignature{
+//     HAPFakegatoSignature_Temperature                = 0x01,     // Length: 2  = temperature   x 100
+//     HAPFakegatoSignature_Humidity                   = 0x02,     // Length: 2  = humidity      x 100
+//     HAPFakegatoSignature_AirPressure                = 0x03,     // Length: 2  = air pressure  x 10
+//     HAPFakegatoSignature_AirQuality                 = 0x04,     // Length: 2  == PPM
+//     HAPFakegatoSignature_PowerApparent              = 0x05,
+//     HAPFakegatoSignature_Door                       = 0x06,     // Length: 1
+//     HAPFakegatoSignature_Power10thWh                = 0x07,     // Length: 2  = W             x 10
+//     HAPFakegatoSignature_WaterFlow                  = 0x08,
+//     HAPFakegatoSignature_WaterTemperature           = 0x09,
+//     HAPFakegatoSignature_WaterEnergy                = 0x0A, 
+//     HAPFakegatoSignature_PowerWatt                  = 0x0B,     // Length: 2
+//     HAPFakegatoSignature_PowerVoltage               = 0x0C,     // Length: 2  = volt          x 10
+//     HAPFakegatoSignature_PowerCurrent               = 0x0D,     // Length: 2
+//     HAPFakegatoSignature_PowerOnOff                 = 0x0E,     // Length: 1
+//     HAPFakegatoSignature_VOCHeatSense               = 0x0F,     // Length: 3
+//     HAPFakegatoSignature_ValvePercent               = 0x10,     // Length: 1
+//     HAPFakegatoSignature_TargetTemperature          = 0x11,     // Length: 2
+//     HAPFakegatoSignature_ThermoTarget               = 0x12,     // Length: 1 or current heating mode
+//     HAPFakegatoSignature_Motion                     = 0x13,
+//     HAPFakegatoSignature_Switch                     = 0x14,
+//     HAPFakegatoSignature_PowerOnOff2                = 0x15,
+//     HAPFakegatoSignature_SmokeDetected              = 0x16,
+//     HAPFakegatoSignature_CurrentPosition            = 0x17,
+//     HAPFakegatoSignature_TargetPosition             = 0x18,
+//     HAPFakegatoSignature_PositionState              = 0x19,
+//     HAPFakegatoSignature_ObstructionDetected        = 0x1A,
+//     HAPFakegatoSignature_SmokeDetectorStatus        = 0x1B,
+//     HAPFakegatoSignature_MotionActive               = 0x1C,     // Length: 1
+//     HAPFakegatoSignature_OpenWindow                 = 0x1D,     // Length: 1 or target heating mode
 //     // 1E unknown                                   = 0x1E,
-//     HAPFakeGatoSignature_InUse                      = 0x1F,     // Length: 3 ??
-//     HAPFakeGatoSignature_WindowState                = 0x20,
-//     HAPFakeGatoSignature_PotState                   = 0x21,
-//     HAPFakeGatoSignature_VOCDensity                 = 0x22,
-//     HAPFakeGatoSignature_BatteryLevelMillivolts     = 0x23,     // Length: 2
-//     HAPFakeGatoSignature_StatelessSwitchEvent       = 0x24,
-//     HAPFakeGatoSignature_BatteryLevelPercent        = 0x25,
-//     HAPFakeGatoSignature_Lock                       = 0x26,
-//     HAPFakeGatoSignature_AirPressureChange          = 0x27,
+//     HAPFakegatoSignature_InUse                      = 0x1F,     // Length: 3 ??
+//     HAPFakegatoSignature_WindowState                = 0x20,
+//     HAPFakegatoSignature_PotState                   = 0x21,
+//     HAPFakegatoSignature_VOCDensity                 = 0x22,
+//     HAPFakegatoSignature_BatteryLevelMillivolts     = 0x23,     // Length: 2
+//     HAPFakegatoSignature_StatelessSwitchEvent       = 0x24,
+//     HAPFakegatoSignature_BatteryLevelPercent        = 0x25,
+//     HAPFakegatoSignature_Lock                       = 0x26,
+//     HAPFakegatoSignature_AirPressureChange          = 0x27,
 //     // unknown                                      = 0x28,     // Length: 8
 // };
 
-union ui32_to_ui8 {
-    uint32_t ui32;
-    uint8_t ui8[4];
-};
+// union ui32_to_ui8 {
+//     uint32_t ui32;
+//     uint8_t ui8[4];
+// };
 
-union ui16_to_ui8 {
-    uint16_t ui16;
-    uint8_t ui8[2];
-};
+// union ui16_to_ui8 {
+//     uint16_t ui16;
+//     uint8_t ui8[2];
+// };
 
 
 union HAPFakeGatoInfoStart {

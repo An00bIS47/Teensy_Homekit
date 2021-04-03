@@ -27,7 +27,7 @@
 #include "HAPTLV8Types.hpp"
 #include "HAPPlugins.hpp"
 #include "plugins/Plugins.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 
 #include "EventManager.h"
 // #include "HAPEventManager.hpp"
@@ -268,7 +268,7 @@ protected:
 #endif
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
-	HAPFakeGatoFactory _fakeGatoFactory;
+	HAPFakegatoFactory _fakeGatoFactory;
 	// 
 	// Event handler
 	// 

@@ -33,7 +33,7 @@
 #include "HAPServices.hpp"
 
 #include "HAPFakeGato.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 #include "HAPDeviceID.hpp"
 
 
@@ -269,11 +269,11 @@ public:
 		return _config; 
 	}
 
-	void setFakeGatoFactory(HAPFakeGatoFactory* fakeGatoFactory){
+	void setFakeGatoFactory(HAPFakegatoFactory* fakeGatoFactory){
 		_fakeGatoFactory = fakeGatoFactory;
 	}
 
-	void registerFakeGato(HAPFakeGato2* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
+	void registerFakeGato(HAPFakegato2* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
 		_fakeGatoFactory->registerFakeGato(fakegato, callback, interval);
 	}
 
@@ -294,7 +294,7 @@ protected:
 	
 	MemberFunctionCallable<HAPPlugin> _listenerMemberFunctionPlugin;
 	
-	HAPFakeGatoFactory*			_fakeGatoFactory;	
+	HAPFakegatoFactory*			_fakeGatoFactory;	
 
 	HAPConfigurationPlugin*		_config;
 };
