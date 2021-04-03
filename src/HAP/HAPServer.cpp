@@ -3675,7 +3675,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		if (characteristic) {
 			if (characteristic->readable()){
 								
-				characteristic->valueGetFunctionCall();
+				// characteristic->valueGetFunctionCall();
 
 				characteristic->toJson(jsonCharacteristic, hasParamType, hasParamPerms, hasParamEvent, hasParamMeta);
 

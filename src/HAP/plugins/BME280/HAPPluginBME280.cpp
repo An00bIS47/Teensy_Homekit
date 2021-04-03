@@ -252,18 +252,29 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	temperatureService->addLinkedServiceId(pressureService->aid());
 
 	
-	Serial.println(">>>> 1"); Serial.send_now();
 
 	//
 	// FakeGato
 	// 		
+	uint8_t signature[6];
+	signature[0] = (uint8_t)HAPFakeGatoSignature_Temperature;
+    signature[1] = 2;
+
+    signature[2] = (uint8_t)HAPFakeGatoSignature_Humidity;
+    signature[3] = 2;
+    
+    signature[4] = (uint8_t)HAPFakeGatoSignature_AirPressure;
+    signature[5] = 2; 
+
+	_fakegato.setSignature(signature, 6);
+	_fakegato.setType(HAP_FAKEGATO_TYPE_WEATHER);
 	_fakegato.registerFakeGatoService(_accessory, _config->name);
-	Serial.println(">>>> 2"); Serial.send_now();
+	
 		
 	auto callbackAddEntry = std::bind(&HAPPluginBME280::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
 
-	Serial.println(">>>> 3"); Serial.send_now();
+	
 	return _accessory;
 }
 

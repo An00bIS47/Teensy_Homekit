@@ -146,11 +146,6 @@ public:
             root[F("description")] = _desc;            
         }
     }  
-
-    virtual void valueGetFunctionCall(){
-
-    }
-
 #endif
 
     bool readable()       { return _permissions & HAP_PERMISSION_READ;            }
@@ -190,10 +185,11 @@ public:
         
         root[F("iid")] = _iid;	       
 	    
-        valueGetFunctionCall();
-
-
+        Serial.println(">>>> 1 "); Serial.send_now();
+        
         valueToJson(root);
+
+        Serial.println(">>>> 2 "); Serial.send_now();
 
         if (meta){
             metaToJson(root);
@@ -369,6 +365,7 @@ public:
     HAPCharacteristicBaseValue(uint8_t type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
         
     }
+
     HAPCharacteristicBaseValue(const char* type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
         
     }
@@ -383,7 +380,7 @@ public:
             T callbackValue = _valueGetFunctionCall();
 
             if (callbackValue != _value){
-                _valueChangeFunctionCall(_value, callbackValue);
+                if (_valueChangeFunctionCall != nullptr) _valueChangeFunctionCall(_value, callbackValue);                
                 _value = callbackValue;
             }            
         }
@@ -401,11 +398,6 @@ public:
 
     virtual void valueToJson(JsonObject& root) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
-
-    virtual void valueGetFunctionCall() {
-        if (readable() && _valueGetFunctionCall) _value = _valueGetFunctionCall();
-    }
-
 
 #if HAP_USE_STD_STRING
     virtual std::string valueString() = 0;
@@ -680,7 +672,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = (uint8_t)_value;     
+            root[F("value")] = (uint8_t) value();     
         }
     }
 
@@ -691,19 +683,19 @@ public:
 
 #if HAP_USE_STD_STRING
     std::string valueString() {
-        return _value == 1 ? std::string("1") : std::string("0");
+        return value() == 1 ? std::string("1") : std::string("0");
     }
 #else
     String valueString(){
-        return _value == 1 ? F("1") : F("0");
+        return value() == 1 ? F("1") : F("0");
     }
 #endif
 
     void valueFromString(const char* value) {
         if (strcmp(value, "1") == 0) {
-            _value = true;
+            setValue(true);
         } else if (strcmp(value, "0") == 0) {
-            _value = false;
+            setValue(false);
         }
     }
 
@@ -730,7 +722,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = HAPHelper::round2(_value);
+            root[F("value")] = HAPHelper::round2(value());
         }                   
     }
 
@@ -750,17 +742,17 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char buffer[64] = {0,};                
-        sprintf(buffer, "%.5lf", _value);        
+        sprintf(buffer, "%.5lf", value());        
         return std::string(buffer);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif    
 
     void valueFromString(const char* value) {
-        _value = atof(value);
+        setValue(atof(value));
     }
 protected:
 
@@ -805,7 +797,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;    
+            root[F("value")] = value();    
         }
     }
 
@@ -831,18 +823,18 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[16];
-        snprintf(temp, 16, "%" PRIu8, _value);
+        snprintf(temp, 16, "%" PRIu8, value());
         return std::string(temp);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif
 
 
     void valueFromString(const char* value) {
-        _value = atoi(value);
+        setValue(atoi(value));
     }
 
 protected:
@@ -871,7 +863,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -891,17 +883,17 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[32];
-        snprintf(temp, 32, "%" PRIu16, _value);
+        snprintf(temp, 32, "%" PRIu16, value());
         return std::string(temp);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif     
 
     void valueFromString(const char* value) {
-        _value = atoi(value);
+        setValue(atoi(value));
     }
 
 protected:
@@ -925,7 +917,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -945,17 +937,17 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[64];
-        snprintf(temp, 64, "%" PRIu32, _value);
+        snprintf(temp, 64, "%" PRIu32, value());
         return std::string(temp);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif     
 
     void valueFromString(const char* value) {
-        _value = atol(value);
+        setValue(atol(value));
     }
 
 protected:
@@ -980,7 +972,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -999,19 +991,19 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[128];
-        snprintf(temp, 128, "%" PRIu64, _value);
+        snprintf(temp, 128, "%" PRIu64, value());
         return std::string(temp);
     }
 #else
     String valueString(){
         char temp[128];
-        snprintf(temp, 128, "%" PRIu64, _value);
+        snprintf(temp, 128, "%" PRIu64, value());
         return String(temp);
     }
 #endif     
 
     void valueFromString(const char* value) {
-        _value = atoll(value);
+        setValue(atoll(value));
     }
 
 protected:
@@ -1037,7 +1029,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -1048,11 +1040,11 @@ public:
 
 #if HAP_USE_STD_STRING
     std::string valueString() {
-        return std::string(_value.c_str());
+        return std::string(value().c_str());
     }
 #else
     String valueString(){
-        return _value;
+        return value();
     }
 #endif     
 
@@ -1060,7 +1052,7 @@ public:
         
         if (strlen(value) > _maxLen) return;
         
-        _value = value;
+        setValue(value);
     }
 
 protected:
@@ -1086,7 +1078,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -1101,7 +1093,7 @@ public:
     }
 #else
     String valueString(){
-        return String(_value.c_str());
+        return String(value().c_str());
     }
 #endif     
 
@@ -1109,7 +1101,7 @@ public:
         
         if (strlen(value) > _maxLen) return;
         
-        _value = value;
+        setValue(value);
     }
 
 protected:
@@ -1164,7 +1156,7 @@ public:
 #endif
 
     void valueFromString(const char* value) {
-        setValueRaw((uint8_t*)value, strlen(value));
+        setValue((uint8_t*)value, strlen(value));
     }
 
 protected:
