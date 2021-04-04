@@ -185,11 +185,7 @@ public:
         
         root[F("iid")] = _iid;	       
 	    
-        Serial.println(">>>> 1 "); Serial.send_now();
-        
         valueToJson(root);
-
-        Serial.println(">>>> 2 "); Serial.send_now();
 
         if (meta){
             metaToJson(root);

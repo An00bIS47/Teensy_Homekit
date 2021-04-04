@@ -250,6 +250,9 @@ FLASHMEM
 #endif
 void HAPFakegato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
 
+    LogD(HAPTime::timeString() + " HAPFakegato2->addDataToBuffer [   ] " + "Adding entry for " + _name + " [size=" + String(_entries.size()) + " bitmask=" + String(bitmask) + "]", true);
+
+
     // Entry will be overwritten ...
     if (_entries.capacity - _entries.size() < 1) {
         // ToDo: Add a dispatcher for overwritten objects? 
@@ -305,9 +308,11 @@ String HAPFakegato2::callbackGetHistoryEntries(){
     
     if (!_transfer) return F("AA==");
     
-    uint8_t offset = 0;
+    uint16_t offset = 0;
+    
     uint8_t data[HAP_FAKEGATO_CHUNK_BUFFER_SIZE];
     uint8_t entryCounter = 0;
+    uint8_t usedBatch = 0;
 
     if (_requestedIndex == 0){
         // ToDo: 
@@ -316,15 +321,18 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         getRefTime(data, &offset); 
         entryCounter = _requestedIndex + 1;
         _requestedIndex--;   
-        
+        usedBatch++;        
     } else {
         _requestedIndex--; 
         entryCounter = _requestedIndex + 1;
-    }
+    }    
 
-    for (uint8_t i=0; i < HAP_FAKEGATO_BATCH_SIZE; i++) {    
-        // Exit if size if smaller than i 
-        if (i > _entries.size()) { 
+    for (uint8_t i=0; i < (HAP_FAKEGATO_BATCH_SIZE - usedBatch); i++) {    
+      
+        if (_requestedIndex > _entries.size() - 1 || _entries[_requestedIndex]->length == 0) { 
+            // _requestedIndex is greater than _entries.size()!
+            Serial.println("_requestedIndex is greater than _entries.size() or length = 0! BREAK");
+
             _transfer = false;
             break;
         }
@@ -413,7 +421,7 @@ String HAPFakegato2::callbackGetHistoryEntries(){
     return String(encodedChr);    
 }
 
-void HAPFakegato2::getRefTime(uint8_t* data, uint8_t* length){
+void HAPFakegato2::getRefTime(uint8_t* data, uint16_t* length){
 
 #if HAP_DEBUG_FAKEGATO
     LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Get ref time entry", true);    
@@ -540,6 +548,7 @@ void HAPFakegato2::callbackHistoryRequest(String oldValue, String newValue){
 
     _requestedIndex = requestedIndex.ui32;
     _transfer = true;
+
 #if HAP_DEBUG_FAKEGATO
     Serial.print("_requestedIndex: ");
     Serial.print(_requestedIndex);

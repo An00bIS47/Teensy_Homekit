@@ -262,7 +262,7 @@ protected:
     virtual String callbackGetHistoryInfo();
     virtual String callbackGetHistoryEntries();
 
-    void getRefTime(uint8_t* data, uint8_t* length);
+    void getRefTime(uint8_t* data, uint16_t* length);
 
     // Schedules
     virtual void scheduleRead(String oldValue, String newValue) {};

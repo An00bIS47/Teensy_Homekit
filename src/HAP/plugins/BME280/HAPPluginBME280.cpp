@@ -270,7 +270,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	// HAPFakegatoCharacteristicAirPressure fgPress = HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginBME280::getAveragedPressureValue, this));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginBME280::getAveragedPressureValue, this)));
 
-	_fakegato.registerFakeGatoService(_accessory, _config->name);
+	_fakegato.registerFakeGatoService(_accessory, "BME280 " + String(hex));
 	
 		
 	auto callbackAddEntry = std::bind(&HAPPluginBME280::fakeGatoCallback, this);
