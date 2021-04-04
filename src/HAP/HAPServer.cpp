@@ -426,15 +426,16 @@ bool HAPServer::begin(bool resume) {
 #if defined( CORE_TEENSY )	
 		_time.setCallbackGetTime(HAPTime::getNTPTime);
 #endif		
-		LogI( F("OK"), true);
+		LogI( F("OK"), true);		
 	}
 #endif /* HAP_ENABLE_NTP */
 
 
 	LogI("Set time to: " + _time.timeString(), true);
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
-	LogI("Current refTime is: " + String(_configuration.getPlatformConfig()->refTime()), true);
-
+	_time.setReftime(_configuration.getPlatformConfig()->refTime());
+	LogI("Current refTime is: " + String(_time.refTime()), true);	
+	
 	LogI("Loading pairings ...", false);	
 	LogI(" OK", true);
 	LogI("Loaded " + String(_accessorySet->numberOfPairings()) + " pairings from EEPROM", true);
@@ -478,17 +479,17 @@ bool HAPServer::begin(bool resume) {
 // 		LogD(F("OK"), true);
 // 	}
 
-	LogI( "Setup accessory ...", false);
+	LogI( "Setup accessory ...", false);	
 	_accessorySet->setModelName(hostname);	
 	_accessorySet->setAccessoryType(HAP_ACCESSORY_TYPE_BRIDGE);
 	_accessorySet->setPinCode(HAP_PIN_CODE);
 	_accessorySet->begin();
 	LogI(" OK", true);
-	
+
 	
 	// 
 	// Event Manager
-	//
+	//	
 	LogI( "Adding listener to event manager ...", false);
 	// Incoming
   	listenerNotificaton.mObj = this;
@@ -641,9 +642,9 @@ bool HAPServer::begin(bool resume) {
   	// Loading fakegato factory
   	// 
 	// Setting Reference Time to FakeGato
-	LogI( "Setting EVE reference time ...", false);
-	_fakeGatoFactory.setRefTime(_configuration.getPlatformConfig()->refTime());
-	LogI(" OK", true);
+	// LogI( "Setting EVE reference time ...", false);
+	// _fakeGatoFactory.setRefTime(_configuration.getPlatformConfig()->refTime());
+	// LogI(" OK", true);
 	
 
   	// 
@@ -1866,7 +1867,7 @@ FLASHMEM
 void HAPServer::handleIdentify(HAPClient* hapClient){
 	LogI( "<<< Handle /identify: ", true );
 
-	HAPCharacteristic* c = _accessorySet->getCharacteristicsOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY);
+	HAPCharacteristicT<bool>* c = reinterpret_cast< HAPCharacteristicT<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY));
 
 	if ( !isPaired() ) {
 		// Send 204
@@ -1874,7 +1875,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 		hapClient->client.write( HTTP_CRLF );
 
 		if (c != NULL){
-			c->setValueString(String(true));
+			c->setValue(true);
 		}
 		
 	} else {
@@ -1898,7 +1899,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 	hapClient->clear();
 	
 	if (c != NULL){
-		c->setValueString(String(false));
+		c->setValue(false);
 	}
 }
 
@@ -2174,23 +2175,13 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 		hapClient->setHeader("Connection", "keep-alive");
 	}
 
+
 #if HAP_DEBUG_ENCRYPTION
 	response->print();	
 #endif
 
-	int bytesSent = response->decode(hapClient->client);
+	int bytesSent = response->decode(*hapClient);
 
-	// uint8_t outResponse[response->size()];
-	// size_t written = 0;
-
-	// response->decode(outResponse, &written);
-
-	// if (written == 0) {
-	// 	LogE("[ERROR] Failed to decode tlv8!", true);
-	// 	result = false;		
-	// }
-
-	// size_t bytesSent = hapClient->write(outResponse, written);
 
 	LogV("\nSent " + String(bytesSent) + " bytes", true);
 
@@ -2200,7 +2191,6 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 
 	return result;
 }
-
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
@@ -2500,7 +2490,6 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	LogD(F("OK"), true);	
     return true;
 }
-
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
@@ -3682,13 +3671,11 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		JsonObject jsonCharacteristic = jsonCharacteristics.createNestedObject();
 		jsonCharacteristic["aid"] = aid;
 
-		HAPCharacteristic* characteristic = _accessorySet->getCharacteristics(aid, iid);
+		HAPCharacteristicBase* characteristic = _accessorySet->getCharacteristic(aid, iid);
 		if (characteristic) {
 			if (characteristic->readable()){
-				
-				if (characteristic->valueGetFunctionCall){
-					characteristic->valueGetFunctionCall();
-				}
+								
+				// characteristic->valueGetFunctionCall();
 
 				characteristic->toJson(jsonCharacteristic, hasParamType, hasParamPerms, hasParamEvent, hasParamMeta);
 
@@ -3782,7 +3769,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 
 		
 		
-		HAPCharacteristic *character = _accessorySet->getCharacteristics(aid, iid);		
+		HAPCharacteristicBase* character = _accessorySet->getCharacteristic(aid, iid);		
 		
 		JsonObject jsonNewChr = responseArray.createNestedObject();
 		jsonNewChr[F("aid")] = aid;
@@ -3816,7 +3803,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 			} else {
 
 				if (character->writable() ) {
-					character->setValueString(jc["value"].as<String>());
+					character->valueFromString(jc["value"].as<String>());
 					// Add to jsonCharacteristics array				
 					character->toJson(jsonNewChr);
 				} else {
@@ -3989,7 +3976,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 
 				if ( hapClient.isSubscribed(aid, iid) ) {										
-					HAPCharacteristic *character = _accessorySet->getCharacteristics(aid, iid);
+					HAPCharacteristicBase* character = _accessorySet->getCharacteristic(aid, iid);
 					
 					if (character) {
 

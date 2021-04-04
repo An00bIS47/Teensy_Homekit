@@ -60,6 +60,18 @@ typedef enum {
     HAP_UNIT_PPM,               // ppm    
 } HAP_UNIT;
 
+typedef enum {
+	HAP_BATTERY_LEVEL_NORMAL    = 0,
+	HAP_BATTERY_LEVEL_LOW       = 1    
+} HAP_BATTERY_LEVEL;
+
+
+typedef enum {
+	HAP_CHARGING_STATE_NOT_CHARGING     = 0,
+	HAP_CHARGING_STATE_CHARGING         = 1,
+	HAP_CHARGING_STATE_NOT_CHARGEABLE   = 2
+} HAP_CHARGING_STATE;
+
 
 // 
 //  Base Characteristic
@@ -79,13 +91,13 @@ typedef enum {
 class HAPCharacteristicBase {
 public:
 
-    HAPCharacteristicBase(uint16_t iid, uint16_t type, uint8_t permissions): _iid(iid), _type(type), _permissions(permissions), _typeString(nullptr) {
+    HAPCharacteristicBase(uint8_t type, uint8_t permissions): _iid(0), _type(type), _permissions(permissions), _typeString(nullptr) {
 #if HAP_ADD_DESC_TO_JSON		
         _desc = nullptr;
 #endif 		
 	}
 
-	HAPCharacteristicBase(uint16_t iid, const char* typeString, uint8_t permissions): _iid(iid), _type(CHAR_TYPE_NULL), _permissions(permissions), _typeString(typeString) {        
+	HAPCharacteristicBase(const char* typeString, uint8_t permissions): _iid(0), _type(CHAR_TYPE_NULL), _permissions(permissions), _typeString(typeString) {        
 		       
 		// typeString = new char[HAP_UUID_LENGTH + 1];
 		// strncpy(typeString, _typeString, HAP_UUID_LENGTH + 1);
@@ -96,6 +108,9 @@ public:
 
 	} 
 
+
+    // std::function<void(void)> valueGetFunctionCall = nullptr;
+
     virtual ~HAPCharacteristicBase() {
         //if (_typeString) delete[] _typeString;
 
@@ -105,9 +120,16 @@ public:
 
     }
 
+    void setIID(uint32_t iid){ _iid = iid; }
+    uint32_t iid() { return _iid; }
 
-    uint16_t iid() { return _iid; }
+    uint8_t type(){
+        return _type;
+    }
 
+    const char* typeString(){
+        return _typeString;
+    }
 
 #if HAP_ADD_DESC_TO_JSON
 	void setDescription(const char* str){
@@ -294,11 +316,28 @@ public:
         }
     }
 
+#if HAP_USE_STD_STRING
+    virtual std::string valueString() = 0;
+
+    virtual void valueFromString(const std::string& value){
+        valueFromString(value.c_str());
+    }    
+#else
+    virtual String valueString() = 0;
+    
+    virtual void valueFromString(const String& value){
+        valueFromString(value.c_str());
+    }
+#endif
+
+    virtual void valueFromString(const char* value) = 0; 
 
 protected:
 
-    const uint16_t  _iid;
-	const uint16_t  _type;
+    
+
+    uint32_t  _iid;
+	const uint8_t   _type;
 	const uint8_t   _permissions;	
 	const char*     _typeString;    
 
@@ -319,11 +358,12 @@ class HAPCharacteristicBaseValue : public HAPCharacteristicBase {
 
 public:
     
-    HAPCharacteristicBaseValue(uint16_t iid, uint16_t type, uint8_t permissions) : HAPCharacteristicBase(iid, type, permissions) {
-        _value = 0;
+    HAPCharacteristicBaseValue(uint8_t type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
+        
     }
-    HAPCharacteristicBaseValue(uint16_t iid, const char* type, uint8_t permissions) : HAPCharacteristicBase(iid, type, permissions) {
-        _value = 0;
+
+    HAPCharacteristicBaseValue(const char* type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
+        
     }
 
     ~HAPCharacteristicBaseValue(){
@@ -336,7 +376,7 @@ public:
             T callbackValue = _valueGetFunctionCall();
 
             if (callbackValue != _value){
-                _valueChangeFunctionCall(_value, callbackValue);
+                if (_valueChangeFunctionCall != nullptr) _valueChangeFunctionCall(_value, callbackValue);                
                 _value = callbackValue;
             }            
         }
@@ -380,6 +420,30 @@ public:
         _valueChangeFunctionCall = callback;
     }
 
+// 	void* operator new(size_t size)
+//     {
+//         Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
+//         //void * p = ::operator new(size);
+
+// #if defined(ARDUINO_TEENSY41)
+// 		void* ptr = extmem_malloc(size);		
+// #else		
+//         void* ptr = malloc(size); // will also work fine
+// #endif     
+//         return ptr;
+//     }
+ 
+//     void operator delete(void* ptr)
+//     {
+//         Serial.println(F("Overloading delete operator"));
+        
+// #if defined(ARDUINO_TEENSY41)
+// 		extmem_free(ptr);
+// #else		
+//         free(ptr);
+// #endif 		
+//     }
+
 protected:
     T _value;    
     std::function<T(void)>      _valueGetFunctionCall       = nullptr;
@@ -395,11 +459,11 @@ template <class T>
 class HAPCharacteristicNumericBase : public HAPCharacteristicBaseValue<T> {
 
 public:
-    HAPCharacteristicNumericBase(uint16_t iid, uint16_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(iid, type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
+    HAPCharacteristicNumericBase(uint8_t type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
         this->_value = minVal;
     }
 
-    HAPCharacteristicNumericBase(uint16_t iid, const char* type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(iid, type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
+    HAPCharacteristicNumericBase(const char* type, uint8_t permissions, T minVal, T maxVal, T step, HAP_UNIT unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
         this->_value = minVal;
     }
 
@@ -444,6 +508,7 @@ public:
 #endif
 
 
+
     virtual void valueFromString(const char* value) = 0;     
    
 protected:        
@@ -461,7 +526,7 @@ template <class T>
 class HAPCharacteristicDataBase : public HAPCharacteristicBase {
 
 public:
-    HAPCharacteristicDataBase(uint16_t iid, uint16_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(iid, type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(uint8_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _valueLen(0), _maxDataLen(maxDataLen) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -469,7 +534,7 @@ public:
         _value = nullptr;
     }
 
-    HAPCharacteristicDataBase(uint16_t iid, const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(iid, type, permissions), _value(nullptr), _maxDataLen(maxDataLen), _valueLen(0) {
+    HAPCharacteristicDataBase(const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _valueLen(0), _maxDataLen(maxDataLen) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -478,10 +543,10 @@ public:
     }
 
     ~HAPCharacteristicDataBase(){
-        if (_value) delete[] _value;
+        if (_value) free(_value);
     }
 
-    virtual size_t setValueRaw(const T* data, const size_t dataLen) {
+    virtual size_t setValueRaw(const T data, const size_t dataLen) {
 
         if (dataLen > _maxDataLen) return 0;        
         
@@ -491,33 +556,39 @@ public:
             delete[] _value;
         }
 
-        _value = new T[dataLen + 1];
+        _value = (T) malloc(sizeof(T) * dataLen + 1);
         _valueLen = dataLen;
-        memcpy((T*)_value, data, dataLen);
+        memcpy((T)_value, data, dataLen);
         _value[_valueLen] = '\0'; 
 
         return dataLen;
     }
 
 
-    virtual void setValue(const T* value, const size_t dataLen, bool withCallback = true){
+    virtual void setValue(const T value, const size_t dataLen, bool withCallback = true){
         
-        if (_valueChangeFunctionCall && withCallback) {
-            _valueChangeFunctionCall(value, dataLen);                 
+        if (_dataChangeFunctionCall && withCallback) {
+            _dataChangeFunctionCall(value, dataLen);                 
         } 
 
         setValueRaw(value, dataLen);               
     } 
 
-    virtual void value(T* output, size_t* dataLen, bool withCallback = true){  
+    virtual void value(T output, size_t* dataLen, bool withCallback = true){  
 
-        if (_valueGetFunctionCall && withCallback){
+        if (_dataGetFunctionCall && withCallback){
 
-            T bufferCallback[_maxDataLen];
-            size_t valueLenCallback = 0;
-            valueGetFunctionCall(bufferCallback, &valueLenCallback); 
+            T bufferCallback;
             
-            setValueRaw(bufferCallback, valueLenCallback);            
+            size_t valueLenCallback = 0;
+            _dataGetFunctionCall(nullptr, &valueLenCallback); 
+
+            bufferCallback = (T) malloc(sizeof(T) * valueLenCallback);
+
+            _dataGetFunctionCall(bufferCallback, &valueLenCallback); 
+            
+            setValueRaw(bufferCallback, valueLenCallback);  
+            free(bufferCallback);
         }
         
         if (output){
@@ -530,14 +601,23 @@ public:
     virtual void valueToJson(JsonObject& root) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
 
-protected:        
-    std::function<void(T*, size_t*)>  _valueGetFunctionCall       = nullptr;
-    std::function<void(T*, size_t)>   _valueChangeFunctionCall    = nullptr;    
+    void setDataGetCallback(std::function<void(T, size_t*)> callback){
+        _dataGetFunctionCall = callback;
+    }
+
+    void setDataChangeCallback(std::function<void(T, size_t)> callback){
+        _dataChangeFunctionCall = callback;
+    }
 
     
-    const size_t _maxDataLen;
+protected:        
+    std::function<void(T, size_t*)>  _dataGetFunctionCall       = nullptr;
+    std::function<void(T, size_t)>   _dataChangeFunctionCall    = nullptr;    
+
+    T _value;
     size_t _valueLen;
-    T* _value;
+    size_t _maxDataLen;
+    
 };
 
 
@@ -549,6 +629,9 @@ protected:
 template <class T>
 class HAPCharacteristicT : public HAPCharacteristicBase {
 public:
+
+
+
     virtual void valueToJson(JsonObject& root) = 0;
     virtual void metaToJson(JsonObject& root)  = 0;
 
@@ -576,9 +659,16 @@ template <>
 class HAPCharacteristicT<bool> : public HAPCharacteristicBaseValue<bool> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
+        _value = false;    
+    }
+    HAPCharacteristicT(const char* type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
+        _value = false;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = (uint8_t)_value;     
+            root[F("value")] = (uint8_t) value();     
         }
     }
 
@@ -589,21 +679,24 @@ public:
 
 #if HAP_USE_STD_STRING
     std::string valueString() {
-        return _value == 1 ? std::string("1") : std::string("0");
+        return value() == 1 ? std::string("1") : std::string("0");
     }
 #else
     String valueString(){
-        return _value == 1 ? "1" : "0";
+        return value() == 1 ? F("1") : F("0");
     }
 #endif
 
     void valueFromString(const char* value) {
         if (strcmp(value, "1") == 0) {
-            _value = true;
+            setValue(true);
         } else if (strcmp(value, "0") == 0) {
-            _value = false;
+            setValue(false);
         }
     }
+
+
+
 
 protected:
     
@@ -615,10 +708,17 @@ protected:
 template <>
 class HAPCharacteristicT<float> : public HAPCharacteristicNumericBase<float> {    
 public:
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, float minVal, float maxVal, float step, HAP_UNIT unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, float minVal, float maxVal, float step, HAP_UNIT unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = HAPHelper::round2(_value);
+            root[F("value")] = HAPHelper::round2(value());
         }                   
     }
 
@@ -638,17 +738,17 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char buffer[64] = {0,};                
-        sprintf(buffer, "%.5lf", _value);        
+        sprintf(buffer, "%.5lf", value());        
         return std::string(buffer);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif    
 
     void valueFromString(const char* value) {
-        _value = atof(value);
+        setValue(atof(value));
     }
 protected:
 
@@ -663,8 +763,9 @@ template <>
 class HAPCharacteristicT<uint8_t> : public HAPCharacteristicNumericBase<uint8_t> {    
 public:
 
-    HAPCharacteristicT(uint16_t iid, uint16_t type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(iid, type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
+    HAPCharacteristicT(uint8_t type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
         _value = minVal;
+        _iid = 0;
 
         if (validValuesSize > 0){
             _validValues = new uint8_t[validValuesSize];
@@ -674,8 +775,9 @@ public:
         }           
     }
 
-    HAPCharacteristicT(uint16_t iid, const char* type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(iid, type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
+    HAPCharacteristicT(const char* type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAP_UNIT charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
         _value = minVal;
+        _iid = 0;
 
         if (validValuesSize > 0){
             _validValues = new uint8_t[validValuesSize];
@@ -691,7 +793,7 @@ public:
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;    
+            root[F("value")] = value();    
         }
     }
 
@@ -717,18 +819,18 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[16];
-        snprintf(temp, 16, "%" PRIu8, _value);
+        snprintf(temp, 16, "%" PRIu8, value());
         return std::string(temp);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif
 
 
     void valueFromString(const char* value) {
-        _value = atoi(value);
+        setValue(atoi(value));
     }
 
 protected:
@@ -746,9 +848,18 @@ template <>
 class HAPCharacteristicT<uint16_t> : public HAPCharacteristicNumericBase<uint16_t> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, uint16_t minVal, uint16_t maxVal, uint16_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint16_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, uint16_t minVal, uint16_t maxVal, uint16_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint16_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -768,17 +879,17 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[32];
-        snprintf(temp, 32, "%" PRIu16, _value);
+        snprintf(temp, 32, "%" PRIu16, value());
         return std::string(temp);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif     
 
     void valueFromString(const char* value) {
-        _value = atoi(value);
+        setValue(atoi(value));
     }
 
 protected:
@@ -792,9 +903,17 @@ template <>
 class HAPCharacteristicT<uint32_t> : public HAPCharacteristicNumericBase<uint32_t> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, uint32_t minVal, uint32_t maxVal, uint32_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint32_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, uint32_t minVal, uint32_t maxVal, uint32_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint32_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -814,17 +933,17 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[64];
-        snprintf(temp, 64, "%" PRIu32, _value);
+        snprintf(temp, 64, "%" PRIu32, value());
         return std::string(temp);
     }
 #else
     String valueString(){
-        return String(_value);
+        return String(value());
     }
 #endif     
 
     void valueFromString(const char* value) {
-        _value = atol(value);
+        setValue(atol(value));
     }
 
 protected:
@@ -839,9 +958,17 @@ template <>
 class HAPCharacteristicT<uint64_t> : public HAPCharacteristicNumericBase<uint64_t> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, uint64_t minVal, uint64_t maxVal, uint64_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint64_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, uint64_t minVal, uint64_t maxVal, uint64_t step, HAP_UNIT unit) : HAPCharacteristicNumericBase<uint64_t>(type, permissions, minVal, maxVal, step, unit) {
+        this->_value = minVal;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -860,19 +987,19 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char temp[128];
-        snprintf(temp, 128, "%" PRIu64, _value);
+        snprintf(temp, 128, "%" PRIu64, value());
         return std::string(temp);
     }
 #else
     String valueString(){
         char temp[128];
-        snprintf(temp, 128, "%" PRIu64, _value);
+        snprintf(temp, 128, "%" PRIu64, value());
         return String(temp);
     }
 #endif     
 
     void valueFromString(const char* value) {
-        _value = atoll(value);
+        setValue(atoll(value));
     }
 
 protected:
@@ -887,9 +1014,18 @@ template <>
 class HAPCharacteristicT<String> : public HAPCharacteristicBaseValue<String> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -900,11 +1036,11 @@ public:
 
 #if HAP_USE_STD_STRING
     std::string valueString() {
-        return std::string(_value.c_str());
+        return std::string(value().c_str());
     }
 #else
     String valueString(){
-        return _value;
+        return value();
     }
 #endif     
 
@@ -912,7 +1048,7 @@ public:
         
         if (strlen(value) > _maxLen) return;
         
-        _value = value;
+        setValue(value);
     }
 
 protected:
@@ -927,9 +1063,18 @@ template <>
 class HAPCharacteristicT<std::string> : public HAPCharacteristicBaseValue<std::string> {    
 public:
 
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxlen) : HAPCharacteristicBaseValue<std::string>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxlen) : HAPCharacteristicBaseValue<std::string>(type, permissions) {
+        _value = "";
+        _maxLen = maxlen;
+    }
+
     void valueToJson(JsonObject& root) override {
         if (readable()) {
-            root[F("value")] = _value;
+            root[F("value")] = value();
         }                   
     }
 
@@ -944,7 +1089,7 @@ public:
     }
 #else
     String valueString(){
-        return String(_value.c_str());
+        return String(value().c_str());
     }
 #endif     
 
@@ -952,12 +1097,13 @@ public:
         
         if (strlen(value) > _maxLen) return;
         
-        _value = value;
+        setValue(value);
     }
 
 protected:
     size_t _maxLen = 64;
 };
+
 
 
 // 
@@ -966,6 +1112,23 @@ protected:
 template <>
 class HAPCharacteristicT<uint8_t*> : public HAPCharacteristicDataBase<uint8_t*> {    
 public:
+
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicDataBase(type, permissions, maxDataLen, desc){
+        if (strcmp(desc, "") == 0){
+            setDescription(desc);
+        }
+
+        _value = nullptr;
+    }
+
+    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicDataBase(type, permissions, maxDataLen, desc){
+        if (strcmp(desc, "") == 0){
+            setDescription(desc);
+        }
+
+        _value = nullptr;
+    }
+
 
     void valueToJson(JsonObject& root) override {
         if (readable()) {
@@ -989,11 +1152,11 @@ public:
 #endif
 
     void valueFromString(const char* value) {
-
+        setValue((uint8_t*)value, strlen(value));
     }
 
 protected:
-    
+    size_t _maxLen = 512;
 };
 
 

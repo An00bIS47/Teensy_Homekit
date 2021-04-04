@@ -197,7 +197,7 @@ void HAPPluginInfluxDB::handleEvents(int eventCode, struct HAPEvent eventParam){
 
 
 
-    //characteristics *character = _accessorySet->getCharacteristics(aid, iid);
+    //characteristics *character = _accessorySet->getCharacteristic(aid, iid);
 
 }
 

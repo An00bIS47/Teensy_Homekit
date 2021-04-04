@@ -12,19 +12,21 @@
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-HAPService::HAPService(uint8_t _uuid)
-: uuid(_uuid), uuidString("") {
-    hidden = false;
-    primary = false;
+HAPService::HAPService(uint8_t uuid)
+: _uuid(uuid)
+, _uuidString("")
+, _features(0)
+{
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
 HAPService::HAPService(const String& _uuid)
-: uuid(CHAR_TYPE_NULL), uuidString(_uuid) {
-    hidden = false;
-    primary = false;
+: _uuid(CHAR_TYPE_NULL)
+, _uuidString(_uuid) 
+, _features(0)
+{
 }
 
 
@@ -166,20 +168,20 @@ void HAPService::printTo(Print& print){
     
     // iid
     print.print(F("\"iid\":"));
-    print.print(serviceID);    
+    print.print(_aid);    
     print.print(F(","));
 
     // type
-    print.print(F("\"type\":"));    
-    if (uuid == 0x00) { 
-        print.print(HAPHelper::wrap(uuidString));
+    print.print(F("\"type\":"));
+    if (_uuid == 0x00) { 
+        print.print(HAPHelper::wrap(_uuidString));
     } else {
 #if HAP_LONG_UUID    
         char uuidStr[HAP_UUID_LENGTH];
         snprintf(uuidStr, HAP_UUID_LENGTH, HAP_UUID, uuid);        
 #else    
         char uuidStr[8];
-        snprintf(uuidStr, 8, PSTR("%X"), uuid);    
+        snprintf(uuidStr, 8, PSTR("%X"), _uuid);    
 #endif  
         print.print(HAPHelper::wrap(uuidStr));                                
     }
@@ -187,20 +189,12 @@ void HAPService::printTo(Print& print){
 
     // hidden
     print.print(F("\"hidden\":"));
-    if (hidden) {
-        print.print(1);    
-    } else {
-        print.print(0);    
-    }    
+    print.print((uint8_t)isHidden());    
     print.print(F(","));
 
     // primary
     print.print(F("\"primary\":"));
-    if (primary) {
-        print.print(1);    
-    } else {
-        print.print(0);    
-    }    
+    print.print((uint8_t)isPrimary());    
     print.print(F(","));
 
     // linked
@@ -217,7 +211,7 @@ void HAPService::printTo(Print& print){
     }
 
     // _characteristics
-    print.print(F("\"characteristics\":["));    
+    print.print(F("\"characteristics\":["));
 	for (int i = 0; i < numberOfCharacteristics(); i++) {
         _characteristics[i]->printTo(print);
 
@@ -229,3 +223,34 @@ void HAPService::printTo(Print& print){
 
     print.print(F("}"));
 }
+
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM 
+// #endif
+// void* HAPService::operator new(size_t size)
+// {
+//     Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
+//     //void * p = ::operator new(size);
+
+// #if defined(ARDUINO_TEENSY41)
+//     void* ptr = extmem_malloc(size);		
+// #else		
+//     void* ptr = malloc(size); // will also work fine
+// #endif     
+//     return ptr;
+// }
+
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM 
+// #endif
+// void HAPService::operator delete(void* ptr)
+// {
+//     Serial.println(F("Overloading delete operator"));
+    
+// #if defined(ARDUINO_TEENSY41)
+//     extmem_free(ptr);
+// #else		
+//     free(ptr);
+// #endif 		
+// }
+

@@ -9,18 +9,18 @@
 #define HAPCHARACTERISTICS_HPP_
 
 #include <Arduino.h>
-#include "HAPCharacteristic.hpp"
+// #include "HAPCharacteristic.hpp"
 #include "HAPCharacteristicsBluetooth.hpp"
 
-#include "HAPCharacteristicBool.hpp"
-#include "HAPCharacteristicData.hpp"
-#include "HAPCharacteristicFloat.hpp"
-#include "HAPCharacteristicInt.hpp"
-#include "HAPCharacteristicString.hpp"
-#include "HAPCharacteristicUInt8.hpp"
-#include "HAPCharacteristicUInt16.hpp"
-#include "HAPCharacteristicUInt32.hpp"
-#include "HAPCharacteristicUInt64.hpp"
+// #include "HAPCharacteristicBool.hpp"
+// #include "HAPCharacteristicData.hpp"
+// #include "HAPCharacteristicFloat.hpp"
+// #include "HAPCharacteristicInt.hpp"
+// #include "HAPCharacteristicString.hpp"
+// #include "HAPCharacteristicUInt8.hpp"
+// #include "HAPCharacteristicUInt16.hpp"
+// #include "HAPCharacteristicUInt32.hpp"
+// #include "HAPCharacteristicUInt64.hpp"
 
 
 typedef enum {

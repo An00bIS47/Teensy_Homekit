@@ -84,7 +84,7 @@ public:
 	}	  
 };
 
-class HAPClient {
+class HAPClient : public Stream {
 public:
 	HAPClient();
 	~HAPClient();
@@ -110,13 +110,13 @@ public:
 	struct HAPEncryptionContext 	encryptionContext;	
 
 	// From Stream:
-  	// size_t write(const uint8_t* buffer, size_t size);
-  	// size_t write(uint8_t b);
+  	size_t write(const uint8_t* buffer, size_t size);
+  	size_t write(uint8_t b);
 
 	int available();
-	// int read();
-	// int peek();
-	// void flush();
+	int read();
+	int peek();
+	void flush();
 
 	void setEncryped(bool mode) {
 		_isEncrypted = mode;
@@ -159,6 +159,7 @@ public:
 #endif
 
 	static String statusMessage(int statusCode);
+	void sendStatusAndHeader(int statusCode, size_t size);
 
 	const uint8_t* getId(){
 		return _idPtr;
@@ -168,7 +169,7 @@ public:
 		memcpy(_idPtr, id, HAP_PAIRINGS_ID_LENGTH);
 	}
 
-private:
+protected:
 	bool			_isEncrypted;
 	bool			_headerSent;
 	bool			_isAdmin;	

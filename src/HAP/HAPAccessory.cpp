@@ -9,9 +9,8 @@
 #include "HAPHelper.hpp"
 #include "HAPServer.hpp"
 #include "EventManager.h"
-
-
 #include "HAPCharacteristics.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "HAPServices.hpp"
 
 
@@ -19,7 +18,7 @@
 FLASHMEM 
 #endif
 HAPAccessory::HAPAccessory() {
-	aid = 0;
+	_aid = 0;
 	
 	_infoService    = nullptr;
 	_accessoryName  = nullptr;
@@ -44,15 +43,16 @@ HAPAccessory::~HAPAccessory(){
 	if (_serialNumber) delete _serialNumber;
 	if (_identify) delete _identify;
 
-	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+	// for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
+	// 	for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
 			
-			struct HAPEvent event = HAPEvent(NULL, aid, (*jt)->iid, "");
-			HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);					
-			(*it)->_characteristics.erase(jt);			                        
-		}
-		_services.erase(it);
-	}
+	// 		struct HAPEvent event = HAPEvent(NULL, aid, (*jt)->iid, "");
+	// 		HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);					
+	// 		(*it->_characteristics->erase(jt);			                        
+	// 	}
+	// 	_services.erase(it);
+	// }
+	_services.clear();
 
 }
 
@@ -60,21 +60,22 @@ HAPAccessory::~HAPAccessory(){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPAccessory::addService(HAPService *ser) {
-	ser->serviceID = ++numberOfInstance;
-	_services.push_back(ser);
+void HAPAccessory::addService(HAPService *service) {
+	service->setAID(++_numberOfInstances);
+	_services.emplace_back(std::move(service));
 }
+
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPAccessory::addCharacteristics(HAPService *ser, HAPCharacteristic *cha) {
-	cha->iid = ++numberOfInstance;
-	ser->_characteristics.push_back(cha);
+void HAPAccessory::addCharacteristicToService(HAPService *service, HAPCharacteristicBase* characteristic) {
+		
+	characteristic->setIID(++_numberOfInstances);
+	service->_characteristics.emplace_back(std::move(characteristic));
 
-	// ToDo: Add event for update mdns config
-	
-	struct HAPEvent event = HAPEvent(NULL, aid, cha->iid, "");					
+	// ToDo: Refactor Eventmanager	
+	struct HAPEvent event = HAPEvent(NULL, _aid, characteristic->iid(), "");					
 	HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
 }
 
@@ -82,74 +83,83 @@ void HAPAccessory::addCharacteristics(HAPService *ser, HAPCharacteristic *cha) {
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-bool HAPAccessory::removeService(HAPService *ser) {
-	bool exist = false;
-	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		if (*it == ser) {
-			_services.erase(it);
-			exist = true;
+bool HAPAccessory::removeService(HAPService *service) {	
+	for (int i=0; i < _services.size(); i++){
+		if (_services[i]->aid() == service->aid()){
+			_services.erase(_services.begin() + i);
+			return true;
 		}
 	}
-	return exist;
+	return false;
 }
 
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-bool HAPAccessory::removeCharacteristics(HAPCharacteristic *cha) {
-	bool exist = false;
-	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
-			if (*jt == cha) {
-				(*it)->_characteristics.erase(jt);
-				exist = true;
-
-				// ToDo: Add event for update mdns config                                                     
-				struct HAPEvent event = HAPEvent(NULL, aid, (*jt)->iid, "");					
-				HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
-			}
+bool HAPAccessory::removeCharacteristicFromService(HAPService *service, HAPCharacteristicBase* characteristic) {
+	for (int i=0; i < service->_characteristics.size(); i++){
+		if (service->_characteristics[i]->iid() == characteristic->iid()){
+			service->_characteristics.erase(service->_characteristics.begin() + i);
+			return true;
 		}
 	}
-	return exist;
+	return false;
 }
 
 
 
-uint8_t HAPAccessory::numberOfService() const { 
+size_t HAPAccessory::numberOfServices() const { 
 	return _services.size(); 
 }
 
 
-HAPService *HAPAccessory::serviceAtIndex(uint8_t index) {
-	return _services[index];
+HAPService* HAPAccessory::serviceAtIndex(size_t index) {
+	return _services.at(index).get();
 }
 
-HAPCharacteristic *HAPAccessory::characteristicsAtIndex(uint8_t index) {
-	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
-			if ((*jt)->iid == index) {
-				return *jt;
-			}
-		}
-	}
-	return NULL;
+
+HAPCharacteristicBase* HAPAccessory::characteristicAtIndex(HAPService *service, size_t index) {
+	return service->_characteristics.at(index).get();
 }
+
+
+HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
+	for (int i=0; i < _services.size(); i++){
+		HAPCharacteristicBase* chr = _services[i]->characteristicWithIID(iid);
+		if (chr != nullptr){
+			return chr;
+		}		
+	}
+	return nullptr;
+}
+
+
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-HAPCharacteristic *HAPAccessory::characteristicsOfType(int type) {
-	for (std::vector<HAPService *>::iterator it = _services.begin(); it != _services.end(); it++) {
-		for (std::vector<HAPCharacteristic *>::iterator jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
-			if ((*jt)->type == type) {
-				return *jt;
+HAPCharacteristicBase* HAPAccessory::characteristicsOfType(int type) {
+	for (auto it = _services.begin(); it != _services.end(); it++) {
+		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+			if ((*jt)->type() == type) {
+				return &(*jt->get());
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
+HAPCharacteristicBase* HAPAccessory::characteristicsOfType(const char* typeString){
+	for (auto it = _services.begin(); it != _services.end(); it++) {
+		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
+			if (strcmp((*jt)->typeString(), typeString) == 0) {
+				return &(*jt->get());
+			}
+		}
+	}
+	return nullptr;
+}
 
 // void HAPAccessory::toJson(JsonArray& array){
 
@@ -168,15 +178,15 @@ void HAPAccessory::printTo(Print& print){
 	
 	// aid
 	print.print("\"aid\":");
-	print.print(aid);    
+	print.print(_aid);    
 	print.print(",");
 
 	// services
 	print.print("\"services\":[");    
-	for (int i = 0; i < numberOfService(); i++) {
+	for (int i = 0; i < numberOfServices(); i++) {
 		_services[i]->printTo(print);
 
-		if (i+1 < numberOfService()){
+		if (i+1 < numberOfServices()){
 			print.print(",");
 		}
 	}
@@ -217,24 +227,46 @@ void HAPAccessory::printTo(Print& print){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
+HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufacturerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
 	
-	setName(accessoryName);
 	
-	setIdentifyCallback(callback);
+	initInfoService();
 
-	setManufacturer(manufactuerName);
-
-	setModelName(modelName);
-
-	setSerialNumber(serialNumber);
 	
-	if ( firmwareRev != "" ) {
-		setFirmware(firmwareRev);
+	if (_accessoryName == nullptr) {
+		_accessoryName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);		
+		addCharacteristicToService(_infoService, _accessoryName);
 	}
+	_accessoryName->setValue(accessoryName, false);
+
+	
+	if (_manufacturer == nullptr) {
+		_manufacturer = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MANUFACTURER, (uint8_t)1);
+		addCharacteristicToService(_infoService, _manufacturer);
+	}
+	_manufacturer->setValue(manufacturerName, false);	
+
+	
+	if (_modelName == nullptr) {
+		_modelName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MODEL, (uint8_t)1);
+		addCharacteristicToService(_infoService, _modelName);
+	}
+	_modelName->setValue(modelName, false);	
+
+	
+	if (_serialNumber == nullptr) {
+		_serialNumber = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, (uint8_t)1);
+		addCharacteristicToService(_infoService, _serialNumber);
+	}
+	_serialNumber->setValue(serialNumber, false);			
+		
+	setFirmware(firmwareRev);
+
+	setIdentifyCallback(callback);
 	
 	return _infoService;
 }
+
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
@@ -242,160 +274,31 @@ FLASHMEM
 void HAPAccessory::initInfoService(){
 	if (_infoService == nullptr) {
 		_infoService = new HAPService(HAP_SERVICE_ACCESSORY_INFORMATION);
-		addService(_infoService);    
-	}    
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::initAccessoryName(){
-	initInfoService();
-	if (_accessoryName == nullptr) {
-		_accessoryName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);            
-		addCharacteristics(_infoService, _accessoryName);
+		addService(_infoService);
 	}
 }
 
+
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPAccessory::initFirmware(){
+void HAPAccessory::setFirmware(const String& firmwareRev){
 	initInfoService();
 	if (_firmware == nullptr) {
-		_firmware = new HAPCharacteristicString(HAP_CHARACTERISTIC_FIRMWARE_REVISION, permission_read);            
-		addCharacteristics(_infoService, _firmware);
+		_firmware = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ);
+		addCharacteristicToService(_infoService, _firmware);
 	}
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::initManufacturer(){
-	initInfoService();
-	if (_manufacturer == nullptr) {
-		_manufacturer = new HAPCharacteristicString(HAP_CHARACTERISTIC_MANUFACTURER, permission_read);            
-		addCharacteristics(_infoService, _manufacturer);
-	}
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::initModelName(){
-	initInfoService();
-	if (_modelName == nullptr) {
-		_modelName = new HAPCharacteristicString(HAP_CHARACTERISTIC_MODEL, permission_read);            
-		addCharacteristics(_infoService, _modelName);
-	}
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::initSerialNumber(){
-	initInfoService();
-	if (_serialNumber == nullptr) {
-		_serialNumber = new HAPCharacteristicString(HAP_CHARACTERISTIC_SERIAL_NUMBER, permission_read);            
-		addCharacteristics(_infoService, _serialNumber);
-	}
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::initIdentify(){
-	initInfoService();
-	if (_identify == nullptr) {
-		_identify = new HAPCharacteristicBool(HAP_CHARACTERISTIC_IDENTIFY, permission_write);            
-		addCharacteristics(_infoService, _identify);
-	}
-}
-
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::setName(const String& name){
-	initAccessoryName();
-	_accessoryName->setValueString(name);
-}
-
-String HAPAccessory::name(){
-	if (_accessoryName == nullptr) {
-		return "";    
-	}
-	return _accessoryName->valueString();
-}
-
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::setFirmware(const String& firmware){
-	initFirmware();
-	_firmware->setValueString(firmware);
-}
-
-
-String HAPAccessory::firmware(){
-	if (_firmware == nullptr) {
-		return "";    
-	}
-	return _firmware->valueString();
-}
-
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::setManufacturer(const String& manufacturer){
-	initManufacturer();
-	_manufacturer->setValueString(manufacturer);
-}
-
-
-String HAPAccessory::manufacturer(){
-	if (_manufacturer == nullptr) {
-		return "";    
-	}
-	return _manufacturer->valueString();
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::setModelName(const String& modelName){
-	initModelName();
-	_modelName->setValueString(modelName);
-}
-
-String HAPAccessory::modelName(){
-	if (_modelName == nullptr) {
-		return "";    
-	}
-	return _modelName->valueString();
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPAccessory::setSerialNumber(const String& serialNumber){
-	initSerialNumber();
-	_serialNumber->setValueString(serialNumber);
-}
-
-String HAPAccessory::serialNumber(){
-	if (_serialNumber == nullptr) {
-		return "";    
-	}
-	return _serialNumber->valueString();
+	_firmware->setValue(firmwareRev, false);	
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
-	initIdentify();
-	_identify->valueChangeFunctionCall = callback;
+	initInfoService();
+	if (_identify == nullptr) {
+		_identify = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_IDENTIFY, HAP_PERMISSION_WRITE);
+		addCharacteristicToService(_infoService, _identify);
+	}	
+	_identify->setValueChangeCallback(callback);
 }

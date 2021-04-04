@@ -27,10 +27,10 @@
 #include "HAPTLV8Types.hpp"
 #include "HAPPlugins.hpp"
 #include "plugins/Plugins.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 
 #include "EventManager.h"
-
+// #include "HAPEventManager.hpp"
 
 #if defined(ARDUINO_ARCH_ESP32)
 #include <WiFiClient.h>
@@ -265,14 +265,10 @@ protected:
 	static const fnet_mdns_txt_key_t* HomekitTXTRecord();
 	static HAP_MDNS_TXT _hapMdnsTxt;
 		
-	
-	
-
 #endif
-	
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
-	HAPFakeGatoFactory _fakeGatoFactory;
+	HAPFakegatoFactory _fakeGatoFactory;
 	// 
 	// Event handler
 	// 
@@ -286,6 +282,9 @@ protected:
 
 	bool stopEvents();
 	void stopEvents(bool value);
+
+
+	// HAPEventManager	_evtMgr;
 
 	// 
 	// Event Member callbacks

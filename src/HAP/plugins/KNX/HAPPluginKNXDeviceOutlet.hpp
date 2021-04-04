@@ -13,10 +13,10 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 #include "HAPFakeGato.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 #include "HAPFakeGatoEnergy.hpp"
 #include "HAPPluginKNXDevice.hpp"
 #include "HAPVersion.hpp"
@@ -32,7 +32,7 @@ public:
     
     // void identify(bool oldValue, bool newValue);
     void setEventManager(EventManager* eventManager);
-    void setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory);
+    void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
     uint32_t getTimestampLastActivity();
 
@@ -52,11 +52,11 @@ protected:
     
     
 
-    HAPCharacteristicBool*    _stateValue;
-    HAPCharacteristicBool*    _inUseState;
-    HAPCharacteristicBool*    _parentalLock;
-    HAPCharacteristicFloat*   _curPowerValue;
-    HAPCharacteristicFloat*   _ttlPowerValue;
+    HAPCharacteristicT<bool>*    _stateValue;
+    HAPCharacteristicT<bool>*    _inUseState;
+    HAPCharacteristicT<bool>*    _parentalLock;
+    HAPCharacteristicT<float>*   _curPowerValue;
+    HAPCharacteristicT<float>*   _ttlPowerValue;
     // HAPCharacteristicString* 	_lastUpdate;
 
     uint32_t                _timestampLastActivity;
@@ -71,9 +71,9 @@ protected:
 	void changedPowerTotal(float oldValue, float newValue);
     void changedState(bool oldValue, bool newValue);
 
-    void readState();
-    void readPowerTotal();
-    void readPowerCurrent();
+    bool readState();
+    float readPowerTotal();
+    float readPowerCurrent();
     
     JsonObject scheduleToJson();
     void scheduleFromJson(JsonObject &root);

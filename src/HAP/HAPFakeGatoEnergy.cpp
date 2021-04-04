@@ -99,19 +99,19 @@ void HAPFakeGatoEnergy::getSignature(uint8_t* signature){
     // bitmask 0x10 => on/off		= 10000
 
     // bitmask for all: 11111 = 0x1F
-    signature[0] = (uint8_t)HAPFakeGatoSignature_PowerWatt;
+    signature[0] = (uint8_t)HAPFakegatoSignature_PowerWatt;
     signature[1] = 2;
 
-    signature[2] = (uint8_t)HAPFakeGatoSignature_PowerVoltage;
+    signature[2] = (uint8_t)HAPFakegatoSignature_PowerVoltage;
     signature[3] = 2;
 
-    signature[4] = (uint8_t)HAPFakeGatoSignature_PowerCurrent;
+    signature[4] = (uint8_t)HAPFakegatoSignature_PowerCurrent;
     signature[5] = 2;
 
-    signature[6] = (uint8_t)HAPFakeGatoSignature_Power10thWh;
+    signature[6] = (uint8_t)HAPFakegatoSignature_Power10thWh;
     signature[7] = 2;
 
-    signature[8] = (uint8_t)HAPFakeGatoSignature_PowerOnOff;
+    signature[8] = (uint8_t)HAPFakegatoSignature_PowerOnOff;
     signature[9] = 1;
 }
 
@@ -374,10 +374,10 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
     LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Schedule Write " + _name + " ..." , true);
 
     size_t outputLength = 0;        
-    mbedtls_base64_decode(NULL, 0, &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
+    mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
     uint8_t decoded[outputLength];
 
-    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());    
+    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());    
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE	
     HAPHelper::array_print("decoded", decoded, outputLength);    
@@ -409,7 +409,7 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
         _shouldSave = true; 
     }
 
-    _configReadCharacteristics->setValueString(_schedule->buildScheduleString());
+    _configReadCharacteristics->valueFromString(_schedule->buildScheduleString().c_str());
 
     if (_shouldSave){
         _callbackSaveConfig();
@@ -420,7 +420,7 @@ void HAPFakeGatoEnergy::scheduleWrite(String oldValue, String newValue){
 FLASHMEM 
 #endif
 void HAPFakeGatoEnergy::beginSchedule(){
-    _configReadCharacteristics->setValueString(_schedule->buildScheduleString());    
+    _configReadCharacteristics->valueFromString(_schedule->buildScheduleString().c_str());    
 }
 
 #if defined(ARDUINO_TEENSY41)

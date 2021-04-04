@@ -74,80 +74,80 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         HAPService* outletService = new HAPService(HAP_SERVICE_OUTLET);
         _accessory->addService(outletService);
 
-        HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
-        plugServiceName->setValueString(_name);
-        _accessory->addCharacteristics(outletService, plugServiceName);
+        HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
+        plugServiceName->setValue(_name);
+        _accessory->addCharacteristicToService(outletService, plugServiceName);
 
         //
         // Power State 
         // 
-        _stateValue = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
-        _stateValue->setValueString("0");
+        _stateValue = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);            
+        _stateValue->setValue(false);
 
         auto callbackState = std::bind(&HAPPluginKNXDeviceOutlet::changedState, this, std::placeholders::_1, std::placeholders::_2);        
-        _stateValue->valueChangeFunctionCall = callbackState;
+        _stateValue->setValueChangeCallback(callbackState);
 
         // Read value from knx
-        _stateValue->valueString();
+        _stateValue->value();
 
         auto callbackReadState = std::bind(&HAPPluginKNXDeviceOutlet::readState, this);        
-        _stateValue->valueGetFunctionCall = callbackReadState;
+        _stateValue->setValueGetCallback(callbackReadState);
 
-        _accessory->addCharacteristics(outletService, _stateValue);
+        _accessory->addCharacteristicToService(outletService, _stateValue);
   
 
         //
         // in use State
         //
-        _inUseState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_OUTLET_IN_USE, permission_read|permission_notify);        
+        _inUseState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_OUTLET_IN_USE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY);        
         // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);        
         // _inUseState->valueChangeFunctionCall = callbackState;
-        _inUseState->setValueString("1");
-        _accessory->addCharacteristics(outletService, _inUseState);
+        _inUseState->setValue(true);
+        _accessory->addCharacteristicToService(outletService, _inUseState);
 
         //
         // power current (EVE)
         //
-        _curPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
-        _curPowerValue->setValueString("0.0");
+        _curPowerValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0.0, 3600, 0.1, HAP_UNIT_NONE);
+        _curPowerValue->setValue(0.0);
         
         auto callbackChangeCurPower = std::bind(&HAPPluginKNXDeviceOutlet::changedPowerCurrent, this, std::placeholders::_1, std::placeholders::_2);
-        _curPowerValue->valueChangeFunctionCall = callbackChangeCurPower;
+        _curPowerValue->setValueChangeCallback(callbackChangeCurPower);
 
         auto callbackReadPowerCurrent = std::bind(&HAPPluginKNXDeviceOutlet::readPowerCurrent, this);        
-        _curPowerValue->valueGetFunctionCall = callbackReadPowerCurrent;
+        _curPowerValue->setValueGetCallback(callbackReadPowerCurrent);
         
         // Read value from knx
         _curPowerValue->valueString();
 
-        _accessory->addCharacteristics(outletService, _curPowerValue);
+        _accessory->addCharacteristicToService(outletService, _curPowerValue);
         
 
         //
         // power total (EVE)
         //
-        _ttlPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
-        _ttlPowerValue->setValueString("0.0");
+        _ttlPowerValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0.0, 3600, 0.1, HAP_UNIT_NONE);
+        _ttlPowerValue->setValue(0.0);
         
         auto callbackChangeTtlPower = std::bind(&HAPPluginKNXDeviceOutlet::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
-        _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
+        _ttlPowerValue->setValueChangeCallback(callbackChangeTtlPower);
         
         auto callbackReadPowerTotal = std::bind(&HAPPluginKNXDeviceOutlet::readPowerTotal, this);        
-        _ttlPowerValue->valueGetFunctionCall = callbackReadPowerTotal;
+        _ttlPowerValue->setValueGetCallback(callbackReadPowerTotal);
         
         // Read value from knx
         _ttlPowerValue->valueString();
 
 
-        _accessory->addCharacteristics(outletService, _ttlPowerValue);
+        _accessory->addCharacteristicToService(outletService, _ttlPowerValue);
 
 
         //
         // parental Lock
         //
-        _parentalLock = new HAPCharacteristicBool(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, permission_read|permission_write);        
-        _parentalLock->setValueString("0");    
-        _accessory->addCharacteristics(outletService, _parentalLock);
+        _parentalLock = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE);        
+        _parentalLock->setValue(false);    
+        _accessory->addCharacteristicToService(outletService, _parentalLock);
 
 
         // if (tmpService == nullptr) tmpService = temperatureService;
@@ -167,26 +167,26 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         // FakeGato
         // 	
-        if (_enableFakegato){
-            _fakegato = new HAPFakeGatoEnergy();
-            _fakegato->registerFakeGatoService(_accessory, _name, true);    
+        // if (_enableFakegato){
+        //     _fakegato = new HAPFakeGatoEnergy();
+        //     _fakegato->registerFakeGatoService(_accessory, _name, true);    
 
 
-            if (_enableSchedule) {
-                // Fakegato Schedule
-                // _fakegato->setSerialNumber(sn);        
-                _fakegato->setCallbackTimerStart(std::bind(&HAPPluginKNXDeviceOutlet::writeStateCallbackFromSchedule, this, std::placeholders::_1));
-                // _fakegato.setCallbackTimerEnd(std::bind(&HAPPluginKNXDeviceOutlet::switchCallback, this));
-                _fakegato->setCallbackGetTimestampLastActivity(std::bind(&HAPPluginKNXDeviceOutlet::getTimestampLastActivity, this));
+        //     if (_enableSchedule) {
+        //         // Fakegato Schedule
+        //         // _fakegato->setSerialNumber(sn);        
+        //         _fakegato->setCallbackTimerStart(std::bind(&HAPPluginKNXDeviceOutlet::writeStateCallbackFromSchedule, this, std::placeholders::_1));
+        //         // _fakegato.setCallbackTimerEnd(std::bind(&HAPPluginKNXDeviceOutlet::switchCallback, this));
+        //         _fakegato->setCallbackGetTimestampLastActivity(std::bind(&HAPPluginKNXDeviceOutlet::getTimestampLastActivity, this));
                 
-                _fakegato->setCallbackSaveConfig(std::bind(&HAPPluginKNXDeviceOutlet::saveConfig, this));
+        //         _fakegato->setCallbackSaveConfig(std::bind(&HAPPluginKNXDeviceOutlet::saveConfig, this));
 
-                _fakegato->beginSchedule();
-            }
+        //         _fakegato->beginSchedule();
+        //     }
 
-            auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceOutlet::fakeGatoCallback, this);
-            _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
-        }
+        //     auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceOutlet::fakeGatoCallback, this);
+        //     _fakegatoFactory->registerFakeGato(_fakegato,  String(_name), callbackAddEntry);
+        // }
 
     }
     return _accessory;
@@ -204,7 +204,7 @@ void HAPPluginKNXDeviceOutlet::setEventManager(EventManager* eventManager){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
-void HAPPluginKNXDeviceOutlet::setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory){
+void HAPPluginKNXDeviceOutlet::setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory){
     
     _fakegatoFactory = fakegatoFactory;
     // Serial.printf("w fakegato: %p\n", _fakegatoFactory);
@@ -216,7 +216,7 @@ void HAPPluginKNXDeviceOutlet::changedPowerTotal(float oldValue, float newValue)
 
     if ( oldValue == newValue) return;
 
-    struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _ttlPowerValue->iid, String(newValue));							
+    struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _ttlPowerValue->iid(), String(newValue));							
     _eventManager->queueEvent( EventManager::kEventNotifyController, event); 
 }
 
@@ -235,7 +235,7 @@ void HAPPluginKNXDeviceOutlet::changedState(bool oldValue, bool newValue){
     _timestampLastActivity = HAPTime::timestamp();
 
     // Add event
-	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _stateValue->iid, String(newValue));							
+	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _stateValue->iid(), String(newValue));							
 	_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 
     if (_enableFakegato){
@@ -248,16 +248,16 @@ void HAPPluginKNXDeviceOutlet::changedPowerCurrent(float oldValue, float newValu
     Serial.printf("[KNX:%X] New power current: %.2f\n", _id, newValue);
     if ( oldValue == newValue) return;
 
-    struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _curPowerValue->iid, String(newValue));							
+    struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), _curPowerValue->iid(), String(newValue));							
     _eventManager->queueEvent( EventManager::kEventNotifyController, event);
 
 
-    String inUse;
-    newValue > 0.01 ? inUse = "1" : inUse = "0";    
-    if (_inUseState->valueString() != inUse){
-        _inUseState->setValueString(inUse);
+    bool inUse;
+    inUse = (newValue > 0.01);    
+    if (_inUseState->value() != inUse){
+        _inUseState->setValue(inUse);
 
-        struct HAPEvent eventInUse = HAPEvent(nullptr, _accessory->aid, _inUseState->iid, String(inUse));							
+        struct HAPEvent eventInUse = HAPEvent(nullptr, _accessory->aid(), _inUseState->iid(), String(inUse));							
         _eventManager->queueEvent( EventManager::kEventNotifyController, eventInUse);
     }
     
@@ -281,7 +281,7 @@ void HAPPluginKNXDeviceOutlet::writeStateCallback(GroupObject& go){
 
     _shouldSend = false;
     Serial.println("writeStateCallback: " + String(result));
-    _stateValue->setValueString(String(result));
+    _stateValue->setValue(result);
 }
 
 void HAPPluginKNXDeviceOutlet::writeActiveEnergyCallback(GroupObject& go){
@@ -292,7 +292,7 @@ void HAPPluginKNXDeviceOutlet::writeActiveEnergyCallback(GroupObject& go){
 
     // ToDo: Add proper conversion
     if (result > 3600) result = 3599;
-    _ttlPowerValue->setValueString(String(result));
+    _ttlPowerValue->setValue(result);
 }
 
 void HAPPluginKNXDeviceOutlet::writeCurrentCallback(GroupObject& go){
@@ -302,7 +302,7 @@ void HAPPluginKNXDeviceOutlet::writeCurrentCallback(GroupObject& go){
     Serial.println("writeCurrentCallback: " + String(result));
 
     // ToDo: Add proper conversion
-    _curPowerValue->setValueString(String(result));
+    _curPowerValue->setValue(result);
 }
 
 
@@ -344,17 +344,23 @@ void HAPPluginKNXDeviceOutlet::saveConfig(){
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
 }
 
-void HAPPluginKNXDeviceOutlet::readState(){
+bool HAPPluginKNXDeviceOutlet::readState(){
     Serial.printf("[KNX:%X] Read state\n", _id);
-    _stateValue->_value = knx.getGroupObject(_koReadState).value();
+    bool result = knx.getGroupObject(_koReadState).value();
+    _stateValue->setValue(result, false);
+    return result;
 }
 
-void HAPPluginKNXDeviceOutlet::readPowerTotal(){
+float HAPPluginKNXDeviceOutlet::readPowerTotal(){
     Serial.printf("[KNX:%X] Read power total\n", _id);
-    _ttlPowerValue->_value = knx.getGroupObject(_koWriteCurrent).value();
+    float result = knx.getGroupObject(_koWriteCurrent).value();
+    _ttlPowerValue->setValue(result, false);
+    return result;
 }
 
-void HAPPluginKNXDeviceOutlet::readPowerCurrent(){
+float HAPPluginKNXDeviceOutlet::readPowerCurrent(){
     Serial.printf("[KNX:%X] Read power current\n", _id);
-    _curPowerValue->_value = knx.getGroupObject(_koWriteCurrent).value();
+    float result = knx.getGroupObject(_koWriteCurrent).value();
+    _curPowerValue->setValue(result, false);
+    return result;
 }

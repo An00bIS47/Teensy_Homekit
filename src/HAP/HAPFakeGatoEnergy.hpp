@@ -83,8 +83,8 @@ public:
 
 protected:
     // Schedules
-    void scheduleRead(String oldValue, String newValue) override;
-    void scheduleWrite(String oldValue, String newValue) override;
+    virtual void scheduleRead(String oldValue, String newValue) override;
+    virtual void scheduleWrite(String oldValue, String newValue) override;
 
 private:
     bool _shouldSave;

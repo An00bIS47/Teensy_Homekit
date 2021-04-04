@@ -13,10 +13,10 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 #include "HAPFakeGato.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 #include "HAPFakeGatoSwitch.hpp"
 #include "HAPPluginKNXDevice.hpp"
 #include "HAPVersion.hpp"
@@ -31,7 +31,7 @@ public:
     void handle(bool forced) override;
 
     void setEventManager(EventManager* eventManager);
-    void setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory);
+    void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
     // uint8_t id;
     // char name[41];
@@ -44,7 +44,7 @@ protected:
     uint16_t                _koReadState;
     uint16_t                _koWriteState;    
 
-    HAPCharacteristicBool*    _stateValue;
+    HAPCharacteristicT<bool>*  _stateValue;
 
     // HAPCharacteristicString* 	_lastUpdate;
 
@@ -52,7 +52,7 @@ protected:
 
     void changedState(bool oldValue, bool newValue);
     
-    void readState();
+    bool readState();
     void writeStateCallback(GroupObject& go);
 
     bool fakeGatoCallback() override;  

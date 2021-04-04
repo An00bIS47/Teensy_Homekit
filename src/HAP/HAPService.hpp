@@ -11,8 +11,8 @@
 
 #include <Arduino.h>
 #include <vector>
-// #include <memory>
-#include "HAPCharacteristic.hpp"
+#include <memory>
+#include "HAPCharacteristicBase.hpp"
 
 class HAPService {
 public:
@@ -21,65 +21,73 @@ public:
     HAPService(uint8_t _uuid);
     HAPService(const String& _uuid);
 
+    uint32_t aid() { return _aid; }
+    void setAID(uint32_t aid) { _aid = aid; }
+
     // String describe();
     void printTo(Print& print);
 
     // void toJson(JsonArray& array) __attribute__ ((deprecated));
     // void toJson(JsonObject& nested) __attribute__ ((deprecated));
-
-    uint8_t serviceID;
-    uint8_t uuid;
-    String uuidString;
+    // std::vector<HAPCharacteristic*> _characteristics;
     
-    bool hidden;
-    bool primary;
+    bool isHidden() { return (_features && 0x01); }
+    void setHidden(bool mode = true) { _features = mode << 0; }
 
-    std::vector<HAPCharacteristic*> _characteristics;
-    // std::vector<std::unique_ptr<HAPCharacteristicBase*>> _chars;
+    bool isPrimary() { return (_features && 0x02); }
+    void setPrimary(bool mode = true){ _features = mode << 1; }
 
-    std::vector<uint8_t> _linkedServiceIds;
-
-    void setHiddenService(bool mode = true){
-        hidden = mode;
-    }
-
-    void setPrimaryService(bool mode = true){
-        primary = mode;
-    }
-
-    void addLinkedServiceId(uint8_t serviceId_){
+    void addLinkedServiceId(uint32_t serviceId_){
         _linkedServiceIds.push_back(serviceId_);
     }
 
-    uint8_t numberOfCharacteristics() { return _characteristics.size(); }
-    HAPCharacteristic *characteristicsAtIndex(uint8_t index) { return _characteristics[index]; }
+    // std::vector< std::unique_ptr< HAPCharacteristicBase > > characteristics(){
+    //     return _characteristics;
+    // }
 
-	// 
-	// NEW and DELETE overloads
-	// 
-// 	void* operator new(size_t size)
-//     {
-//         // Serial.printf(PSTR("Overloading new operator with size: %d\n"), size);
-//         // void* ptr = ::operator new(size);
+#if defined(ARDUINO_TEENSY41)
+    FLASHMEM 
+#endif
+    size_t numberOfCharacteristics() { return _characteristics.size(); }
 
-// #if defined(ARDUINO_TEENSY41)
-// 		void* ptr = extmem_malloc(size);		
-// #else		
-//         void* ptr = malloc(size); // will also work fine
-// #endif     
-//         return ptr;
-//     }
- 
-//     void operator delete(void* ptr)
-//     {
-//         // Serial.println(F("Overloading delete operator"));
-        
-// #if defined(ARDUINO_TEENSY41)
-// 		extmem_free(ptr);
-// #else		
-//         free(ptr);
-// #endif 		
-//     }    
+    
+#if defined(ARDUINO_TEENSY41)
+    FLASHMEM 
+#endif
+	HAPCharacteristicBase* characteristicAtIndex(size_t index) {
+        return _characteristics.at(index).get();
+    }
+
+    
+#if defined(ARDUINO_TEENSY41)
+    FLASHMEM 
+#endif
+	HAPCharacteristicBase* characteristicWithIID(uint32_t iid) {
+        for (int i=0; i < _characteristics.size(); i++){
+            if (_characteristics[i]->iid() == iid){
+                return characteristicAtIndex(i);
+            }
+        }
+        return nullptr;
+    }    
+
+	// void* operator new(size_t size);
+    // void operator delete(void* ptr);
+
+    std::vector<std::unique_ptr<HAPCharacteristicBase>> _characteristics;
+protected:
+    uint32_t    _aid;
+    uint8_t     _uuid;
+    String      _uuidString;
+    
+
+    uint8_t     _features; // hidden == 0x01, primary == 0x02
+    // bool        _hidden;
+    // bool        _primary;
+
+    
+    std::vector<uint32_t> _linkedServiceIds;
+
 };
 
 

@@ -30,8 +30,9 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
-#include "HAPFakeGato.hpp"
-#include "HAPFakeGatoWeather.hpp"
+#include "HAPFakegato2.hpp"
+#include "HAPFakegatoAverage.hpp"
+// #include "HAPFakeGatoWeather.hpp"
 
 
 #include <Wire.h>
@@ -82,6 +83,20 @@ public:
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 
 #endif	
+
+
+	inline float getAveragedTemperatureValue(){
+		return _temperatureAverage.getAverage();
+	}
+
+	inline float getAveragedHumidityValue(){
+		return _humidityAverage.getAverage();
+	}
+
+	inline uint16_t getAveragedPressureValue(){
+		return _pressureAverage.getAverage();
+	}
+
 	
 	HAPConfigurationPlugin* setDefaults() override;
 	void internalConfigToJson(Print& prt); 	
@@ -90,24 +105,27 @@ public:
 protected:
 	
  	struct HAPPluginBME280Config* _configInternal;
-		
-	HAPCharacteristicFloat*		_humidityValue;
-	HAPCharacteristicFloat*		_temperatureValue;
-	HAPCharacteristicUInt16*	_pressureValue;
+	
+	HAPCharacteristicT<float>*		_humidityValue;
+	HAPFakegatoAverage<float>		_humidityAverage;
+
+	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPFakegatoAverage<float>		_temperatureAverage;
+
+
+	HAPCharacteristicT<uint16_t>*	_pressureValue;
+	HAPFakegatoAverage<uint16_t>	_pressureAverage;
+
+	
+	// HAPCharacteristicFloat*		_humidityValue;
+	// HAPCharacteristicFloat*		_temperatureValue;
+	// HAPCharacteristicUInt16*	_pressureValue;
 
 	Adafruit_BME280* _bme;
 
-	void addToAverage(float temperature, float humidity, uint16_t pressure);
-	void resetAverage();
-
-	float _averageTemperature;
-	float _averageHumidity;
-	uint64_t _averagePressure;
-
-	uint16_t _measurementCount;
-
 	bool fakeGatoCallback();
-	HAPFakeGatoWeather _fakegato;
+	// HAPFakeGatoWeather _fakegato;
+	HAPFakegato2 _fakegato;
 };
 
 REGISTER_PLUGIN(HAPPluginBME280)

@@ -14,10 +14,10 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 #include "HAPFakeGato.hpp"
-#include "HAPFakeGatoFactory.hpp"
+#include "HAPFakegatoFactory.hpp"
 #include "HAPFakeGatoWeather.hpp"
 #include "HAPPluginKNXDevice.hpp"
 #include "HAPVersion.hpp"
@@ -35,7 +35,7 @@ public:
     
     // void identify(bool oldValue, bool newValue);
     void setEventManager(EventManager* eventManager);
-    void setFakeGatoFactory(HAPFakeGatoFactory* fakegatoFactory);
+    void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
 
     // uint8_t id;
@@ -52,9 +52,9 @@ protected:
 
     bool                    _useHumdityDPT9;
    
-	HAPCharacteristicFloat*	_humidityValue;
-	HAPCharacteristicFloat*	_temperatureValue;
-	HAPCharacteristicUInt16*	_pressureValue;
+	HAPCharacteristicT<float>*	    _humidityValue;
+	HAPCharacteristicT<float>*	    _temperatureValue;
+	HAPCharacteristicT<uint16_t>*	_pressureValue;
 
 #if HAP_PLUGIN_KNX_ENABLE_AVERAGE_FOR_WEATHER
     float       _averageTemperature;
