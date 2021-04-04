@@ -236,7 +236,7 @@ void HAPFakegato2::addEntry(uint8_t bitmask){
     uint8_t data[valueLength()];
     uint8_t offset = 0;
     for (uint8_t i=0; i < _signatures.size(); i++){
-        if (bitmask && (1 << i)){                        
+        if (bitmask && (1 << i)){                                   
             uint8_t length = 0;
             _signatures[i]->getBytes(data + offset, &length);
             offset += length;
@@ -258,6 +258,7 @@ void HAPFakegato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t lengt
         LogW("WARNING: Fakegato entry will be overwritten!", true);
     }
 
+    Serial.print("bitmask: "); Serial.println(bitmask);
     HAPHelper::array_print("FAKEGATO ENTRY DATA", data, length);
 
     size_t indexLast = _entries.size() - 1;        
@@ -343,10 +344,20 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         
         Serial.print(">>>> size: ");
         Serial.println(size);
-         
-        // size
-        data[offset + currentOffset++] = size;        
 
+
+        Serial.print(">>>> timestamp: ");
+        Serial.println(_entries[_requestedIndex]->timestamp);
+
+        Serial.print(">>>> bitmask: ");
+        Serial.println(_entries[_requestedIndex]->bitmask);
+
+
+        // size
+        data[offset + currentOffset] = size;        
+        currentOffset += 1;
+
+        // entry count
         // requestedEntry == index
         ui32_to_ui8 entryCount;
         entryCount.ui32 = entryCounter;
@@ -359,9 +370,13 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         memcpy(data + offset + currentOffset, secs.ui8, 4);
         currentOffset += 4;
 
-        // data includes all values including bitmask
+        // bitmask
+        data[offset + currentOffset] = _entries[_requestedIndex]->bitmask; 
+        currentOffset += 1;
+
+        // data includes all values
         memcpy(data + offset + currentOffset, _entries[_requestedIndex]->data, _entries[_requestedIndex]->length);
-        currentOffset += _entries[_requestedIndex]->length + 1;  // + 1 for bitmask !
+        currentOffset += _entries[_requestedIndex]->length;  // + 1 for bitmask !
 
         String t = "History Entry " + String(entryCounter);
         HAPHelper::array_print(t.c_str(), data + offset, currentOffset);

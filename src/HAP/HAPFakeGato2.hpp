@@ -243,7 +243,7 @@ protected:
             prt.print(F(" bitmask:")); prt.print(bitmask);
             prt.print(F(" timestamp:")); prt.print(timestamp);
             prt.println("");
-            HAPHelper::array_print(" data", data, length);
+            HAPHelper::array_print("data", data, length);
         }
 
 #endif
