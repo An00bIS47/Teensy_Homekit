@@ -372,4 +372,7 @@ dmypy.json
 # profiling data
 .prof
 
+# homekitstorage.json
+homekitStorage.json
+
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,macos,python,platformio,cmake,node

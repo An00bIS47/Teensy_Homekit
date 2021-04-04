@@ -1,0 +1,184 @@
+{
+  "parameters": [
+    {
+      "Name": "ServiceType<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-HK-ServiceSelection",
+      "Text": "<C>: Homekit Accessory",
+      "Value": "0",
+      "Memory": {
+        "Size": 1
+      }
+    },
+    {
+      "Name": "ServiceName<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-Text40Byte",
+      "Text": "Bezeichnung des Accessorys",
+      "Value": "Sensor <C>",
+      "Memory": {
+        "Size": 40
+      }
+    },
+    {
+      "Name": "EnableFakegato<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-CheckBox",
+      "Text": "Aktiviere Historie",
+      "Value": 0,
+      "Memory": {
+        "BitOffset": 0,
+        "Size": 1
+      }
+    },
+    {
+      "Name": "EnableSchedule<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-CheckBox",
+      "Text": "Aktiviere Schedule",
+      "Value": 0,
+      "Memory": {
+        "BitOffset": 1,
+        "Size": 1
+      }
+    },
+    {
+      "Name": "TemperatureSensor<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-CheckBox",
+      "Text": "   Temperatursensor",
+      "Value": 0,
+      "Memory": {
+        "BitOffset": 0,
+        "Size": 1
+      }
+    },
+    {
+      "Name": "HumiditySensor<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-CheckBox",
+      "Text": "   Luftfeuchtesensor",
+      "Value": 0,
+      "Memory": {
+        "BitOffset": 1,
+        "Size": 1
+      }
+    },
+    {
+      "Name": "AirPressureSensor<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-CheckBox",
+      "Text": "   Luftdrucksensor",
+      "Value": 0,
+      "Memory": {
+        "BitOffset": 2,
+        "Size": 1
+      }
+    },
+    {
+      "Name": "HumidityDPT<C>",
+      "ParameterType": "M-00FA_A-0000-00-0000_PT-DptSelect",
+      "Text": "      Wert empfangen als",
+      "Value": 9,
+      "Memory": {
+        "Size": 1
+      }
+    }
+  ],
+  "comObjects": [
+    {
+      "Name": "RemoteTemperature<C>",
+      "Text": "Temperatur <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Disabled",
+      "UpdateFlag": "Disabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-9-1"
+      ]
+    },
+    {
+      "Name": "RemoteHumidity<C>",
+      "Text": "Luftfeuchtigkeit <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Disabled",
+      "UpdateFlag": "Disabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-5-1",
+        "DPST-9-7"
+      ]
+    },
+    {
+      "Name": "RemoteAirPressure<C>",
+      "Text": "Luftdruck <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Disabled",
+      "UpdateFlag": "Disabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-5-1"
+      ]
+    },
+    {
+      "Name": "RemoteSwitchWrite<C>",
+      "Text": "Schalten <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Enabled",
+      "UpdateFlag": "Enabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-1-1"
+      ]
+    },    
+    {
+      "Name": "RemoteSwitchRead<C>",
+      "Text": "Status <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Disabled",
+      "UpdateFlag": "Disabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-1-1"
+      ]
+    },
+    {
+      "Name": "RemoteOutletCurrent<C>",
+      "Text": "Stromwert (A) <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Disabled",
+      "UpdateFlag": "Disabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-14-19"
+      ]
+    },
+    {
+      "Name": "RemoteOutletActEnergy<C>",
+      "Text": "Stromverbrauch (kWh) <C>",
+      "FunctionText": "Eingang",
+      "ReadFlag": "Disabled",
+      "WriteFlag": "Enabled",
+      "CommunicationFlag": "Enabled",
+      "TransmitFlag": "Disabled",
+      "UpdateFlag": "Disabled",
+      "ReadOnInitFlag": "Disabled",
+      "DatapointType": [
+        "DPST-13-13"
+      ]
+    }
+
+
+  ]
+}

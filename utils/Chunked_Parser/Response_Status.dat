@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+Content-Type: application/hap+json
+Connection: keep-alive
+Transfer-Encoding: chunked
+
+c9
+{"characteristics":[{"aid":2,"iid":18,"value":"GAAAAAAAAABCQL8lAwECAgIDAgQAAAEAAAAAAAAAAAEB","maxDataLen":128,"format":"data","perms":["pr","ev"],"ev":1,"type":"E863F116-079E-48FF-8F27-9C2605A29F52"}]}
+0
+

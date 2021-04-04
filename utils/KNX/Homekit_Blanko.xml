@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<KNX xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" CreatedBy="KNX MT" ToolVersion="5.1.255.16695" xmlns="http://knx.org/xml/project/14">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-1" Name="Geräte" Number="1" DefaultLanguage="de">
+          <CatalogItem Id="M-00FA_H-123-1_HP-0000-00-0000_CI-1-1" Name="Homekit Gateway" Number="1" ProductRefId="M-00FA_H-123-1_P-1" Hardware2ProgramRefId="M-00FA_H-123-1_HP-0000-00-0000" DefaultLanguage="de" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0000-00-0000" ApplicationNumber="1" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="Homekit Gateway" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="de" DynamicTableManagement="false" Linkable="true" MinEtsVersion="4.0">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0000-00-0000_RS-04-00000" Name="Parameters" Offset="0" Size="4" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <!-- the following ParameterTypes are from a productive example -->
+              <!-- simple integer type -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-DelaySeconds" Name="DelaySeconds">
+                <TypeNumber SizeInBit="32" Type="signedInt" minInclusive="0" maxInclusive="86400" />
+              </ParameterType>
+              <!-- enumeration with 16-bit (word) values -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-DelaySelection" Name="DelaySelection">
+                <TypeRestriction Base="Value" SizeInBit="16">
+                  <Enumeration Text="1 Sekunde" Value="1" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-0" />
+                  <Enumeration Text="2 Sekunden" Value="2" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-1" />
+                  <Enumeration Text="5 Sekunden" Value="5" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-2" />
+                  <Enumeration Text="10 Sekunden" Value="10" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-3" />
+                  <Enumeration Text="30 Sekunden" Value="30" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-4" />
+                  <Enumeration Text="1 Minute" Value="60" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-5" />
+                  <Enumeration Text="2 Minuten" Value="120" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-6" />
+                  <Enumeration Text="5 Minuten" Value="300" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-7" />
+                  <Enumeration Text="10 Minuten" Value="600" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-8" />
+                  <Enumeration Text="30 Minuten" Value="1800" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-9" />
+                  <Enumeration Text="manuelle Eingabe (Sekundengenau)" Value="0" Id="M-00FA_A-0000-00-0000_PT-DelaySelection_EN-10" />
+                </TypeRestriction>
+              </ParameterType>
+
+              <!-- Homekit -->
+              <!-- enumeration with 8-bit (byte) values -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection" Name="HKServiceSelection">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <!-- <Enumeration Text="Temperature" Value="1" Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection_EN-0" />
+                  <Enumeration Text="Humidity" Value="2" Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection_EN-1" /> -->
+                  <Enumeration Text="Inaktiv" Value="0" Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection_EN-0" />
+                  <Enumeration Text="Wetter" Value="1" Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection_EN-1" />
+                  <Enumeration Text="Steckdose" Value="2" Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection_EN-2" />
+                  <Enumeration Text="Schalter" Value="3" Id="M-00FA_A-0000-00-0000_PT-HK-ServiceSelection_EN-3" />
+                </TypeRestriction>
+              </ParameterType> 
+              <!-- End Homekit -->
+
+
+              <!-- Demo ParameterTypes to show available possibilities  -->
+              <!-- Parameter type for text parameter, just for descriptions in ETS, is not transferred to device -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-Text40Byte" Name="Text40Byte">
+                <TypeText SizeInBit="320" />
+              </ParameterType>
+              <!-- Parameter type for 1 bit parameter, presented as checkbox -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-CheckBox" Name="CheckBox">
+                <TypeNumber SizeInBit="1" Type="unsignedInt" minInclusive="0" maxInclusive="1" UIHint="CheckBox" />
+              </ParameterType>
+              <!-- Parameter type for 1 bit parameter, presented as radio button -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-YesNo" Name="YesNo">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Nein" Value="0" Id="M-00FA_A-0000-00-0000_PT-YesNo_EN-0" />
+                  <Enumeration Text="Ja" Value="1" Id="M-00FA_A-0000-00-0000_PT-YesNo_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <!-- Parameter type for an 8 bit percent parameter -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-Percentage" Name="Percentage">
+                <TypeNumber SizeInBit="8" Type="signedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <!-- Parameter type for an 16 bit float value like temperature -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-ValueDpt9" Name="ValueDpt9">
+                <TypeFloat Encoding="IEEE-754 Single" minInclusive="-671088" maxInclusive="670760" />
+              </ParameterType>
+              <!-- Parameter type for an 8 bit enumeration -->
+              <ParameterType Id="M-00FA_A-0000-00-0000_PT-DptSelect" Name="DptSelect">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="DPT 5.001 (1 Byte, Prozentwert)" Value="5" Id="M-00FA_A-0000-00-0000_PT-DptSelect_EN-0" />
+                  <Enumeration Text="DPT 9.007 (2 Byte, Fließkommawert)" Value="9" Id="M-00FA_A-0000-00-0000_PT-DptSelect_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+
+            
+            </Parameters>
+            <ParameterRefs>
+              <!-- ParameterRef have to be defined for each parameter, pay attention, that the ID-part (number) after R- is unique! -->
+              <!-- ParameterRef are used in the ETS UI -->
+              
+            </ParameterRefs>
+            <ComObjectTable>
+             
+            </ComObjectTable>
+            <ComObjectRefs>
+              <!-- A ComObjecdtRef is necessary for each ComObject, ComObjectRef are used in the ETS UI -->
+             
+            </ComObjectRefs>
+            <AddressTable MaxEntries="65535" />
+            <AssociationTable MaxEntries="65535" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="4" Mode="0" Fill="0" AppliesTo="full" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="4" Verify="true" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <!-- Here statrs the UI definition -->
+          <Dynamic>
+            <!-- The following block is always there -->
+            <ChannelIndependentBlock>               
+              <!-- Channels -->
+
+              <!-- End Channels -->
+            </ChannelIndependentBlock>   
+
+
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-123-1" Name="ESP32" SerialNumber="123" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-123-1_P-1" Text="Homekit Gateway" OrderNumber="1" IsRailMounted="false" DefaultLanguage="de">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-123-1_HP-0000-00-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0000-00-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
