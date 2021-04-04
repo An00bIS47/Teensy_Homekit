@@ -29,14 +29,14 @@ union ui16_to_ui8 {
     uint8_t ui8[2];
 };
 
-const uint8_t type_size_map[] = {
+const PROGMEM uint8_t type_size_map[] = {
     0,
     2,  // HAPFakegatoSignature_Temperature
     2,  // HAPFakegatoSignature_Humidity
     2,  // HAPFakegatoSignature_AirPressure
     2,  // HAPFakegatoSignature_AirQuality
     0,  // HAPFakegatoSignature_PowerApparent       // unknown
-    1
+    1   // HAPFakegatoSignature_Door
 };
 
 enum HAPFakegatoSignature {
@@ -157,7 +157,7 @@ protected:
 /**
  * @brief HAPFakegatoCharacteristicTemperature
  *  valueType: float
- *  size: 2
+ *  size: 2 (uint16_t)
  *  calculation to fg: value * 100 
  *  calculation from fg: value / 100 
  * 
@@ -190,7 +190,7 @@ public:
 /**
  * @brief HAPFakegatoCharacteristicHumidity
  *  valueType: float
- *  size: 2
+ *  size: 2 (uint16_t)
  *  calculation to fg: value * 100 
  *  calculation from fg: value / 100 
  * 

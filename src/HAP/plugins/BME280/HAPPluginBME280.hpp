@@ -72,9 +72,13 @@ public:
 
 	HAPAccessory* initAccessory() override;	
 
-	void changeTemp(float oldValue, float newValue);
-	void changeHum(float oldValue, float newValue);
-	void changePressure(uint16_t oldValue, uint16_t newValue);
+	void changedTemperature(float oldValue, float newValue);
+	void changedHumidity(float oldValue, float newValue);
+	void changedPressure(uint16_t oldValue, uint16_t newValue);
+
+	float readTemperature();
+	float readHumidity();
+	uint16_t readPressure();
 
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
@@ -83,7 +87,6 @@ public:
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 
 #endif	
-
 
 	inline float getAveragedTemperatureValue(){
 		return _temperatureAverage.getAverage();
@@ -103,7 +106,8 @@ public:
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
 	
 protected:
-	
+
+
  	struct HAPPluginBME280Config* _configInternal;
 	
 	HAPCharacteristicT<float>*		_humidityValue;
@@ -122,6 +126,7 @@ protected:
 	// HAPCharacteristicUInt16*	_pressureValue;
 
 	Adafruit_BME280* _bme;
+	uint32_t _timestampLastRead;
 
 	bool fakeGatoCallback();
 	// HAPFakeGatoWeather _fakegato;

@@ -86,6 +86,8 @@ public:
 	}
 	
 
+	static size_t base64_enc_len(size_t plainLen);
+	static size_t base64_dec_len(char * input, size_t inputLen);
 
 #if defined(ARDUINO_ARCH_ESP32)
 	static void getPartionTableInfo();

@@ -277,6 +277,18 @@ public:
 		_fakeGatoFactory->registerFakeGato(fakegato, callback, interval);
 	}
 
+
+	void queueNotifyEvent(uint32_t iid, String value){
+		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid, value);							
+		_eventManager->queueEvent( EventManager::kEventNotifyController, event);
+	}
+
+	void queueNotifyEvent(HAPCharacteristicBase* characteristic){
+		if (characteristic->notifiable()){
+			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());							
+			_eventManager->queueEvent( EventManager::kEventNotifyController, event);
+		}		
+	}	
 	
 
 protected:

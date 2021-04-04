@@ -386,4 +386,25 @@ void HAPHelper::printHex(const char* suffix, const uint8_t *data, size_t length,
     }
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+size_t HAPHelper::base64_enc_len(size_t plainLen) {
+	size_t n = plainLen;
+	return (n + 2 - ((n + 2) % 3)) / 3 * 4;
+}
+
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+size_t HAPHelper::base64_dec_len(char * input, size_t inputLen) {
+	size_t i = 0;
+	size_t numEq = 0;
+	for(i = inputLen - 1; input[i] == '='; i--) {
+		numEq++;
+	}
+
+	return ((6 * inputLen) / 8) - numEq;
+}
 

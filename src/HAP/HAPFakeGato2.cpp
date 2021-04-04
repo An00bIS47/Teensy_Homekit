@@ -17,9 +17,9 @@
 #include "mbedtls/base64.h"
 #else
 extern "C" {
-    #include "crypto/base64.h"
-    
+    #include "crypto/base64.h"    
 }
+
 #endif
 #elif defined(CORE_TEENSY)
 #include <Base64.h>
@@ -309,8 +309,9 @@ String HAPFakegato2::callbackGetHistoryEntries(){
     if (!_transfer) return F("AA==");
     
     uint16_t offset = 0;
+    uint16_t buffersize = HAP_FAKEGATO_BATCH_SIZE * (10 + getMaxEntryValueLength());
+    uint8_t data[buffersize];
     
-    uint8_t data[HAP_FAKEGATO_CHUNK_BUFFER_SIZE];
     uint8_t entryCounter = 0;
     uint8_t usedBatch = 0;
 
@@ -344,14 +345,7 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         Serial.println(_requestedIndex);
 #endif  
        
-        // ToDo: Calculate size for each signature !
         uint8_t size = 10;
-        // if (_fakegatoType == HAP_FAKEGATO_TYPE_WEATHER) {            
-        //     size += ((_entries[_requestedIndex].bitmask & 0x04) >> 1);  
-        //     size +=  (_entries[_requestedIndex].bitmask & 0x02);  
-        //     size += ((_entries[_requestedIndex].bitmask & 0x01) * 2); 
-        // }
-
         size += getEntryValueLength(_entries[_requestedIndex]->bitmask);
         
 
@@ -621,7 +615,7 @@ String HAPFakegato2::callbackGetHistoryInfo(){
     memcpy(data + offset, refTimeLastUpdate.ui8, 4);
     offset += 4;    // == 12
 
-    // signature Legnth as word ( x / 2 )
+    // signature Length as word ( x / 2 )
     data[offset++] = (sigLength / 2);  // == 13
 
     // signature
