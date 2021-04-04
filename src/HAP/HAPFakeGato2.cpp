@@ -258,8 +258,10 @@ void HAPFakegato2::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t lengt
         LogW("WARNING: Fakegato entry will be overwritten!", true);
     }
 
+#if HAP_DEBUG_FAKEGATO   
     Serial.print("bitmask: "); Serial.println(bitmask);
     HAPHelper::array_print("FAKEGATO ENTRY DATA", data, length);
+#endif
 
     size_t indexLast = _entries.size() - 1;        
     bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, HAPTime::timestamp(), data, length)));
@@ -328,9 +330,11 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         }
         
         uint8_t currentOffset = 0;
+
+#if HAP_DEBUG_FAKEGATO          
         Serial.print(">>>> _requestedIndex: ");
         Serial.println(_requestedIndex);
-
+#endif  
        
         // ToDo: Calculate size for each signature !
         uint8_t size = 10;
@@ -342,6 +346,8 @@ String HAPFakegato2::callbackGetHistoryEntries(){
 
         size += getEntryValueLength(_entries[_requestedIndex]->bitmask);
         
+
+#if HAP_DEBUG_FAKEGATO        
         Serial.print(">>>> size: ");
         Serial.println(size);
 
@@ -351,7 +357,7 @@ String HAPFakegato2::callbackGetHistoryEntries(){
 
         Serial.print(">>>> bitmask: ");
         Serial.println(_entries[_requestedIndex]->bitmask);
-
+#endif   
 
         // size
         data[offset + currentOffset] = size;        
@@ -378,9 +384,10 @@ String HAPFakegato2::callbackGetHistoryEntries(){
         memcpy(data + offset + currentOffset, _entries[_requestedIndex]->data, _entries[_requestedIndex]->length);
         currentOffset += _entries[_requestedIndex]->length;  // + 1 for bitmask !
 
+#if HAP_DEBUG_FAKEGATO
         String t = "History Entry " + String(entryCounter);
         HAPHelper::array_print(t.c_str(), data + offset, currentOffset);
-
+#endif   
         offset += currentOffset;
         _requestedIndex++;
         entryCounter++;
