@@ -15,9 +15,12 @@
 #include "HAPService.hpp"
 #include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
-#include "HAPFakeGato.hpp"
+
+#include "HAPFakegato2.hpp"
+#include "HAPFakegato+ScheduleEnergy.hpp"
+#include "HAPFakegatoAverage.hpp"
 #include "HAPFakegatoFactory.hpp"
-#include "HAPFakeGatoEnergy.hpp"
+
 #include "HAPPluginKNXDevice.hpp"
 #include "HAPVersion.hpp"
 
@@ -36,6 +39,23 @@ public:
 
     uint32_t getTimestampLastActivity();
 
+
+	inline float getAveragedTotalPowerValue(){
+		return _ttlPowerAverage.getAverage();
+	}
+
+	inline float getAveragedCurrentPowerValue(){
+		return _curPowerAverage.getAverage();
+	}
+
+    inline float getAveragedPowerTenth() {
+        return 0.0;
+    }
+
+    inline float getAveragedPowerVoltage() {
+        return 0.0;
+    }    
+
     // uint8_t id;
     // char name[41];
     // enum HAPPluginKNXServiceType type;  
@@ -50,20 +70,28 @@ protected:
     uint16_t                _koWriteCurrent;
     uint16_t                _koWriteActEnergy;    
     
+    uint32_t                _timestampLastActivity;
     
-
-    HAPCharacteristicT<bool>*    _stateValue;
     HAPCharacteristicT<bool>*    _inUseState;
     HAPCharacteristicT<bool>*    _parentalLock;
+    
+    HAPCharacteristicT<bool>*    _stateValue;
+
+
     HAPCharacteristicT<float>*   _curPowerValue;
+    HAPFakegatoAverage<float>	 _curPowerAverage;
+
     HAPCharacteristicT<float>*   _ttlPowerValue;
+    HAPFakegatoAverage<float>	 _ttlPowerAverage;
+
     // HAPCharacteristicString* 	_lastUpdate;
 
-    uint32_t                _timestampLastActivity;
+    HAPFakegatoScheduleEnergy* _fakegato;
+    bool fakeGatoCallback() override;
 
-    void writeStateCallback(GroupObject& go);
-    void writeCurrentCallback(GroupObject& go);
-    void writeActiveEnergyCallback(GroupObject& go);
+    void setStateFromKNXCallback(GroupObject& go);
+    void setCurrentPowerFromKNXCallback(GroupObject& go);
+    void setActiveEnergyFromKNXCallback(GroupObject& go);
 
     void writeStateCallbackFromSchedule(uint16_t state);
 
@@ -71,18 +99,18 @@ protected:
 	void changedPowerTotal(float oldValue, float newValue);
     void changedState(bool oldValue, bool newValue);
 
-    bool readState();
-    float readPowerTotal();
-    float readPowerCurrent();
+    bool readStateFromKNX();
+    float readPowerTotalFromKNX();
+    float readPowerCurrentFromKNX();
     
     JsonObject scheduleToJson();
     void scheduleFromJson(JsonObject &root);
 
     void saveConfig();
 
-    HAPFakeGatoEnergy* _fakegato;
+    
 
-    bool fakeGatoCallback() override;  
+     
 };
 
 #endif /* HAPPLUGINKNXDEVICEOUTLET_HPP_ */

@@ -14,8 +14,9 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 
-#include "HAPFakeGato.hpp"
-#include "HAPFakeGatoHygrometer.hpp"
+#include "HAPFakegato2.hpp"
+#include "HAPFakegatoAverage.hpp"
+
 #include "HAPCustomCharacteristics+Services.hpp"
 #include "HAPGlobals.hpp"
 
@@ -28,13 +29,15 @@ public:
 	bool begin();
 	HAPAccessory* initAccessory() override;
 	
-	void setValue(int iid, String oldValue, String newValue);	
-	
-	void changeHum(float oldValue, float newValue);
+	void changedHumidity(float oldValue, float newValue);
 
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 	
+	inline float getAveragedHumidityValue(){
+		return _humidityAverage.getAverage();
+	}
+
 #if HAP_ENABLE_WEBSERVER	
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 	JsonObject getConfigImpl();
@@ -42,23 +45,27 @@ public:
 #endif
 
 	HAPConfigurationPlugin* setDefaults();
-
+	void setConfiguration(HAPConfigurationPlugin* cfg) override;
+	
 private:
 
 
-	HAPCharacteristicFloat*	_humidityValue;
+	HAPCharacteristicT<float>*		_humidityValue;
+	HAPFakegatoAverage<float>		_humidityAverage;
 
-#if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
-	HAPCharacteristicUInt8*	_leakSensor;	
-#endif
+// #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
+// 	HAPCharacteristicUInt8*	_leakSensor;	
+// #endif
 
 	bool _leakSensorEnabled;
 	
 	bool fakeGatoCallback();
 
-	HAPFakeGatoHygrometer _fakegato;
+	HAPFakegato2 _fakegato;
 
-    uint16_t readSensor();
+    float readSensor();
+	uint16_t readSensorRaw();
+	float moistureToPercentage(uint16_t moisture);
 };
 
 REGISTER_PLUGIN(HAPPluginHygrometer)

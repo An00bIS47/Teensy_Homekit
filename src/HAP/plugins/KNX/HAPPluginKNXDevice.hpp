@@ -15,9 +15,12 @@
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
 #include "HAPCharacteristicBase.hpp"
-#include "HAPFakeGato.hpp"
-#include "HAPFakegatoFactory.hpp"
 #include "EventManager.h"
+
+#include "HAPFakegato2.hpp"
+#include "HAPFakegatoAverage.hpp"
+#include "HAPFakegatoFactory.hpp"
+
 
 enum HAPPluginKNXServiceType {
     HAPPluginKNXServiceTypeNone     = 0x00,
@@ -73,6 +76,17 @@ protected:
     HAPAccessory*           _accessory;
     EventManager*			_eventManager;
     HAPFakegatoFactory*     _fakegatoFactory;
+
+
+    inline void queueNotifyEvent(HAPCharacteristicBase* characteristic){
+        if (characteristic->notifiable()){
+            if (_eventManager){
+                struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());							            
+                _eventManager->queueEvent( EventManager::kEventNotifyController, event);
+            }
+			
+		}	
+    }
    
     virtual bool fakeGatoCallback() = 0;  
 };

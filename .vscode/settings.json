@@ -1,3 +1,6 @@
 {
-    "gitlab.ignoreCertificateErrors": true
+    "gitlab.ignoreCertificateErrors": true,
+    "files.associations": {
+        "*.tpp": "cpp"
+    }
 }

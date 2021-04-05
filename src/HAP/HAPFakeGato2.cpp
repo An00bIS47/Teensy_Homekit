@@ -48,7 +48,6 @@ FLASHMEM
 void HAPFakegato2::registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule){
     _name = name;
 
-    
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);    
 
     HAPCharacteristicT<String>* accNameCha = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
@@ -66,10 +65,6 @@ void HAPFakegato2::registerFakeGatoService(HAPAccessory* accessory, const String
     _historyInfo->setValueGetCallback(callbackGetHistoryInfo);    
     accessory->addCharacteristicToService(fgService, _historyInfo);
     
-
-    
-
-
     // History Entries
     _historyEntries = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);    
     _historyEntries->setDescription("EVE History Entries");
@@ -80,10 +75,6 @@ void HAPFakegato2::registerFakeGatoService(HAPAccessory* accessory, const String
     _historyEntries->setValueGetCallback(callbackGetHistoryEntries);
 
     accessory->addCharacteristicToService(fgService, _historyEntries);
-    
-
-    
-
 
     // History Request
     _historyRequest = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE, 128);
@@ -100,9 +91,7 @@ void HAPFakegato2::registerFakeGatoService(HAPAccessory* accessory, const String
     auto callbackSetTime = std::bind(&HAPFakegato2::callbackHistorySetTime, this, std::placeholders::_1, std::placeholders::_2);        
     _historySetTime->setValueChangeCallback(callbackSetTime);
     accessory->addCharacteristicToService(fgService, _historySetTime);
-    
-
-    
+        
 
     if (withSchedule){        
         // Config Read

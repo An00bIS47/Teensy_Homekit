@@ -11,7 +11,7 @@
 
 #include <Arduino.h>
 #include "HAPFakeGato.hpp"
-#include "HAPFakeGatoScheduleEnergy.hpp"
+#include "HAPFakeGatoScheduleEnergyOLD.hpp"
 
 
 struct HAPFakeGatoEnergyData {
@@ -90,7 +90,7 @@ private:
     bool _shouldSave;
 
     std::vector<HAPFakeGatoEnergyData>* _vectorBuffer; 
-    HAPFakeGatoScheduleEnergy* _schedule;
+    HAPFakeGatoScheduleEnergyOLD* _schedule;
 
     std::function<void(void)> _callbackSaveConfig;    
 };

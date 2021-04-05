@@ -6,8 +6,8 @@
 //      Author: michael
 //
 
-#ifndef HAPFakegato2_HPP_
-#define HAPFakegato2_HPP_
+#ifndef HAPFAKEGATO2_HPP_
+#define HAPFAKEGATO2_HPP_
 
 #include <Arduino.h>
 #include <functional>
@@ -15,6 +15,7 @@
 #include <cstdarg>
 #include <CircularBuffer.h>
 #include "HAPAccessory.hpp"
+#include "HAPService.hpp"
 #include "HAPFakegatoCharacteristic.hpp"
 
 #ifndef HAP_FAKEGATO_BUFFER_SIZE
@@ -106,7 +107,6 @@
 
 
 
-
 enum HAP_FAKEGATO_TYPE {
     HAP_FAKEGATO_TYPE_NONE      = 0x00,
     HAP_FAKEGATO_TYPE_WEATHER,
@@ -121,13 +121,6 @@ public:
     virtual void begin() {};
 
     virtual void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
-
-    //                                                         gets cast as ... due to va_args :(
-    // t == temperature - float     >> calculate value * 100    >>> double
-    // h == humidity    - float                                 >>> double
-    // p == airpressure - uint16_t                              >>> int 
-    // ...
-    // virtual void addEntry(uint8_t bitmask, const char* fmt, ...);
 
     void addEntry(uint8_t bitmask);
     
@@ -221,8 +214,6 @@ public:
 
 protected:
 
-
-
     struct HAPFakegatoDataEntry {
         uint8_t bitmask = 0;
         uint32_t timestamp = 0;
@@ -258,9 +249,6 @@ protected:
 #endif
     };
 
-
-
-
     bool shouldHandle();
 
     virtual void addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length);
@@ -273,22 +261,24 @@ protected:
 
     void getRefTime(uint8_t* data, uint16_t* length);
 
-    // Schedules
-    virtual void scheduleRead(String oldValue, String newValue) {};
-    virtual void scheduleWrite(String oldValue, String newValue) {};
 
 
     // FIXME: Change to uint8_t* data characteristic with base64 encoding inside of the charactersitic 
     //        Add this to a new file specific for data chars ? 
-    HAPCharacteristicT<String>* _historyInfo;    // 116 // _s2r1Characteristics; 
-    HAPCharacteristicT<String>* _historyEntries; // 117 // _s2r2Characteristics;
-    HAPCharacteristicT<String>* _historyRequest; // 11C // _s2w1Characteristics;
-    HAPCharacteristicT<String>* _historySetTime; // 121 // _s2w2Characteristics;
+    HAPCharacteristicT<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics; 
+    HAPCharacteristicT<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
+    HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
+    HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
 
-    // Optional?? 
-    // ToDo: Move to Energy ??
-    HAPCharacteristicT<String>* _configRead;
-    HAPCharacteristicT<String>* _configWrite;
+
+
+    // Schedules
+    HAPCharacteristicT<String>* _configRead     = nullptr;
+    HAPCharacteristicT<String>* _configWrite    = nullptr;
+    
+    virtual void scheduleRead(String oldValue, String newValue)     {}
+    virtual void scheduleWrite(String oldValue, String newValue)    {}
+    virtual String buildScheduleString() { return ""; }
 
     std::function<bool()> _callbackAddEntry = nullptr;
 
@@ -313,4 +303,4 @@ protected:
 };
 
 
-#endif /* HAPFakegato2_HPP_ */
+#endif /* HAPFAKEGATO2_HPP_ */

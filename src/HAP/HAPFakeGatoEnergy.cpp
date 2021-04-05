@@ -67,7 +67,7 @@ void HAPFakeGatoEnergy::begin(){
     }
 
     if (_schedule == nullptr) {
-        _schedule = new HAPFakeGatoScheduleEnergy();
+        _schedule = new HAPFakeGatoScheduleEnergyOLD();
     }
 
     _schedule->setCallbackGetReftime(std::bind(&HAPFakeGatoEnergy::getTimestampRefTime, this));
@@ -108,7 +108,7 @@ void HAPFakeGatoEnergy::getSignature(uint8_t* signature){
     signature[4] = (uint8_t)HAPFakegatoSignature_PowerCurrent;
     signature[5] = 2;
 
-    signature[6] = (uint8_t)HAPFakegatoSignature_Power10thWh;
+    signature[6] = (uint8_t)HAPFakegatoSignature_PowerTenthWh;
     signature[7] = 2;
 
     signature[8] = (uint8_t)HAPFakegatoSignature_PowerOnOff;

@@ -1,23 +1,19 @@
 // 
-// HAPFakeGatoScheduleEnergy.hpp
-// Homekit
+// HAPFakegato+Schedule.hpp
+// Teensy_Homekit
 //
-//  Created on: 23.09.2020
+//  Created on: 05.04.2021
 //      Author: michael
 //
 
-#ifndef HAPFAKEGATOSCHEDULEENERGY_HPP_
-#define HAPFAKEGATOSCHEDULEENERGY_HPP_
+#ifndef HAPFAKEGATOSCHEDULE_HPP_
+#define HAPFAKEGATOSCHEDULE_HPP_
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include "HAPGlobals.hpp"
+#include <functional>
+#include "HAPFakegato2.hpp"
 #include "HAPAccessory.hpp"
-
-#include "HAPHelper.hpp"
-#include "HAPTLV8.hpp"
+#include "HAPService.hpp"
 #include <vector>
-
 #include "HAPDailyTimerFactory.hpp"
 
 // ToDo: define or enum ?
@@ -31,6 +27,7 @@
 #define HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS                 0x45
 #define HAP_FAKEGATO_SCHEDULE_TYPE_DAYS                     0x46
 #define HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED               0x60
+
 
 typedef enum {
     TIME = 0,
@@ -102,41 +99,52 @@ struct HAPFakeGatoScheduleDays {
     }
 };
 
-
-
-// template <class TFakeGatoData>
-class HAPFakeGatoScheduleEnergy {
+class HAPFakegatoSchedule : public HAPFakegato2 {
 public:    
 
-    HAPFakeGatoScheduleEnergy();
-    HAPFakeGatoScheduleEnergy(String serialNumber, std::function<void(uint16_t)> callbackStartTimer, std::function<void(uint16_t)> callbackEndTimer, std::function<uint32_t(void)> callbackRefTime, std::function<uint32_t(void)> callbackTimestampLastActivity, std::function<uint32_t(void)> callbackTimestampLastEntry);
-    ~HAPFakeGatoScheduleEnergy();
+    HAPFakegatoSchedule() : HAPFakegato2() {
 
-    void begin();
+    }
+
+    ~HAPFakegatoSchedule(){
+        if (_configRead) delete _configRead;
+        if (_configWrite) delete _configWrite;
+
+        _programEvents.clear();
+        _timers.enable(false);
+        _timers.clear();
+    }
+    
+    virtual void begin() { }
    
-    bool decodeToggleOnOff(uint8_t* data);
-    void decodeDays(uint8_t *data);
-    void decodePrograms(uint8_t* data);
+    virtual bool decodeToggleOnOff(uint8_t* data);
+    virtual void decodeDays(uint8_t *data);
+    virtual void decodePrograms(uint8_t* data);
+    virtual void encodePrograms(uint8_t* data, size_t *dataSize);
+    
+    virtual String buildScheduleString();
 
-    void encodePrograms(uint8_t* data, size_t *dataSize);
 
-    bool isEnabled();
-    void enable(bool on);
+    bool isEnabled(){
+        return _timers.isEnabled();
+    }
+
+    void enable(bool on){
+        _timers.enable(on);
+    }
 
     void setSerialNumber(String serialNumber){
         _serialNumber = serialNumber;
     }
 
-    void setStatusLED(uint8_t mode);
+    
+    void setStatusLED(uint8_t mode){	
+	    _statusLED = mode;
+    }
 
-    static uint32_t encodeTimerCount(uint8_t timerCount);
-    static uint8_t encodeProgramCount(uint8_t programCount);    
-
-    void fromJson(JsonObject &root);
-    JsonObject toJson();
-
-    String buildScheduleString();
-
+    void scheduleFromJson(JsonObject &root);
+    JsonObject scheduleToJson();
+    
     void clear();
 
     void setCallbackTimerStart(std::function<void(uint16_t)> callback){
@@ -152,52 +160,27 @@ public:
         _timers.handle();
     }
 
-
     void callbackTimerStart(uint16_t state);
     void callbackTimerEnd(uint16_t state);
-
-    void setCallbackGetReftime(std::function<uint32_t(void)> callback){
-        _callbackGetRefTime = callback;
-    }
     
-    void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){
-        _callbackGetTimestampLastActivity = callback;
+    void programTimers();
+
+    void setCallbackSaveConfig(std::function<void(void)> callback){
+        _callbackSaveConfig = callback;
     }
-
-    void setCallbackGetTimestampLastEntry(std::function<uint32_t(void)> callback){
-        _callbackGetTimestampLastEntry = callback;
-    }
-
-    void setCallbackGetMemoryUsed(std::function<uint16_t(void)> callback){
-        _callbackGetMemoryUsed = callback;
-    }
-
-    void setCallbackGetRolledOverIndex(std::function<uint32_t(void)> callback){
-        _callbackGetRolledOverIndex = callback;
-    }
-
-
 
 protected:
+    String  _serialNumber;
+    uint8_t _statusLED;
+
     std::vector<HAPFakeGatoScheduleProgramEvent> _programEvents; // 7
     HAPFakeGatoScheduleDays _days;  
     HAPDailyTimerFactory _timers;
 
-    // bool _isActive;  
-    String _serialNumber;
-    uint8_t _statusLED;
+    std::function<void(uint16_t)> _callbackTimerStart = nullptr;
+    std::function<void(uint16_t)> _callbackTimerEnd = nullptr;
 
-    void programTimers();
-    
-    std::function<void(uint16_t)> _callbackTimerStart;
-    std::function<void(uint16_t)> _callbackTimerEnd;
-
-    std::function<uint32_t(void)> _callbackGetRefTime;
-    std::function<uint32_t(void)> _callbackGetTimestampLastActivity;
-    std::function<uint32_t(void)> _callbackGetTimestampLastEntry;
-    
-    std::function<uint16_t(void)> _callbackGetMemoryUsed;
-    std::function<uint32_t(void)> _callbackGetRolledOverIndex;    
+    std::function<void(void)> _callbackSaveConfig = nullptr;   
 };
 
-#endif /* HAPFAKEGATOSCHEDULEENERGY_HPP_ */
+#endif /* HAPFAKEGATOSCHEDULE_HPP_ */

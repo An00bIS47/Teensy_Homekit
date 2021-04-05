@@ -30,7 +30,8 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 
-#include "HAPFakeGato.hpp"
+#include "HAPFakegato2.hpp"
+#include "HAPFakegatoAverage.hpp"
 #include "HAPGlobals.hpp"
 
 // 
@@ -38,10 +39,6 @@
 // 
 #ifndef HAP_PLUGIN_DHT_USE_DUMMY
 #define HAP_PLUGIN_DHT_USE_DUMMY 	0
-#endif
-
-#ifndef HAP_PLUGIN_DHT_USE_PRESSURE
-#define HAP_PLUGIN_DHT_USE_PRESSURE 0
 #endif
 
 #ifndef DHTPIN
@@ -60,7 +57,8 @@
 #include <DHT_U.h>
 #endif
 
-#include "HAPFakeGatoWeather.hpp"
+#include "HAPFakegato2.hpp"
+#include "HAPFakegatoAverage.hpp"
 
 class HAPPluginDHT: public HAPPlugin {
 public:
@@ -69,37 +67,38 @@ public:
 
 	bool begin();
 	HAPAccessory* initAccessory() override;
-	
-	void setValue(int iid, String oldValue, String newValue);	
-	
-	void changeTemp(float oldValue, float newValue);
-	void changeHum(float oldValue, float newValue);
 
-#if HAP_PLUGIN_DHT_USE_PRESSURE	
-	void changePressure(uint16_t oldValue, uint16_t newValue);
-#endif
+	void changedTemperature(float oldValue, float newValue);
+	void changedHumidity(float oldValue, float newValue);
 
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);	
 	
+	float readHumidity();
+	float readTemperature();
+
+	inline float getAveragedTemperatureValue(){
+		return _temperatureAverage.getAverage();
+	}
+
+	inline float getAveragedHumidityValue(){
+		return _humidityAverage.getAverage();
+	}
+
 #if HAP_ENABLE_WEBSERVER		
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 #endif
 
-	HAPConfigurationPlugin* setDefaults();	
+	HAPConfigurationPlugin* setDefaults();		
+	void setConfiguration(HAPConfigurationPlugin* cfg) override;
 
 private:
 
-	// String 						_name;
-	// bool 						_isEnabled;
-	// unsigned long 				_interval;
+	HAPCharacteristicT<float>*		_humidityValue;
+	HAPFakegatoAverage<float>		_humidityAverage;
 
-
-	HAPCharacteristicFloat*	_humidityValue;
-	HAPCharacteristicFloat*	_temperatureValue;
-#if HAP_PLUGIN_DHT_USE_PRESSURE	
-	HAPCharacteristicUInt16*	_pressureValue;
-#endif
+	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPFakegatoAverage<float>		_temperatureAverage;
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
 #else
@@ -108,8 +107,9 @@ private:
 
 	bool fakeGatoCallback();
 
+	uint32_t _timestampLastRead;
 
-	HAPFakeGatoWeather _fakegato;
+	HAPFakegato2 _fakegato;
 
 };
 

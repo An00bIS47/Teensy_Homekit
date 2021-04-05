@@ -15,9 +15,10 @@
 #include "HAPService.hpp"
 #include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
-#include "HAPFakeGato.hpp"
+
+#include "HAPFakegato2.hpp"
 #include "HAPFakegatoFactory.hpp"
-#include "HAPFakeGatoSwitch.hpp"
+
 #include "HAPPluginKNXDevice.hpp"
 #include "HAPVersion.hpp"
 
@@ -33,9 +34,7 @@ public:
     void setEventManager(EventManager* eventManager);
     void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
-    // uint8_t id;
-    // char name[41];
-    // enum HAPPluginKNXServiceType type;  
+    bool getStateValue();
 
 protected:    
     
@@ -48,12 +47,13 @@ protected:
 
     // HAPCharacteristicString* 	_lastUpdate;
 
-    HAPFakeGatoSwitch*     _fakegato;
+    HAPFakegato2*     _fakegato;
 
-    void changedState(bool oldValue, bool newValue);
-    
-    bool readState();
-    void writeStateCallback(GroupObject& go);
+    void changedState(bool oldValue, bool newValue);    
+    void writeStateToKNX(bool newValue);
+
+    bool readStateFromKNX();
+    void setStateFromKNXCallback(GroupObject& go);
 
     bool fakeGatoCallback() override;  
 };

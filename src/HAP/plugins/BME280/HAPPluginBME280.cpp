@@ -16,7 +16,7 @@
 #define SCL_PIN				SCL
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       6	// 6 = new configuration; 2 = FakeGato support
+#define VERSION_MINOR       7	// 7 = new fakegato; 6 = new configuration; 2 = FakeGato support
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
@@ -195,11 +195,8 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
 		_temperatureValue->setValue(0.0F);
 
-		auto callbackChangeTemperature = std::bind(&HAPPluginBME280::changedTemperature, this, std::placeholders::_1, std::placeholders::_2);
-		_temperatureValue->setValueChangeCallback(callbackChangeTemperature);
-
-		auto callbackGetTemperature = std::bind(&HAPPluginBME280::readTemperature, this);
-		_temperatureValue->setValueGetCallback(callbackGetTemperature);
+		_temperatureValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
+		_temperatureValue->setValueGetCallback(std::bind(&HAPPluginBME280::readTemperature, this));
 
 		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 	}
@@ -218,11 +215,8 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
 		_humidityValue->setValue(0.0F);
 
-		auto callbackChangeHumidity = std::bind(&HAPPluginBME280::changedHumidity, this, std::placeholders::_1, std::placeholders::_2);
-		_humidityValue->setValueChangeCallback(callbackChangeHumidity);
-
-		auto callbackGetHumidity = std::bind(&HAPPluginBME280::readHumidity, this);
-		_humidityValue->setValueGetCallback(callbackGetHumidity);
+		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));
+		_humidityValue->setValueGetCallback(std::bind(&HAPPluginBME280::readHumidity, this));
 
 		_accessory->addCharacteristicToService(humidityService, _humidityValue);
 	}
@@ -241,12 +235,8 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_pressureValue = new HAPCharacteristicT<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
 		_pressureValue->setValue(320);
 
-		auto callbackChangePressure = std::bind(&HAPPluginBME280::changedPressure, this, std::placeholders::_1, std::placeholders::_2);
-		_pressureValue->setValueChangeCallback(callbackChangePressure);
-
-		auto callbackGetPressure = std::bind(&HAPPluginBME280::readPressure, this);
-		_pressureValue->setValueGetCallback(callbackGetPressure);
-
+		_pressureValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedPressure, this, std::placeholders::_1, std::placeholders::_2));
+		_pressureValue->setValueGetCallback(std::bind(&HAPPluginBME280::readPressure, this));
 
 		_accessory->addCharacteristicToService(pressureService, _pressureValue);
 	}

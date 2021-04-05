@@ -489,7 +489,7 @@ public:
     virtual void setValue(const T& value, bool withCallback = true) override {
 
         if ((value != this->_value) && (value >= _minVal) && (value <= _maxVal)){
-            if (this->_valueChangeFunctionCall && withCallback) {
+            if (this->_valueChangeFunctionCall && withCallback == true) {
                 this->_valueChangeFunctionCall(this->_value, value);
             }
 

@@ -11,7 +11,7 @@
 #define HAP_PLUGIN_DHT_INTERVAL 5000
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       6
+#define VERSION_MINOR       7
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
@@ -28,11 +28,7 @@ HAPPluginDHT::HAPPluginDHT(){
     _version.build      = VERSION_BUILD;
 
 	_humidityValue		= nullptr;
-	_temperatureValue	= nullptr;
-
-#if HAP_PLUGIN_DHT_USE_PRESSURE	
-	_pressureValue		= nullptr;
-#endif	
+	_temperatureValue	= nullptr;	
 
 	_config = new HAPConfigurationPlugin("DHT", true, HAP_PLUGIN_DHT_INTERVAL);
 }
@@ -61,19 +57,13 @@ void HAPPluginDHT::identify(bool oldValue, bool newValue) {
 	Serial.printf("Start Identify %s\n", _config->name);
 }
 
-void HAPPluginDHT::changeTemp(float oldValue, float newValue) {
+void HAPPluginDHT::changedTemperature(float oldValue, float newValue) {
 	Serial.printf("[%s] New temperature: %f\n", _config->name, newValue);
 }
 
-void HAPPluginDHT::changeHum(float oldValue, float newValue) {
+void HAPPluginDHT::changedHumidity(float oldValue, float newValue) {
 	Serial.printf("[%s] New humidity: %f\n", _config->name, newValue);
 }
-
-#if HAP_PLUGIN_DHT_USE_PRESSURE
-void HAPPluginDHT::changePressure(uint16_t oldValue, uint16_t newValue) {
-	Serial.printf("New pressure: %d\n", newValue);
-}
-#endif
 
 
 void HAPPluginDHT::handleImpl(bool forced){	
@@ -99,47 +89,19 @@ void HAPPluginDHT::handleImpl(bool forced){
 #endif
 
 	if (!isnan(sensorEventTemp.temperature)) {
-		setValue(_temperatureValue->iid, _temperatureValue->valueString(), String(sensorEventTemp.temperature) );
+		_temperatureValue->setValue(sensorEventTemp.temperature, false);
+		_temperatureAverage.addValue(sensorEventTemp.temperature);
+		queueNotifyEvent(_temperatureValue);
 	}
 
 	if (!isnan(sensorEventHum.relative_humidity)) {
-		setValue(_humidityValue->iid, _humidityValue->valueString(), String(sensorEventHum.relative_humidity) );
+		_humidityValue->setValue(sensorEventHum.relative_humidity, false);
+		_humidityAverage.addValue(sensorEventHum.relative_humidity);
+		queueNotifyEvent(_humidityValue);
+
 	}
-
-#if HAP_PLUGIN_DHT_USE_PRESSURE
-
-	sensorEventPressure.pressure 		= random(30, 110) * 10;
-
-	if (!isnan(sensorEventPressure.pressure)) {
-		setValue(_pressureValue->iid, getValue(_pressureValue->iid), String(sensorEventPressure.pressure) );
-	}
-#endif
-
 
 }
-
-// void HAPPluginDHT::handleEvents(int eventCode, struct HAPEvent eventParam){
-// 	LogE("!!!!!!!!!!! HANDLE PLUGIN EVENT !!!!!!!!!!!!!!!", true);
-// }
-
-
-void HAPPluginDHT::setValue(int iid, String oldValue, String newValue){
-	if (iid == _temperatureValue->iid) {		
-		_temperatureValue->setValueString(newValue);
-	} else if (iid == _humidityValue->iid) {
-		//LogW("Setting DHT HUMIDITY oldValue: " + oldValue + " -> newValue: " + newValue, true);
-		_humidityValue->setValueString(newValue);
-	} 
-#if HAP_PLUGIN_DHT_USE_PRESSURE	
-	else if (iid == _pressureValue->iid) {
-		//LogW("Setting DHT HUMIDITY oldValue: " + oldValue + " -> newValue: " + newValue, true);
-		_pressureValue->setValue(newValue);
-	}
-#endif
-	struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, iid, newValue);							
-	_eventManager->queueEvent( EventManager::kEventNotifyController, event);	
-}
-
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
@@ -149,7 +111,6 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
 #else
-
 	sensor_t sensor;
 	_dht->temperature().getSensor(&sensor);	
 #endif
@@ -174,17 +135,18 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	_accessory->addService(temperatureService);
 	{	
 		const char* serviceName = "DHT Temperature Sensor";
-		HAPCharacteristicString *tempServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, strlen(serviceName));
-		tempServiceName->setValue(serviceName);
+		HAPCharacteristicT<String> *temperatureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		temperatureServiceName->setValue(serviceName);
 
-		_accessory->addCharacteristicToService(temperatureService, tempServiceName);
+		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
 
 		//HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
-		_temperatureValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, permission_read|permission_notify, -50, 100, 0.1, unit_celsius);
-		_temperatureValue->setValue("0.0");
-		auto callbackChangeTemp = std::bind(&HAPPluginDHT::changeTemp, this, std::placeholders::_1, std::placeholders::_2);
-		//_temperatureValue->valueChangeFunctionCall = std::bind(&changeTemp);
-		_temperatureValue->valueChangeFunctionCall = callbackChangeTemp;
+		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
+		_temperatureValue->setValue(0.0F);
+		
+		_temperatureValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
+		_temperatureValue->setValueGetCallback(std::bind(&HAPPluginDHT::readTemperature, this));
+
 		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 
 	}	
@@ -200,49 +162,26 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	//
 	// is bound to the temperature service
 	{
-		_humidityValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, permission_read|permission_notify, 0, 100, 0.1, unit_percentage);
-		_humidityValue->setValue("0.0");
+		_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);		_humidityValue->setValue(0.0);
+		_humidityValue->setValue(0.0F);
 
-		auto callbackChangeHum = std::bind(&HAPPluginDHT::changeHum, this, std::placeholders::_1, std::placeholders::_2);
-		_humidityValue->valueChangeFunctionCall = callbackChangeHum;
-		// _accessory->addCharacteristicToService(humidityService, _humidityValue);
+		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));
+		_humidityValue->setValueGetCallback(std::bind(&HAPPluginDHT::readHumidity, this));
+
+
 		_accessory->addCharacteristicToService(temperatureService, _humidityValue);
 	}
 
 	
-
-#if HAP_PLUGIN_DHT_USE_PRESSURE
-	//
-	// AirPressure Service
-	//
-	{	
-		
-		HAPService* pressureService = new HAPService(serviceType_FG_pressure);
-		_accessory->addService(pressureService);
-
-		const char* serviceName = "DHT AirPressure Sensor";
-		HAPCharacteristicString *pressureServiceName = new HAPCharacteristicString(charType_serviceName, permission_read, strlen(serviceName));
-		pressureServiceName->setValueString(serviceName);
-		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
-
-		_pressureValue = new HAPCharacteristicUInt16(charType_FG_airPressure, permission_read|permission_notify, 300, 1100, 1, unit_hpa);
-		_pressureValue->setValueString("700");
-
-		auto callbackChangePressure = std::bind(&HAPPluginDHT::changePressure, this, std::placeholders::_1, std::placeholders::_2);
-		//_humidityValue->valueChangeFunctionCall = std::bind(&changeHum);
-		_pressureValue->valueChangeFunctionCall = callbackChangePressure;
-		_accessory->addCharacteristicToService(pressureService, _pressureValue);
-	}
-#endif
-
-
-
 	//
 	// FakeGato
-	// 		
-	_fakegato.registerFakeGatoService(_accessory, _config->name);
+	// 				
+	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginDHT::getAveragedTemperatureValue, this)));
+	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginDHT::getAveragedHumidityValue, this)));	
+	
+	_fakegato.registerFakeGatoService(_accessory, sn);
+			
 	auto callbackAddEntry = std::bind(&HAPPluginDHT::fakeGatoCallback, this);
-	// _fakegato.registerCallback(callbackAddEntry);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
 
 	return _accessory;
@@ -254,22 +193,17 @@ HAPConfigurationValidationResult HAPPluginDHT::validateConfig(JsonObject object)
 }
 #endif
 
-bool HAPPluginDHT::fakeGatoCallback(){	
-	// return _fakegato.addEntry(_temperatureValue->value(), _humidityValue->value(), _pressureValue->value());
-#if HAP_PLUGIN_DHT_USE_PRESSURE	
-	return _fakegato.addEntry(0x07, _temperatureValue->valueString(), _humidityValue->valueString(), _pressureValue->valueString());
-#else
-	return _fakegato.addEntry(0x03, _temperatureValue->valueString(), _humidityValue->valueString(), "0");
+bool HAPPluginDHT::fakeGatoCallback(){		
+	_fakegato.addEntry(0x03);
+	return true;
 	// 0102 0202 0302
 	//	|	  |	   +-> Pressure	
 	//  |	  +-> Humidity
 	//  +-> Temp
 	// 
-	// 0x07 => all			= 111
-	// 0x01 => temp			= 001
-	// 0x02 => hum			= 010
-	// 0x04 => pressure		= 100
-#endif
+	// 0x03 => all			= 11
+	// 0x01 => temp			= 01
+	// 0x02 => hum			= 10
 }
 
 #if defined(ARDUINO_TEENSY41)
@@ -281,4 +215,53 @@ HAPConfigurationPlugin* HAPPluginDHT::setDefaults(){
 	_config->dataPtr = nullptr;
 	_config->dataSize = 0;
 	return _config;
+}
+
+float HAPPluginDHT::readTemperature(){
+
+	float value = 0;
+#if HAP_PLUGIN_BME280_USE_DUMMY
+	value = random(200, 401) / 10.0;
+#else
+	sensors_event_t sensorEventTemp;
+	if (_timestampLastRead + 2000 <= millis()) {
+		_dht->temperature().getEvent(&sensorEventTemp);
+		_timestampLastRead = millis();		
+		
+		if (!isnan(sensorEventTemp.temperature)) {	
+			value = sensorEventTemp.temperature;
+		}
+	} else {
+		value = _temperatureValue->value(false);
+	}
+	
+#endif
+	return value;
+}
+
+float HAPPluginDHT::readHumidity(){
+	float value = 0;
+#if HAP_PLUGIN_BME280_USE_DUMMY
+	value = random(200, 401) / 10.0;
+#else
+	sensors_event_t sensorEventHum;
+	if (_timestampLastRead + 2000 <= millis()) {
+		_dht->humidity().getEvent(&sensorEventHum);
+		_timestampLastRead = millis();	
+
+		if (!isnan(sensorEventHum.relative_humidity)) {	
+			value = sensorEventHum.relative_humidity;
+		}
+	} else {
+		value = _humidityValue->value(false);
+	}
+#endif
+	return value;
+}
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM 
+#endif
+void HAPPluginDHT::setConfiguration(HAPConfigurationPlugin* cfg){
+	_config = cfg;
 }

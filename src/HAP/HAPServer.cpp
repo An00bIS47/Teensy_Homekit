@@ -175,6 +175,7 @@ bool HAPServer::begin(bool resume) {
 
 #if HAP_RESET_CONFIGURATION			
 		_configuration.reset();		
+		_configuration.getAccessoryConfig()->save();
 #endif
 
 #if HAP_RESET_PAIRINGS

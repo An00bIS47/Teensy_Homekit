@@ -1,89 +1,36 @@
 // 
-// HAPFakeGatoScheduleEnergy.cpp
+// HAPFakegato+ScheduleEnergy.cpp
 // Homekit
 //
-//  Created on: 23.09.2020
+//  Created on: 05.04.2021
 //      Author: michael
 //
 
-#include "HAPFakeGatoScheduleEnergy.hpp"
-#include "HAPLogger.hpp"
-#include "HAPServer.hpp"
+#include "HAPFakegato+ScheduleEnergy.hpp"
+#include "HAPHelper.hpp"
+#include "HAPTLV8.hpp"
+#include "HAPTime.hpp"
 
-#if defined( ARDUINO_ARCH_ESP32 )
-#include <base64.h>
-#elif defined( CORE_TEENSY )
+#if defined ( ARDUINO_ARCH_ESP32 )
+#if ESP_IDF_VERSION_MAJOR == 4
+#include "mbedtls/base64.h"
+#else
+extern "C" {
+    #include "crypto/base64.h"    
+}
+
+#endif
+#elif defined(CORE_TEENSY)
 #include <Base64.h>
 #endif
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-HAPFakeGatoScheduleEnergy::HAPFakeGatoScheduleEnergy(){
-	_statusLED = 0x00;
 
 
-	_serialNumber = "";
-
-	_callbackTimerStart = nullptr;
-	_callbackTimerEnd   = nullptr;
-
-	_callbackGetRefTime = nullptr;
-	_callbackGetTimestampLastActivity = nullptr;
-	_callbackGetTimestampLastEntry = nullptr;
-
-	_callbackGetMemoryUsed = nullptr;
-	_callbackGetRolledOverIndex = nullptr;
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-HAPFakeGatoScheduleEnergy::HAPFakeGatoScheduleEnergy(String serialNumber, std::function<void(uint16_t)> callbackStartTimer, std::function<void(uint16_t)> callbackEndTimer, std::function<uint32_t(void)> callbackRefTime, std::function<uint32_t(void)> callbackTimestampLastActivity, std::function<uint32_t(void)> callbackTimestampLastEntry){
-	_serialNumber = serialNumber;
-	_callbackTimerStart = callbackStartTimer;
-	_callbackTimerEnd = callbackEndTimer;
-	_callbackGetRefTime = callbackRefTime;
-	_callbackGetTimestampLastActivity = callbackTimestampLastActivity;
-	_callbackGetTimestampLastEntry = callbackTimestampLastEntry;
-
-	// _callbackGetMemoryUsed
-	// _callbackGetRolledOverIndex
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-HAPFakeGatoScheduleEnergy::~HAPFakeGatoScheduleEnergy(){
-
-}
-
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPFakeGatoScheduleEnergy::begin(){
-
-}
-
-
-bool HAPFakeGatoScheduleEnergy::decodeToggleOnOff(uint8_t* data){
+bool HAPFakegatoScheduleEnergy::decodeToggleOnOff(uint8_t* data){
 	return data[1] & 0x01;
 }
 
-void HAPFakeGatoScheduleEnergy::enable(bool on){		
-	_timers.enable(on);
-}
-
-void HAPFakeGatoScheduleEnergy::setStatusLED(uint8_t mode){	
-	_statusLED = mode;
-}
-
-bool HAPFakeGatoScheduleEnergy::isEnabled(){
-	return _timers.isEnabled();
-}
-
-void HAPFakeGatoScheduleEnergy::decodeDays(uint8_t *data){
+void HAPFakegatoScheduleEnergy::decodeDays(uint8_t *data){
 	uint32_t daysnumber = data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
 	daysnumber = daysnumber >> 4;	
 
@@ -101,7 +48,7 @@ void HAPFakeGatoScheduleEnergy::decodeDays(uint8_t *data){
  * 
  * @param data 
  */
-void HAPFakeGatoScheduleEnergy::decodePrograms(uint8_t* data){
+void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 	// clear all old programs and timers
 	clear();
 	// ToDo: update to daily timer vector
@@ -189,7 +136,7 @@ void HAPFakeGatoScheduleEnergy::decodePrograms(uint8_t* data){
 }
 
 
-uint32_t HAPFakeGatoScheduleEnergy::encodeTimerCount(uint8_t timerCount){
+uint32_t HAPFakegatoScheduleEnergy::encodeTimerCount(uint8_t timerCount){
 	uint32_t result = 0;
 	if (timerCount < 3) {
 		result = (timerCount * 128) + timerCount;
@@ -200,7 +147,7 @@ uint32_t HAPFakeGatoScheduleEnergy::encodeTimerCount(uint8_t timerCount){
 }
 
 
-uint8_t HAPFakeGatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
+uint8_t HAPFakegatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
 	return programCount + 1;
 }
 
@@ -211,7 +158,7 @@ uint8_t HAPFakeGatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
  * @param data 			Output for programs
  * @param dataSize 		length of data
  */
-void HAPFakeGatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
+void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 	// uint8_t programCount = data[1] | data[2] << 8;
 	uint8_t programCount = _programEvents.size();
 	// printf("%0x\n", programCount);
@@ -291,67 +238,8 @@ void HAPFakeGatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 }
 
 
-void HAPFakeGatoScheduleEnergy::clear(){
-	for (int i = 0; i < _programEvents.size(); i++){
-		_programEvents[i].timerEvents.clear();
-	}
 
-	_programEvents.clear();
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPFakeGatoScheduleEnergy::fromJson(JsonObject &root){
-	
-	if (root["timer"].isNull()) return;
-
-	enable(root["timer"]["enabled"].as<bool>());
-	_days = HAPFakeGatoScheduleDays(root["timer"]["days"].as<uint32_t>());
-	
-	String dataStr = root["timer"]["programs"].as<String>();
-	
-	uint8_t data[dataStr.length() / 2];
-	HAPHelper::hexToBin(data, dataStr.c_str(), dataStr.length());
-	
-	decodePrograms(data);
-	
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-JsonObject HAPFakeGatoScheduleEnergy::toJson(){
-	/*
-		"days": uint32_t,
-		"programs": "0503....."
-	*/
-	const size_t capacity = 256;
-	DynamicJsonDocument doc(capacity);
-
-	if (_programEvents.size() == 0) {
-	    doc.shrinkToFit();
-    	return doc.as<JsonObject>();
-	}
-	
-	doc["enabled"] = isEnabled();
-	doc["days"] = _days.daysnumber();
-
-	size_t dataSize = 0;
-	encodePrograms(nullptr, &dataSize);
-	uint8_t data[dataSize];
-	encodePrograms(data, &dataSize);
-
-	// HAPHelper::array_print("CONFIG SAVE data", data, dataSize);
-
-	char hexString[(dataSize * 2) + 1];
-	HAPHelper::binToHex(data, dataSize, hexString, (dataSize * 2) + 1);
-
-	doc["programs"] = hexString;
-	return doc.as<JsonObject>();
-}
-
-String HAPFakeGatoScheduleEnergy::buildScheduleString(){
+String HAPFakegatoScheduleEnergy::buildScheduleString(){
     TLV8 tlv;
     
     tlv.encode(0x00, {0x24, 0x00});
@@ -364,19 +252,15 @@ String HAPFakeGatoScheduleEnergy::buildScheduleString(){
 	// Number of history entries
     // tlv.encode(0x06, {0xFB, 0x0A});
 	ui16_to_ui8 memoryUsed;
-	if (_callbackGetMemoryUsed != nullptr) {
-		memoryUsed.ui16 = _callbackGetMemoryUsed();
-	} else {
-		memoryUsed.ui16 = 0;
-	}
+    memoryUsed.ui16 = _entries.size();
 	
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY, 2, memoryUsed.ui8); 
 	
 	// Number of rolled over index    
     // tlv.encode(0x07, {0x0C, 0x10, 0x00, 0x00});
 	ui32_to_ui8 rolledOverIndex;
-	if (_callbackGetRolledOverIndex != nullptr) {
-		rolledOverIndex.ui32 = _callbackGetRolledOverIndex();
+	if (_entries.size() == _entries.capacity) {
+		rolledOverIndex.ui32 = 1;
 	} else {
 		rolledOverIndex.ui32 = 0;
 	}
@@ -438,8 +322,8 @@ String HAPFakeGatoScheduleEnergy::buildScheduleString(){
     // last activity On switch ?
     // tlv.encode(0xD0, {0x99, 0x6C, 0x21, 0x00});
 	ui32_to_ui8 secsLastAct;
-	if ((_callbackGetTimestampLastActivity != nullptr) && (_callbackGetRefTime != nullptr)) {
-		secsLastAct.ui32 = _callbackGetTimestampLastActivity() - _callbackGetRefTime();
+	if ((_callbackGetTimestampLastActivity != nullptr)) {
+		secsLastAct.ui32 = _callbackGetTimestampLastActivity() - HAPTime::refTime();
 	} else {
 		secsLastAct.ui32 = 0;
 	}    
@@ -451,12 +335,8 @@ String HAPFakeGatoScheduleEnergy::buildScheduleString(){
 
     //  EVE Time
 	//tlv.encode(0x9B, {0xFB, 0x2C, 0x19, 0x00}); // offset ?
-	ui32_to_ui8 secs;
-	if ((_callbackGetTimestampLastEntry != nullptr) && (_callbackGetRefTime != nullptr)) {
-		secs.ui32 = _callbackGetTimestampLastEntry() - _callbackGetRefTime();
-	} else {
-		secs.ui32 = 0;
-	}    
+	ui32_to_ui8 secs;	
+    secs.ui32 = (timestampLastEntry() - HAPTime::refTime());
 	tlv.encode(0x9B, 4, secs.ui8); // offset ?
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE	
@@ -492,65 +372,4 @@ String HAPFakeGatoScheduleEnergy::buildScheduleString(){
 #endif
 
 
-}
-
-void HAPFakeGatoScheduleEnergy::programTimers() {
-	
-	for (size_t i = 0; i < _programEvents.size(); i++){
-		
-#if HAP_DEBUG_FAKEGATO_SCHEDULE		
-		Serial.printf("M T W T F S S \n");
-		Serial.printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
-#endif		
-		
-		/*SMTWTFSS*/
-		uint8_t daysMask = 0;
-		daysMask  = (_days.sun == (i+1)) << 7;
-		daysMask |= (_days.mon == (i+1)) << 6;
-		daysMask |= (_days.tue == (i+1)) << 5;
-		daysMask |= (_days.wed == (i+1)) << 4;
-		daysMask |= (_days.thu == (i+1)) << 3;
-		daysMask |= (_days.fri == (i+1)) << 2;
-		daysMask |= (_days.sat == (i+1)) << 1;
-		//0b10000000,
-
-#if HAP_DEBUG_FAKEGATO_SCHEDULE		
-		Serial.printf("daysMask: %d\n", daysMask);
-#endif	
-
-		for (size_t j = 0; j < _programEvents[i].timerEvents.size(); j++){
-			// add dailytimer here !!			
-			HAPDailyTimer timer(_programEvents[i].timerEvents[j].hour,
-								_programEvents[i].timerEvents[j].minute,
-								daysMask,
-								FIXED,
-								std::bind(&HAPFakeGatoScheduleEnergy::callbackTimerStart, this, std::placeholders::_1),
-								// [](uint16_t i){Serial.println("Serial Print Timer just Fired!");},
-								(uint16_t)_programEvents[i].timerEvents[j].state);
-
-			// timer.setDaysActive(daysMask);
-			timer.begin();					
-			_timers.addTimer(timer);
-		}
-	} 
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPFakeGatoScheduleEnergy::callbackTimerStart(uint16_t state){
-#if HAP_DEBUG_FAKEGATO_SCHEDULE
-	LogI(HAPTime::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: START", true);
-#endif	
-	if (_callbackTimerStart) _callbackTimerStart(state);
-}
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPFakeGatoScheduleEnergy::callbackTimerEnd(uint16_t state){
-#if HAP_DEBUG_FAKEGATO_SCHEDULE	
-	LogI(HAPTime::timeString() + " " + "HAPFakeGatoScheduleEnergy" + "->" + String(__FUNCTION__) + " [   ] " + "Timed action: END", true);
-#endif	
-	if (_callbackTimerEnd)  _callbackTimerEnd(state);
 }
