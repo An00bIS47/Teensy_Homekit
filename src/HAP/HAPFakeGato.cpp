@@ -304,6 +304,13 @@ String HAPFakegato::callbackGetHistoryEntries(){
     uint8_t entryCounter = 0;
     uint8_t usedBatch = 0;
 
+#if HAP_DEBUG_FAKEGATO          
+        Serial.print(">>>> _requestedIndex: ");
+        Serial.println(_requestedIndex);
+        Serial.send_now();
+#endif 
+
+
     if (_requestedIndex == 0){
         // ToDo: 
 
@@ -317,9 +324,16 @@ String HAPFakegato::callbackGetHistoryEntries(){
         entryCounter = _requestedIndex + 1;
     }    
 
+
+#if HAP_DEBUG_FAKEGATO          
+        Serial.print(">>>> _requestedIndex: ");
+        Serial.println(_requestedIndex); Serial.send_now();
+#endif 
+
     for (uint8_t i=0; i < (HAP_FAKEGATO_BATCH_SIZE - usedBatch); i++) {    
       
-        if (_requestedIndex > _entries.size() - 1 || _entries[_requestedIndex]->length == 0) { 
+        if (_requestedIndex > _entries.size() - 1 ) { 
+            //|| _entries[_requestedIndex]->length == 0
             // _requestedIndex is greater than _entries.size()!
             Serial.println("_requestedIndex is greater than _entries.size() or length = 0! BREAK");
 
@@ -327,13 +341,14 @@ String HAPFakegato::callbackGetHistoryEntries(){
             break;
         }
         
-        uint8_t currentOffset = 0;
-
+       
 #if HAP_DEBUG_FAKEGATO          
         Serial.print(">>>> _requestedIndex: ");
-        Serial.println(_requestedIndex);
-#endif  
-       
+        Serial.println(_requestedIndex); Serial.send_now();
+#endif 
+        
+        uint8_t currentOffset = 0;
+
         uint8_t size = 10;
         size += getEntryValueLength(_entries[_requestedIndex]->bitmask);
         

@@ -110,7 +110,7 @@ public:
     void queueNotifyEvent(uint8_t aid, uint32_t iid, const char* value, HAP_EVENT_PRIORITY priority = HAP_EVENT_PRIORITY_LOW){
         HAPEventNotifyPayload eventPayload(aid, iid, value);
 
-        HAPEvent event(HAP_EVENT_HOMEKIT_NOTIFY, &event); 
+        HAPEvent event(HAP_EVENT_HOMEKIT_NOTIFY, &eventPayload, priority); 
         queueEvent(event);       
     }
 
