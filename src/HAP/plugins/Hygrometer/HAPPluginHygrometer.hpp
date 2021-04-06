@@ -14,7 +14,7 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoAverage.hpp"
 
 #include "HAPCustomCharacteristics+Services.hpp"
@@ -46,7 +46,7 @@ public:
 
 	HAPConfigurationPlugin* setDefaults();
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
-	
+
 private:
 
 
@@ -61,7 +61,7 @@ private:
 	
 	bool fakeGatoCallback();
 
-	HAPFakegato2 _fakegato;
+	HAPFakegato _fakegato;
 
     float readSensor();
 	uint16_t readSensorRaw();

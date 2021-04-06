@@ -11,14 +11,17 @@
 
 
 #include <Arduino.h>
-#include <MD5Builder.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristic.hpp"
-#include "HAPFakeGato.hpp"
+
+#include "HAPFakegato.hpp"
+#include "HAPFakegato+ScheduleEnergy.hpp"
+#include "HAPFakegatoAverage.hpp"
 #include "HAPFakegatoFactory.hpp"
+
+#include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
-#include "HAPFakeGatoEnergy.hpp"
+
 
 
 class HAPPluginRCSwitchDevice {
@@ -57,21 +60,52 @@ public:
     uint8_t             deviceAddress;
     String              name;
 
-private:    
+
+	inline float getAveragedTotalPowerValue(){
+		return 0.0;
+	}
+
+	inline float getAveragedCurrentPowerValue(){
+		return 0.0;
+	}
+
+    inline float getAveragedPowerTenth() {
+        return 0.0;
+    }
+
+    inline float getAveragedPowerVoltage() {
+        return 0.0;
+    }  
+
+
+protected:    
+
+    bool getPowerState();
+
+    inline void queueNotifyEvent(HAPCharacteristicBase* characteristic){
+        if (characteristic->notifiable()){
+            if (_eventManager){
+                struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());							            
+                _eventManager->queueEvent( EventManager::kEventNotifyController, event);
+            }
+			
+		}	
+    }
 
     std::function<void(uint8_t, uint8_t, uint8_t)> _callbackRCSwitchSend = NULL;  
 
-    HAPFakeGatoEnergy       _fakegato;
+    HAPFakegatoScheduleEnergy  _fakegato;
     
     HAPAccessory*           _accessory;
     EventManager*			_eventManager;
     HAPFakegatoFactory*     _fakegatoFactory;
 
-    HAPCharacteristicBool*    _stateValue;
-    HAPCharacteristicBool*    _inUseState;
-    HAPCharacteristicBool*    _parentalLock;
-    HAPCharacteristicFloat*   _curPowerValue;
-    HAPCharacteristicFloat*   _ttlPowerValue;
+    HAPCharacteristicT<bool>*    _stateValue;
+    HAPCharacteristicT<bool>*    _inUseState;
+    HAPCharacteristicT<bool>*    _parentalLock;
+    HAPCharacteristicT<float>*   _curPowerValue;
+    HAPCharacteristicT<float>*   _ttlPowerValue;
+
 
     uint32_t                _timestampLastActivity;
 

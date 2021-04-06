@@ -27,8 +27,7 @@ public:
 	void setValue(int iid, String oldValue, String newValue);
 
 	void changePower(bool oldValue, bool newValue);
-	void changeEnabled(bool oldValue, bool newValue);
-	void changeBrightness(int oldValue, int newValue);
+	void changeEnabled(bool oldValue, bool newValue);	
 
 	void handleImpl(bool forced=false);
 	void identify( bool oldValue, bool newValue);
@@ -40,9 +39,8 @@ public:
 
 
 protected:	
-	HAPCharacteristicBool* 	_powerState;
-	HAPCharacteristicInt*	_brightnessState;
-	HAPCharacteristicBool* 	_enabledState;
+	HAPCharacteristicT<bool>* 	_powerState;
+	HAPCharacteristicT<bool>* 	_enabledState;
 
 	bool 	_blinkingEnabled;
 	uint8_t _gpio;

@@ -49,7 +49,6 @@ HAPPluginLED::HAPPluginLED(){
     _version.build      = VERSION_BUILD;
 
     _powerState         = nullptr;
-	_brightnessState    = nullptr;
 
     _enabledState       = nullptr;
     _blinkingEnabled    = true;
@@ -74,45 +73,24 @@ void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
     if (newValue != oldValue) {
         _blinkingEnabled = newValue;
         
-        setValue(_powerState->iid, "1", "0");
+        _powerState->setValue(newValue);
 
+        // Config update notification
         struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");							
         _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);                           
     }     
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
-void HAPPluginLED::changeBrightness(int oldValue, int newValue){
-    printf("New brightness state: %d\n", newValue);
-}
+
 
 void HAPPluginLED::handleImpl(bool forced){
     
     if (isEnabled() && _blinkingEnabled) {
         LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
-        if (_isOn) {            
-            setValue(_powerState->iid, "1", "0");
-        } else {
-            setValue(_powerState->iid, "0", "1");            
-        }
+        _powerState->setValue(_isOn);
+        queueNotifyEvent(_powerState);
 
-        // Add event
-        // struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _powerState->iid, _powerState->value());							
-        // _eventManager->queueEvent( EventManager::kEventNotifyController, event);
-
-#if HAP_LED_ENABLE_BRIGHTNESS  
-        uint32_t freeMem = ESP.getFreeHeap();        
-        uint8_t percentage = ( freeMem * 100) / 245000;        
-        // _brightnessState->setValue(String(percentage));
-        setValue(charType_brightness, _brightnessState->getValue(), percentage);
-
-        // Add event
-        // struct HAPEvent eventB = HAPEvent(nullptr, _accessory->aid, _brightnessState->iid, _brightnessState->value());							
-        // _eventManager->queueEvent( EventManager::kEventNotifyController, eventB);
-#endif  
     }
       
 
@@ -157,30 +135,18 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     _accessory->addService(_service);
 
 
-    HAPCharacteristicString *lightServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
-    lightServiceName->setValueString("LED");
+    HAPCharacteristicT<String>* lightServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+    lightServiceName->setValue("LED");
     _accessory->addCharacteristicToService(_service, lightServiceName);
 
-    _powerState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
-    if (_isOn)
-        _powerState->setValueString("1");
-    else
-        _powerState->setValueString("0");
-    
+    _powerState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+    _powerState->setValue(_isOn);
+
     auto callbackPowerState = std::bind(&HAPPluginLED::changePower, this, std::placeholders::_1, std::placeholders::_2);        
-    _powerState->valueChangeFunctionCall = callbackPowerState;
+    _powerState->setValueChangeCallback(callbackPowerState);
     _accessory->addCharacteristicToService(_service, _powerState);
 
     
-    _brightnessState = new HAPCharacteristicInt(HAP_CHARACTERISTIC_BRIGHTNESS, permission_read|permission_write|permission_notify, 0, 100, 1, unit_percentage);
-        //_brightnessState->valueChangeFunctionCall = &changeBrightness;
-
-#if HAP_LED_ENABLE_BRIGHTNESS   
-    _brightnessState->setValueString("50");
-    auto callbackBrightness = std::bind(&HAPPluginLED::changeBrightness, this, std::placeholders::_1, std::placeholders::_2);        
-    _brightnessState->valueChangeFunctionCall = callbackBrightness;
-    _accessory->addCharacteristicToService(_service, _brightnessState);    
-#endif
 
     // 
     // Outlet Service / Switch Service
@@ -188,23 +154,20 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
     _accessory->addService(switchService);
 
-    HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read);
-    plugServiceName->setValueString("LED");
+    HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+    plugServiceName->setValue("LED");
     _accessory->addCharacteristicToService(switchService, plugServiceName);
 
-    _enabledState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);
+    _enabledState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
     _enabledState->setDescription("Enabled");
-    if (_blinkingEnabled)
-        _enabledState->setValueString("1");
-    else
-        _enabledState->setValueString("0");
-
+    _enabledState->setValue(_blinkingEnabled);
+    
     auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);        
-    _enabledState->valueChangeFunctionCall = callbackEnabledState;
+    _enabledState->setValueChangeCallback(callbackEnabledState);
     _accessory->addCharacteristicToService(switchService, _enabledState);
 
     // Link switchService to _service
-    _service->addLinkedServiceId(switchService->serviceID);
+    _service->addLinkedServiceId(switchService->aid());
 
 	LogD("OK", true);
 
@@ -212,37 +175,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 }
 
 
-void HAPPluginLED::setValue(int iid, String oldValue, String newValue){
-    LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
-
-     if (iid == _powerState->iid) {
-        
-        if (newValue == "1"){
-            _isOn = true;
-        } else {
-            _isOn = false;
-        }    
-
-        _powerState->setValueString(newValue);
-
-        struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _powerState->iid, _powerState->valueString());							
-	    _eventManager->queueEvent( EventManager::kEventNotifyController, event);
- 
-    }
-    //  else if (type == charType_brightness) {        
-    //     _brightnessState->setValue(newValue);
-
-    //     struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _brightnessState->iid, _brightnessState->value());							
-	// 	_eventManager->queueEvent( EventManager::kEventNotifyController, event);
-    // }
-
-}
-
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM 
 #endif
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
-    printf(F("Start Identify Light from member\n"));
+    Serial.printf(F("Start Identify Light from member\n"));
 }
 
 #if HAP_ENABLE_WEBSERVER

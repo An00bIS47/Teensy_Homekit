@@ -1,76 +1,38 @@
 // 
-// HAPFakeGato.hpp
-// Homekit
+// HAPFakegato.hpp
+// Teensy_Homekit
 //
-//  Created on: 29.08.2019
+//  Created on: 31.03.2021
 //      Author: michael
 //
 
-#ifndef HAPFAKEGATO_HPP_
-#define HAPFAKEGATO_HPP_
+#ifndef HAPFakegato_HPP_
+#define HAPFakegato_HPP_
 
 #include <Arduino.h>
-#include "HAPGlobals.hpp"
-#include "HAPAccessory.hpp"
-
-#include "HAPHelper.hpp"
+#include <functional>
 #include <vector>
-
-#if defined(ARDUINO_ARCH_ESP32)
-
-#if ESP_IDF_VERSION_MAJOR == 4
-#include "mbedtls/base64.h"
-#else
-extern "C" {
-    #include "crypto/base64.h"
-    
-}
-#endif
-#elif defined(CORE_TEENSY)
-#include <Base64.h>
-#include "mbedtls/base64.h"
-#endif
-
-#define FAKEGATO_EPOCH_OFFSET           978307200
-
+#include <cstdarg>
+#include <CircularBuffer.h>
+#include "HAPAccessory.hpp"
+#include "HAPService.hpp"
+#include "HAPFakegatoCharacteristic.hpp"
 
 #ifndef HAP_FAKEGATO_BUFFER_SIZE
-#define HAP_FAKEGATO_BUFFER_SIZE	1536    // Number of history entries for each characteristic 
-#endif										// default: 768
+#define HAP_FAKEGATO_BUFFER_SIZE 100
+#endif
 
+#ifndef HAP_FAKEGATO_BATCH_SIZE
+#define HAP_FAKEGATO_BATCH_SIZE  16
+#endif
 
-#ifndef HAP_FAKEGATO_INTERVAL
-#define HAP_FAKEGATO_INTERVAL       300000	// Interval to add entry to history in millis
-#endif                                      // EVE app requires at least one entry every 10 mins
-											// default: 300000
+#define HAP_FAKEGATO_EPOCH       978307200
 
-#ifndef HAP_FAKEGATO_CHUNK_SIZE
-#define HAP_FAKEGATO_CHUNK_SIZE     16      // Number of entries sent at once from device to EVE app
-#endif										// default: 16
-
-// ToDo: Adjust for the other entries
-// #define HAP_FAKEGATO_CHUNK_BUFFER_SIZE  HAP_FAKEGATO_CHUNK_SIZE * 16     // 256 => 16 is the length of the weather info
+#ifndef HAP_FAKEGATO_CHUNK_BUFFER_SIZE
 #define HAP_FAKEGATO_CHUNK_BUFFER_SIZE      512     // base64 256 bits = 344
+#endif
 
-
-// this.accessoryType117
-// this is a bitmask for the values of the entry
-// for example weather: 0x07 = 00111 => 1x temp, 1x hum 1x, pres 
-//             energy:  0x1f = 11111 => 1x w, 1x v etc
-// ToDo: Remove 
-// #define HAP_FAKEGATO_TYPE_REFTIME       0x81
-// #define HAP_FAKEGATO_TYPE_WEATHER       0x07    // --> not unique
-// #define HAP_FAKEGATO_TYPE_ENERGY        0x1F    // --> not unique
-// #define HAP_FAKEGATO_TYPE_ENERGY_18     0x1E
-// #define HAP_FAKEGATO_TYPE_ROOM          0x0F
-// #define HAP_FAKEGATO_TYPE_MOTION        0x02
-// #define HAP_FAKEGATO_TYPE_DOOR          0x01
-// #define HAP_FAKEGATO_TYPE_THERMO        0x1F    // --> not unique
-// #define HAP_FAKEGATO_TYPE_AQUA          0x05    // Entry for Eve Aqua, valve on, 13 bytes in total
-// #define HAP_FAKEGATO_TYPE_AQUA_21       0x07    // --> not unique
-// #define HAP_FAKEGATO_TYPE_SWITCH        0x01
-
-
+#define HAP_FAKEGATO_TYPE_REFTIME       0x81
 
 #define HAP_SERVICE_FAKEGATO_ENDING                             "-079E-48FF-8F27-9C2605A29F52"
 
@@ -145,164 +107,49 @@ extern "C" {
 
 
 
-enum HAPFakeGatoType{
-    HAPFakeGatoType_refTime,
-    HAPFakeGatoType_weather,
-    HAPFakeGatoType_energy,
-    HAPFakeGatoType_energy18,
-    HAPFakeGatoType_room,
-    HAPFakeGatoType_motion,
-    HAPFakeGatoType_door,
-    HAPFakeGatoType_thermo,
-    HAPFakeGatoType_aqua,
-    HAPFakeGatoType_aqua21,
-    HAPFakeGatoType_switch,
-};
-  
-
-// enum HAPFakegatoSignature{
-//     HAPFakegatoSignature_Temperature                = 0x01,     // Length: 2  = temperature   x 100
-//     HAPFakegatoSignature_Humidity                   = 0x02,     // Length: 2  = humidity      x 100
-//     HAPFakegatoSignature_AirPressure                = 0x03,     // Length: 2  = air pressure  x 10
-//     HAPFakegatoSignature_AirQuality                 = 0x04,     // Length: 2  == PPM
-//     HAPFakegatoSignature_PowerApparent              = 0x05,
-//     HAPFakegatoSignature_Door                       = 0x06,     // Length: 1
-//     HAPFakegatoSignature_Power10thWh                = 0x07,     // Length: 2  = W             x 10
-//     HAPFakegatoSignature_WaterFlow                  = 0x08,
-//     HAPFakegatoSignature_WaterTemperature           = 0x09,
-//     HAPFakegatoSignature_WaterEnergy                = 0x0A, 
-//     HAPFakegatoSignature_PowerWatt                  = 0x0B,     // Length: 2
-//     HAPFakegatoSignature_PowerVoltage               = 0x0C,     // Length: 2  = volt          x 10
-//     HAPFakegatoSignature_PowerCurrent               = 0x0D,     // Length: 2
-//     HAPFakegatoSignature_PowerOnOff                 = 0x0E,     // Length: 1
-//     HAPFakegatoSignature_VOCHeatSense               = 0x0F,     // Length: 3
-//     HAPFakegatoSignature_ValvePercent               = 0x10,     // Length: 1
-//     HAPFakegatoSignature_TargetTemperature          = 0x11,     // Length: 2
-//     HAPFakegatoSignature_ThermoTarget               = 0x12,     // Length: 1 or current heating mode
-//     HAPFakegatoSignature_Motion                     = 0x13,
-//     HAPFakegatoSignature_Switch                     = 0x14,
-//     HAPFakegatoSignature_PowerOnOff2                = 0x15,
-//     HAPFakegatoSignature_SmokeDetected              = 0x16,
-//     HAPFakegatoSignature_CurrentPosition            = 0x17,
-//     HAPFakegatoSignature_TargetPosition             = 0x18,
-//     HAPFakegatoSignature_PositionState              = 0x19,
-//     HAPFakegatoSignature_ObstructionDetected        = 0x1A,
-//     HAPFakegatoSignature_SmokeDetectorStatus        = 0x1B,
-//     HAPFakegatoSignature_MotionActive               = 0x1C,     // Length: 1
-//     HAPFakegatoSignature_OpenWindow                 = 0x1D,     // Length: 1 or target heating mode
-//     // 1E unknown                                   = 0x1E,
-//     HAPFakegatoSignature_InUse                      = 0x1F,     // Length: 3 ??
-//     HAPFakegatoSignature_WindowState                = 0x20,
-//     HAPFakegatoSignature_PotState                   = 0x21,
-//     HAPFakegatoSignature_VOCDensity                 = 0x22,
-//     HAPFakegatoSignature_BatteryLevelMillivolts     = 0x23,     // Length: 2
-//     HAPFakegatoSignature_StatelessSwitchEvent       = 0x24,
-//     HAPFakegatoSignature_BatteryLevelPercent        = 0x25,
-//     HAPFakegatoSignature_Lock                       = 0x26,
-//     HAPFakegatoSignature_AirPressureChange          = 0x27,
-//     // unknown                                      = 0x28,     // Length: 8
-// };
-
-// union ui32_to_ui8 {
-//     uint32_t ui32;
-//     uint8_t ui8[4];
-// };
-
-// union ui16_to_ui8 {
-//     uint16_t ui16;
-//     uint8_t ui8[2];
-// };
-
-
-union HAPFakeGatoInfoStart {
-            struct {
-/* 4 */         uint32_t evetime;               // Actual time, in seconds from last time update
-/* 4 */         uint32_t negativeOffset;        // negative offset of reference time
-/* 4 */         uint32_t refTimeLastUpdate;     // reference time/last Accessory time update
-                                                // (taken from E863F117-079E-48FF-8F27-9C2605A29F52)            
-/* 1 */         uint8_t sigLength;    // number of 16 bits word of the following "signature" portion
-            } data;
-            uint8_t bytes[13];
-}; 
-
-union HAPFakeGatoInfoEnd {
-    struct {
-/* 2 */     uint16_t usedMemory;        // last physical memory position occupied (used by Eve.app 
-                                        // to understand how many transfers are needed). 
-                                        //
-                                        // If set to an address lower than the last successfully 
-                                        // uploaded entry, forces Eve.app to start from the beginning 
-                                        // of the memory, asking address 00 in E863F11C. 
-                                        // Accessory answers with entry 01. 
-                                        //
-                                        // Once the memory is fully written and memory overwriting is necessary 
-                                        // this field remains equal to history size.
-
-/* 2 */     uint16_t size;              // history size
-/* 4 */     uint32_t rollOver;          // once memory rolling occurred it indicates the address of the oldest entry 
-                                        // present in memory 
-                                        // (if memory rolling did not occur yet, these bytes are at 0)   
-
-/* 4 */     uint32_t unknown;
-/* 2 */     uint16_t end;               // ?? always 01ff or 0101
-    } data;
-    uint8_t bytes[14];
+enum HAP_FAKEGATO_TYPE {
+    HAP_FAKEGATO_TYPE_NONE      = 0x00,
+    HAP_FAKEGATO_TYPE_WEATHER,
+    HAP_FAKEGATO_TYPE_CUSTOM   
 };
 
+class HAPFakegato {
+public:
+    HAPFakegato();
+    virtual ~HAPFakegato();
 
-// template <class TFakeGatoData>
-class HAPFakeGato {
-public:    
-    HAPFakeGato();
-    ~HAPFakeGato();
+    virtual void begin() {};
 
-    void registerFakeGatoService(HAPAccessory* accessory, String name, bool withSchedule = false);
+    void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
+
+    void addEntry(uint8_t bitmask);
     
-    virtual void handle(bool forced = false);
+    String name() { return _name; }
 
-    virtual void    begin()     = 0;
-    virtual size_t  size()      = 0;
-    virtual bool    isFull()    = 0;
-    // virtual bool    isEmpty()   = 0;
-    virtual void    clear()     = 0;
-    virtual void    getData(const size_t count, uint8_t *data, size_t* length, uint16_t offset) = 0;
-    // virtual bool    addRefTimeEntry(uint32_t timestmap = 0) = 0;
-
-    uint32_t getTimestampRefTime() {
-        return _refTime;
+    uint32_t timestampLastEntry(){
+        return _entries[_entries.size() - 1]->timestamp;
     }
 
-    uint32_t getTimestampLastEntry(){
-        return _timestampLastEntry;
-    }   
-
-    uint16_t getMemoryUsed(){
-        return _memoryUsed;
-    } 
-
-    uint32_t getRolledOverIndex(){
-        return _idxRead;
-    }
-
-    void setRefTime(uint32_t reftime){
-        _refTime = reftime;
-    }
-
-    unsigned long interval(){
-		return _interval;
-	}	
-
-	void setInterval(unsigned long interval){
+    void setInterval(uint32_t interval){
 		_interval = interval;
 	}
 
-	void setName(String name){
-		_name = name;
-	}
+    size_t memoryUsed(){
+        return _entries.size();
+    }
 
-    String name(){
-		return _name;
-	}
+    size_t capacity(){
+        return _entries.capacity;
+    }
+
+    void setAsTimeSource(bool mode = true){
+        _isTimeSource = mode;
+    }
+
+
+    void registerCallbackAddEntry(std::function<bool()> callback){
+        _callbackAddEntry = callback;
+    }
 
     bool isEnabled(){
 		return _isEnabled;
@@ -312,111 +159,148 @@ public:
 		_isEnabled = mode;
 	}
 
-    void registerCallback(std::function<bool()> callback){
-        _callbackAddEntry = callback;
+    void handle(bool forced = false);
+
+
+    void getSignature(uint8_t* bytes){
+        
+        uint8_t offset = 0;
+        for (auto &chr : _signatures){            
+            uint8_t len = 0;
+            chr->getSignatureBytes(bytes + offset, &len);
+            offset += len;
+        }
     }
 
-    void setSerialNumber(String serialNumber) {
-        _serialNumber = serialNumber;
+
+    uint8_t getMaxEntryValueLength(){
+        uint8_t bitmask = 0;
+        for (uint8_t i=0; i < _signatures.size(); i++){
+            bitmask += (1 << i);
+        }        
+        return getEntryValueLength(bitmask);
     }
-    
-    virtual void beginSchedule() {};
+
+    uint8_t getEntryValueLength(uint8_t bitmask){
+        uint8_t length = 0;
+        for (uint8_t i=0; i < _signatures.size(); i++){
+            if (bitmask && (1 << i)){                        
+                length += _signatures[i]->valueLength();
+            }
+        }
+        return length;    
+    }
+
+    uint8_t valueLength(){
+        uint8_t length = 0;
+        for (auto &chr : _signatures){
+            length += chr->valueLength();
+        }
+        return length;
+    }
+
+    uint8_t signatureLength(){
+        return (_signatures.size() * 2);
+    }    
+
+    void enablePeriodicUpdates(bool mode = true){
+        _periodicUpdates = mode;
+    }
+
+
+    void addCharacteristic(HAPFakegatoCharacteristic* characteristic){
+        _signatures.emplace_back(std::move(characteristic));
+    }
 
 protected:
-    std::function<bool()> _callbackAddEntry = NULL;  
-    
-    String                _name;
-    String                _serialNumber;
 
-    HAPCharacteristicT<String>* _s2r1Characteristics;
-    HAPCharacteristicT<String>* _s2r2Characteristics;
-    HAPCharacteristicT<String>* _s2w1Characteristics;
-    HAPCharacteristicT<String>* _s2w2Characteristics;
+    struct HAPFakegatoDataEntry {
+        uint8_t bitmask = 0;
+        uint32_t timestamp = 0;
+        uint8_t* data = nullptr;
+        uint8_t length = 0;
 
-    HAPCharacteristicT<String>* _configReadCharacteristics;
-    HAPCharacteristicT<String>* _configWriteCharacteristics;
+        HAPFakegatoDataEntry(){
 
-    // // History Characteristics
-    // HAPCharacteristicData*  _s2r1Characteristics;
-    // HAPCharacteristicData*  _s2r2Characteristics;
-    // HAPCharacteristicData*  _s2w1Characteristics;
-    // HAPCharacteristicData*  _s2w2Characteristics;
-    
-    // // Schedule Characteristics
-    // HAPCharacteristicData* _configReadCharacteristics;
-    // HAPCharacteristicData* _configWriteCharacteristics;
-    
-    bool                    _isEnabled;
-    uint32_t                _refTime;    
+        }
 
-    
-    bool                    _rolledOver;
+        HAPFakegatoDataEntry(uint8_t bitmask_, uint32_t timestamp_, uint8_t* data_, uint8_t length_)
+        : bitmask(bitmask_)
+        , timestamp(timestamp_)
+        , length(length_)
+        {
+            data = (uint8_t*) malloc(sizeof(uint8_t) * length_);
+            memcpy(data, data_, length_);
+        }
 
-    uint16_t                _memoryUsed;    // last physical memory position occupied
-    //uint16_t                _memorySize;
-    
+        ~HAPFakegatoDataEntry(){
+            if (data) free(data);
+        }
 
-    uint32_t                _idxWrite;      // Write index
-    uint32_t                _idxRead;       // Read index, used for rolled over
+#if HAP_DEBUG
+        void printTo(Print& prt){
+            prt.print(F("Entry:"));
+            prt.print(F(" bitmask:")); prt.print(bitmask);
+            prt.print(F(" timestamp:")); prt.print(timestamp);
+            prt.println("");
+            HAPHelper::array_print("data", data, length);
+        }
 
-    uint32_t                _requestedEntry;
-    uint32_t                _currentEntryNumber;
-
-    bool                    _periodicUpdates;
-    uint32_t                _timestampLastEntry;
-
-    uint32_t     		    _previousMillis;
-    uint32_t     			_interval;
-    bool                    _transfer;
-
-    void getRefTime(uint8_t *data, size_t* length, const uint16_t offset);
-    
-    uint32_t getWriteIndex(){
-        return _idxWrite;
-    }
-
-    uint32_t getReadIndex(){
-        return _idxRead;
-    }
-
-    virtual void getSignature(uint8_t* signature) = 0;
-    virtual int signatureLength() = 0;
-
-
-
-    uint32_t incrementIndex(uint32_t index){
-        uint32_t result = (index + 1) % (HAP_FAKEGATO_BUFFER_SIZE);
-        //if (result == 0) result += 1;
-        return result;
-    }
-
-    uint32_t decrementIndex(uint32_t index){
-        return (index + HAP_FAKEGATO_BUFFER_SIZE - 1) % HAP_FAKEGATO_BUFFER_SIZE;
-    }
-
-    String getS2R2Callback();
-
-    void updateS2R1Value();
-    void updateS2R2Value();
+#endif
+    };
 
     bool shouldHandle();
 
+    virtual void addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length);
 
-    void setS2R1Characteristics(String oldValue, String newValue);
-    void setS2R2Characteristics(String oldValue, String newValue);
+    virtual void callbackHistorySetTime(String oldValue, String newValue);
+    virtual void callbackHistoryRequest(String oldValue, String newValue);
 
-    void setS2W1Characteristics(String oldValue, String newValue);
-    void setS2W2Characteristics(String oldValue, String newValue);
+    virtual String callbackGetHistoryInfo();
+    virtual String callbackGetHistoryEntries();
+
+    void getRefTime(uint8_t* data, uint16_t* length);
+
+
+
+    // FIXME: Change to uint8_t* data characteristic with base64 encoding inside of the charactersitic 
+    //        Add this to a new file specific for data chars ? 
+    HAPCharacteristicT<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics; 
+    HAPCharacteristicT<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
+    HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
+    HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
+
+
 
     // Schedules
-    virtual void scheduleRead(String oldValue, String newValue) {};
-    virtual void scheduleWrite(String oldValue, String newValue) {};
-
+    HAPCharacteristicT<String>* _configRead     = nullptr;
+    HAPCharacteristicT<String>* _configWrite    = nullptr;
     
-    // std::function<uint8_t*()> _callbackReadSchedule = NULL;  
-    // std::function<uint8_t*()> _callbackWriteSchedule = NULL;  
+    virtual void scheduleRead(String oldValue, String newValue)     {}
+    virtual void scheduleWrite(String oldValue, String newValue)    {}
+    virtual String buildScheduleString() { return ""; }
 
+    std::function<bool()> _callbackAddEntry = nullptr;
+
+    String  _name;
+    // uint8_t _signature[12] = {0, };
+    // uint8_t _sigLength;
+    // uint8_t _fakegatoType = 0;
+    size_t  _requestedIndex = 0;    
     
+    uint32_t _previousMillis = 0;
+    uint32_t _interval = HAP_FAKEGATO_INTERVAL;
+
+    bool    _isTimeSource = false;
+    bool    _rolledOver = false;
+    bool    _isEnabled = true;
+    bool    _periodicUpdates = true;
+
+    bool    _transfer = false;    
+
+    std::vector< std::unique_ptr<HAPFakegatoCharacteristic> > _signatures;
+    CircularBuffer<HAPFakegatoDataEntry*, HAP_FAKEGATO_BUFFER_SIZE> _entries;
 };
 
-#endif /* HAPFAKEGATO_HPP_ */
+
+#endif /* HAPFakegato_HPP_ */

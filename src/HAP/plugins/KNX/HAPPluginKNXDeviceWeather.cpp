@@ -174,10 +174,10 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
     if (_enableFakegato) {
         
         if (_fakegato == nullptr) {
-            _fakegato = new HAPFakegato2();
+            _fakegato = new HAPFakegato();
         }
 
-        
+
         if (_koTemperature > 0) _fakegato->addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginKNXDeviceWeather::getAveragedTemperatureValue, this)));        
         if (_koHumidity > 0)    _fakegato->addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginKNXDeviceWeather::getAveragedHumidityValue, this)));
         if (_koAirPressure > 0) _fakegato->addCharacteristic(new HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginKNXDeviceWeather::getAveragedPressureValue, this)));

@@ -117,57 +117,57 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     HAPService* outletService = new HAPService(HAP_SERVICE_OUTLET);
     _accessory->addService(outletService);
 
-    HAPCharacteristicString *plugServiceName = new HAPCharacteristicString(HAP_CHARACTERISTIC_NAME, permission_read, 32);
-    plugServiceName->setValueString("RCSwitch " + String(houseAddress) + String(deviceAddress));
+    HAPCharacteristicT<String> *plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, 32);
+    plugServiceName->setValue("RCSwitch " + String(houseAddress) + String(deviceAddress));
     _accessory->addCharacteristicToService(outletService, plugServiceName);
 
     //
     // Power State 
     // 
-    _stateValue = new HAPCharacteristicBool(HAP_CHARACTERISTIC_ON, permission_read|permission_write|permission_notify);            
-    _stateValue->setValueString("0");
+    _stateValue = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);            
+    _inUseState->setValue(true);
 
     auto callbackState = std::bind(&HAPPluginRCSwitchDevice::changedState, this, std::placeholders::_1, std::placeholders::_2);        
-    _stateValue->valueChangeFunctionCall = callbackState;
+    _stateValue->setValueChangeCallback(callbackState);
     _accessory->addCharacteristicToService(outletService, _stateValue);
 
 
     //
     // in use State
     //
-    _inUseState = new HAPCharacteristicBool(HAP_CHARACTERISTIC_OUTLET_IN_USE, permission_read|permission_notify);        
+    _inUseState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_OUTLET_IN_USE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY);        
     // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);        
     // _inUseState->valueChangeFunctionCall = callbackState;
-    _inUseState->setValueString("1");
+    _inUseState->setValue(true);
     _accessory->addCharacteristicToService(outletService, _inUseState);
 
     //
     // power current (EVE)
     //
-    _curPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
-    _curPowerValue->setValueString("0.0");
+    _curPowerValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0.0, 3600, 0.1, HAP_UNIT_NONE);
+    _curPowerValue->setValue(0.0);
     
     auto callbackChangeCurPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerCurrent, this, std::placeholders::_1, std::placeholders::_2);
-    _curPowerValue->valueChangeFunctionCall = callbackChangeCurPower;
+    _curPowerValue->setValueChangeCallback(callbackChangeCurPower);
     _accessory->addCharacteristicToService(outletService, _curPowerValue);
     
 
     //
     // power total (EVE)
     //
-    _ttlPowerValue = new HAPCharacteristicFloat(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, permission_read|permission_notify, 0.0, 3600, 0.1, unit_none);
-    _ttlPowerValue->setValueString("0.0");
+    _ttlPowerValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0.0, 3600, 0.1, HAP_UNIT_NONE);
+    _ttlPowerValue->setValue(0.0);
     
     auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
-    _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
+    _ttlPowerValue->setValueChangeCallback(callbackChangeTtlPower);
     _accessory->addCharacteristicToService(outletService, _ttlPowerValue);
 
 
     //
     // parental Lock
     //
-    _parentalLock = new HAPCharacteristicBool(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, permission_read|permission_write);        
-    _parentalLock->setValueString("0");    
+    _parentalLock = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE);        
+    _inUseState->setValue(false);
     // auto callbackChangeTtlPower = std::bind(&HAPPluginRCSwitchDevice::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2);
     // _ttlPowerValue->valueChangeFunctionCall = callbackChangeTtlPower;
     _accessory->addCharacteristicToService(outletService, _parentalLock);
@@ -177,6 +177,14 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     // 
     // FakeGato History
     // 
+
+    _fakegato.addCharacteristic(new HAPFakegatoCharacteristicPowerWatt(std::bind(&HAPPluginRCSwitchDevice::getAveragedTotalPowerValue, this)));        
+    _fakegato.addCharacteristic(new HAPFakegatoCharacteristicPowerVoltage(std::bind(&HAPPluginRCSwitchDevice::getAveragedPowerVoltage, this)));
+    _fakegato.addCharacteristic(new HAPFakegatoCharacteristicPowerCurrent(std::bind(&HAPPluginRCSwitchDevice::getAveragedCurrentPowerValue, this)));
+    _fakegato.addCharacteristic(new HAPFakegatoCharacteristicPowerTenth(std::bind(&HAPPluginRCSwitchDevice::getAveragedPowerTenth, this)));
+    _fakegato.addCharacteristic(new HAPFakegatoCharacteristicPowerOnOff(std::bind(&HAPPluginRCSwitchDevice::getPowerState, this)));
+
+
     _fakegato.registerFakeGatoService(_accessory, "RCSwitch " + String(houseAddress) + String(deviceAddress), true);
     
     // Fakegato Schedule
@@ -187,10 +195,10 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     
     _fakegato.setCallbackSaveConfig(std::bind(&HAPPluginRCSwitchDevice::saveConfig, this));
 
-    _fakegato.beginSchedule();
+    // _fakegato.beginSchedule();
 
 	auto callbackAddEntry = std::bind(&HAPPluginRCSwitchDevice::fakeGatoCallback, this);
-	_fakegatoFactory->registerFakeGato(&_fakegato,  "RCSwitch " + String(houseAddress) + String(deviceAddress), callbackAddEntry);
+	_fakegatoFactory->registerFakeGato(&_fakegato, callbackAddEntry);
 
 
     return _accessory;
@@ -221,25 +229,21 @@ void HAPPluginRCSwitchDevice::identify(bool oldValue, bool newValue) {
 void HAPPluginRCSwitchDevice::changedPowerCurrent(float oldValue, float newValue){
     
     if (oldValue != newValue) {
-        struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _curPowerValue->iid, String(newValue));							
-        _eventManager->queueEvent( EventManager::kEventNotifyController, event);
-
+        queueNotifyEvent(_curPowerValue);
 
         String inUse;
         newValue > 0.1 ? inUse = "1" : inUse = "0";    
         if (_inUseState->valueString() != inUse){
             _inUseState->setValue(inUse);
 
-            struct HAPEvent eventInUse = HAPEvent(nullptr, _accessory->aid, _inUseState->iid, String(newValue));							
-            _eventManager->queueEvent( EventManager::kEventNotifyController, eventInUse);
+            queueNotifyEvent(_inUseState);
         }
     }
 }
 
 void HAPPluginRCSwitchDevice::changedPowerTotal(float oldValue, float newValue){
     if (oldValue != newValue) {
-        struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _ttlPowerValue->iid, String(newValue));							
-	    _eventManager->queueEvent( EventManager::kEventNotifyController, event); 
+        queueNotifyEvent(_ttlPowerValue);
     }
 }
 
@@ -254,10 +258,8 @@ void HAPPluginRCSwitchDevice::changedState(bool oldValue, bool newValue){
         _timestampLastActivity = HAPTime::timestamp();
 
         // Add entry to fakegato
-        _fakegato.addEntry(0x01, "0", "0", "0", "0", newValue == true ? "1" : "0");
-
-        struct HAPEvent event = HAPEvent(nullptr, _accessory->aid, _stateValue->iid, newValue ? "1" : "0");							
-        _eventManager->queueEvent( EventManager::kEventNotifyController, event);        
+        _fakegato.addEntry(0x01);        
+        queueNotifyEvent(_stateValue);
     }    
 }
 
@@ -265,13 +267,14 @@ bool HAPPluginRCSwitchDevice::fakeGatoCallback(){
     // LogD(HAPTime::timeString() + " " + "HAPPluginPCA301Device" + "->" + String(__FUNCTION__) + " [   ] " + "fakeGatoCallback()", true);
 
     // Serial.println("power: " + _curPowerValue->value());    
-    return _fakegato.addEntry(0x1F, "0", "0", "0", "0", _stateValue->valueString());
+    _fakegato.addEntry(0x1F);
+    return true;
 }
 
 void HAPPluginRCSwitchDevice::switchCallback(uint16_t state){
     LogD(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
     // _callbackRCSwitchSend(houseAddress, deviceAddress, state);
-    _stateValue->setValue(state == 1 ? "1" : "0");
+    _stateValue->setValue(state);
 }
 
 uint32_t HAPPluginRCSwitchDevice::getTimestampLastActivity(){
@@ -298,4 +301,9 @@ FLASHMEM
 void HAPPluginRCSwitchDevice::saveConfig(){ 
     LogE(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);		
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
+}
+
+
+bool HAPPluginRCSwitchDevice::getPowerState(){
+    return _stateValue->value(false);
 }

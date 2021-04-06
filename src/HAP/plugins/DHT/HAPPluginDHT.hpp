@@ -30,7 +30,7 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoAverage.hpp"
 #include "HAPGlobals.hpp"
 
@@ -57,7 +57,7 @@
 #include <DHT_U.h>
 #endif
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoAverage.hpp"
 
 class HAPPluginDHT: public HAPPlugin {
@@ -109,7 +109,7 @@ private:
 
 	uint32_t _timestampLastRead;
 
-	HAPFakegato2 _fakegato;
+	HAPFakegato _fakegato;
 
 };
 

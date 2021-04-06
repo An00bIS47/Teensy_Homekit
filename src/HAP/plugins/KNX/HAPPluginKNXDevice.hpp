@@ -17,7 +17,7 @@
 #include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoAverage.hpp"
 #include "HAPFakegatoFactory.hpp"
 

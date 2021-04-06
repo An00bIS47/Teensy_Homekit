@@ -30,7 +30,7 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoAverage.hpp"
 // #include "HAPFakeGatoWeather.hpp"
 
@@ -130,7 +130,7 @@ protected:
 
 	bool fakeGatoCallback();
 	// HAPFakeGatoWeather _fakegato;
-	HAPFakegato2 _fakegato;
+	HAPFakegato _fakegato;
 };
 
 REGISTER_PLUGIN(HAPPluginBME280)

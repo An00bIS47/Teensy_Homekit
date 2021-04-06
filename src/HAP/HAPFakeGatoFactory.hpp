@@ -12,17 +12,17 @@
 #include <vector>
 #include <memory>
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 
 class HAPFakegatoFactory {
 public:
     HAPFakegatoFactory() {}
 
     void handle(bool forced = false);
-    void registerFakeGato(HAPFakegato2* fakegato, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL);
+    void registerFakeGato(HAPFakegato* fakegato, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL);
 
 private:    
-    std::vector<HAPFakegato2*> _fakegatos;    
+    std::vector<HAPFakegato*> _fakegatos;    
 };
 
 #endif /* HAPFakegatoFactory_HPP_ */

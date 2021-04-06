@@ -120,7 +120,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         if (_enableFakegato){
 
             if (_fakegato == nullptr) {
-                _fakegato = new HAPFakegato2();
+                _fakegato = new HAPFakegato();
             }
 
             _fakegato->enablePeriodicUpdates(false);

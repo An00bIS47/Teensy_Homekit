@@ -10,7 +10,7 @@
 #define HAPFAKEGATOSCHEDULE_HPP_
 
 #include <functional>
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
 #include <vector>
@@ -99,10 +99,10 @@ struct HAPFakeGatoScheduleDays {
     }
 };
 
-class HAPFakegatoSchedule : public HAPFakegato2 {
+class HAPFakegatoSchedule : public HAPFakegato {
 public:    
 
-    HAPFakegatoSchedule() : HAPFakegato2() {
+    HAPFakegatoSchedule() : HAPFakegato() {
 
     }
     

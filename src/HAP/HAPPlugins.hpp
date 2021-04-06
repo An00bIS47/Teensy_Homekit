@@ -273,7 +273,7 @@ public:
 		_fakeGatoFactory = fakeGatoFactory;
 	}
 
-	void registerFakeGato(HAPFakegato2* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
+	void registerFakeGato(HAPFakegato* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
 		_fakeGatoFactory->registerFakeGato(fakegato, callback, interval);
 	}
 

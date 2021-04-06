@@ -16,7 +16,7 @@
 #include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoFactory.hpp"
 
 #include "HAPPluginKNXDevice.hpp"
@@ -47,7 +47,7 @@ protected:
 
     // HAPCharacteristicString* 	_lastUpdate;
 
-    HAPFakegato2*     _fakegato;
+    HAPFakegato*     _fakegato;
 
     void changedState(bool oldValue, bool newValue);    
     void writeStateToKNX(bool newValue);

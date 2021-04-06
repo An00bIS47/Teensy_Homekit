@@ -17,7 +17,7 @@
 #include "HAPCharacteristicBase.hpp"
 #include "EventManager.h"
 
-#include "HAPFakegato2.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoAverage.hpp"
 #include "HAPFakegatoFactory.hpp"
 
@@ -72,7 +72,7 @@ protected:
 	HAPFakegatoAverage<uint16_t>	_pressureAverage;
 
 
-    HAPFakegato2*     _fakegato;
+    HAPFakegato*     _fakegato;
 
 
 	void changedTemperature(float oldValue, float newValue);
