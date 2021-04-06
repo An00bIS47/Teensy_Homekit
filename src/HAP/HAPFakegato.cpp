@@ -10,8 +10,6 @@
 #include "HAPLogger.hpp"
 #include "HAPTime.hpp"
 
-
-
 #if defined ( ARDUINO_ARCH_ESP32 )
 #if ESP_IDF_VERSION_MAJOR == 4
 #include "mbedtls/base64.h"

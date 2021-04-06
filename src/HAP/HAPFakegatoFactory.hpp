@@ -11,7 +11,6 @@
 #include <Arduino.h>
 #include <vector>
 #include <memory>
-
 #include "HAPFakegato.hpp"
 
 class HAPFakegatoFactory {
