@@ -1,4 +1,4 @@
-image: python:3-slim
+image: python:3
 
 stages:
   - build
@@ -8,7 +8,7 @@ stages:
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
   GIT_SUBMODULE_STRATEGY: recursive
-  
+
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
 #
