@@ -270,8 +270,6 @@ protected:
     HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
     HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
 
-
-
     // Schedules
     HAPCharacteristicT<String>* _configRead     = nullptr;
     HAPCharacteristicT<String>* _configWrite    = nullptr;
