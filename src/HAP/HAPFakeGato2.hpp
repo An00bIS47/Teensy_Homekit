@@ -116,11 +116,11 @@ enum HAP_FAKEGATO_TYPE {
 class HAPFakegato2 {
 public:
     HAPFakegato2();
-    ~HAPFakegato2();
+    virtual ~HAPFakegato2();
 
     virtual void begin() {};
 
-    virtual void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
+    void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
 
     void addEntry(uint8_t bitmask);
     

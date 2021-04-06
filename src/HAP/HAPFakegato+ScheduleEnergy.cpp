@@ -25,6 +25,10 @@ extern "C" {
 #endif
 
 
+void HAPFakegatoScheduleEnergy::begin(){
+
+}
+
 
 bool HAPFakegatoScheduleEnergy::decodeToggleOnOff(uint8_t* data){
 	return data[1] & 0x01;

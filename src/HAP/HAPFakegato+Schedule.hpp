@@ -105,8 +105,9 @@ public:
     HAPFakegatoSchedule() : HAPFakegato2() {
 
     }
+    
 
-    ~HAPFakegatoSchedule(){
+    virtual ~HAPFakegatoSchedule() {
         if (_configRead) delete _configRead;
         if (_configWrite) delete _configWrite;
 
@@ -115,14 +116,13 @@ public:
         _timers.clear();
     }
     
-    virtual void begin() { }
-   
-    virtual bool decodeToggleOnOff(uint8_t* data);
-    virtual void decodeDays(uint8_t *data);
-    virtual void decodePrograms(uint8_t* data);
-    virtual void encodePrograms(uint8_t* data, size_t *dataSize);
+    virtual void begin() = 0;
+    virtual bool decodeToggleOnOff(uint8_t* data) = 0;
+    virtual void decodeDays(uint8_t *data) = 0;
+    virtual void decodePrograms(uint8_t* data) = 0;
+    virtual void encodePrograms(uint8_t* data, size_t *dataSize) = 0;
     
-    virtual String buildScheduleString();
+    virtual String buildScheduleString() = 0;
 
 
     bool isEnabled(){
