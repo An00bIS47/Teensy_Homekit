@@ -18,7 +18,7 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
-#include "HAPFakeGato.hpp"
+#include "HAPFakegato.hpp"
 
 #include <knx.h>
 #include "HAPPluginKNXDevice.hpp"

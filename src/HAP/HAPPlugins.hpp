@@ -32,7 +32,7 @@
 #include "HAPCharacteristicBase.hpp"
 #include "HAPServices.hpp"
 
-#include "HAPFakeGato.hpp"
+#include "HAPFakegato.hpp"
 #include "HAPFakegatoFactory.hpp"
 #include "HAPDeviceID.hpp"
 

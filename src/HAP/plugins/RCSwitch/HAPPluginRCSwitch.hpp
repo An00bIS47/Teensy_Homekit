@@ -19,7 +19,7 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
-#include "HAPFakeGato.hpp"
+#include "HAPFakegato.hpp"
 
 
 #include "HAPPluginRCSwitchDevice.hpp"
