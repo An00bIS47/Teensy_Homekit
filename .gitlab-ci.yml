@@ -24,7 +24,13 @@ before_script:
   - pip install -U platformio
   - platformio update
 
-run:
+compile:
   stage: build
   script:
     - platformio run -e teensy_41
+
+
+clean:
+  stage: build
+  script:
+    - platformio run -e teensy_41 -t clean
