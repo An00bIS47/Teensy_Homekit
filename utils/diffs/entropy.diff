@@ -1,0 +1,6 @@
+59,60c59,60
+<   uint8_t randomByte(void);
+<   uint16_t randomWord(void);
+---
+>   uint8_t randomByte(void) { return random8(); }
+>   uint16_t randomWord(void) { return random16(); }
