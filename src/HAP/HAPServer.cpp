@@ -498,6 +498,9 @@ bool HAPServer::begin(bool resume) {
 	_eventManager.addListener( EventManager::kEventNotifyController, &listenerNotificaton );
 	
 
+	// _evtMgr.addListener( );
+	
+
 	// UpdateConfigNumber
 	listenerUpdateConfigNumber.mObj = this;
   	listenerUpdateConfigNumber.mf = &HAPServer::handleEventUpdateConfigNumber;

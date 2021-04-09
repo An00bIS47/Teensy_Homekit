@@ -70,7 +70,8 @@ public:
 };
 
 
-template<typename F> class GenericCallable : public EventListener
+template<typename F> 
+class GenericCallable : public EventListener
 {
 	F* mf;
 
@@ -87,7 +88,8 @@ public:
 };
 
 
-template<class C> class MemberFunctionCallable : public EventListener
+template<class C> 
+class MemberFunctionCallable : public EventListener
 {
 	typedef void (C::*memberfPointer)( int, struct HAPEvent );
 

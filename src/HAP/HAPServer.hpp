@@ -221,6 +221,8 @@ public:
 	bool isPaired();	
 
 	static EventManager _eventManager;
+
+	// HAPEventManager _evtMgr;
 protected:
 	
 	void updateConfig();
