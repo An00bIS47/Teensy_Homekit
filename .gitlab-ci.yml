@@ -1,4 +1,4 @@
-image: infinitecoding/platformio-for-ci:latest
+image: python:3-buster
 
 stages:
   - build
@@ -20,10 +20,10 @@ cache:
     - venv/
     - ~/.platformio
 
-# before_script:
-#   - python -V               # Print out python version for debugging
-#   - pip install -U platformio
-#   - platformio update
+before_script:
+  - python -V               # Print out python version for debugging
+  - pip install -U platformio
+  - platformio update
 
 compile:
   stage: build
