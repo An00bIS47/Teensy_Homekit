@@ -7,3 +7,6 @@
 [submodule "lib/TeensyDebug"]
 	path = lib/TeensyDebug
 	url = https://github.com/ftrias/TeensyDebug.git
+[submodule "lib/knx"]
+	path = lib/knx
+	url = ssh://git@SynologyNAS:30001/michael/kx.git
