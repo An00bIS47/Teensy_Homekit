@@ -24,12 +24,19 @@ before_script:
   - python -V               # Print out python version for debugging
   - pip install -U platformio
   - platformio update
+  
+
+patch:
+  stage: build
+  script:    
+    - platformio run -e teensy_41
+    - patch ~/.platformio/packages/framework-arduinoteensy/libraries/Entropy/Entropy.h utils/diffs/entropy.diff    
 
 compile:
   stage: build
-  script:
+  script:    
     - platformio run -e teensy_41
-
+    - patch ~/.platformio/packages/framework-arduinoteensy/libraries/Entropy/Entropy.h utils/diffs/entropy.diff
 
 clean:
   stage: build
