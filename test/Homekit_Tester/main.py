@@ -726,6 +726,40 @@ class HomekitTester(object):
         return result, data
 
 
+    def printEvents(self, events):
+        for event in events:
+            print('event for {aid}.{iid}: {event}'.format(aid=event[0], iid=event[1], event=event[2]))
+
+
+
+    @measure
+    def listenEvents(self, testname):
+        if self.args.alias not in self.controller.get_pairings():
+            print('"{a}" is no known alias'.format(a=self.args.alias))
+            sys.exit(-1)
+
+        try:
+            pairing = self.controller.get_pairings()[self.args.alias]
+            characteristics = [(int(c.split('.')[0]), int(c.split('.')[1])) for c in self.args.characteristicsEvent]
+            results = pairing.get_events(characteristics, self.printEvents, max_events=self.args.eventCount, max_seconds=self.args.secondsCount)
+        except KeyboardInterrupt:
+            sys.exit(-1)
+        except Exception as e:
+            print(e)
+            logging.debug(e, exc_info=True)
+            sys.exit(-1)
+
+        for key, value in results.items():
+            aid = key[0]
+            iid = key[1]
+            status = value['status']
+            desc = value['description']
+            if status < 0:
+                print('put_characteristics failed on {aid}.{iid} because: {reason} ({code})'.format(aid=aid, iid=iid,
+                                                                                                    reason=desc,
+                                                                                                    code=status))
+        return 1, None
+
 
     @measure
     def removePairing(self, testname):
@@ -834,7 +868,7 @@ class HomekitTester(object):
             #print(data[(2, 18)]["value"])
 
             if data[(2, 18)]["value"] is None:
-            	return None
+                return None
 
             base64_bytes = base64.b64decode(data[(2, 18)]["value"])
 
@@ -892,7 +926,7 @@ class HomekitTester(object):
             info = self.getHistoryStatus()
 
             if info is None:
-            	return False, None
+                return False, None
             
             if self.args.quiet == False:
                 print(info)
@@ -956,11 +990,17 @@ def setup_args_parser():
     parser.add_argument('-C', action='append', required=False, dest='characteristicsPut', nargs=2,
                         help='Use `aid.iid value` to CHANGE the value. Repeat to change multiple characteristics. '
                              'If the value starts with `@` it is interpreted as a file')
+    parser.add_argument('-e', action='append', required=True, dest='characteristicsEvent',
+                        help='Use aid.iid for subscribing to a characteristic. Repeat to subscribe to multiple characteristics.')
+    parser.add_argument('-n', action='store', required=False, dest='eventCount', help='max number of events before end',
+                        default=-1, type=int)
+    parser.add_argument('-s', action='store', required=False, dest='secondsCount', default=-1, type=int,
+                        help='max number of seconds before end')
     parser.add_argument('-r', action='store_true', required=False, dest='report',
                         help='create report')
     parser.add_argument('-R', action='store', dest='reportFormat', default='md', choices=['md', 'json'],
                         help='Specify report format')
-    parser.add_argument('-s', action='store_true', required=False, dest='summary',
+    parser.add_argument('-z', action='store_true', required=False, dest='summary',
                         help='print summary')
     parser.add_argument('-q', action='store_true', required=False, default=False, dest='quiet',
                         help='surpress output')
@@ -987,8 +1027,8 @@ if __name__ == '__main__':
     args = setup_args_parser()
 
 
-    print(args.characteristics) 
-    print(args.characteristicsPut)    
+    #print(args.characteristics) 
+    #print(args.characteristicsPut)    
 
     # convert the command line parameters to the required form
     characteristics = [(int(c.split('.')[0]), int(c.split('.')[1])) for c in args.characteristics]
@@ -997,8 +1037,8 @@ if __name__ == '__main__':
                                 c[1]) for c in args.characteristicsPut]
 
 
-    print(characteristics) 
-    print(characteristicsPut)    
+    #print(characteristics) 
+    #print(characteristicsPut)    
 
 
     tester = HomekitTester(args)
@@ -1010,8 +1050,10 @@ if __name__ == '__main__':
     tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
     tester.runTest("getAccessories", tester.getAccessories) 
 
+    tester.runTest("listenEvents", tester.listenEvents)
 
     tester.runFakegato()
+
 
     tester.runTest("removePairing", tester.removePairing)
     
