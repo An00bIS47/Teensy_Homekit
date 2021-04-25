@@ -21,7 +21,10 @@ import struct
 import datetime as dt
 import timeit
 from tabulate import tabulate
-        
+from functools import wraps
+from time import time
+
+
 class TestReport(object):
 
     """docstring for ClassName"""
@@ -278,11 +281,6 @@ class TimingManager(object):
         return str(dt.datetime.fromtimestamp(sec))
 
 
-
-
-
-from functools import wraps
-from time import time
 
 def measure(func):
     @wraps(func)
@@ -738,16 +736,28 @@ class HomekitTester(object):
             print('"{a}" is no known alias'.format(a=self.args.alias))
             sys.exit(-1)
 
+        loggingArray = []
         try:
-            pairing = self.controller.get_pairings()[self.args.alias]
-            characteristics = [(int(c.split('.')[0]), int(c.split('.')[1])) for c in self.args.characteristicsEvent]
-            results = pairing.get_events(characteristics, self.printEvents, max_events=self.args.eventCount, max_seconds=self.args.secondsCount)
+            
+            with TimingManager(testname, loggingArray) as tm:                
+
+                pairing = self.controller.get_pairings()[self.args.alias]
+                characteristics = [(int(c.split('.')[0]), int(c.split('.')[1])) for c in self.args.characteristicsEvent]
+                results = pairing.get_events(characteristics, self.printEvents, max_events=self.args.eventCount, max_seconds=self.args.secondsCount)
+
+            self.report.addStep(testname, True, loggingArray)
+
+
         except KeyboardInterrupt:
-            sys.exit(-1)
+            #sys.exit(-1)
+            self.report.addStep(testname, False, loggingArray, "User canceled")
+            return -1, None
         except Exception as e:
             print(e)
             logging.debug(e, exc_info=True)
-            sys.exit(-1)
+            self.report.addStep(testname, False, loggingArray, e)
+            #sys.exit(-1)
+            return -1, None
 
         for key, value in results.items():
             aid = key[0]
@@ -1047,7 +1057,7 @@ if __name__ == '__main__':
 
     tester.runTest("getAccessories", tester.getAccessories)
     tester.runTest("getCharacteristic", tester.getCharacteristic, characteristics)
-    tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
+    #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
     tester.runTest("getAccessories", tester.getAccessories) 
 
     tester.runTest("listenEvents", tester.listenEvents)
@@ -1066,6 +1076,7 @@ if __name__ == '__main__':
         tester.printSummary()
 
     if args.report == True:
+        tester.saveReport("./Testreports", args.reportFormat)
         tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
         
 

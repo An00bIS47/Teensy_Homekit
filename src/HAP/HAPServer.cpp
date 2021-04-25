@@ -1110,15 +1110,14 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 void HAPServer::handleClientState(HAPClient* hapClient) {
 	switch(hapClient->state) {
 		case HAP_CLIENT_STATE_DISCONNECTED:
-#if defined( ARDUINO_ARCH_ESP32 )		
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] disconnected", true );
-#elif defined( CORE_TEENSY )		
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] disconnected", true);
-#endif
+// #if defined( ARDUINO_ARCH_ESP32 )		
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] disconnected", true );
+// #elif defined( CORE_TEENSY )		
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] disconnected", true);
+// #endif
 			handleClientDisconnect( hapClient );
-
 			break;
 		case HAP_CLIENT_STATE_CONNECTED:		
 #if defined( ARDUINO_ARCH_ESP32 )		
@@ -1374,12 +1373,14 @@ bool HAPServer::stopEvents(){
 
 
 void HAPServer::stopEvents(bool value) {
-	
+
+#if HAP_DEBUG	
 	if (value) {
 		LogD("<<< Stopping Events", true);
 	} else {
 		LogD(">>> Starting Events", true);
 	}
+#endif	
 	_stopEvents = value;
 }
 
@@ -1850,7 +1851,8 @@ bool HAPServer::encode(HAPClient* hapClient){
 			}
 
 		} else {
-			uint8_t read = hapClient->client.read();
+			// uint8_t read = hapClient->client.read();
+			hapClient->client.read();
 #if HAP_DEBUG_TLV8
 			LogW( "WARNING: Invalid TLV8 type: ", false );
 			LogW((char*)read, true);			

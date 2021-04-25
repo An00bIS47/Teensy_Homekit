@@ -296,16 +296,31 @@ String HAPFakegato::callbackGetHistoryEntries(){
     if (!_transfer) return F("AA==");
     
     uint16_t offset = 0;
-    uint16_t buffersize = HAP_FAKEGATO_BATCH_SIZE * (10 + getMaxEntryValueLength());
-    uint8_t data[buffersize];
+
+    // 
+    // buffersize
+    // calculation: (16 * (10 + 6)) + 21
+    //                |     |   |      +-> 21 is the size of a reftime entry
+    //                |     |   +-> 6 is max length for all values in bitmask (in this case)
+    //                |     +-> 10 is the static data size
+    //                +-> batch size (defined as 16 in this case)
+
+
+    // ToDo: fix getMaxEntryValueLength()!!
+    // uint16_t buffersize = (HAP_FAKEGATO_BATCH_SIZE * (10 + getMaxEntryValueLength())) + 21;    
+    // Serial.print(">>>> bufferSize: ");
+    // Serial.println(buffersize); Serial.send_now();
+    // uint8_t data[buffersize];
+
+    // uint16_t buffersize = 512;
+    uint8_t data[512];
     
     uint8_t entryCounter = 0;
     uint8_t usedBatch = 0;
 
 #if HAP_DEBUG_FAKEGATO          
         Serial.print(">>>> _requestedIndex: ");
-        Serial.println(_requestedIndex);
-        Serial.send_now();
+        Serial.println(_requestedIndex); Serial.send_now();    
 #endif 
 
 
@@ -347,14 +362,13 @@ String HAPFakegato::callbackGetHistoryEntries(){
         
         uint8_t currentOffset = 0;
 
-        uint8_t size = 10;
+        uint8_t size = 10;  // length of static data is 10
         size += getEntryValueLength(_entries[_requestedIndex]->bitmask);
         
 
 #if HAP_DEBUG_FAKEGATO        
         Serial.print(">>>> size: ");
         Serial.println(size);
-
 
         Serial.print(">>>> timestamp: ");
         Serial.println(_entries[_requestedIndex]->timestamp);
