@@ -60,8 +60,8 @@ public:
 		return _configuration->isAdmin(id);
 	}
 
-	void addPairing(const uint8_t* id, const uint8_t* key, bool isAdmin){
-		_configuration->addPairing(id, key, isAdmin);
+	void addPairing(const uint8_t* id, const uint8_t* key){
+		_configuration->addPairing(id, key);
 		_configuration->save();
 	}
 

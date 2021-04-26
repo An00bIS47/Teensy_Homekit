@@ -416,19 +416,6 @@ bool HAPPluginBME280::begin(){
 }
 
 bool HAPPluginBME280::fakeGatoCallback(){	
-
-	// Serial.println("ADD FAKEGATO ENTRY");
-	// addToAverage(_temperatureValue->value(), _humidityValue->value(), _pressureValue->value());
-	
-	// float avgTemp = _averageTemperature / _measurementTempCount;
-	// float avgHum = _averageHumidity / _measurementHumCount;
-	// float avgPres = _averagePressure / _measurementPresCount;
-	
-	// resetAverage();
-	_fakegato.addEntry(0x07); //, "thp", avgTemp, avgHum, avgPres);
-	
-	return true;
-	// return _fakegato.addEntry(0x07, String(avgTemp), String(avgHum), String(avgPres));
 	// 0102 0202 0302
 	//	|	  |	   +-> Pressure	
 	//  |	  +-> Humidity
@@ -438,7 +425,9 @@ bool HAPPluginBME280::fakeGatoCallback(){
 	// 0x01 => temp			= 001
 	// 0x02 => hum			= 010
 	// 0x04 => pressure		= 100
-
+	_fakegato.addEntry(_fakegato.getBitmaskForAll());
+	
+	return true;
 }
 
 #if defined(ARDUINO_TEENSY41)

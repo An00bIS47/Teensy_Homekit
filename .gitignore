@@ -378,4 +378,7 @@ homekitStorage.json
 # TestReports* 
 reports*
 
+# buildnumber in root
+./buildnumber
+
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,macos,python,platformio,cmake,node
