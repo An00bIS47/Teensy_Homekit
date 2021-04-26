@@ -315,7 +315,7 @@ String HAPFakegato::callbackGetHistoryEntries(){
     // uint16_t buffersize = 512;
     uint8_t data[512];
     
-    uint8_t entryCounter = 0;
+    uint16_t entryCounter = 0;
     uint8_t usedBatch = 0;
 
 #if HAP_DEBUG_FAKEGATO          

@@ -312,6 +312,8 @@ class HomekitTester(object):
 
         self.fakegatoHistories = []
 
+        self.eventCount = 0
+
         try:
             self.controller.load_data(self.args.file)
         except Exception as e:
@@ -727,7 +729,7 @@ class HomekitTester(object):
     def printEvents(self, events):
         for event in events:
             print('event for {aid}.{iid}: {event}'.format(aid=event[0], iid=event[1], event=event[2]))
-
+            self.eventCount = self.eventCount + 1
 
 
     @measure
@@ -735,6 +737,8 @@ class HomekitTester(object):
         if self.args.alias not in self.controller.get_pairings():
             print('"{a}" is no known alias'.format(a=self.args.alias))
             sys.exit(-1)
+
+        print("Waiting for {} events ...".format(self.args.eventCount))
 
         loggingArray = []
         try:
@@ -752,6 +756,7 @@ class HomekitTester(object):
             #sys.exit(-1)
             self.report.addStep(testname, False, loggingArray, "User canceled")
             return -1, None
+            
         except Exception as e:
             print(e)
             logging.debug(e, exc_info=True)
@@ -767,8 +772,15 @@ class HomekitTester(object):
             if status < 0:
                 print('put_characteristics failed on {aid}.{iid} because: {reason} ({code})'.format(aid=aid, iid=iid,
                                                                                                     reason=desc,
-                                                                                                    code=status))
-        return 1, None
+                                                                                                  code=status))
+
+        
+        if self.eventCount == self.args.eventCount:
+            cprint('Received {}/{} events'.format(self.eventCount, self.args.eventCount), "green")
+            return True, None
+        else:
+            cprint('Received {}/{} events'.format(self.eventCount, self.args.eventCount), "red")
+            return False, None
 
 
     @measure
@@ -944,7 +956,7 @@ class HomekitTester(object):
             if int(info["rollover"]) > 0:
                 self.requestedEntry = info["rollover"]
             else:
-                self.requestedEntry = 1
+                self.requestedEntry = 0
 
             
 
@@ -957,7 +969,7 @@ class HomekitTester(object):
                 if self.args.quiet == False:
                     print("requestedEntry: " + str(self.requestedEntry))
 
-                self.putHistoryAddress(self.requestedEntry)
+                self.putHistoryAddress(self.requestedEntry + 1)
                 passed, data = self.getHistoryEntry()        
                 if passed == True:
                     base64_bytes = base64.b64decode(data[(2, 19)]["value"])
@@ -966,9 +978,8 @@ class HomekitTester(object):
                     historyData.extend(bytearray.fromhex(hexdata))
                 else:
                     allPassed = False
-
-                data[(2,19)]["value"]
-                self.requestedEntry += 15
+                
+                self.requestedEntry += 16
                 
                 if self.requestedEntry > info["used"] or data[(2,19)]["value"] == "AA==":
                     break
@@ -1076,8 +1087,8 @@ if __name__ == '__main__':
         tester.printSummary()
 
     if args.report == True:
-        tester.saveReport("./Testreports", args.reportFormat)
-        tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
+        tester.saveReport("./reports/", args.reportFormat)
+        #tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
         
 
 
