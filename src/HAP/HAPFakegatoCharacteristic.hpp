@@ -104,7 +104,7 @@ public:
         *length = _size;
     }
     
-    virtual void getBytes(uint8_t* bytes, uint8_t* length);
+    virtual void getBytes(uint8_t* bytes, uint8_t* length) = 0;
     
 protected:    
     uint8_t _type;
@@ -127,6 +127,8 @@ public:
     HAPFakegatoCharacteristicBase(HAPFakegatoSignature type, std::function<T(void)> callback, uint8_t size) : HAPFakegatoCharacteristic(type, size) {
         _valueGetFunctionCall = callback;
     }
+
+
 
     virtual T valueFromBytes(uint8_t* bytes, uint8_t length) = 0;
     virtual void bytesFromValue(T value, uint8_t* bytes, uint8_t* length) = 0;
