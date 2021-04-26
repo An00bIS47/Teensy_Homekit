@@ -165,9 +165,9 @@ public:
     void getSignature(uint8_t* bytes){
         
         uint8_t offset = 0;
-        for (auto &chr : _signatures){            
+        for (auto &sig : _signatures){            
             uint8_t len = 0;
-            chr->getSignatureBytes(bytes + offset, &len);
+            sig->getSignatureBytes(bytes + offset, &len);
             offset += len;
         }
     }

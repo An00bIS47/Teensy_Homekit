@@ -1571,14 +1571,11 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 							} else {
 #endif							
 								if (!handlePairSetupM1( hapClient ) ) {
-									LogE( "ERROR: Pair-setup failed at M1!", true);
-									
+									LogE( "ERROR: Pair-setup failed at M1!", true);									
 									hapClient->clear();
 									hapClient->client.stop();
 									stopEvents(false);
-
-									hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								
+									hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;								
 								}
 #if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0							
 							}
@@ -1589,9 +1586,9 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 						else if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M3) ) {
 							if (!handlePairSetupM3( hapClient ) ) {
 								LogE( "ERROR: Pair-setup failed at M3!", true);
-								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->clear();
 								hapClient->client.stop();
-
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;							
 								stopEvents(false);
 							}
 						}
@@ -1600,8 +1597,9 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 						else if ( (hapClient->request.path == "/pair-setup" ) && (hapClient->pairState == HAP_PAIR_STATE_M5) ) {
 							if ( !handlePairSetupM5( hapClient ) ) {
 								LogE( "ERROR: Pair-setup failed at M5!", true);
-								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->clear();
 								hapClient->client.stop();
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;							
 								stopEvents(false);
 							}
 						}
@@ -1610,8 +1608,9 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 						if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M1) ) {
 							if ( !handlePairVerifyM1( hapClient ) ) {
 								LogE( "ERROR: Pair-verify failed at M1!", true);
-								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->clear();
 								hapClient->client.stop();
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;							
 								stopEvents(false);
 							}
 						}
@@ -1620,9 +1619,10 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient){
 						else if ( (hapClient->request.path == "/pair-verify" ) && (hapClient->verifyState == HAP_VERIFY_STATE_M3) ) {
 							if ( !handlePairVerifyM3( hapClient ) ) {
 								LogE( "ERROR: Pair-verify failed at M3!", true);
-								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+								hapClient->clear();
 								hapClient->client.stop();
-								stopEvents(false);
+								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;							
+								stopEvents(false);								
 							}
 						}
 					}

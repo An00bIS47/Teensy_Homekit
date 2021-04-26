@@ -85,9 +85,9 @@ enum HAPFakegatoSignature {
 
 class HAPFakegatoCharacteristic {
 public:
-    HAPFakegatoCharacteristic(HAPFakegatoSignature sigType) {
+    HAPFakegatoCharacteristic(HAPFakegatoSignature sigType, uint8_t size) {
         _type = sigType;
-        _size = 0;
+        _size = size;
     }
 
     ~HAPFakegatoCharacteristic() {
@@ -120,13 +120,13 @@ protected:
 template <class T>
 class HAPFakegatoCharacteristicBase : public HAPFakegatoCharacteristic {
 public:
-    HAPFakegatoCharacteristicBase(std::function<T(void)> callback) : HAPFakegatoCharacteristic(HAPFakegatoSignature_Temperature) {
-        _valueGetFunctionCall = callback;
-        _size = sizeof(T);
-    }
+    // HAPFakegatoCharacteristicBase(std::function<T(void)> callback) : HAPFakegatoCharacteristic(HAPFakegatoSignature_Temperature, sizeof(T)) {
+    //     _valueGetFunctionCall = callback;
+    //     // _size = sizeof(T);
+    // }
 
-    HAPFakegatoCharacteristicBase(HAPFakegatoSignature type, std::function<T(void)> callback) : HAPFakegatoCharacteristic(type) {
-        _valueGetFunctionCall = callback;
+    HAPFakegatoCharacteristicBase(HAPFakegatoSignature type, std::function<T(void)> callback, uint8_t size) : HAPFakegatoCharacteristic(type, size) {
+        _valueGetFunctionCall = callback;  
     }
 
     virtual T valueFromBytes(uint8_t* bytes, uint8_t length) = 0;
@@ -150,8 +150,8 @@ public:
     }
     
 protected:    
-    uint8_t _size = 0;
-    std::function<T(void)> _valueGetFunctionCall = nullptr;
+    uint8_t _size;
+    std::function<T(void)> _valueGetFunctionCall;
 };
 
 /**
@@ -164,12 +164,12 @@ protected:
  */
 class HAPFakegatoCharacteristicTemperature : public HAPFakegatoCharacteristicBase<float> {
 public:
-    HAPFakegatoCharacteristicTemperature(std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(HAPFakegatoSignature_Temperature, callback) {        
-        _size = 2;
+    HAPFakegatoCharacteristicTemperature(std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(HAPFakegatoSignature_Temperature, callback, 2) {
+        
     }
 
-    HAPFakegatoCharacteristicTemperature(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback) {        
-        _size = 2;
+    HAPFakegatoCharacteristicTemperature(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback, 2) {       
+        
     }
 
     float valueFromBytes(uint8_t* bytes, uint8_t length){
@@ -211,11 +211,11 @@ public:
  */
 class HAPFakegatoCharacteristicAirPressure : public HAPFakegatoCharacteristicBase<uint16_t> {
 public:
-    HAPFakegatoCharacteristicAirPressure(std::function<uint16_t(void)> callback) : HAPFakegatoCharacteristicBase<uint16_t>(HAPFakegatoSignature_AirPressure, callback) {
+    HAPFakegatoCharacteristicAirPressure(std::function<uint16_t(void)> callback) : HAPFakegatoCharacteristicBase<uint16_t>(HAPFakegatoSignature_AirPressure, callback, 2) {
         _size = 2;
     }
 
-    HAPFakegatoCharacteristicAirPressure(HAPFakegatoSignature type, std::function<uint16_t(void)> callback) : HAPFakegatoCharacteristicBase<uint16_t>(type, callback) {
+    HAPFakegatoCharacteristicAirPressure(HAPFakegatoSignature type, std::function<uint16_t(void)> callback) : HAPFakegatoCharacteristicBase<uint16_t>(type, callback, 2) {
         _size = 2;
     }
 
@@ -244,12 +244,12 @@ public:
  */
 class HAPFakegatoCharacteristicSwitch : public HAPFakegatoCharacteristicBase<bool> {
 public:
-    HAPFakegatoCharacteristicSwitch(std::function<bool(void)> callback) : HAPFakegatoCharacteristicBase<bool>(HAPFakegatoSignature_Switch, callback) {
-        _size = 1;
+    HAPFakegatoCharacteristicSwitch(std::function<bool(void)> callback) : HAPFakegatoCharacteristicBase<bool>(HAPFakegatoSignature_Switch, callback, 1) {
+        
     }
 
-    HAPFakegatoCharacteristicSwitch(HAPFakegatoSignature type, std::function<bool(void)> callback) : HAPFakegatoCharacteristicBase<bool>(type, callback) {
-        _size = 1;
+    HAPFakegatoCharacteristicSwitch(HAPFakegatoSignature type, std::function<bool(void)> callback) : HAPFakegatoCharacteristicBase<bool>(type, callback, 1) {
+        
     }
 
     bool valueFromBytes(uint8_t* bytes, uint8_t length){
@@ -273,12 +273,12 @@ public:
  */
 class HAPFakegatoCharacteristicPowerWatt : public HAPFakegatoCharacteristicBase<float> {
 public:
-    HAPFakegatoCharacteristicPowerWatt(std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(HAPFakegatoSignature_PowerWatt, callback) {
-        _size = 2;
+    HAPFakegatoCharacteristicPowerWatt(std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(HAPFakegatoSignature_PowerWatt, callback, 2) {
+        
     }
 
-    HAPFakegatoCharacteristicPowerWatt(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback) {        
-        _size = 2;
+    HAPFakegatoCharacteristicPowerWatt(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback, 2) {        
+        
     }
 
     float valueFromBytes(uint8_t* bytes, uint8_t length){
@@ -344,7 +344,7 @@ public:
  */
 class HAPFakegatoCharacteristicPowerOnOff : public HAPFakegatoCharacteristicSwitch {
 public:
-    HAPFakegatoCharacteristicPowerOnOff(std::function<uint16_t(void)> callback) : HAPFakegatoCharacteristicSwitch(HAPFakegatoSignature_PowerOnOff, callback) {}
+    HAPFakegatoCharacteristicPowerOnOff(std::function<bool(void)> callback) : HAPFakegatoCharacteristicSwitch(HAPFakegatoSignature_PowerOnOff, callback) {}
 };
 
 #endif /* HAPFAKEGATOCHARACTERISTIC_HPP_ */
