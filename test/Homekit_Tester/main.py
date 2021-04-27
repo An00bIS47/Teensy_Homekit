@@ -18,11 +18,12 @@ from homekit.controller.tools import AbstractPairing
 from termcolor import colored, cprint
 import struct
 
+import time
 import datetime as dt
 import timeit
 from tabulate import tabulate
 from functools import wraps
-from time import time
+
 
 
 class TestReport(object):
@@ -285,11 +286,11 @@ class TimingManager(object):
 def measure(func):
     @wraps(func)
     def _time_it(*args, **kwargs):
-        start = int(round(time() * 1000))
+        start = int(round(time.time() * 1000))
         try:
             return func(*args, **kwargs)
         finally:
-            end_ = int(round(time() * 1000)) - start
+            end_ = int(round(time.time() * 1000)) - start
             print(f"Total execution time: {end_ if end_ > 0 else 0} ms")
     return _time_it
 
@@ -1075,12 +1076,25 @@ if __name__ == '__main__':
 
     tester.runFakegato()
 
-
     tester.runTest("removePairing", tester.removePairing)
-    
 
-    for his in tester.fakegatoHistories:    
-         tester.openInHexFiend(his)
+    for historyEntry in tester.fakegatoHistories:    
+         tester.openInHexFiend(historyEntry)
+
+
+    tester.runTest("pair", tester.pair)
+    for i in range(0,10):
+        print(i)
+        time.sleep(0.1)
+        tester.runTest("getAccessories", tester.getAccessories)        
+    tester.runTest("removePairing", tester.removePairing)    
+
+    
+    # for i in range(0,100):
+    #     tester.runTest("pair", tester.pair)
+    #     tester.runTest("getAccessories", tester.getAccessories)
+    #     tester.runTest("removePairing", tester.removePairing)
+    
 
 
     if args.summary == True:
@@ -1088,7 +1102,7 @@ if __name__ == '__main__':
 
     if args.report == True:
         tester.saveReport("./reports/", args.reportFormat)
-        #tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
+        tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
         
 
 

@@ -145,10 +145,15 @@ public:
         return nullptr;
     }
 
-	void removePairing(const uint8_t* id){
+	bool removePairing(const uint8_t* id){
 		int index = getIndex(id);
 		if (index >= 0) {
 			pairings.erase(pairings.begin() + index);
+			return true;
+		} else {
+			LogE("ERROR: Pairing id not found!", true);
+			HAPHelper::array_print("id", id, HAP_PAIRINGS_ID_LENGTH);
+			return false;
 		}
 	}
 

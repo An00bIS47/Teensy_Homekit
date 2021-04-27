@@ -65,9 +65,12 @@ public:
 		_configuration->save();
 	}
 
-	void removePairing(const uint8_t* id){
-		_configuration->removePairing(id);
-		_configuration->save();
+	bool removePairing(const uint8_t* id){
+		if (_configuration->removePairing(id)) {
+			_configuration->save();
+			return true;
+		}	
+		return false;	
 	}
 
 	void removeAllPairings(){
