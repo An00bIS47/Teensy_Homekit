@@ -298,7 +298,7 @@
                 "HAP_RESET_CONFIGURATION=0",
                 "HAP_RESET_PAIRINGS=1",
                 "HAP_USE_SPIFFS_CONFIGURATION=1",
-                "HAP_FAKEGATO_BUFFER_SIZE=768",
+                "HAP_FAKEGATO_BUFFER_SIZE=100",
                 "TEENSY_DEBUG=1",
                 "ARDUINO=10805",
                 "TEENSYDUINO=153",
