@@ -58,11 +58,11 @@ void HAPPluginDHT::identify(bool oldValue, bool newValue) {
 }
 
 void HAPPluginDHT::changedTemperature(float oldValue, float newValue) {
-	Serial.printf("[%s] New temperature: %f\n", _config->name, newValue);
+	Serial.println("[" + String(_config->name) + "] Changed temperature " + String(oldValue) + " >>> " + String(newValue));
 }
 
 void HAPPluginDHT::changedHumidity(float oldValue, float newValue) {
-	Serial.printf("[%s] New humidity: %f\n", _config->name, newValue);
+	Serial.println("[" + String(_config->name) + "] Changed humidity " + String(oldValue) + " >>> " + String(newValue));
 }
 
 

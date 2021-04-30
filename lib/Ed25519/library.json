@@ -1,0 +1,13 @@
+{
+  "name": "Ed25519",
+  "keywords": "ed25519",
+  "description": "ed25519 library",
+  "repository":
+  {
+    "type": "git",
+    "url": ""
+  },
+  "frameworks": "arduino",
+  "platforms": "teensy",
+  "libArchive": true
+}

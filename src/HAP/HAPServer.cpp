@@ -2670,13 +2670,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	LogV( " OK", true);
 
 
-	// ToDo: When is admin set?
-	// Save to Pairings as admin
-	LogD(F("Saving pairing ..."), false);
-	// _accessorySet->getPairings()->add(ios_device_pairing_id, ios_device_ltpk, true);
-	// _accessorySet->getPairings()->save();		
-	_accessorySet->addPairing(ios_device_pairing_id, ios_device_ltpk, true);
-	LogV( F("OK"), true);
+
 	
 	encTLV.clear();
 
@@ -2788,7 +2782,12 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	response.clear();
 	
-	
+
+	// Save to Pairings as admin (first pairing is admin pairing!)
+	// this is done in the addPairing routine
+	LogD(F("Saving pairing ..."), false);
+	_accessorySet->addPairing(ios_device_pairing_id, ios_device_ltpk);
+	LogV( F("OK"), true);	
 
 
 	LogV( "Updating mDNS ...", false);	
@@ -2809,11 +2808,10 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 #endif	
 	
 	// ToDo: set timeout for resetting to false automatically?
-	_isInPairingMode = false;
-	
-
+	_isInPairingMode = false;	
 	
 	_eventManager.queueEvent(EventManager::kEventPairingComplete, HAPEvent());
+
 
 
 	hapClient->request.clear();
@@ -2821,7 +2819,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	//stopEvents(false);
 
-	// Heap(_clients.size(), _eventManager.getNumEventsInQueue());
+	Heap(_clients.size(), _eventManager.getNumEventsInQueue());
 
     return true;
 }
@@ -3447,7 +3445,7 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	if (_accessorySet->numberOfPairings() >= HAP_PAIRINGS_MAX) {		
 		response.encode(HAP_TLV_ERROR, 1, HAP_ERROR_MAX_PEERS);
 	} else {
-		_accessorySet->addPairing(identifier, publicKey, isAdmin);
+		_accessorySet->addPairing(identifier, publicKey);
 	}
 
 #if HAP_DEBUG_TLV8	
