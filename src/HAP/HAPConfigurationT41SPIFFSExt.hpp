@@ -1,4 +1,4 @@
-// 
+//
 // HAPConfigurationT41SPIFFSExt.hpp
 // Teensy_Homekit
 //

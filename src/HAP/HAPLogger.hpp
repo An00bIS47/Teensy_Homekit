@@ -99,7 +99,7 @@ public:
 
 	static void colorPrint(const char* color, int num, bool newLine);
 	static void colorPrint(const char* color, const char* text, bool newLine);
-#if !defined(__APPLE__)	
+#if !defined(__APPLE__)
 	static void colorPrint(const char* color, const __FlashStringHelper * text, bool newLine);
 #endif
 

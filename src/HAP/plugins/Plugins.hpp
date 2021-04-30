@@ -75,4 +75,4 @@
 #include "HAPPluginKNX.hpp"
 #endif
 
-#endif /* PLUGINS_HPP_ */  
+#endif /* PLUGINS_HPP_ */

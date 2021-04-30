@@ -18,9 +18,9 @@
 // Platform
 //
 struct HAPConfigurationPlatform : public HAPConfigurationItem {
-public:	
+public:
 	enum LogLevel _logLevel = LogLevel::DEBUG;
-	uint32_t	  _refTime  = 0;	
+	uint32_t	  _refTime  = 0;
 
 	static size_t getDataSize(){
 		return sizeof(uint8_t) + sizeof(uint32_t);
@@ -38,17 +38,17 @@ public:
 	HAPConfigurationPlatform(uint8_t loglvl, uint32_t refTime)
 		: _logLevel((enum LogLevel)loglvl)
 		, _refTime(refTime)
-		{	
-			
+		{
+
 		}
 
 	uint8_t logLevel(){ return (uint8_t)_logLevel; }
 	void 	setLogLevel(uint8_t lvl){ _logLevel = (enum LogLevel)lvl; }
-	
+
 	void setRefTime(uint32_t refTime){ _refTime = refTime; }
 	uint32_t refTime(){ return _refTime; }
-		
-	HAPConfigurationPlatform(const HAPConfigurationPlatform& rhs) {				
+
+	HAPConfigurationPlatform(const HAPConfigurationPlatform& rhs) {
 		_logLevel = rhs._logLevel;
 		_refTime  = rhs._refTime;
 	}
@@ -57,20 +57,20 @@ public:
 		if (this == &rhs) {
 			return (*this);
 		}
-		
+
 		_logLevel = rhs._logLevel;
 		_refTime  = rhs._refTime;
-		return (*this);	
+		return (*this);
 	}
 
 	bool operator== (const HAPConfigurationPlatform &rhs) const {
-		/* your logic for comparision between "*this" and "rhs" */ 
-		return ( 
+		/* your logic for comparision between "*this" and "rhs" */
+		return (
 			( this->_logLevel == rhs._logLevel ) &&
-			( this->_refTime == rhs._refTime )			
+			( this->_refTime == rhs._refTime )
 		) ? true : false;
 	}
-		
+
 
 	void clear() override {
 		_logLevel = LogLevel::DEBUG;
@@ -86,16 +86,16 @@ public:
 	/*
 		{
 			"loglevel": 1,
-			"refTime": 0,		
+			"refTime": 0,
 		}
 	 */
 	void toJson(Print& prt) override {
 		prt.print("{");
-		
+
 		prt.print("\"loglevel\": ");
 		prt.print((uint8_t)_logLevel);
 		prt.print(",");
-		
+
 		prt.print("\"refTime\": ");
 		prt.print((uint8_t)_refTime);
 

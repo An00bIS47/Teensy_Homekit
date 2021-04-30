@@ -1,4 +1,4 @@
-// 
+//
 // HAPHash.hpp
 // Homekit
 //
@@ -84,7 +84,7 @@ public:
     static void final( HAPHashAlgorithm alg, HAPHashContext *context, uint8_t* md );
     static void clear( HAPHashAlgorithm alg, HAPHashContext* context);
     static void hash( HAPHashAlgorithm alg, const uint8_t* d, size_t n, uint8_t* md );
-    
+
 protected:
     HAPHashAlgorithm _hashAlgorithm;
     HAPHashContext*  _context;

@@ -17,13 +17,13 @@ class HAPConfigurationPreferences : public HAPConfiguration {
 public:
 	HAPConfigurationPreferences();
 	~HAPConfigurationPreferences();
-	
+
 	void reset() override;
 
 	bool getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize) override;
 	size_t getDataLengthForPlugin(const char* name) override;
 
-protected:	
+protected:
 	Preferences _prefs;
 
 	size_t writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen) override;

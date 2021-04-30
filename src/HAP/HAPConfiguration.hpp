@@ -57,27 +57,27 @@ public:
 	HAPConfiguration();
 	~HAPConfiguration();
 
-	virtual void setDefaults();	
+	virtual void setDefaults();
 	virtual void clear();
-	
+
 	virtual bool save();
 	virtual bool load();
-	
+
 	virtual bool begin();
 	virtual void end();
 	virtual void reset();
 
 	virtual void validateConfig() {};
 	virtual bool validConfig() {return true;};
-	
-	virtual bool getDataForPlugin(const char* name, HAPConfigurationPlugin* data, size_t dataSize);		
-	
+
+	virtual bool getDataForPlugin(const char* name, HAPConfigurationPlugin* data, size_t dataSize);
+
 	virtual bool getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize) = 0;
 	virtual size_t getDataLengthForPlugin(const char* name) = 0;
 
 	void update();	// calls _callbackUpdate
 
-	virtual void toJson(Print& prt);		
+	virtual void toJson(Print& prt);
 
 	void registerCallbackUpdate(std::function<void(void)> callback){
         _callbackUpdate = callback;
@@ -88,9 +88,9 @@ public:
 	//
 	// Accessory
 	//
-	virtual HAPConfigurationAccessory* getAccessoryConfig() { return _accessoryConfig; }	
+	virtual HAPConfigurationAccessory* getAccessoryConfig() { return _accessoryConfig; }
 	virtual void setAccessoryConfig(HAPConfigurationAccessory* data) { _accessoryConfig = data; }
-	
+
 	//
 	// ESP32 / Plattform
 	//
@@ -131,14 +131,14 @@ public:
 	//
 	// WiFi
 	//
-#if HAP_ENABLE_WIFI	
+#if HAP_ENABLE_WIFI
 	virtual HAPConfigurationWiFi* getWiFiConfig() { return _wifiConfig; }
 	virtual void setWiFiConfig(HAPConfigurationWiFi* data) { _wifiConfig = data; }
 #endif
 
-protected:	
+protected:
 	std::function<void(void)> 	_callbackUpdate;
-	// std::vector<HAPConfigurationPlugin*> 		_pluginConfigs;			
+	// std::vector<HAPConfigurationPlugin*> 		_pluginConfigs;
 
 
 	virtual size_t writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen) = 0;
@@ -148,10 +148,10 @@ protected:
 	//
 	// ESP32 / Plattform
 	//
-	struct HAPConfigurationPlatform* 	_platformConfig;		
+	struct HAPConfigurationPlatform* 	_platformConfig;
 	bool savePlatformConfig();
 	bool loadPlatformConfig();
-	
+
 	//
 	// Accessory
 	//
@@ -184,17 +184,17 @@ protected:
 
 	//
 	// WebServer
-	//	
-#if HAP_ENABLE_WEBSERVER	
+	//
+#if HAP_ENABLE_WEBSERVER
 	struct HAPConfigurationWebServer* 	_webserverConfig;
 	bool saveWebServerConfig();
 	bool loadWebServerConfig();
-#endif	
-	
+#endif
+
 
 	//
 	// Keystore
-	//	
+	//
 #if HAP_ENABLE_KEYSTORE
 	struct HAPConfigurationKeystore* 	_keystoreConfig;
 	bool saveKeystoreConfig();
@@ -212,11 +212,11 @@ protected:
 
 
 #if 0
-    static HAPConfigurationValidationResult validateConfigHomekit(const JsonObject object) __attribute__ ((deprecated));	
-    static HAPConfigurationValidationResult validateConfigAccessory(const JsonObject object) __attribute__ ((deprecated));	
+    static HAPConfigurationValidationResult validateConfigHomekit(const JsonObject object) __attribute__ ((deprecated));
+    static HAPConfigurationValidationResult validateConfigAccessory(const JsonObject object) __attribute__ ((deprecated));
     static HAPConfigurationValidationResult validateConfigWifi(const JsonObject object) __attribute__ ((deprecated));
-    static HAPConfigurationValidationResult validateConfigWebserver(const JsonObject object) __attribute__ ((deprecated));	
-    static HAPConfigurationValidationResult validateConfigUpdate(const JsonObject object) __attribute__ ((deprecated));	
+    static HAPConfigurationValidationResult validateConfigWebserver(const JsonObject object) __attribute__ ((deprecated));
+    static HAPConfigurationValidationResult validateConfigUpdate(const JsonObject object) __attribute__ ((deprecated));
     static HAPConfigurationValidationResult validateConfigPlugins(const JsonObject object) __attribute__ ((deprecated));
 #endif
 	// virtual size_t writeBytes(uint16_t address, const uint8_t* input, const size_t expectedDataLen) = 0;

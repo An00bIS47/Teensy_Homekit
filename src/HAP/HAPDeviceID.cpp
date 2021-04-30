@@ -14,17 +14,17 @@ uint8_t HAPDeviceID::_deviceID[] = {'\0'};
 
 
 uint8_t* HAPDeviceID::generateID() {
-    
+
     if (_deviceID[0] == '\0')
-#if defined(ARDUINO_ARCH_ESP32)    
+#if defined(ARDUINO_ARCH_ESP32)
         esp_read_mac(_deviceID, ESP_MAC_WIFI_STA);
 #elif defined ( CORE_TEENSY )
         teensyMAC(_deviceID);
 #endif
-    
+
     return _deviceID;
-}   
-    
+}
+
 /*
 const char* HAPDeviceID::deviceID(){
     char baseMacChr[18];
@@ -39,9 +39,9 @@ String HAPDeviceID::deviceID(){
     return String(baseMacChr);
 }
 
-void HAPDeviceID::deviceID(char baseMacChr[18]){    
+void HAPDeviceID::deviceID(char baseMacChr[18]){
     sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
-    baseMacChr[18] = '\0';    
+    baseMacChr[18] = '\0';
 }
 
 String HAPDeviceID::chipID(){

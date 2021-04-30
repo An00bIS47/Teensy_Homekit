@@ -27,8 +27,8 @@ public:
 
     HAPPluginKNXDeviceSwitch(uint8_t id_, char name[], bool enableFakegato, uint16_t koReadState, uint16_t koWriteState);
 
-    HAPAccessory* initAccessory() override;    
-	
+    HAPAccessory* initAccessory() override;
+
     void handle(bool forced) override;
 
     void setEventManager(EventManager* eventManager);
@@ -36,12 +36,12 @@ public:
 
     bool getStateValue();
 
-protected:    
-    
+protected:
+
     // Default 0
     // if != 0: sensor is available
     uint16_t                _koReadState;
-    uint16_t                _koWriteState;    
+    uint16_t                _koWriteState;
 
     HAPCharacteristicT<bool>*  _stateValue;
 
@@ -49,13 +49,13 @@ protected:
 
     HAPFakegato*     _fakegato;
 
-    void changedState(bool oldValue, bool newValue);    
+    void changedState(bool oldValue, bool newValue);
     void writeStateToKNX(bool newValue);
 
     bool readStateFromKNX();
     void setStateFromKNXCallback(GroupObject& go);
 
-    bool fakeGatoCallback() override;  
+    bool fakeGatoCallback() override;
 };
 
 #endif /* HAPPLUGINKNXDEVICESWITCH_HPP_ */

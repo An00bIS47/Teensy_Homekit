@@ -14,8 +14,8 @@
 
 HAPDailyTimer::HAPDailyTimer(uint8_t StartHour, uint8_t StartMinute, uint8_t daysMask, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_){
 	autoSync = false;
-	startTime.hour = StartHour > 23 ? 23 : StartHour; 
-	startTime.minute = StartMinute > 59 ? 59 : StartMinute; 
+	startTime.hour = StartHour > 23 ? 23 : StartHour;
+	startTime.minute = StartMinute > 59 ? 59 : StartMinute;
 	endTime.hour = startTime.hour;
 	endTime.minute = startTime.minute;
 	setDaysActive(daysMask);
@@ -33,8 +33,8 @@ HAPDailyTimer::HAPDailyTimer(uint8_t StartHour, uint8_t StartMinute, uint8_t day
 
 HAPDailyTimer::HAPDailyTimer(uint8_t StartHour, uint8_t StartMinute, EventDays DaysOfTheWeek, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_) {
 	autoSync = false;
-	startTime.hour = StartHour > 23 ? 23 : StartHour; 
-	startTime.minute = StartMinute > 59 ? 59 : StartMinute; 
+	startTime.hour = StartHour > 23 ? 23 : StartHour;
+	startTime.minute = StartMinute > 59 ? 59 : StartMinute;
 	endTime.hour = startTime.hour;
 	endTime.minute = startTime.minute;
 	setDaysActive(dayTemplate[static_cast<int>(DaysOfTheWeek)]);
@@ -51,8 +51,8 @@ HAPDailyTimer::HAPDailyTimer(uint8_t StartHour, uint8_t StartMinute, EventDays D
 
 HAPDailyTimer::HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t StartMinute, uint8_t EndHour, uint8_t EndMinute, EventDays DaysOfTheWeek, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_, HAPDailyTimerCallback endCallback, uint16_t targetStateEnd_) {
 	autoSync = syncOnPowerup;
-	startTime.hour = StartHour > 23 ? 23 : StartHour; 
-	startTime.minute = StartMinute > 59 ? 59 : StartMinute; 
+	startTime.hour = StartHour > 23 ? 23 : StartHour;
+	startTime.minute = StartMinute > 59 ? 59 : StartMinute;
 	endTime.hour = EndHour > 23 ? 23 : EndHour;
 	endTime.minute = EndMinute > 59 ? 59 : EndMinute;
 	setDaysActive(dayTemplate[static_cast<int>(DaysOfTheWeek)]);
@@ -69,8 +69,8 @@ HAPDailyTimer::HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t Star
 
 HAPDailyTimer::HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t StartMinute, uint8_t EndHour, uint8_t EndMinute, uint8_t daysMask, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_, HAPDailyTimerCallback endCallback, uint16_t targetStateEnd_){
 	autoSync = syncOnPowerup;
-	startTime.hour = StartHour > 23 ? 23 : StartHour; 
-	startTime.minute = StartMinute > 59 ? 59 : StartMinute; 
+	startTime.hour = StartHour > 23 ? 23 : StartHour;
+	startTime.minute = StartMinute > 59 ? 59 : StartMinute;
 	endTime.hour = EndHour > 23 ? 23 : EndHour;
 	endTime.minute = EndMinute > 59 ? 59 : EndMinute;
 	setDaysActive(daysMask);
@@ -91,7 +91,7 @@ HAPDailyTimer::HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t Star
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPDailyTimer::begin() {
   	return sync();
@@ -130,8 +130,8 @@ void HAPDailyTimer::setRandomOffset(uint8_t random_minutes, RandomType type) {
 }
 
 void HAPDailyTimer::setStartTime(uint8_t hour, uint8_t minute){
-	startTime.hour = hour > 23 ? 23 : hour; 
-	startTime.minute = minute > 59 ? 59 : minute; 
+	startTime.hour = hour > 23 ? 23 : hour;
+	startTime.minute = minute > 59 ? 59 : minute;
 	setDaysActive(onMask);
 	(void)sync();
 }
@@ -157,7 +157,7 @@ uint8_t HAPDailyTimer::setRandomDays(uint8_t number_Days){
 		array[i] = array[index];
 		array[index] = temp;
 	}
-	
+
 	for (int i = 0; i < 7; i++) {
 		mask |= (array[i] << i);
 	}
@@ -239,7 +239,7 @@ bool HAPDailyTimer::isActive(HAPDailyTimer* instance) {
     {
       return (now_time > on_time || now_time < off_time);
     }
-//    else 
+//    else
 //    {
 //      return false;
 //    }
@@ -267,7 +267,7 @@ bool HAPDailyTimer::isActive(HAPDailyTimer* instance) {
   {
     return now_time < off_time;
   }
-  else // if 
+  else // if
   {
     return false;
   }
@@ -289,7 +289,7 @@ time_t HAPDailyTimer::tmConvert_t(int YYYY, uint8_t MM, uint8_t DD, uint8_t hh, 
 #else
 
 	time_t rawtime;
-  	struct tm * timeinfo;	
+  	struct tm * timeinfo;
 	time ( &rawtime );
   	timeinfo = localtime( &rawtime );
   	timeinfo->tm_year = YYYY - 1900;
@@ -309,28 +309,28 @@ time_t HAPDailyTimer::now(){
 	return time(&t);
 }
 
-uint8_t HAPDailyTimer::weekday(time_t rawtime){	
+uint8_t HAPDailyTimer::weekday(time_t rawtime){
   	struct tm * timeinfo;
 	time ( &rawtime );
 	timeinfo = localtime ( &rawtime );
 	return timeinfo->tm_wday + 1;	// = days since sunday -> timelib sunday = 1
 }
 
-uint8_t HAPDailyTimer::month(time_t rawtime){	
+uint8_t HAPDailyTimer::month(time_t rawtime){
   	struct tm * timeinfo;
 	time ( &rawtime );
 	timeinfo = localtime ( &rawtime );
 	return timeinfo->tm_mon + 1;
 }
 
-uint8_t HAPDailyTimer::day(time_t rawtime){	
+uint8_t HAPDailyTimer::day(time_t rawtime){
   	struct tm * timeinfo;
 	time ( &rawtime );
 	timeinfo = localtime ( &rawtime );
 	return timeinfo->tm_mday;
 }
 
-uint16_t HAPDailyTimer::year(time_t rawtime){	
+uint16_t HAPDailyTimer::year(time_t rawtime){
   	struct tm * timeinfo;
 	time ( &rawtime );
 	timeinfo = localtime ( &rawtime );

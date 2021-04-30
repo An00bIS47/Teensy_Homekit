@@ -25,24 +25,24 @@
 uint32_t HAPAccessorySet::configurationNumber = HOMEKIT_CONFIGURATION_NUMBER;
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-HAPAccessorySet::HAPAccessorySet() 
+HAPAccessorySet::HAPAccessorySet()
 : _accessoryType(HAP_ACCESSORY_TYPE_OTHER)
 {
 	// memset(_xhm, 0, 21);
-	_configuration = nullptr;	
+	_configuration = nullptr;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPAccessorySet::~HAPAccessorySet(){
 
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::begin(){
 	addAccessoryInfo();
@@ -50,50 +50,50 @@ void HAPAccessorySet::begin(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::addAccessoryInfo(){
 	HAPAccessory *accessory = new HAPAccessory();
 	accessory->addInfoService(modelName(), HAP_MANUFACTURER, HAP_MODELL_NAME, "44-22-777", NULL, hap.versionString());
-	
+
 	// HAPCharacteristicString *fwCha = new HAPCharacteristicString(charType_firmwareRevision, permission_read, 32);
 	// fwCha->setValue(hap.versionString());
 	// accessory->addCharacteristics(infoService, fwCha);
-	
+
 	addAccessory(accessory);
 }
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 uint8_t HAPAccessorySet::accessoryType(){
 	return _accessoryType;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::setAccessoryType(enum HAP_ACCESSORY_TYPE accessoryType){
 	_accessoryType = (uint8_t)accessoryType;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const char* HAPAccessorySet::setupID(){
 	return _configuration->setupId;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::generateSetupID(){
 	char setupID[5];
 
-#if HAP_DEBUG	
+#if HAP_DEBUG
 	strcpy(setupID, HAP_SETUP_ID);
-#else	  	
+#else
 	const char* letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	randomSeed(analogRead(0));
@@ -106,7 +106,7 @@ void HAPAccessorySet::generateSetupID(){
   	setupID[4] = '\0';
 
 #endif
-	
+
 	_configuration->setSetupId(setupID);
   	computeSetupHash();
 
@@ -114,28 +114,28 @@ void HAPAccessorySet::generateSetupID(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 char HAPAccessorySet::randomChar(char* letters) {
    return letters[random(0, strlen(letters)-1)];
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::setModelName(const char* name){
 	_configuration->setModelName(name);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const char* HAPAccessorySet::modelName(){
 	return _configuration->modelname;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const char* HAPAccessorySet::setupHash(){
 	return _setupHash;
@@ -143,15 +143,15 @@ const char* HAPAccessorySet::setupHash(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::computeSetupHash(){
-	
+
 	uint8_t *baseMac = HAPDeviceID::generateID();
 
 	char ci[18];
 	sprintf(ci, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
-	
+
 	uint8_t setupHashMaterial[(4 + 17)];
 
 	memcpy(setupHashMaterial, _configuration->setupId, 4);
@@ -164,9 +164,9 @@ void HAPAccessorySet::computeSetupHash(){
 	memcpy(sliced, output, 4);
 
 	// Doesn't work :(
-	//_setupHash = base64::encode(sliced);	
+	//_setupHash = base64::encode(sliced);
 
-	size_t olen;		
+	size_t olen;
 	if (mbedtls_base64_encode((uint8_t*)_setupHash, 9, &olen, sliced, 4)) {
 		LogE("[computeSetupHash] ERROR: mbedtls_base64_encode failed!", true);
 	}
@@ -175,26 +175,26 @@ void HAPAccessorySet::computeSetupHash(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::setPinCode(const char* pinCode){
 	_configuration->setPincode(pinCode);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const char* HAPAccessorySet::pinCode(){
 	return _configuration->pincode;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPAccessorySet::generateXMI(){
-	
-	String tmp = _configuration->pincode;	
-	tmp.replace("-", "");	
+
+	String tmp = _configuration->pincode;
+	tmp.replace("-", "");
 
 	int lowValue = atoi(tmp.c_str());
 
@@ -212,10 +212,10 @@ void HAPAccessorySet::generateXMI(){
 		Serial.println("ERROR 1!!!");
 	}
 
-	
+
 	size_t olenLow = 0;
 	mbedtls_mpi_write_string(&bignumLow, 16, NULL, 0, &olenLow);
-	
+
 	char dstLow[olenLow];
 	int dstLowLen = olenLow;
 	error_code = mbedtls_mpi_write_string(&bignumLow, 16, dstLow, dstLowLen, &olenLow);
@@ -227,7 +227,7 @@ void HAPAccessorySet::generateXMI(){
 	int valueHigh = _accessoryType >> 1;
 
 	char dst2[olenLow + 1];
-	sprintf(dst2, "%d%s", valueHigh, dstLow);	
+	sprintf(dst2, "%d%s", valueHigh, dstLow);
 
 	error_code = mbedtls_mpi_read_string(&bignumHigh, 16, dst2);
 	if (error_code != 0){
@@ -237,7 +237,7 @@ void HAPAccessorySet::generateXMI(){
 
 	size_t olen2 = 0;
 	mbedtls_mpi_write_string(&bignumHigh, 16, NULL, 0, &olen2);
-	
+
 	char dst3[olen2];
 	int dstlen3 = olen2;
 	error_code = mbedtls_mpi_write_string(&bignumHigh, 16, dst3, dstlen3, &olen2);
@@ -247,9 +247,9 @@ void HAPAccessorySet::generateXMI(){
 
 	char dest[9];
 	str16_to_str36(dest, dst3);
-	
-	char finalDest[9];	
-	HAPHelper::prependZeros(finalDest, dest, 9);	
+
+	char finalDest[9];
+	HAPHelper::prependZeros(finalDest, dest, 9);
 
 	memcpy(_xhm, "X-HM://", 7);
 	memcpy(_xhm + 7, finalDest, 9);
@@ -261,7 +261,7 @@ void HAPAccessorySet::generateXMI(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const char* HAPAccessorySet::xhm(){
 	return _xhm;
@@ -275,11 +275,11 @@ uint8_t HAPAccessorySet::numberOfAccessories() {
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPAccessory* HAPAccessorySet::accessoryWithAID(uint8_t aid) {
 	for (uint8_t i=0; i < _accessories.size(); i++){
-		if (_accessories[i]->aid() == aid){			
+		if (_accessories[i]->aid() == aid){
 			return _accessories.at(i).get();
 		}
 	}
@@ -294,12 +294,12 @@ HAPAccessory* HAPAccessorySet::accessoryAtIndex(uint8_t index){
 
 void HAPAccessorySet::addAccessory(HAPAccessory *accessory) {
 	accessory->setAID(++_aid);
-	_accessories.emplace_back(std::move(accessory));	
+	_accessories.emplace_back(std::move(accessory));
 }
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
 	for (int i=0; i < _accessories.size(); i++){
@@ -320,37 +320,37 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
 //         desc[i] = _accessories[i]->describe();
 //     }
 
-    
+
 //     String result = HAPHelper::arrayWrap(desc, numberOfAcc);
 //     delete [] desc;
 //     String key = "accessories";
 //     result = HAPHelper::dictionaryWrap(&key, &result, 1);
-    
+
 //     return result;
 // }
 
 
 
 // #if defined(ARDUINO_TEENSY41)
-// FLASHMEM 
+// FLASHMEM
 // #endif
 // void HAPAccessorySet::toJson(JsonArray& array){
-	
+
 // 	for (int i = 0; i < numberOfAccessory(); i++) {
 //         _accessories[i]->toJson(array);
 //     }
 // }
 
 // #if defined(ARDUINO_TEENSY41)
-// FLASHMEM 
+// FLASHMEM
 // #endif
 // int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
 // 	HAPCharacteristic *c = getCharacteristics(aid, iid);
-// 	if (c != nullptr) {		
+// 	if (c != nullptr) {
 // 		*outSize = c->valueString().length() + 1;
 // 		if (out != NULL){
-// 			c->valueString().toCharArray(out, *outSize);							
-// 		}		
+// 			c->valueString().toCharArray(out, *outSize);
+// 		}
 // 		return 0;
 // 	}
 // 	return HAP_STATUS_RESOURCE_NOT_FOUND;
@@ -358,8 +358,8 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
 
 
 HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t iid){
-	HAPAccessory* accessory = accessoryWithAID(aid);		
-		
+	HAPAccessory* accessory = accessoryWithAID(aid);
+
 	if (accessory == nullptr) {
 
 		LogE("[ERROR] Accessory with aid: ", false);
@@ -368,8 +368,8 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 		LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
 
 		//error_code = HAP_STATUS_RESOURCE_NOT_FOUND;
-		//errorOccured = true;	
-		return nullptr;	    			
+		//errorOccured = true;
+		return nullptr;
 	} else {
 
 		HAPCharacteristicBase* chr = accessory->characteristicWithIID(iid);
@@ -384,7 +384,7 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 			return nullptr;
 		} else {
 			return chr;
-		}			
+		}
 
 	}
 

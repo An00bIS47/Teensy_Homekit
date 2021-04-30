@@ -21,15 +21,15 @@
 
 
 HAPConfigurationEEPROM::HAPConfigurationEEPROM(){
-#if defined (ARDUINO_ARCH_ESP32)	
+#if defined (ARDUINO_ARCH_ESP32)
 	_eeprom = nullptr;
-#endif	
+#endif
 }
 
 
 HAPConfigurationEEPROM::~HAPConfigurationEEPROM(){
 
-#if defined (ARDUINO_ARCH_ESP32)	
+#if defined (ARDUINO_ARCH_ESP32)
 	if (_eeprom == nullptr) {
 		delete _eeprom;
 		_eeprom = nullptr;
@@ -38,22 +38,22 @@ HAPConfigurationEEPROM::~HAPConfigurationEEPROM(){
 
 }
 
-bool HAPConfigurationEEPROM::begin() {		
+bool HAPConfigurationEEPROM::begin() {
 	buildDataMap();
 
 	printDataMapTo(Serial);
 
-#if defined (ARDUINO_ARCH_ESP32)	
+#if defined (ARDUINO_ARCH_ESP32)
 	//EEPROM.begin(KNX_FLASH_SIZE);
 
 	if (_eeprom == nullptr){
 		_eeprom = new EEPROMClass(HAP_EEPROM_PARTITION_NAME, HAP_EEPROM_PARTITION_SIZE);
 		_eeprom->begin(HAP_EEPROM_PARTITION_SIZE);
 	}
-	
-#else	
+
+#else
 	EEPROM.begin();
-#endif	
+#endif
 
 	return true;
 }
@@ -73,15 +73,15 @@ void HAPConfigurationEEPROM::validateConfig(){
 #else
 	EEPROM.write(HAP_EEPROM_OFFSET + 0, HAP_EEPROM_MAGIC_BYTE);
 	EEPROM.write(HAP_EEPROM_OFFSET + 2, HAP_EEPROM_VERSION);
-#endif	
+#endif
 }
 
 
 bool HAPConfigurationEEPROM::validConfig(){
-	
+
 	uint16_t magicByte = 0;
 
-#if defined (ARDUINO_ARCH_ESP32)	
+#if defined (ARDUINO_ARCH_ESP32)
 	if (_eeprom == nullptr){
 		buildDataMap();
 		_eeprom = new EEPROMClass(HAP_EEPROM_PARTITION_NAME, HAP_EEPROM_PARTITION_SIZE);
@@ -89,14 +89,14 @@ bool HAPConfigurationEEPROM::validConfig(){
 	}
 
 	magicByte = _eeprom->readUShort(HAP_EEPROM_OFFSET + 0);
-	
+
 #else
-	magicByte = EEPROM.read(HAP_EEPROM_OFFSET + 0);	
+	magicByte = EEPROM.read(HAP_EEPROM_OFFSET + 0);
 #endif
 	// HAPHelper::printHex("magic byte ", (uint8_t*)magicByte, 2);
 	Serial.print("MAGIC BYTE: ");
 	Serial.println(magicByte, HEX);
-	
+
 	return (magicByte == HAP_EEPROM_MAGIC_BYTE);
 }
 
@@ -118,7 +118,7 @@ size_t HAPConfigurationEEPROM::getAddressForLabel(const char* label) {
 }
 
 size_t HAPConfigurationEEPROM::getDataLengthForPlugin(const char* name) {
-	char label[20];	
+	char label[20];
 	sprintf(label, "p%s", name);
 	return getBytesLength(label);
 }
@@ -135,11 +135,11 @@ int HAPConfigurationEEPROM::getIndexForLabel(const char* name){
 
 void HAPConfigurationEEPROM::buildDataMap(){
 	size_t offset = HAP_EEPROM_OFFSET_INTERNAL;
-	
+
 	// Platform
 	{
 		DataEntry newEntry = DataEntry(offset, HAPConfigurationPlatform::getDataSize(), "cPltfrm");
-		offset += HAPConfigurationPlatform::getDataSize();	
+		offset += HAPConfigurationPlatform::getDataSize();
 		_dataMap.push_back(newEntry);
 	}
 
@@ -147,7 +147,7 @@ void HAPConfigurationEEPROM::buildDataMap(){
 	// Accessory
 	{
 		DataEntry newEntry = DataEntry(offset, HAPConfigurationAccessory::getDataSize(), "cAcc");
-		offset += HAPConfigurationAccessory::getDataSize();	
+		offset += HAPConfigurationAccessory::getDataSize();
 		_dataMap.push_back(newEntry);
 	}
 
@@ -155,7 +155,7 @@ void HAPConfigurationEEPROM::buildDataMap(){
 	// WiFi
 	{
 		DataEntry newEntry = DataEntry(offset, HAPConfigurationWiFi::getDataSize(), "cWiFi");
-		offset += HAPConfigurationWiFi::getDataSize();	
+		offset += HAPConfigurationWiFi::getDataSize();
 		_dataMap.push_back(newEntry);
 	}
 #endif
@@ -164,7 +164,7 @@ void HAPConfigurationEEPROM::buildDataMap(){
 	// OTA
 	{
 		DataEntry newEntry = DataEntry(offset, HAPConfigurationKeystore::getDataSize(), "cKeySt");
-		offset += HAPConfigurationKeystore::getDataSize();	
+		offset += HAPConfigurationKeystore::getDataSize();
 		_dataMap.push_back(newEntry);
 	}
 #endif
@@ -173,7 +173,7 @@ void HAPConfigurationEEPROM::buildDataMap(){
 	// WebServer
 	{
 		DataEntry newEntry = DataEntry(offset, HAPConfigurationWebServer::getDataSize(), "cWebSvr");
-		offset += HAPConfigurationWebServer::getDataSize();	
+		offset += HAPConfigurationWebServer::getDataSize();
 		_dataMap.push_back(newEntry);
 	}
 #endif
@@ -182,33 +182,33 @@ void HAPConfigurationEEPROM::buildDataMap(){
 	// OTA
 	{
 		DataEntry newEntry = DataEntry(offset, HAPConfigurationArduinoOTA::getDataSize(), "cOTA");
-		offset += HAPConfigurationArduinoOTA::getDataSize();	
+		offset += HAPConfigurationArduinoOTA::getDataSize();
 		_dataMap.push_back(newEntry);
 	}
 #endif
 
 
 
-	auto &factory = HAPPluginFactory::Instance();        
-    std::vector<String> names = factory.names();    
+	auto &factory = HAPPluginFactory::Instance();
+    std::vector<String> names = factory.names();
 
-	
-    for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {    	
+
+    for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
     	auto plugin = factory.getPlugin(*it);
-		char label[20];	
+		char label[20];
 		sprintf(label, "p%s", plugin->name().c_str());
 		HAPConfigurationPlugin* pluginConfig = plugin->getConfiguration();
 
 		size_t dataSize = pluginConfig->getCommonSize() + pluginConfig->getDataSize();
 
 		DataEntry newEntry = DataEntry(offset, dataSize, label);
-		offset += dataSize;	
+		offset += dataSize;
 		_dataMap.push_back(newEntry);
-    }	
+    }
 }
 
 bool HAPConfigurationEEPROM::getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize){
-	char label[20];	
+	char label[20];
 	sprintf(label, "p%s",name);
 
 	// Serial.println("Loading data for " + String(name) + " EEPROM: ");
@@ -222,7 +222,7 @@ bool HAPConfigurationEEPROM::getBytesForPlugin(const char* name, uint8_t* data, 
 	// Serial.println(getAddressForLabel(label));
 
 	// uint8_t buffer[dataSize];
-	size_t read = readBytes(label, data, dataSize);		
+	size_t read = readBytes(label, data, dataSize);
 
 #if HAP_DEBUG_CONFIGURATION
 	char text[32];
@@ -246,13 +246,13 @@ size_t HAPConfigurationEEPROM::readBytes(const char* label, uint8_t* output, con
 		output[i] = _eeprom->read(address + i);
 #else
 		output[i] = EEPROM.read(address + i);
-#endif		
+#endif
 	}
 	return expectedDataLen;
 
 	// EEPROM.begin();
 	// EepromStream s(address, expectedDataLen);
-	// size_t read = s.readBytes(output, expectedDataLen);	
+	// size_t read = s.readBytes(output, expectedDataLen);
 
 	// EEPROM.end();
 	// return read;
@@ -264,10 +264,10 @@ size_t HAPConfigurationEEPROM::readBytes(const char* label, uint8_t* output, con
 size_t HAPConfigurationEEPROM::writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen){
 	if (getIndexForLabel(label) == -1) return 0;
 
-	size_t address = getAddressForLabel(label);	
+	size_t address = getAddressForLabel(label);
 
-	
-#if defined (ARDUINO_ARCH_ESP32)	
+
+#if defined (ARDUINO_ARCH_ESP32)
 	// for (int i=0; i < expectedDataLen; i++){
 	// 	// EEPROM.write(address + i, input[i]);
 	// 	_eeprom->write(address + i, input[i]);
@@ -284,18 +284,18 @@ size_t HAPConfigurationEEPROM::writeBytes(const char* label, const uint8_t* inpu
 	}
 	return expectedDataLen;
 #endif
-	
-	
+
+
 	// EEPROM.begin();
 	// EepromStream s(address, expectedDataLen);
 	// size_t written = 0;
 	// if (expectedDataLen > 0){
 	// 	written = s.write(input, expectedDataLen);
-	// 	Serial.print(">>>>>>>>>> WRITE BYTES 4: written "); 
+	// 	Serial.print(">>>>>>>>>> WRITE BYTES 4: written ");
 	// 	Serial.println(written);
 	// 	Serial.send_now();
 	// }
-	
+
 	// s.flush();
 	// EEPROM.end();
 
@@ -307,7 +307,7 @@ void HAPConfigurationEEPROM::reset(){
 	lastAddress += _dataMap[_dataMap.size()-1].offset;
 	lastAddress += _dataMap[_dataMap.size()-1].size;
 
-	
+
 #if defined (ARDUINO_ARCH_ESP32)
 	for (int i=0; i < lastAddress; i++){
 		// EEPROM.write(i, 0xFF);
@@ -316,12 +316,12 @@ void HAPConfigurationEEPROM::reset(){
 	}
 	// EEPROM.commit();
 	_eeprom->commit();
-#else		
+#else
 	for (int i=0; i < lastAddress; i++){
 		EEPROM.update(i, 0xFF);
 	}
-#endif		
-	
+#endif
+
 
 	// EEPROM.begin();
 	// EepromStream s(0, lastAddress);

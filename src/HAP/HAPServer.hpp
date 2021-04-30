@@ -55,7 +55,7 @@
 #endif
 
 
-#if HAP_WEBSERVER_USE_SPIFFS  
+#if HAP_WEBSERVER_USE_SPIFFS
 #include <FS.h>
 #include <SPIFFS.h>
 #endif
@@ -105,7 +105,7 @@ hap.__setBrand(__FLAGGED_BRAND);
 #else
 #error HAP_GENERATE_XHM must be enabled!
 #endif
-#endif	
+#endif
 
 
 
@@ -139,8 +139,8 @@ static const char EVENT_200[] PROGMEM 					= "EVENT/1.0 200 OK\r\n";
 struct HAP_MDNS_TXT {
 	char md[32 + 1];
 	char id[20 + 1];
-	char cN[20 + 1];	
-	char ff[2  + 1];	
+	char cN[20 + 1];
+	char ff[2  + 1];
 	char pv[4  + 1];
 	char sN[2  + 1];
 	char sf[2  + 1];
@@ -152,7 +152,7 @@ struct HAP_MDNS_TXT {
 		md[32] ='\0';
 	}
 
-	void setConfigNumber(const uint32_t c_){		
+	void setConfigNumber(const uint32_t c_){
 		sprintf(cN, "%" PRIu32, c_);
 		cN[20] ='\0';
 	}
@@ -206,7 +206,7 @@ public:
 	static String versionString(){
 		return HAPVersion(HOMEKIT_VERSION).toString();
 	}
-	
+
 
 	static HAPVersion version() {
 		return HAPVersion(HOMEKIT_VERSION);
@@ -217,19 +217,19 @@ public:
 	void __setBrand(const char* brand);
 
 	HAPAccessorySet* getAccessorySet();
-	
-	bool isPaired();	
+
+	bool isPaired();
 
 	static EventManager _eventManager;
 
 	// HAPEventManager _evtMgr;
 protected:
-	
+
 	void updateConfig();
 
 	HAPAccessorySet* _accessorySet;
 	std::vector<HAPClient> _clients;
-	
+
 	HAPTime _time;
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -238,42 +238,42 @@ protected:
 
 #if HAP_USE_PREFERENCES
 	HAPConfigurationPreferences _configuration;
-#else	
-	HAPConfigurationEEPROM _configuration;	
+#else
+	HAPConfigurationEEPROM _configuration;
 #endif
 
 
 #if HAP_ENABLE_KEYSTORE
-	HAPKeystore	  _keystore;	
+	HAPKeystore	  _keystore;
 #endif
 
-#if HAP_ENABLE_WEBSERVER	
+#if HAP_ENABLE_WEBSERVER
 	HAPWebServer* _webserver;
 #endif
 
 
 
 	// Preferences _preferences;
-#elif defined(CORE_TEENSY)		
+#elif defined(CORE_TEENSY)
 	EthernetServer _server;
-	
+
 #if HAP_USE_SPIFFS_CONFIGURATION
 	HAPConfigurationT41SPIFFSExt _configuration;
 #elif HAP_USE_EEPROM
-	HAPConfigurationEEPROM _configuration;	
+	HAPConfigurationEEPROM _configuration;
 #endif
 
 
 	static const fnet_mdns_txt_key_t* HomekitTXTRecord();
 	static HAP_MDNS_TXT _hapMdnsTxt;
-		
+
 #endif
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
 	HAPFakegatoFactory _fakeGatoFactory;
-	// 
+	//
 	// Event handler
-	// 
+	//
 	void handleEvents( int eventCode, struct HAPEvent eventParam );
 	void handleEventUpdateConfigNumber( int eventCode, struct HAPEvent eventParam );
 	void handleEventUpdatedConfig(int eventCode, struct HAPEvent eventParam);
@@ -288,18 +288,18 @@ protected:
 
 	// HAPEventManager	_evtMgr;
 
-	// 
+	//
 	// Event Member callbacks
-	//  ToDo: Rename 
+	//  ToDo: Rename
     MemberFunctionCallable<HAPServer> listenerUpdateConfigNumber;
 	MemberFunctionCallable<HAPServer> listenerConfigUpdated;
-	MemberFunctionCallable<HAPServer> listenerNotificaton;	
-	MemberFunctionCallable<HAPServer> listenerRebootNow;	
+	MemberFunctionCallable<HAPServer> listenerNotificaton;
+	MemberFunctionCallable<HAPServer> listenerRebootNow;
 
-	MemberFunctionCallable<HAPServer> listenerConfigReset;	
-	MemberFunctionCallable<HAPServer> listenerDeleteAllPairings;	
+	MemberFunctionCallable<HAPServer> listenerConfigReset;
+	MemberFunctionCallable<HAPServer> listenerDeleteAllPairings;
 
-#if HAP_ENABLE_UPDATE_OTA || HAP_ENABLE_UPDATE_WEB 	
+#if HAP_ENABLE_UPDATE_OTA || HAP_ENABLE_UPDATE_WEB
 	HAPUpdate _updater;
 #endif
 
@@ -328,8 +328,8 @@ protected:
 	void handleAccessories(HAPClient* hapClient);
 
 	// /characteristics
-	void handleCharacteristicsGet(HAPClient* hapClient);	
-	void handleCharacteristicsPut(HAPClient* hapClient, String body);	
+	void handleCharacteristicsGet(HAPClient* hapClient);
+	void handleCharacteristicsPut(HAPClient* hapClient, String body);
 
 	// pairings
 	void handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen);
@@ -341,13 +341,13 @@ protected:
 	void handleIdentify(HAPClient* hapClient);
 
 
-	// 
+	//
 	// Plugin handling
 	// ToDo: currently unused
-	// 
+	//
 	void stopPlugins(bool value);
 	bool startPlugin(std::unique_ptr<HAPPlugin> plugin);
-	
+
 	// Callbacks
 	void handleAllPairingsRemoved();
 
@@ -362,17 +362,17 @@ private:
 	uint8_t _homekitFailedLoginAttempts;
 
 	String _curLine;
-	uint16_t _port;	
+	uint16_t _port;
 
-#if HAP_DEBUG	
+#if HAP_DEBUG
 	unsigned long _previousMillisHeap;
 #endif
 
-	HAPSRP* _hapsrp;	
+	HAPSRP* _hapsrp;
 
 	char _brand[MAX_BRAND_LENGTH];
 
-	bool _stopEvents;	
+	bool _stopEvents;
 	bool _stopPlugins;
 
 	//
@@ -383,7 +383,7 @@ private:
 
 	//
 	// HTTP
-	// 
+	//
 
 	// parsing
 	void processIncomingRequest(HAPClient* hapClient);
@@ -403,7 +403,7 @@ private:
 
 	//
 	// Sending responses
-	// 
+	//
 	bool sendResponse(HAPClient* hapClient, TLV8* response, bool chunked = true, bool closeConnection = false);
 	bool sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked = true);
 	bool sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType);
@@ -423,7 +423,7 @@ private:
 #endif
 
 #if HAP_ENABLE_WIFI_BUTTON
-	// 
+	//
 	// Button
 	//
 	static void taskButtonRead(void* pvParameters);
@@ -435,10 +435,10 @@ private:
 #endif
 
 	//
-	// TLV8 Encoding 
+	// TLV8 Encoding
 	//
 	static bool encode(HAPClient* hapClient);
-	
+
 	static bool _isConnected;
 
 	const char* __HOMEKIT_SIGNATURE;

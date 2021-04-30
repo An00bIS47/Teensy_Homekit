@@ -36,14 +36,14 @@ TLV8Entry* TLV8::getType(uint8_t type){
 void TLV8::decode(const uint8_t type, uint8_t* out, size_t *outSize){
 	if (_head == NULL || !out) {
 		if (outSize != nullptr) {
-			*outSize = 0;	
+			*outSize = 0;
 		}
 		return;
 	}
 
 
 	if (outSize != nullptr) {
-		*outSize = 0;	
+		*outSize = 0;
 	}
 
 	TLV8Entry *tmp = _head;
@@ -65,9 +65,9 @@ void TLV8::decode(const uint8_t type, uint8_t* out, size_t *outSize){
 			//			data[offset++] = _head->length;
 			memcpy(out + offset, _head->value, _head->length);
 			offset += _head->length;
-			
+
 			if (outSize != nullptr) {
-				*outSize = offset;	
+				*outSize = offset;
 			}
 		}
 
@@ -130,8 +130,8 @@ void TLV8::decode(const uint8_t type, uint8_t* out, size_t *outSize){
 
 size_t TLV8::decode(Stream& stream) {
 	size_t length = 0;
-	
-	uint8_t out[size()];	
+
+	uint8_t out[size()];
 	decode(out, &length);
 
 #if HAP_DEBUG_HOMEKIT
@@ -140,37 +140,37 @@ size_t TLV8::decode(Stream& stream) {
 	return stream.write(out, length);
 }
 
-void TLV8::decode(uint8_t* out, size_t *outSize){		
+void TLV8::decode(uint8_t* out, size_t *outSize){
 
 	if (_head == NULL || !out) {
 		if (outSize != nullptr) {
-			*outSize = 0;	
+			*outSize = 0;
 		}
 		return;
 	}
 
 	if (outSize != nullptr) {
-		*outSize = 0;	
+		*outSize = 0;
 	}
 
 	TLV8Entry *tmp = _head;
 	// outSize = size(_head);
 
-	size_t offset = 0;		
+	size_t offset = 0;
 
 	while(_head) {
 		out[offset++] = _head->type;
 		out[offset++] = _head->length;
-		
+
 		if (_head->type != HAP_TLV_SEPERATOR) {
 			memcpy(out + offset, _head->value, _head->length);
 			offset += _head->length;
 		}
 
 		if (outSize != nullptr) {
-			*outSize = offset;	
+			*outSize = offset;
 		}
-		
+
 
 		if(_head->next == NULL) {
 			_head = tmp;
@@ -267,7 +267,7 @@ bool TLV8::encode(uint8_t* rawData, size_t dataLen){
 		else {
 			ptr->type = rawData[encoded];
 			ptr->length = rawData[encoded+1];
-			
+
 			ptr->value = new unsigned char[ptr->length];
 			memcpy(ptr->value, rawData + (encoded+2), ptr->length);
 
@@ -319,12 +319,12 @@ bool TLV8::encode(uint8_t type, size_t length, const uint8_t* rawData) {
 }
 
 bool TLV8::encode(uint8_t type, const std::initializer_list<uint8_t> data){
-	
+
 	size_t length = data.size();
 	uint8_t rawData[length];
 
 	std::copy(data.begin(), data.end(), rawData);
-	
+
 	return encode(type, length, rawData);
 }
 
@@ -341,7 +341,7 @@ TLV8Entry* TLV8::initNode(const uint8_t* rawData) {
 		ptr->type = rawData[0];
 		ptr->length = rawData[1];
 
-		
+
 		ptr->value = new unsigned char[ptr->length];
 		memcpy(ptr->value, rawData + 2, ptr->length);
 		return ptr;
@@ -361,7 +361,7 @@ TLV8Entry* TLV8::initNode(const uint8_t type, const uint8_t length, const uint8_
 		ptr->type = type;
 		ptr->length = length;
 
-		
+
 		ptr->value = new unsigned char[length];
 		memcpy(ptr->value, value, length);
 		return ptr;
@@ -512,7 +512,7 @@ void TLV8::printNode( TLV8Entry *ptr )
 	char out[sizeof(char) * (ptr->length * 2) + 1];
 	HAPHelper::binToHex(ptr->value, ptr->length, out, (ptr->length * 2) + 1);
 	LogD( out, true );
-	
+
 
 	// HAPHelper::array_print("T:", (uint8_t*)ptr->type, 1);
 	// HAPHelper::array_print("L:", (uint8_t*)ptr->length, 1);

@@ -36,11 +36,11 @@ HAPButton::HAPButton(){
 }
 
 
-HAPBUTTON_STATE HAPButton::checkButton() {    
+HAPBUTTON_STATE HAPButton::checkButton() {
 	HAPBUTTON_STATE event = HAPBUTTON_STATE_UNKNOWN;
 
 	_buttonVal = digitalRead(HAP_BUTTON_PIN);
-   
+
 	// Button pressed down
 	if (_buttonVal == LOW && _buttonLast == HIGH && (millis() - _upTime) > _debounce) {
 		_downTime = millis();
@@ -55,9 +55,9 @@ HAPBUTTON_STATE HAPButton::checkButton() {
 			_DConUp = false;
 			_DCwaiting = false;
 		}
-	   	
+
 	} else if (_buttonVal == HIGH && _buttonLast == LOW && (millis() - _downTime) > _debounce)    {
-			// Button released        
+			// Button released
 		if (!_ignoreUp) {
 			_upTime = millis();
 			if (_DConUp == false) _DCwaiting = true;

@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegatoCharacteristic.hpp
 // Teensy_Homekit
 //
@@ -49,7 +49,7 @@ enum HAPFakegatoSignature {
     HAPFakegatoSignature_PowerTenthWh               = 0x07,     // Length: 2  = W             x 10
     HAPFakegatoSignature_WaterFlow                  = 0x08,
     HAPFakegatoSignature_WaterTemperature           = 0x09,
-    HAPFakegatoSignature_WaterEnergy                = 0x0A, 
+    HAPFakegatoSignature_WaterEnergy                = 0x0A,
     HAPFakegatoSignature_PowerWatt                  = 0x0B,     // Length: 2
     HAPFakegatoSignature_PowerVoltage               = 0x0C,     // Length: 2  = volt          x 10
     HAPFakegatoSignature_PowerCurrent               = 0x0D,     // Length: 2
@@ -103,10 +103,10 @@ public:
         bytes[1] = _size;
         *length = _size;
     }
-    
+
     virtual void getBytes(uint8_t* bytes, uint8_t* length) = 0;
-    
-protected:    
+
+protected:
     uint8_t _type;
     uint8_t _size;
 };
@@ -115,7 +115,7 @@ protected:
 
 /**
  * @brief HAPFakegatoCharacteristicBase
- * 
+ *
  */
 template <class T>
 class HAPFakegatoCharacteristicBase : public HAPFakegatoCharacteristic {
@@ -149,7 +149,7 @@ public:
     void setSize(uint8_t size){
         _size = size;
     }
-    
+
 protected:
     std::function<T(void)> _valueGetFunctionCall = nullptr;
 };
@@ -158,23 +158,23 @@ protected:
  * @brief HAPFakegatoCharacteristicTemperature
  *  valueType: float
  *  size: 2 (uint16_t)
- *  calculation to fg: value * 100 
- *  calculation from fg: value / 100 
- * 
+ *  calculation to fg: value * 100
+ *  calculation from fg: value / 100
+ *
  */
 class HAPFakegatoCharacteristicTemperature : public HAPFakegatoCharacteristicBase<float> {
 public:
-    HAPFakegatoCharacteristicTemperature(std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(HAPFakegatoSignature_Temperature, callback, 2) {        
+    HAPFakegatoCharacteristicTemperature(std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(HAPFakegatoSignature_Temperature, callback, 2) {
         _size = 2;
     }
 
-    HAPFakegatoCharacteristicTemperature(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback, 2) {        
+    HAPFakegatoCharacteristicTemperature(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback, 2) {
         _size = 2;
     }
 
     float valueFromBytes(uint8_t* bytes, uint8_t length){
         ui16_to_ui8 converter;
-        memcpy(converter.ui8, bytes, length);         
+        memcpy(converter.ui8, bytes, length);
         return (float)HAPHelper::round2(converter.ui16 / 100);
     }
 
@@ -193,9 +193,9 @@ public:
  * @brief HAPFakegatoCharacteristicHumidity
  *  valueType: float
  *  size: 2 (uint16_t)
- *  calculation to fg: value * 100 
- *  calculation from fg: value / 100 
- * 
+ *  calculation to fg: value * 100
+ *  calculation from fg: value / 100
+ *
  */
 class HAPFakegatoCharacteristicHumidity : public HAPFakegatoCharacteristicTemperature {
 public:
@@ -207,7 +207,7 @@ public:
  *  valueType: uint16_t
  *  size: 2
  *  calculation to fg: value * 10
- *  calculation from fg: value / 10 
+ *  calculation from fg: value / 10
  */
 class HAPFakegatoCharacteristicAirPressure : public HAPFakegatoCharacteristicBase<uint16_t> {
 public:
@@ -221,7 +221,7 @@ public:
 
     uint16_t valueFromBytes(uint8_t* bytes, uint8_t length){
         ui16_to_ui8 converter;
-        memcpy(converter.ui8, bytes, length);         
+        memcpy(converter.ui8, bytes, length);
         return (uint16_t)converter.ui16 / 10;
     }
 
@@ -277,13 +277,13 @@ public:
         _size = 2;
     }
 
-    HAPFakegatoCharacteristicPowerWatt(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback, 2) {        
+    HAPFakegatoCharacteristicPowerWatt(HAPFakegatoSignature type, std::function<float(void)> callback) : HAPFakegatoCharacteristicBase<float>(type, callback, 2) {
         _size = 2;
     }
 
     float valueFromBytes(uint8_t* bytes, uint8_t length){
         ui16_to_ui8 converter;
-        memcpy(converter.ui8, bytes, length);         
+        memcpy(converter.ui8, bytes, length);
         return (float)HAPHelper::round2(converter.ui16 / 10);
     }
 
@@ -294,7 +294,7 @@ public:
         converter.ui16 = HAPHelper::round2(value) * 10;
         memcpy(bytes, converter.ui8, _size);
         *length = _size;
-    }                
+    }
 };
 
 /**

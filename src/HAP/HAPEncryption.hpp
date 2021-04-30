@@ -54,7 +54,7 @@
 
 
 #define HAP_ENCRYPTION_DEBUG				0		// Be careful, it will print all keys on console
-#define HAP_ENCRYPTION_EXIT_ON_FAILURE 		0		// 0 = ignore 
+#define HAP_ENCRYPTION_EXIT_ON_FAILURE 		0		// 0 = ignore
 													// 1 = Don't ignore and return failure
 
 #define HAP_ENCRYPTION_SUPPRESS_WARNINGS 	1		// Surpress crypto_verify_16 warning
@@ -67,16 +67,16 @@ public:
 
 	static int begin();
 
-	// Set the following values to ... to get the padded buffer size 
+	// Set the following values to ... to get the padded buffer size
 	//		buf 		  	= NULL
 	//  	max_buflen 		= 0
-	static int pad(size_t *padded_buflen_p, uint8_t *msg, 
-			const uint8_t *buf, size_t unpadded_buflen, 
+	static int pad(size_t *padded_buflen_p, uint8_t *msg,
+			const uint8_t *buf, size_t unpadded_buflen,
 			size_t blocksize, size_t max_msglen, bool zeroPadded = true);
 
 	static size_t paddedLength(size_t unpadded_buflen, size_t blocksize) {
 			size_t padded_buflen = 0;
-			
+
 			pad(&padded_buflen, NULL, NULL, unpadded_buflen, blocksize, 0);
 		return padded_buflen;
 	}
@@ -86,18 +86,18 @@ public:
 			size_t padded_buflen, size_t blocksize);
 
 
-	
-	static int computePoly1305(uint8_t* hmac, uint8_t* cipherText, 
-			size_t cipherTextLength, uint8_t* AAD, uint8_t *nonce, 
+
+	static int computePoly1305(uint8_t* hmac, uint8_t* cipherText,
+			size_t cipherTextLength, uint8_t* AAD, uint8_t *nonce,
 			uint8_t *key);
 
 
-	static int verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[], uint16_t length, 
+	static int verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[], uint16_t length,
 			uint8_t mac[], uint8_t aad[], int decryptCount, uint8_t key[]);
 #endif
 
 	static int decrypt(const uint8_t tag[CHACHA20_POLY1305_TAG_BYTES],
-			uint8_t* m,			
+			uint8_t* m,
 			const uint8_t* c,
 			size_t c_len,
 			const uint8_t* a,
@@ -105,10 +105,10 @@ public:
 			const uint8_t* n,
 			size_t n_len,
 			const uint8_t k[CHACHA20_POLY1305_KEY_BYTES]);
-	
+
 	// not needed
 	// static size_t encrypt(uint8_t *message, size_t length, uint8_t* buffer, uint8_t* key, uint16_t encryptCount);
-	
+
 	static uint8_t* encrypt(uint8_t *message, size_t length, int* encrypted_len, uint8_t* key, uint16_t encryptCount);
 
 	static int chacha20_poly1305_update_aad(

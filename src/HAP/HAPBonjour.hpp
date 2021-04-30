@@ -26,7 +26,7 @@ public:
 	bool updateHomekitTxt(bool isPaired, uint32_t configNumber);
 	bool updateHomekitTxtItem(const char* key, const char* value);
 
-	
+
 private:
 
 };

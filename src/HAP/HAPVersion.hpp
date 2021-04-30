@@ -81,10 +81,10 @@ struct HAPVersion {
 
 	static String featureRev(){
 		const char* binaryString = HAP_PLUGIN_FEATURE_NUMBER;
-		
+
 		// convert binary string to integer
 		uint64_t value = (uint64_t)strtol(binaryString, NULL, 2);
-		
+
 		// convert integer to hex string
 		char hexString[32]; // long enough for any 32-bit value, 4-byte aligned
 		sprintf(hexString, "%llx", value);
@@ -96,7 +96,7 @@ struct HAPVersion {
 		return (uint64_t)strtol(rev, NULL, 2);
 	}
 
-	static bool compareFeatureRev(uint64_t first, uint64_t second){		
+	static bool compareFeatureRev(uint64_t first, uint64_t second){
 		uint64_t result = second & first;
 		return result == first;
 	}

@@ -50,13 +50,13 @@ const char*     INFLUXDB_PASS = "password";
 
 
 HAPPluginInfluxDB::HAPPluginInfluxDB() {
-    
+
     _type = HAP_PLUGIN_TYPE_STORAGE;
     // _config->name = "InfluxDB";
     // _isEnabled = HAP_PLUGIN_USE_INFLUXDB;
     // _interval = HAP_PLUGIN_INFLUXDB_INTERVAL;
-    _previousMillis = 0;	
-    
+    _previousMillis = 0;
+
 #if HAP_USE_INFLUXDB_SECURE
     // _influxdb->setCACert((const char*)localCA_pem_start);	// does not work with provided root CA cert :(
                                                                 // dont know why
@@ -72,12 +72,12 @@ HAPPluginInfluxDB::HAPPluginInfluxDB() {
     // _configInternal->url = INFLUXDB_HOST;
 	// _configInternal->database = INFLUXDB_DATABASE;
     // _configInternal->port = INFLUXDB_PORT;
- 
+
     _eventManager		= nullptr;
 
     _usedSize = 0;
 
-    _configInternal = new HAPPluginInfluxDBConfig(INFLUXDB_PORT, INFLUXDB_USER, INFLUXDB_PASS, INFLUXDB_DATABASE, INFLUXDB_HOST);        
+    _configInternal = new HAPPluginInfluxDBConfig(INFLUXDB_PORT, INFLUXDB_USER, INFLUXDB_PASS, INFLUXDB_DATABASE, INFLUXDB_HOST);
 	_config = new HAPConfigurationPlugin("InfluxDB", true, HAP_PLUGIN_INFLUXDB_INTERVAL, (uint8_t*)_configInternal, _configInternal->getDataSize() );
 
 	// Callback for PRINT internal config to json
@@ -91,7 +91,7 @@ HAPAccessory* HAPPluginInfluxDB::initAccessory(){
 
 bool HAPPluginInfluxDB::begin(){
     LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
-    _influxdb = new Influxdb(_configInternal->url, _configInternal->port);	
+    _influxdb = new Influxdb(_configInternal->url, _configInternal->port);
     _influxdb->setDbAuth(_configInternal->database, _configInternal->username, _configInternal->password);
 
     return true;
@@ -99,23 +99,23 @@ bool HAPPluginInfluxDB::begin(){
 
 
 
-void HAPPluginInfluxDB::handleImpl(bool forced){	
+void HAPPluginInfluxDB::handleImpl(bool forced){
 
     LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
-    
+
     // first accessory is bridge -> don't write
     for (int i=1; i < _accessorySet->numberOfAccessory(); i++){
         HAPAccessory* curAcc = _accessorySet->accessoryAtIndex(i);
-        // Serial.print("Acc: " + curAcc->getName() + " - ");			
+        // Serial.print("Acc: " + curAcc->getName() + " - ");
         // Serial.println(curAcc->numberOfService());
 
         String accName = curAcc->name();
         accName.replace(" ", "");
-        
+
         String name;
         // first service is info service -> don't write
         for (int j=1; j < curAcc->numberOfService(); j++){
-            HAPService* curSer = curAcc->serviceAtIndex(j);                                
+            HAPService* curSer = curAcc->serviceAtIndex(j);
 
             for (int k=0; k < curSer->numberOfCharacteristics(); k++){
                 HAPCharacteristic *curChar = curSer->characteristicsAtIndex(k);
@@ -125,13 +125,13 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                         // serviceName is first -> don't write into db
                         // Serial.println("-- " + curChar->value());
 
-                        name = curChar->valueString();	
+                        name = curChar->valueString();
                         name.replace(" ", "");
                         name.replace("\"", "");
-                        //Serial.println(name);					
+                        //Serial.println(name);
                     } else if ( strncmp(curChar->typeString + 8, HAP_SERVICE_FAKEGATO_ENDING, 28) == 0) {
                         // Exclude fakegato history service (all others are hidden)
-                        //                    
+                        //
                     } else {
                         // all other chars -> write to db
                         // Serial.println("-- " + curChar->value());
@@ -148,26 +148,26 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                             row.addTag("type", String(curChar->type));
 
                             row.setTimestamp(HAPTime::timestamp());
-                            
+
                             // Serial.print("Handling " + String(name) + " - value: " + String(curChar->value()) + " type: ");
                             if ( HAPHelper::isValidFloat(curChar->valueString()) ){
                                 // Serial.println(" float");
-                                row.addValue("value", curChar->valueString().toFloat(), 2);					
+                                row.addValue("value", curChar->valueString().toFloat(), 2);
                             } else if ( HAPHelper::isValidNumber(curChar->valueString()) ) {
                                 // Serial.println(" integer");
                                 row.addValue("value", curChar->valueString().toFloat());
                             } else if (curChar->valueString() == "true") {
                                 // Serial.println(" bool -> 1");
-                                row.addValue("value", 1);					
+                                row.addValue("value", 1);
                             } else if (curChar->valueString() == "false") {
                                 // Serial.println(" bool -> 0");
-                                row.addValue("value", 0);					
+                                row.addValue("value", 0);
                             } else {
-                                row.addValueString("value", curChar->valueString() );					
+                                row.addValueString("value", curChar->valueString() );
                             }
 
                             // LogD(row.toString() + " - size: " + String(row.serializedSize()), true);
-                    
+
                             if (_usedSize + row.serializedSize() > HAP_PLUGIN_INFLUXDB_BUFFER_SIZE){
                                 LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Sending data to InfluxDB server [" + String(_usedSize) + " bytes] ...", false);
                                 _influxdb->write();
@@ -178,22 +178,22 @@ void HAPPluginInfluxDB::handleImpl(bool forced){
                             name = "";
 
                             _influxdb->prepare(row);
-                            _usedSize += row.serializedSize();                            
+                            _usedSize += row.serializedSize();
                             // LogD("usesdSize: " + String(_usedSize), true);
                         }
-                        
 
-                    }   
-                }                    					
+
+                    }
+                }
 
             }
-            
+
         }
     }
 }
 
 void HAPPluginInfluxDB::handleEvents(int eventCode, struct HAPEvent eventParam){
-    LogD("Handle event: [" + String(__PRETTY_FUNCTION__) + "]", true);	
+    LogD("Handle event: [" + String(__PRETTY_FUNCTION__) + "]", true);
 
 
 
@@ -204,23 +204,23 @@ void HAPPluginInfluxDB::handleEvents(int eventCode, struct HAPEvent eventParam){
 void HAPPluginInfluxDB::addEventListener(EventManager* eventManager){
 
     if (isEnabled()) {
-        LogD("Add Listener: [" + String(__PRETTY_FUNCTION__) + "]", true);	
+        LogD("Add Listener: [" + String(__PRETTY_FUNCTION__) + "]", true);
 
         _listenerMemberFunctionPlugin.mObj = this;
         _listenerMemberFunctionPlugin.mf = &HAPPlugin::handleEvents;
-        
+
         // Add listener to event manager
         _eventManager = eventManager;
 
-        
+
         // for accessory notifications and values
         // _eventManager->addListener( EventManager::kEventNotifyAccessory, &_listenerMemberFunctionPlugin );
         // _eventManager->addListener( EventManager::kEventPairingComplete, &_listenerMemberFunctionPlugin );
         // _eventManager->addListener( EventManager::kEventHomekitStarted, &_listenerMemberFunctionPlugin );
-        
-        // _eventManager->addListener( EventManager::kEventNotifyController, &_listenerMemberFunctionPlugin );		
+
+        // _eventManager->addListener( EventManager::kEventNotifyController, &_listenerMemberFunctionPlugin );
     }
-    
+
 }
 
 /*
@@ -230,10 +230,10 @@ void HAPPluginInfluxDB::addEventListener(EventManager* eventManager){
 HAPConfigurationValidationResult HAPPluginInfluxDB::validateConfig(JsonObject object){
 
     LogD("Validation config " + String(__PRETTY_FUNCTION__), true);
-    
+
 
     HAPConfigurationValidationResult result;
-    
+
     result = HAPPlugin::validateConfig(object);
     if (result.valid == false) {
         return result;
@@ -252,7 +252,7 @@ HAPConfigurationValidationResult HAPPluginInfluxDB::validateConfig(JsonObject ob
         }
      */
 
-    
+
     // plugin._name.username
     if (object.containsKey("username") && !object["username"].is<const char*>()) {
         result.reason = "plugins." + String(_config->name) + ".username is not a string";
@@ -303,15 +303,15 @@ HAPConfigurationValidationResult HAPPluginInfluxDB::validateConfig(JsonObject ob
 
 /*
  * getConfig
- * 
+ *
  * @param: root :   the root object of the plugin config
- *                  enabled and interval is already present 
+ *                  enabled and interval is already present
  *                  add all other config values except "_enabled" and "_interval"
  */
-JsonObject HAPPluginInfluxDB::getConfigImpl(){   
+JsonObject HAPPluginInfluxDB::getConfigImpl(){
 
-    LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);     
-    
+    LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+
     DynamicJsonDocument doc(512);
     doc["username"] = _configInternal->username;
     doc["password"] = _configInternal->password;
@@ -329,7 +329,7 @@ JsonObject HAPPluginInfluxDB::getConfigImpl(){
 }
 
 void HAPPluginInfluxDB::setConfigImpl(JsonObject root){
-    
+
     if (root.containsKey("username")){
         // LogD(" -- username: " + String(root["username"]), true);
         _configInternal->username = root["username"].as<String>();
@@ -360,7 +360,7 @@ void HAPPluginInfluxDB::setConfigImpl(JsonObject root){
 
 HAPConfigurationPlugin* HAPPluginInfluxDB::setDefaults(){
 	_config->enabled  = HAP_PLUGIN_USE_INFLUXDB;
-	_config->interval = HAP_PLUGIN_INFLUXDB_INTERVAL;	
+	_config->interval = HAP_PLUGIN_INFLUXDB_INTERVAL;
 	_config->dataPtr = (uint8_t*)_configInternal;
 	_config->dataSize = sizeof(_configInternal);
 	return _config;
@@ -374,13 +374,13 @@ void HAPPluginInfluxDB::internalConfigToJson(Print& prt){
             "password": "abcd",
             "url": "abcd",
             "database": "abcd",
-            "port": 1234            
+            "port": 1234
 		} >>> will be printed after
-	
+
 	*/
 	prt.print("\"username\":");
 	prt.print(HAPHelper::wrap(_configInternal->username));
-    
+
     prt.print(",");
     prt.print("\"password\":");
 	prt.print(HAPHelper::wrap(_configInternal->password));
@@ -400,21 +400,21 @@ void HAPPluginInfluxDB::internalConfigToJson(Print& prt){
 }
 
 void HAPPluginInfluxDB::setConfiguration(HAPConfigurationPlugin* cfg){
-	_config = cfg;	
+	_config = cfg;
 	_configInternal = (HAPPluginInfluxDBConfig*)_config->dataPtr;
 
     Serial.print("InlfuxDB port:");
 	Serial.println(_configInternal->port);
-    
+
 
 	_config->setToJsonCallback(std::bind(&HAPPluginInfluxDB::internalConfigToJson, this, std::placeholders::_1));
 
 	// Serial.print("BME280 interval:");
 	// Serial.println(_config->interval);
 	// Serial.print("BME280 dataSize:");
-	// Serial.println(_config->dataSize);	
+	// Serial.println(_config->dataSize);
 	// Serial.print("BME280 mode:");
-	// Serial.println(_configInternal->mode);	
+	// Serial.println(_configInternal->mode);
 }
 
 

@@ -11,51 +11,51 @@
 #include <Arduino.h>
 
 typedef enum {
-    HAP_SERVICE_ACCESSORY_INFORMATION                           = 0x3E,     //    
-    HAP_SERVICE_AIR_PURIFIER                                    = 0xBB,     //    
-    HAP_SERVICE_AIR_QUALITY_SENSOR                              = 0x8D,     //    
-    HAP_SERVICE_BATTERY_SERVICE                                 = 0x96,     //    
-    HAP_SERVICE_CAMERA_RTP_STREAM_MANAGEMENT                    = 0x110,    //    
-    HAP_SERVICE_CARBON_DIOXIDE_SENSOR                           = 0x97,     //    
-    HAP_SERVICE_CARBON_MONOXIDE_SENSOR                          = 0x7F,     //    
-    HAP_SERVICE_CONTACT_SENSOR                                  = 0x80,     //    
-    HAP_SERVICE_DOOR                                            = 0x81,     //    
-    HAP_SERVICE_DOORBELL                                        = 0x121,    //    
-    HAP_SERVICE_FAN                                             = 0x40,     //    
-    HAP_SERVICE_FANV2                                           = 0xB7,     //    
-    HAP_SERVICE_FAUCET                                          = 0xD7,     //    
-    HAP_SERVICE_FILTER_MAINTENANCE                              = 0xBA,     //    
-    HAP_SERVICE_GARAGE_DOOR_OPENER                              = 0x41,     //    
-    HAP_SERVICE_HEATER_COOLER                                   = 0xBC,     //    
-    HAP_SERVICE_HUMIDIFIER_DEHUMIDIFIER                         = 0xBD,     //    
-    HAP_SERVICE_HUMIDITY_SENSOR                                 = 0x82,     //    
-    HAP_SERVICE_IRRIGATION_SYSTEM                               = 0xCF,     //    
-    HAP_SERVICE_LEAK_SENSOR                                     = 0x83,     //    
-    HAP_SERVICE_LIGHTBULB                                       = 0x43,     //    
-    HAP_SERVICE_LIGHT_SENSOR                                    = 0x84,     //    
-    HAP_SERVICE_LOCK_MANAGEMENT                                 = 0x44,     //    
-    HAP_SERVICE_LOCK_MECHANISM                                  = 0x45,     //    
-    HAP_SERVICE_MICROPHONE                                      = 0x112,    //    
-    HAP_SERVICE_MOTION_SENSOR                                   = 0x85,     //    
-    HAP_SERVICE_OCCUPANCY_SENSOR                                = 0x86,     //    
-    HAP_SERVICE_OUTLET                                          = 0x47,     //    
-    HAP_SERVICE_SECURITY_SYSTEM                                 = 0x7E,     //    
-    HAP_SERVICE_SERVICE_LABEL                                   = 0xCC,     //    
-    HAP_SERVICE_SLAT                                            = 0xB9,     //    
-    HAP_SERVICE_SMOKE_SENSOR                                    = 0x87,     //    
-    HAP_SERVICE_SPEAKER                                         = 0x113,    //    
-    HAP_SERVICE_STATELESS_PROGRAMMABLE_SWITCH                   = 0x89,     //    
-    HAP_SERVICE_SWITCH                                          = 0x49,     //    
-    HAP_SERVICE_TEMPERATURE_SENSOR                              = 0x8A,     //    
-    HAP_SERVICE_THERMOSTAT                                      = 0x4A,     //    
-    HAP_SERVICE_VALVE                                           = 0xD0,     //    
-    HAP_SERVICE_WINDOW                                          = 0x8B,     //    
-    HAP_SERVICE_WINDOW_COVERING                                 = 0x8C,     //    
+    HAP_SERVICE_ACCESSORY_INFORMATION                           = 0x3E,     //
+    HAP_SERVICE_AIR_PURIFIER                                    = 0xBB,     //
+    HAP_SERVICE_AIR_QUALITY_SENSOR                              = 0x8D,     //
+    HAP_SERVICE_BATTERY_SERVICE                                 = 0x96,     //
+    HAP_SERVICE_CAMERA_RTP_STREAM_MANAGEMENT                    = 0x110,    //
+    HAP_SERVICE_CARBON_DIOXIDE_SENSOR                           = 0x97,     //
+    HAP_SERVICE_CARBON_MONOXIDE_SENSOR                          = 0x7F,     //
+    HAP_SERVICE_CONTACT_SENSOR                                  = 0x80,     //
+    HAP_SERVICE_DOOR                                            = 0x81,     //
+    HAP_SERVICE_DOORBELL                                        = 0x121,    //
+    HAP_SERVICE_FAN                                             = 0x40,     //
+    HAP_SERVICE_FANV2                                           = 0xB7,     //
+    HAP_SERVICE_FAUCET                                          = 0xD7,     //
+    HAP_SERVICE_FILTER_MAINTENANCE                              = 0xBA,     //
+    HAP_SERVICE_GARAGE_DOOR_OPENER                              = 0x41,     //
+    HAP_SERVICE_HEATER_COOLER                                   = 0xBC,     //
+    HAP_SERVICE_HUMIDIFIER_DEHUMIDIFIER                         = 0xBD,     //
+    HAP_SERVICE_HUMIDITY_SENSOR                                 = 0x82,     //
+    HAP_SERVICE_IRRIGATION_SYSTEM                               = 0xCF,     //
+    HAP_SERVICE_LEAK_SENSOR                                     = 0x83,     //
+    HAP_SERVICE_LIGHTBULB                                       = 0x43,     //
+    HAP_SERVICE_LIGHT_SENSOR                                    = 0x84,     //
+    HAP_SERVICE_LOCK_MANAGEMENT                                 = 0x44,     //
+    HAP_SERVICE_LOCK_MECHANISM                                  = 0x45,     //
+    HAP_SERVICE_MICROPHONE                                      = 0x112,    //
+    HAP_SERVICE_MOTION_SENSOR                                   = 0x85,     //
+    HAP_SERVICE_OCCUPANCY_SENSOR                                = 0x86,     //
+    HAP_SERVICE_OUTLET                                          = 0x47,     //
+    HAP_SERVICE_SECURITY_SYSTEM                                 = 0x7E,     //
+    HAP_SERVICE_SERVICE_LABEL                                   = 0xCC,     //
+    HAP_SERVICE_SLAT                                            = 0xB9,     //
+    HAP_SERVICE_SMOKE_SENSOR                                    = 0x87,     //
+    HAP_SERVICE_SPEAKER                                         = 0x113,    //
+    HAP_SERVICE_STATELESS_PROGRAMMABLE_SWITCH                   = 0x89,     //
+    HAP_SERVICE_SWITCH                                          = 0x49,     //
+    HAP_SERVICE_TEMPERATURE_SENSOR                              = 0x8A,     //
+    HAP_SERVICE_THERMOSTAT                                      = 0x4A,     //
+    HAP_SERVICE_VALVE                                           = 0xD0,     //
+    HAP_SERVICE_WINDOW                                          = 0x8B,     //
+    HAP_SERVICE_WINDOW_COVERING                                 = 0x8C,     //
 } HAP_SERVICE;
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 inline String serviceName(int type){
     switch(type) {

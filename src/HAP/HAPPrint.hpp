@@ -21,7 +21,7 @@
 // Do not change !!!
 //      + 	2 AAD
 //      + 	7 ENCODING RESERVE
-//      + 1024 PAYLOAD 
+//      + 1024 PAYLOAD
 //      +	7 ENCODING RESERVE
 //      +   16 TAG
 //   =====  1056

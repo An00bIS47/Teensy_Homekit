@@ -1,4 +1,4 @@
-// 
+//
 // HAPHash.cpp
 // Homekit
 //
@@ -10,17 +10,17 @@
 
 
 HAPHash::HAPHash(HAPHashAlgorithm algorithm){
-    _hashAlgorithm = algorithm;  
+    _hashAlgorithm = algorithm;
     _context = nullptr;
 }
 
 HAPHash::~HAPHash(){
-    clear(_hashAlgorithm, _context);     
+    clear(_hashAlgorithm, _context);
     if (_context) delete _context;
 }
 
 void HAPHash::init(){
-    if (_context == nullptr) _context = new HAPHashContext();   
+    if (_context == nullptr) _context = new HAPHashContext();
     init(_hashAlgorithm, _context);
 }
 
@@ -55,10 +55,10 @@ void HAPHash::update_hash_n( const mbedtls_mpi * n )
 {
     uint32_t len = mbedtls_mpi_size(n);
     uint8_t* n_bytes = (uint8_t*) malloc( len );
-    
+
 	if (!n_bytes)
        return;
-    
+
 	mbedtls_mpi_write_binary( n, n_bytes, len );
 
     update(n_bytes, len);
@@ -78,7 +78,7 @@ void HAPHash::hash_num( const mbedtls_mpi * n, uint8_t* dest )
     free(bin);
 }
 
-// 
+//
 // Static Functions
 // ==========================================================================================================
 
@@ -86,7 +86,7 @@ void HAPHash::init(HAPHashAlgorithm alg, HAPHashContext* context){
 	switch (alg) {
 		case SRP_SHA1  : {
 			mbedtls_sha1_init( &context->sha );
-			mbedtls_sha1_starts( &context->sha );            
+			mbedtls_sha1_starts( &context->sha );
 			break;
 		}
 		case SRP_SHA224:

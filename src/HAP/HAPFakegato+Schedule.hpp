@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegato+Schedule.hpp
 // Teensy_Homekit
 //
@@ -35,7 +35,7 @@ typedef enum {
 } HAPFakeGatoScheduleTimerType;
 
 
-typedef enum {  
+typedef enum {
     SUNSET  = 0,
     SUNRISE = 1
 } HAPFakeGatoScheduleSunriseType;
@@ -49,7 +49,7 @@ struct HAPFakeGatoScheduleTimerEvent {
     int32_t     offset;
 
     bool        state;
-    HAPFakeGatoScheduleSunriseType sunrise;    
+    HAPFakeGatoScheduleSunriseType sunrise;
 };
 
 
@@ -87,7 +87,7 @@ struct HAPFakeGatoScheduleDays {
         thu = ( daysnumber >>  9 ) & 0x07;
         fri = ( daysnumber >> 12 ) & 0x07;
         sat = ( daysnumber >> 15 ) & 0x07;
-        sun = ( daysnumber >> 18 ) & 0x07;  
+        sun = ( daysnumber >> 18 ) & 0x07;
     }
 
     // encode
@@ -100,12 +100,12 @@ struct HAPFakeGatoScheduleDays {
 };
 
 class HAPFakegatoSchedule : public HAPFakegato {
-public:    
+public:
 
     HAPFakegatoSchedule() : HAPFakegato() {
 
     }
-    
+
 
     virtual ~HAPFakegatoSchedule() {
         if (_configRead) delete _configRead;
@@ -115,13 +115,13 @@ public:
         _timers.enable(false);
         _timers.clear();
     }
-    
+
     virtual void begin() = 0;
     virtual bool decodeToggleOnOff(uint8_t* data) = 0;
     virtual void decodeDays(uint8_t *data) = 0;
     virtual void decodePrograms(uint8_t* data) = 0;
     virtual void encodePrograms(uint8_t* data, size_t *dataSize) = 0;
-    
+
     virtual String buildScheduleString() = 0;
 
 
@@ -137,14 +137,14 @@ public:
         _serialNumber = serialNumber;
     }
 
-    
-    void setStatusLED(uint8_t mode){	
+
+    void setStatusLED(uint8_t mode){
 	    _statusLED = mode;
     }
 
     void scheduleFromJson(JsonObject &root);
     JsonObject scheduleToJson();
-    
+
     void clear();
 
     void setCallbackTimerStart(std::function<void(uint16_t)> callback){
@@ -155,14 +155,14 @@ public:
         _callbackTimerEnd = callback;
     }
 
-    void handle() {        
+    void handle() {
         // _alarms.delay(0);
         _timers.handle();
     }
 
     void callbackTimerStart(uint16_t state);
     void callbackTimerEnd(uint16_t state);
-    
+
     void programTimers();
 
     void setCallbackSaveConfig(std::function<void(void)> callback){
@@ -174,13 +174,13 @@ protected:
     uint8_t _statusLED;
 
     std::vector<HAPFakeGatoScheduleProgramEvent> _programEvents; // 7
-    HAPFakeGatoScheduleDays _days;  
+    HAPFakeGatoScheduleDays _days;
     HAPDailyTimerFactory _timers;
 
     std::function<void(uint16_t)> _callbackTimerStart = nullptr;
     std::function<void(uint16_t)> _callbackTimerEnd = nullptr;
 
-    std::function<void(void)> _callbackSaveConfig = nullptr;   
+    std::function<void(void)> _callbackSaveConfig = nullptr;
 };
 
 #endif /* HAPFAKEGATOSCHEDULE_HPP_ */

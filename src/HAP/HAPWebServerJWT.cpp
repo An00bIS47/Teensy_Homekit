@@ -42,8 +42,8 @@ char* HAPWebServerJWT::mbedtlsError(int errnum) {
  * @returns A JWT token for transmission to GCP.
  */
 char* HAPWebServerJWT::createGCPJWT(const char* audience, const char* issuer, uint8_t* privateKey, size_t privateKeySize) {
-    
-    const char header[] = "{\"alg\":\"RS256\",\"typ\":\"JWT\"}";    
+
+    const char header[] = "{\"alg\":\"RS256\",\"typ\":\"JWT\"}";
     char base64Header[BASE64_ENCODE_OUT_SIZE(strlen(header))];
     base64url_encode(
         (unsigned char *)header,   // Data to encode.
@@ -92,20 +92,20 @@ char* HAPWebServerJWT::createGCPJWT(const char* audience, const char* issuer, ui
     mbedtls_entropy_init(&entropy);
 
     const char* pers="MyEntropy";
-                
+
     mbedtls_ctr_drbg_seed(
         &ctr_drbg,
         mbedtls_entropy_func,
         &entropy,
         (const unsigned char*)pers,
         strlen(pers));
-    
+
 
     uint8_t digest[32];
     rc = mbedtls_md(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), headerAndPayload, strlen((char*)headerAndPayload), digest);
     if (rc != 0) {
         printf("Failed to mbedtls_md: %d (-0x%x): %s\n", rc, -rc, mbedtlsError(rc));
-        return nullptr;        
+        return nullptr;
     }
 
     size_t retSize;
@@ -120,7 +120,7 @@ char* HAPWebServerJWT::createGCPJWT(const char* audience, const char* issuer, ui
     rc = mbedtls_pk_sign(&pk_context, MBEDTLS_MD_SHA256, digest, sizeof(digest), oBuf, &retSize, mbedtls_ctr_drbg_random, &ctr_drbg);
     if (rc != 0) {
         printf("Failed to mbedtls_pk_sign: %d (-0x%x): %s\n", rc, -rc, mbedtlsError(rc));
-        return nullptr;        
+        return nullptr;
     }
 
 
@@ -138,13 +138,13 @@ char* HAPWebServerJWT::createGCPJWT(const char* audience, const char* issuer, ui
 }
 
 bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const char* issuer, const uint8_t* publicKey, size_t publicKeySize){
-    
+
 
     const char pattern[]=". ";
     char *ptr = strchr(token, ' ');
-    
+
     int headerStart = ptr - token + 1;
-        
+
     char *jwt = (char*)token + headerStart;
     char * pch;
 
@@ -157,7 +157,7 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
     int index = 0;
     pch = strtok (jwt, pattern);
     while (pch != NULL)
-    {                
+    {
         if (index == 0) {
             // header
             Serial.printf ("header: %s\n", pch);
@@ -172,15 +172,15 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
 
 
             const size_t bufferSize = JSON_OBJECT_SIZE(2) + 20;
-            DynamicJsonDocument root(bufferSize);            
+            DynamicJsonDocument root(bufferSize);
             DeserializationError error = deserializeJson(root, header);
 
-           if (error) {                
+           if (error) {
                 LogW("JWT Verification: Error parsing header of jwt failed!", true);
                 return false;
             }
-            
-            serializeJsonPretty(root, Serial);            
+
+            serializeJsonPretty(root, Serial);
 
             passedHeader = true;
             headerAndPayload += String(pch) + ".";
@@ -194,7 +194,7 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
                 strlen(pch),                // Length of data to encode.
                 (unsigned char *) payload);  // Base64 decoded data.
 
-            //payload[BASE64_DECODE_OUT_SIZE(strlen(pch))] = '\0';            
+            //payload[BASE64_DECODE_OUT_SIZE(strlen(pch))] = '\0';
 
             Serial.printf ("payload: %s\n", payload);
 
@@ -202,22 +202,22 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
             DynamicJsonDocument root(bufferSize);
             DeserializationError error = deserializeJson(root, payload);
 
-            if (error) {                
+            if (error) {
                 LogW("JWT Verification: Error parsing jwt failed!", true);
                 return false;
             }
-            
+
             serializeJsonPretty(root, Serial);
 
 
             //long iat = root["iat"]; // 1546378963
             long exp = root["exp"]; // 1546382563
-            const char* aud = root["aud"]; // "api"            
+            const char* aud = root["aud"]; // "api"
 
             time_t now;
             time(&now);
 
-            if  (strcmp(aud, audience) == 0) {                
+            if  (strcmp(aud, audience) == 0) {
                 LogD("JWT Verification: audience passed", true);
             } else {
                 LogW("JWT Verification: audience failed", true);
@@ -258,7 +258,7 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
                 strlen(pch),                // Length of data to encode.
                 signature);  // Base64 decoded data.
 
-            //payload[BASE64_DECODE_OUT_SIZE(strlen(pch))] = '\0';   
+            //payload[BASE64_DECODE_OUT_SIZE(strlen(pch))] = '\0';
 
 
             mbedtls_pk_context pk_context;
@@ -279,7 +279,7 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
             rc = mbedtls_md(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), payload, headerAndPayload.length(), digest);
             if (rc != 0) {
                 Serial.printf("Failed to mbedtls_md: %d (-0x%x): %s\n", rc, -rc, mbedtlsError(rc));
-                return false;        
+                return false;
             }
 
             Serial.println("Parsed hash key");
@@ -288,7 +288,7 @@ bool HAPWebServerJWT::verifyToken(const char* token, const char* audience, const
             if( ( rc = mbedtls_pk_verify( &pk_context, MBEDTLS_MD_SHA256, digest, 32, (const unsigned char*)signature, strlen((const char*)signature) ) ) != 0 )
             {
                 Serial.printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -rc );
-                
+
             }
 
 

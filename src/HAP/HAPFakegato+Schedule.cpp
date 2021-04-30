@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegato+Schedule.cpp
 // Homekit
 //
@@ -13,34 +13,34 @@
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPFakegatoSchedule::callbackTimerStart(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 	LogI(HAPTime::timeString() + " " + "HAPFakegatoSchedule" + "->" + "callbackTimerStart" + " [   ] " + "Timed action: START", true);
-#endif	
+#endif
 	if (_callbackTimerStart) _callbackTimerStart(state);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPFakegatoSchedule::callbackTimerEnd(uint16_t state){
-#if HAP_DEBUG_FAKEGATO_SCHEDULE	
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
 	LogI(HAPTime::timeString() + " " + "HAPFakegatoSchedule" + "->" + "callbackTimerStart" + " [   ] " + "Timed action: END", true);
-#endif	
+#endif
 	if (_callbackTimerEnd)  _callbackTimerEnd(state);
 }
 
 void HAPFakegatoSchedule::programTimers() {
-	
+
 	for (size_t i = 0; i < _programEvents.size(); i++){
-		
-#if HAP_DEBUG_FAKEGATO_SCHEDULE		
+
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
 		Serial.printf("M T W T F S S \n");
 		Serial.printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
-#endif		
-		
+#endif
+
 		/*SMTWTFSS*/
 		uint8_t daysMask = 0;
 		daysMask  = (_days.sun == (i+1)) << 7;
@@ -52,12 +52,12 @@ void HAPFakegatoSchedule::programTimers() {
 		daysMask |= (_days.sat == (i+1)) << 1;
 		//0b10000000,
 
-#if HAP_DEBUG_FAKEGATO_SCHEDULE		
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
 		Serial.printf("daysMask: %d\n", daysMask);
-#endif	
+#endif
 
 		for (size_t j = 0; j < _programEvents[i].timerEvents.size(); j++){
-			// add dailytimer here !!			
+			// add dailytimer here !!
 			HAPDailyTimer timer(_programEvents[i].timerEvents[j].hour,
 								_programEvents[i].timerEvents[j].minute,
 								daysMask,
@@ -67,10 +67,10 @@ void HAPFakegatoSchedule::programTimers() {
 								(uint16_t)_programEvents[i].timerEvents[j].state);
 
 			// timer.setDaysActive(daysMask);
-			timer.begin();					
+			timer.begin();
 			_timers.addTimer(timer);
 		}
-	} 
+	}
 }
 
 
@@ -84,26 +84,26 @@ void HAPFakegatoSchedule::clear(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPFakegatoSchedule::scheduleFromJson(JsonObject &root){
-	
+
 	if (root["timer"].isNull()) return;
 
 	enable(root["timer"]["enabled"].as<bool>());
 	_days = HAPFakeGatoScheduleDays(root["timer"]["days"].as<uint32_t>());
-	
+
 	String dataStr = root["timer"]["programs"].as<String>();
-	
+
 	uint8_t data[dataStr.length() / 2];
 	HAPHelper::hexToBin(data, dataStr.c_str(), dataStr.length());
-	
+
 	decodePrograms(data);
-	
+
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 JsonObject HAPFakegatoSchedule::scheduleToJson(){
 	/*
@@ -117,7 +117,7 @@ JsonObject HAPFakegatoSchedule::scheduleToJson(){
 	    doc.shrinkToFit();
     	return doc.as<JsonObject>();
 	}
-	
+
 	doc["enabled"] = isEnabled();
 	doc["days"] = _days.daysnumber();
 

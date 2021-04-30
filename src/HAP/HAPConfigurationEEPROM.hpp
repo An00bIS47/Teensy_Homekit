@@ -24,7 +24,7 @@ struct DataEntry {
 	DataEntry(size_t offset_, size_t size_, const char* name_)
 		: offset(offset_)
 		, size(size_)
-		{			
+		{
 		strncpy(name, name_, 20);
 	}
 
@@ -33,14 +33,14 @@ struct DataEntry {
 		prt.printf("name: %12s", name);
 		prt.printf(" - offset: %4d", offset);
 		prt.printf(" - size: %4d", size);
-		
+
 		prt.println("");
 	}
 };
 
 class HAPConfigurationEEPROM : public HAPConfiguration {
 public:
-	
+
 
 	HAPConfigurationEEPROM();
 	~HAPConfigurationEEPROM();
@@ -56,19 +56,19 @@ public:
 
 
 	void printDataMapTo(Print& prt);
-protected:	
+protected:
 
 #if defined (ARDUINO_ARCH_ESP32)
 	EEPROMClass* _eeprom;
 #endif
 
-	
+
 	void buildDataMap();
 
 	size_t writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen) override;
 	size_t readBytes(const char* label, uint8_t* output, const size_t expectedDataLen) override;
 	size_t getBytesLength(const char* label) override;
-	
+
 	size_t getAddressForLabel(const char* label);
 	int getIndexForLabel(const char* name);
 

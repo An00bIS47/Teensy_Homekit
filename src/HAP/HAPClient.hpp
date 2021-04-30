@@ -39,7 +39,7 @@ enum HAP_CLIENT_STATE {
 	HAP_CLIENT_STATE_AVAILABLE,
 	HAP_CLIENT_STATE_SENT,
 	HAP_CLIENT_STATE_RECEIVED,
-	HAP_CLIENT_STATE_IDLE,	
+	HAP_CLIENT_STATE_IDLE,
 	HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED
 };
 
@@ -81,7 +81,7 @@ public:
 
 	bool operator==(const HAPClientHeader &header) const {
 		return header.name == name && header.value == value;
-	}	  
+	}
 };
 
 class HAPClient : public Stream {
@@ -95,7 +95,7 @@ public:
 
 	HAPRequest		request;
 
-#if defined(ARDUINO_ARCH_ESP32)	
+#if defined(ARDUINO_ARCH_ESP32)
 	WiFiClient 		client;
 #elif defined(CORE_TEENSY)
 	EthernetClient	client;
@@ -103,11 +103,11 @@ public:
 
 	HAP_CLIENT_STATE 	state;
 	HAP_PAIR_STATE		pairState;
-	HAP_VERIFY_STATE	verifyState;	
+	HAP_VERIFY_STATE	verifyState;
 
 
 	struct HAPVerifyContext 		verifyContext;
-	struct HAPEncryptionContext 	encryptionContext;	
+	struct HAPEncryptionContext 	encryptionContext;
 
 	// From Stream:
   	size_t write(const uint8_t* buffer, size_t size);
@@ -172,7 +172,7 @@ public:
 protected:
 	bool			_isEncrypted;
 	bool			_headerSent;
-	bool			_isAdmin;	
+	bool			_isAdmin;
 	bool			_chunkedMode;
 
 	std::vector<HAPClientHeader> _headers;
@@ -180,7 +180,7 @@ protected:
 	String buildHeaderAndStatus(int statusCode, size_t size = 0);
 
 	uint8_t	_idPtr[HAP_PAIRINGS_ID_LENGTH];
-			
+
 };
 
 #endif /* HAPCLIENT_HPP_ */

@@ -43,26 +43,26 @@ enum HAP_ENCRYPTION_MODE {
 
 
 class HAPPrintEncrypted : public HAPPrintBuffered {
-private:	
-	
+private:
+
 	bool _firstChunk = false;
 
 	bool _headerEnded = false;
-	bool _bodyEnded = false;	
+	bool _bodyEnded = false;
 	bool _ended	= true;			// is set at begin() to false and at end() to true
 
 	uint8_t _encryptCount = 0;
 
-	uint8_t _key[CHACHA20_POLY1305_KEY_BYTES];		
+	uint8_t _key[CHACHA20_POLY1305_KEY_BYTES];
 
-	
+
 
 public:
 	HAPPrintEncrypted(Print &target, uint8_t* buffer, size_t size);
 	~HAPPrintEncrypted() { end(); }
 
 	void setEncryptCount(uint8_t encryptCount) { _encryptCount = encryptCount; }
-	uint8_t encryptCount(){ return _encryptCount; }		
+	uint8_t encryptCount(){ return _encryptCount; }
 
 	void setKey(const uint8_t key[CHACHA20_POLY1305_KEY_BYTES]);
 
@@ -73,8 +73,8 @@ public:
 
 	void end();
 
-	void flush() override;  
-	
+	void flush() override;
+
 };
 
 

@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegato+ScheduleEnergy.cpp
 // Homekit
 //
@@ -16,7 +16,7 @@
 #include "mbedtls/base64.h"
 #else
 extern "C" {
-    #include "crypto/base64.h"    
+    #include "crypto/base64.h"
 }
 
 #endif
@@ -36,27 +36,27 @@ bool HAPFakegatoScheduleEnergy::decodeToggleOnOff(uint8_t* data){
 
 void HAPFakegatoScheduleEnergy::decodeDays(uint8_t *data){
 	uint32_t daysnumber = data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
-	daysnumber = daysnumber >> 4;	
+	daysnumber = daysnumber >> 4;
 
-	_days = HAPFakeGatoScheduleDays(daysnumber);	
+	_days = HAPFakeGatoScheduleDays(daysnumber);
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 	Serial.printf("M T W T F S S \n");
 	Serial.printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
-#endif	
+#endif
 }
 
 
 /**
  * @brief Load Programs from data
- * 
- * @param data 
+ *
+ * @param data
  */
 void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 	// clear all old programs and timers
 	clear();
 	// ToDo: update to daily timer vector
-	_timers.clear();	
+	_timers.clear();
 
 	uint8_t programCount = data[1];
 	programCount = programCount - 1;
@@ -65,12 +65,12 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 	uint8_t curIndex = 7;
 
 	for (uint8_t i = 0; i < programCount; i++) {
-		
+
 		HAPFakeGatoScheduleProgramEvent program;
 		program.id = pcount;
 
 		uint16_t timerCount = (data[curIndex] | (data[curIndex+1] << 8)) >> 7;
-		
+
 		// printf("%x %x\n", data[curIndex], data[curIndex+1]);
 		// printf("timerCount: %d\n", timerCount);
 
@@ -90,12 +90,12 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 			tEvent.type   = static_cast<HAPFakeGatoScheduleTimerType>( ((timer & 0x1F) & 0x02 ) >> 1);
 
 			if ((timer & 0x1F) == 1 || (timer & 0x1F) == 5) {
-							
-				tEvent.minute = (timer >> 5) % 60;		
+
+				tEvent.minute = (timer >> 5) % 60;
 				tEvent.hour   = ((timer >> 5) - tEvent.minute) / 60;
 
 				// printf("offset:: %d\n", ((timer >> 5) * 60) );
-				tEvent.offset = ((timer >> 5) * 60); 			
+				tEvent.offset = ((timer >> 5) * 60);
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 				Serial.printf("hour: %d, min: %d, offset: %d state: %d type: %d \n", tEvent.hour, tEvent.minute, tEvent.offset, tEvent.state, tEvent.type);
@@ -107,15 +107,15 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 				Serial.printf("sunrise: %d, offset: %d state: %d type: %d \n", tEvent.sunrise, tEvent.offset, tEvent.state, tEvent.type);
-#endif				
+#endif
 			}
 
-			
+
 			program.timerEvents.push_back(tEvent);
 			curIndex = curIndex + 2;
 		}
 
-		
+
 
 		_programEvents.push_back(program);
 		pcount++;
@@ -136,7 +136,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 	// 		}
 	// 	}
 	// }
-	
+
 }
 
 
@@ -158,7 +158,7 @@ uint8_t HAPFakegatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
 
 /**
  * @brief Put programs to data
- * 
+ *
  * @param data 			Output for programs
  * @param dataSize 		length of data
  */
@@ -168,16 +168,16 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 	// printf("%0x\n", programCount);
 
 	uint8_t totalTimerCount = 0;
-	
+
 	uint16_t timerCount[programCount];
 
 	for (uint8_t i = 0; i < _programEvents.size(); i++){
 		timerCount[i] = _programEvents[i].timerEvents.size();
 		totalTimerCount += timerCount[i];
 	}
-	
+
 	// printf("%d\n", totalTimerCount);
-	// uint8_t dataSize = 1 + 1 + 5;	
+	// uint8_t dataSize = 1 + 1 + 5;
 	*dataSize = 1 + 1 + 5;
 	*dataSize += (programCount * 2) + (totalTimerCount * 2);
 	// printf("%d\n", dataSize);
@@ -204,15 +204,15 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 			addition = 3;
 		}
 
-		data[curIndex++] = ((timerCount[i] << 7) & 0xFF) + addition;		
-		data[curIndex++] = ((timerCount[i] << 7 ) >> 8);		
+		data[curIndex++] = ((timerCount[i] << 7) & 0xFF) + addition;
+		data[curIndex++] = ((timerCount[i] << 7 ) >> 8);
 
 		for (int j = 0; j < _programEvents[i].timerEvents.size(); j++){
 
 			HAPFakeGatoScheduleTimerEvent tEvent = _programEvents[i].timerEvents[j];
 
-			uint16_t timerData = 0;			
-			
+			uint16_t timerData = 0;
+
 			tEvent.state == true ? timerData += 4 : timerData += 0;
 
 			// tEvent.type  == TIME ? timerData += 1 : timerData += 3;
@@ -230,12 +230,12 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 					timerData += (tEvent.offset / 60) << 7;
 				}
 
-				timerData += 0x03 + ((uint8_t)tEvent.sunrise * 0x1F) + (uint8_t)tEvent.sunrise;					
+				timerData += 0x03 + ((uint8_t)tEvent.sunrise * 0x1F) + (uint8_t)tEvent.sunrise;
 			}
-		
-			data[curIndex++] = (timerData & 0xFF);		
+
+			data[curIndex++] = (timerData & 0xFF);
 			data[curIndex++] = (timerData >> 8);
-		
+
 			// printf("%d - %d %02X %02X %02X\n", tEvent.offset, timerData, timerData, (timerData & 0xFF), (timerData >> 8));
 		}
 	}
@@ -245,22 +245,22 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 
 String HAPFakegatoScheduleEnergy::buildScheduleString(){
     TLV8 tlv;
-    
+
     tlv.encode(0x00, {0x24, 0x00});
     tlv.encode(0x03, {0xB8, 0x04});
 
     // Serial Number
     // tlv.encode(0x04, {0x42, 0x56, 0x31, 0x32, 0x4A, 0x31, 0x41, 0x30, 0x37, 0x32, 0x31, 0x32});
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_SERIALNUMBER, _serialNumber.length(), (uint8_t*)_serialNumber.c_str());    
-	
+	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_SERIALNUMBER, _serialNumber.length(), (uint8_t*)_serialNumber.c_str());
+
 	// Number of history entries
     // tlv.encode(0x06, {0xFB, 0x0A});
 	ui16_to_ui8 memoryUsed;
     memoryUsed.ui16 = _entries.size();
-	
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY, 2, memoryUsed.ui8); 
-	
-	// Number of rolled over index    
+
+	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY, 2, memoryUsed.ui8);
+
+	// Number of rolled over index
     // tlv.encode(0x07, {0x0C, 0x10, 0x00, 0x00});
 	ui32_to_ui8 rolledOverIndex;
 	if (_entries.size() == _entries.capacity) {
@@ -268,7 +268,7 @@ String HAPFakegatoScheduleEnergy::buildScheduleString(){
 	} else {
 		rolledOverIndex.ui32 = 0;
 	}
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_ROLLED_OVER_INDEX, 4, rolledOverIndex.ui8); 
+	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_ROLLED_OVER_INDEX, 4, rolledOverIndex.ui8);
 
     tlv.encode(0x0B, {0x00, 0x00});
     tlv.encode(0x05, {0x00});
@@ -287,12 +287,12 @@ String HAPFakegatoScheduleEnergy::buildScheduleString(){
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS, dataSize, data);
 
     // Days
-    // tlv.encode(0x46, {0x05, 0x15, 0x1C, 0x2C, 0x9F, 0x24, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});	
+    // tlv.encode(0x46, {0x05, 0x15, 0x1C, 0x2C, 0x9F, 0x24, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
 	uint8_t daysHex[84];
 	memset(daysHex, 0, 84);
 
 	uint32_t daysNo = _days.daysnumber();
-	daysHex[0] = 0x05;  // ?? 
+	daysHex[0] = 0x05;  // ??
 	daysHex[1] = 0x15;  // ??
 	daysHex[2] = 0x1C;	// ??
 	daysHex[3] = 0x2C;	// ??
@@ -303,10 +303,10 @@ String HAPFakegatoScheduleEnergy::buildScheduleString(){
 
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS, 84, daysHex);
 
-    // Commands			 						
+    // Commands
     // tlv.encode(0x44, {0x05, 0x0C, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
-	// 						    |	 
-	//						    +-> 0x0C = OFF -- 0xOD = ON 
+	// 						    |
+	//						    +-> 0x0C = OFF -- 0xOD = ON
 	if (_timers.isEnabled()) {
 		tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE, {0x05, 0x0D, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
 	} else {
@@ -314,11 +314,11 @@ String HAPFakegatoScheduleEnergy::buildScheduleString(){
 	}
 
     // ??
-    tlv.encode(0x47, {0x05, 0x73, 0x1B, 0x45, 0x1C, 0xDF, 0x1C, 0xB8, 0x1D, 0xB4, 0x00, 0x00, 0x00, 0x3C, 0x00, 0x00, 0x00});	
+    tlv.encode(0x47, {0x05, 0x73, 0x1B, 0x45, 0x1C, 0xDF, 0x1C, 0xB8, 0x1D, 0xB4, 0x00, 0x00, 0x00, 0x3C, 0x00, 0x00, 0x00});
     tlv.encode(0x48, {0x05, 0x00, 0x00, 0x00, 0x00, 0x00});
     tlv.encode(0x4A, {0x05, 0x00, 0x00, 0x00, 0x00, 0x00});
     tlv.encode(0x1A, {0x00, 0x00, 0x00, 0x00});
-    
+
     // Status LED
     // tlv.encode(0x60, {0x64});
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED, 1, _statusLED);
@@ -330,37 +330,37 @@ String HAPFakegatoScheduleEnergy::buildScheduleString(){
 		secsLastAct.ui32 = _callbackGetTimestampLastActivity() - HAPTime::refTime();
 	} else {
 		secsLastAct.ui32 = 0;
-	}    
+	}
 	tlv.encode(0xD0, 4, secsLastAct.ui8); // offset ?
 
-#if HAP_DEBUG_FAKEGATO_SCHEDULE	
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
 	// HAPHelper::array_print("secsLastAct", secsLastAct.ui8, 4);
 #endif
 
     //  EVE Time
 	//tlv.encode(0x9B, {0xFB, 0x2C, 0x19, 0x00}); // offset ?
-	ui32_to_ui8 secs;	
+	ui32_to_ui8 secs;
     secs.ui32 = (timestampLastEntry() - HAPTime::refTime());
 	tlv.encode(0x9B, 4, secs.ui8); // offset ?
 
-#if HAP_DEBUG_FAKEGATO_SCHEDULE	
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
 	// HAPHelper::array_print("secs", secs.ui8, 4);
 #endif
-    
+
     // ending bytes?
     // tlv.encode(0xD2, {});
     uint8_t endBytes[2] = {0xD2, 0x00};
 
-    size_t decodedLen = 0;	
+    size_t decodedLen = 0;
 	uint8_t out[tlv.size() + 2];
 
 	tlv.decode(out, &decodedLen);
-    
+
     // attach endingBytes
     memcpy(out + decodedLen, endBytes, 2);
     decodedLen = decodedLen + 2;
 
-#if HAP_DEBUG_FAKEGATO_SCHEDULE	
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
     HAPHelper::array_print("tlv", out, decodedLen);
 #endif
 

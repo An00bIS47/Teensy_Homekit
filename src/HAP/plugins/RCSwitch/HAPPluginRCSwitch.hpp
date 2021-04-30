@@ -5,7 +5,7 @@
 //  Created on: 20.12.2019
 //      Author: michael
 //
-// 
+//
 
 #ifndef HAPPLUGINRCSWITCH_HPP_
 #define HAPPLUGINRCSWITCH_HPP_
@@ -41,11 +41,11 @@ public:
 	bool begin();
 
 	HAPAccessory* initAccessory() override;
-	
+
 	void setValue(int iid, String oldValue, String newValue);
-	
+
 	void identify(bool oldValue, bool newValue);
-    void handleImpl(bool forced = false);	
+    void handleImpl(bool forced = false);
 
 #if HAP_ENABLE_WEBSERVER
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
@@ -55,18 +55,18 @@ public:
 
 
 	HAPConfigurationPlugin* setDefaults() override;
-	void internalConfigToJson(Print& prt); 	
+	void internalConfigToJson(Print& prt);
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
 
 
-	
+
     // void handleRoot(HTTPRequest * req, HTTPResponse * res);
 
 
 #if HAP_ENABLE_WEBSERVER
 	std::vector<HAPWebServerPluginNode*> getResourceNodes();
-	
-	void handleHTTPGet(HTTPRequest * req, HTTPResponse * res);	
+
+	void handleHTTPGet(HTTPRequest * req, HTTPResponse * res);
 	void handleHTTPGetKeyProcessor(const String& key, HTTPResponse * res);
 
 	void handleHTTPPost(HTTPRequest * req, HTTPResponse * res);
@@ -74,7 +74,7 @@ public:
 #endif
 
 
-    void sendDeviceCallback(uint8_t houseAddress_, uint8_t deviceAddress_, bool on_);    
+    void sendDeviceCallback(uint8_t houseAddress_, uint8_t deviceAddress_, bool on_);
 
 
     static void prependZeros(char *dest, String src, uint8_t width);
@@ -106,4 +106,4 @@ private:
 
 REGISTER_PLUGIN(HAPPluginRCSwitch)
 
-#endif /* HAPPLUGINRCSWITCH_HPP_ */ 
+#endif /* HAPPLUGINRCSWITCH_HPP_ */

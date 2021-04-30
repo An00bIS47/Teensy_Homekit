@@ -30,12 +30,12 @@ public:
     HAPPluginKNXDeviceWeather(uint8_t id_, char name[], bool enableFakegato, uint16_t koTemperature, uint16_t koHumidity, uint16_t koAirPressure, bool useHumidityDPT9 = false);
     ~HAPPluginKNXDeviceWeather();
 
-    HAPAccessory* initAccessory() override;    
-	
+    HAPAccessory* initAccessory() override;
+
     void handle(bool forced) override;
-    
+
     void identify(bool oldValue, bool newValue);
-    
+
     void setEventManager(EventManager* eventManager);
     void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
@@ -51,16 +51,16 @@ public:
 		return _pressureAverage.getAverage();
 	}
 
-protected:    
-    
+protected:
+
     // Default 0
     // if != 0: sensor is available
     uint16_t                _koTemperature;
-    uint16_t                _koHumidity;    
+    uint16_t                _koHumidity;
     uint16_t                _koAirPressure;
 
     bool                    _useHumdityDPT9;
-   
+
     HAPCharacteristicT<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
@@ -78,15 +78,15 @@ protected:
 	void changedTemperature(float oldValue, float newValue);
 	void changedHumidity(float oldValue, float newValue);
 	void changedPressure(uint16_t oldValue, uint16_t newValue);
-    
+
 
     void setTemperatureFromKNXCallback(GroupObject& go);
     void setHumidityFromKNXCallback(GroupObject& go);
     void setPressureFromKNXCallback(GroupObject& go);
 
-    
 
-    bool fakeGatoCallback() override;  
+
+    bool fakeGatoCallback() override;
 };
 
 #endif /* HAPPLUGINKNXDEVICEWEATHER_HPP_ */

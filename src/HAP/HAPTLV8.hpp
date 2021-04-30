@@ -20,7 +20,7 @@ struct TLV8Entry {
 
 	TLV8Entry* next;
 
-	~TLV8Entry(){	
+	~TLV8Entry(){
 		delete[] value;
 	};
 };
@@ -31,7 +31,7 @@ public:
 	TLV8();
 	~TLV8();
 
-	void addSeperator();	
+	void addSeperator();
 	TLV8Entry* searchType(TLV8Entry* ptr, uint8_t type);
 	TLV8Entry* searchId(TLV8Entry* ptr, uint8_t id);
 
@@ -44,7 +44,7 @@ public:
 
 	bool encode(uint8_t type, const std::initializer_list<uint8_t> data);
 
-	
+
 	// uint8_t* decode() __attribute__ ((deprecated));
 	// uint8_t* decode(uint8_t type) __attribute__ ((deprecated));
 

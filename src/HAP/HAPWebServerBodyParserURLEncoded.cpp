@@ -10,18 +10,18 @@
 #include "HAPWebServerBodyParserURLEncoded.hpp"
 
 /** HTTP Query parameters, as key-value pairs */
-  
+
 
 std::vector<std::pair<std::string, std::string>> HAPWebServerBodyParserURLEncoded::processAndParse(HTTPRequest* req){
 	uint8_t buffer[256];
 	std::vector<std::pair<std::string, std::string>> keyValues;
-	
+
 	std::string key = "";
 	std::string value = "";
 	bool keyFound = false;
 
 	do {
-		size_t readBytes = req->readBytes(buffer, 256);				
+		size_t readBytes = req->readBytes(buffer, 256);
 		for (int i = 0; i < readBytes; i++){
 			if ( buffer[i] == '=' ) {
 				keyFound = true;
@@ -30,7 +30,7 @@ std::vector<std::pair<std::string, std::string>> HAPWebServerBodyParserURLEncode
 				// Serial.print(key.c_str());
 				// Serial.print(" = ");
 				// Serial.println(value.c_str());
-				
+
 				std::pair<std::string, std::string> param;
 				param.first = urlDecode(key);
 				if (value.length() > 0) {
@@ -38,8 +38,8 @@ std::vector<std::pair<std::string, std::string>> HAPWebServerBodyParserURLEncode
 				} else {
 					param.second = "";
 				}
-					
-				keyValues.push_back(param);				
+
+				keyValues.push_back(param);
 
 				key = "";
 				value = "";
@@ -65,7 +65,7 @@ std::vector<std::pair<std::string, std::string>> HAPWebServerBodyParserURLEncode
 			param.second = "";
 		}
 
-		keyValues.push_back(param);	
+		keyValues.push_back(param);
 
 		// Serial.print(key.c_str());
 		// Serial.print(" = ");

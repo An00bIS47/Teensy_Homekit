@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegatoFactory.hpp
 // Homekit
 //
@@ -20,8 +20,8 @@ public:
     void handle(bool forced = false);
     void registerFakeGato(HAPFakegato* fakegato, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL);
 
-private:    
-    std::vector<HAPFakegato*> _fakegatos;    
+private:
+    std::vector<HAPFakegato*> _fakegatos;
 };
 
 #endif /* HAPFakegatoFactory_HPP_ */

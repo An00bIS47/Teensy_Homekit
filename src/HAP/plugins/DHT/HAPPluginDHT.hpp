@@ -15,11 +15,11 @@
 //  | | | |
 // 3v H - GND
 //    H | = Not connected
-//    H => Resistor: 10k 
-//    H 
+//    H => Resistor: 10k
+//    H
 //    |
-//    15 
-// 
+//    15
+//
 
 
 #ifndef HAPPLUGINDHT_HPP_
@@ -34,9 +34,9 @@
 #include "HAPFakegatoAverage.hpp"
 #include "HAPGlobals.hpp"
 
-// 
+//
 // Set these values in the HAPGlobals.hpp
-// 
+//
 #ifndef HAP_PLUGIN_DHT_USE_DUMMY
 #define HAP_PLUGIN_DHT_USE_DUMMY 	0
 #endif
@@ -72,8 +72,8 @@ public:
 	void changedHumidity(float oldValue, float newValue);
 
 	void identify(bool oldValue, bool newValue);
-    void handleImpl(bool forced = false);	
-	
+    void handleImpl(bool forced = false);
+
 	float readHumidity();
 	float readTemperature();
 
@@ -85,11 +85,11 @@ public:
 		return _humidityAverage.getAverage();
 	}
 
-#if HAP_ENABLE_WEBSERVER		
+#if HAP_ENABLE_WEBSERVER
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 #endif
 
-	HAPConfigurationPlugin* setDefaults();		
+	HAPConfigurationPlugin* setDefaults();
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
 
 private:
@@ -115,4 +115,4 @@ private:
 
 REGISTER_PLUGIN(HAPPluginDHT)
 
-#endif /* HAPPLUGINS_HPP_ */ 
+#endif /* HAPPLUGINS_HPP_ */

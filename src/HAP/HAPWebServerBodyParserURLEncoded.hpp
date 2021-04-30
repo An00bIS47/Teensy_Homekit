@@ -21,7 +21,7 @@ using namespace httpsserver;
 
 class HAPWebServerBodyParserURLEncoded {
 
-public:    
+public:
     static std::vector<std::pair<std::string, std::string>> processAndParse(HTTPRequest* req);
 private:
 

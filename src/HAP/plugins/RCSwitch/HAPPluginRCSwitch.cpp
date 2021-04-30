@@ -11,7 +11,7 @@
 #include "HAPWebServerBodyParserMultipart.hpp"
 #include "HAPWebServerBodyParserURLEncoded.hpp"
 
-#if !HAP_WEBSERVER_USE_SPIFFS  
+#if !HAP_WEBSERVER_USE_SPIFFS
 #include "HAPWebServerFiles.hpp"
 #endif
 
@@ -30,7 +30,7 @@
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginRCSwitch::HAPPluginRCSwitch(){
     _type           = HAP_PLUGIN_TYPE_ACCESSORY;
@@ -54,7 +54,7 @@ HAPPluginRCSwitch::HAPPluginRCSwitch(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginRCSwitch::~HAPPluginRCSwitch(){
     if (_configInternal != nullptr) delete _configInternal;
@@ -62,11 +62,11 @@ HAPPluginRCSwitch::~HAPPluginRCSwitch(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPPluginRCSwitch::begin(){
 
-    // Transmitter is connected to Arduino Pin #10  
+    // Transmitter is connected to Arduino Pin #10
     _rcSwitch.enableTransmit(HAP_PLUGIN_RCSWITCH_PIN);
 
     return true;
@@ -81,7 +81,7 @@ String HAPPluginRCSwitch::uint32ToBitString(uint32_t dec){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPAccessory* HAPPluginRCSwitch::initAccessory() {
 	LogD("\nInitializing plugin: HAPPluginRCSwitch ...", false);
@@ -100,11 +100,11 @@ HAPAccessory* HAPPluginRCSwitch::initAccessory() {
     // );
     // _devices.push_back(newDevice);
 
-    for (auto& dev : _devices){           
+    for (auto& dev : _devices){
         dev->setFakeGatoFactory(_fakeGatoFactory);
         dev->setEventManager(_eventManager);
-        
-        auto callbackSend = std::bind(&HAPPluginRCSwitch::sendDeviceCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);        
+
+        auto callbackSend = std::bind(&HAPPluginRCSwitch::sendDeviceCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         dev->setRCSwitchSendCallback(callbackSend);
 
         _accessorySet->addAccessory(dev->initAccessory());
@@ -114,31 +114,31 @@ HAPAccessory* HAPPluginRCSwitch::initAccessory() {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginRCSwitch::setValue(int iid, String oldValue, String newValue){
 
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginRCSwitch::identify(bool oldValue, bool newValue){
 
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginRCSwitch::handleImpl(bool forced){
 
-}	
+}
 
 
 #if HAP_ENABLE_WEBSERVER
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject object){
 
@@ -175,7 +175,7 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject ob
     // plugin._name.devices array
     uint8_t count = 0;
     for( const auto& value : object["devices"].as<JsonArray>() ) {
-        
+
         // plugin._name.devices.count.house
         if (!value.containsKey("houseAddress") ) {
             result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".houseAddress is required";
@@ -194,28 +194,28 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject ob
         if (value.containsKey("deviceAddress") && !value["deviceAddress"].is<uint8_t>()) {
             result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".deviceAddress is not an integer";
             return result;
-        }    
+        }
 
         // optional
         // plugin._name.devices.count.name
         if (value.containsKey("name") && !value["name"].is<const char*>()) {
             result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".name is not a string";
             return result;
-        }   
+        }
 
         // plugin._name.devices.count.name - length
         if (value.containsKey("name")) {
             if (strlen(value["name"]) + 1 > HAP_STRING_LENGTH_MAX) {
                 result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".name is too long";
                 return result;
-            } 
-        }   
+            }
+        }
 
         // plugin._name.devices.count.timer
         if (value.containsKey("timer") && !value["timer"].is<JsonObject>() && !value["timer"].isNull()) {
             result.reason = "plugins." + String(_config->name) + ".devices.timer is not an object";
             return result;
-        }        
+        }
 
         if (value["timer"].containsKey("enabled") && !value["timer"]["enabled"].is<bool>()) {
             result.reason = "plugins." + String(_config->name) + ".devices.timer.enabled is not a bool";
@@ -225,7 +225,7 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject ob
         if (value["timer"].containsKey("days") && !value["timer"]["days"].is<uint32_t>()) {
             result.reason = "plugins." + String(_config->name) + ".devices.timer.enabled is not an uint32_t";
             return result;
-        }        
+        }
 
         if (value["timer"].containsKey("programs") && !value["timer"]["programs"].is<String>()) {
             result.reason = "plugins." + String(_config->name) + ".devices.timer.enabled is not a string";
@@ -261,61 +261,61 @@ JsonObject HAPPluginRCSwitch::getConfigImpl(){
         JsonObject device_ = devices.createNestedObject();
         device_["houseAddress"]   = dev->houseAddress;
         device_["deviceAddress"]  = dev->deviceAddress;
-        device_["name"]    = dev->name;     
+        device_["name"]    = dev->name;
 
         // get schedules
         if (!dev->scheduleToJson().isNull()){
-            device_["timer"] = dev->scheduleToJson();           
-        }        
+            device_["timer"] = dev->scheduleToJson();
+        }
     }
 
-    
+
 #if HAP_DEBUG_CONFIG
     serializeJsonPretty(doc, Serial);
     Serial.println();
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32)	
+#if defined(ARDUINO_ARCH_ESP32)
 	doc.shrinkToFit();
 #endif
     return doc.as<JsonObject>();
 }
 
 void HAPPluginRCSwitch::setConfigImpl(JsonObject root){
-#if HAP_DEBUG_RCSWITCH   
+#if HAP_DEBUG_RCSWITCH
     int count = 0;
 #endif
 
 
-    if (root.containsKey("devices")){        
+    if (root.containsKey("devices")){
         for (JsonObject dev : root["devices"].as<JsonArray>()) {
 
 #if HAP_DEBUG_RCSWITCH
-            LogD(" -- device " + String(count) + ": house "     + dev["houseAddress"].as<String>()   , true);                    
-            LogD(" -- device " + String(count) + ": device "    + dev["deviceAddress"].as<String>()        , true);            
-            LogD(" -- device " + String(count) + ": name "      + dev["name"].as<String>()      , true);                        
+            LogD(" -- device " + String(count) + ": house "     + dev["houseAddress"].as<String>()   , true);
+            LogD(" -- device " + String(count) + ": device "    + dev["deviceAddress"].as<String>()        , true);
+            LogD(" -- device " + String(count) + ": name "      + dev["name"].as<String>()      , true);
 
             count++;
 #endif
-            
+
             HAPPluginRCSwitchDevice* newDevice = new HAPPluginRCSwitchDevice(
                 dev["houseAddress"].as<uint8_t>(),
                 dev["deviceAddress"].as<uint8_t>(),
                 dev["name"].as<String>()
             );
-            
+
             // set schedules
-            if (dev.containsKey("timer") && !dev["timer"].isNull()) {                
-                newDevice->scheduleFromJson(dev);      
-            }            
+            if (dev.containsKey("timer") && !dev["timer"].isNull()) {
+                newDevice->scheduleFromJson(dev);
+            }
 
             int index = indexOfDevice(newDevice);
             if ( index == -1 ){
-                _devices.push_back(newDevice);                                
+                _devices.push_back(newDevice);
             } else {
                 _devices[index] = newDevice;
-            }         
-        }        
+            }
+        }
     }
 }
 
@@ -324,11 +324,11 @@ void HAPPluginRCSwitch::setConfigImpl(JsonObject root){
 int HAPPluginRCSwitch::indexOfDevice(HAPPluginRCSwitchDevice* device){
     // Check if element 22 exists in vector
 	std::vector<HAPPluginRCSwitchDevice*>::iterator it = std::find(_devices.begin(), _devices.end(), device);
- 
+
 	if (it != _devices.end())
-	{		
+	{
 		// Get index of element from iterator
-		return std::distance(_devices.begin(), it);		
+		return std::distance(_devices.begin(), it);
 	} else {
         return -1;
     }
@@ -343,11 +343,11 @@ void HAPPluginRCSwitch::prependZeros(char *dest, String src, uint8_t width) {
     } else {
         sprintf(dest, "%0*d%s", (int) (width - len), 0, src.c_str());
     }
-    
+
 }
 
 void HAPPluginRCSwitch::sendDeviceCallback(uint8_t houseAddress_, uint8_t deviceAddress_, bool on_){
-    
+
     char houseCode[6];
     char deviceCode[6];
 
@@ -367,13 +367,13 @@ void HAPPluginRCSwitch::sendDeviceCallback(uint8_t houseAddress_, uint8_t device
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateName(const char* name){
     HAPConfigurationValidationResult result;
     result.valid = true;
 
-    if (name == 0) {                    
+    if (name == 0) {
         result.reason = "The length of the name is 0";
         result.valid = false;
     }
@@ -382,7 +382,7 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateName(const char* nam
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateHouseAddress(const char* houseAddress){
     HAPConfigurationValidationResult result;
@@ -408,7 +408,7 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateHouseAddress(const c
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationValidationResult HAPPluginRCSwitch::validateDeviceAddress(const char* deviceAddress){
     HAPConfigurationValidationResult result;
@@ -430,23 +430,23 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateDeviceAddress(const 
         }
     }
 
-    
+
     return result;
 }
 
 
 #if HAP_ENABLE_WEBSERVER
 
-void HAPPluginRCSwitch::handleHTTPGet(HTTPRequest * req, HTTPResponse * res){        
-    // template processing    
+void HAPPluginRCSwitch::handleHTTPGet(HTTPRequest * req, HTTPResponse * res){
+    // template processing
     auto callback = std::bind(&HAPPluginRCSwitch::handleHTTPGetKeyProcessor, this, std::placeholders::_1, std::placeholders::_2);
-    
-    
-#if HAP_WEBSERVER_USE_SPIFFS        
+
+
+#if HAP_WEBSERVER_USE_SPIFFS
     HAPWebServerTemplateProcessor::processAndSend(res, "/index.html", callback);
 #else
     HAPWebServerTemplateProcessor::processAndSendEmbedded(res, html_template_index_start, html_template_index_end, callback);
-#endif  
+#endif
 
 }
 
@@ -456,13 +456,13 @@ void HAPPluginRCSwitch::handleHTTPGetKeyProcessor(const String& key, HTTPRespons
         res->print("Plugins - " + String(_config->name));
     } else if (key == "VAR_NAVIGATION") {
         res->print(HAPWebServer::buildNavigation());
-    } else if (key == "VAR_CONTENT") {        
+    } else if (key == "VAR_CONTENT") {
         res->print("<div class=\"pure-u-1 pure-u-md-1\"><p>Paired Devices:</p>");
         res->print("<table class=\"pure-table pure-table-horizontal\">");
         res->print("<thead> <tr> <th>Name</th> <th>House Code</th> <th>Device Code</th> </tr> </thead>");
         res->print("<tbody>");
         res->print("");
-        for (auto& dev : _devices){ 
+        for (auto& dev : _devices){
 
             char houseCode[6];
             char deviceCode[6];
@@ -475,12 +475,12 @@ void HAPPluginRCSwitch::handleHTTPGetKeyProcessor(const String& key, HTTPRespons
         res->print("</tbody>");
         res->print("</table>");
         res->print("</div>");
-        
+
         res->print("<br>");
         res->print("<br>");
 
 
-        // Add new device        
+        // Add new device
         res->print("<div class=\"pure-u-1 pure-u-md-1\">");
         res->print("<form class=\"pure-form\" action=\"/plugin/rcswitch\" method=\"POST\">");
         res->print(" <fieldset>");
@@ -498,7 +498,7 @@ void HAPPluginRCSwitch::handleHTTPGetKeyProcessor(const String& key, HTTPRespons
     }
 }
 
-void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){    
+void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
 
 
     if (req->getHeader("Content-Type") == "application/x-www-form-urlencoded") {
@@ -508,10 +508,10 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
         if (_newDevice == nullptr) {
             _newDevice = new HAPPluginRCSwitchDevice();
         }
-        
+
         HAPConfigurationValidationResult result;
         result.valid = true;
-        
+
         for (auto param : parameters) {
 
             if (param.first == "name") {
@@ -522,7 +522,7 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
                 } else {
                     break;
                 }
-                
+
             } else if (param.first == "deviceAddress") {
                 result = validateDeviceAddress(param.second.c_str());
 
@@ -530,11 +530,11 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
                     _newDevice->deviceAddress = strtol(param.second.c_str(), (char**) NULL, 2);
                 } else {
                     break;
-                }              
-                
+                }
+
             } else if (param.first == "houseAddress") {
                 result = validateHouseAddress(param.second.c_str());
-                
+
                 if (result.valid){
                     _newDevice->houseAddress = strtol(param.second.c_str(), (char**) NULL, 2);
                 } else {
@@ -551,16 +551,16 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
 
                 _newDevice->setFakeGatoFactory(_fakeGatoFactory);
                 _newDevice->setEventManager(_eventManager);
-                
-                auto callbackSend = std::bind(&HAPPluginRCSwitch::sendDeviceCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);        
+
+                auto callbackSend = std::bind(&HAPPluginRCSwitch::sendDeviceCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
                 _newDevice->setRCSwitchSendCallback(callbackSend);
 
                 _accessorySet->addAccessory(_newDevice->initAccessory());
-                
+
                 _devices.push_back(_newDevice);
 
-                struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");							
-                _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);        
+                struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
+                _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);
             }
 
         } else {
@@ -572,8 +572,8 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
         auto callbackFormField = std::bind(&HAPPluginRCSwitch::handleHTTPFormField, this, std::placeholders::_1, std::placeholders::_2);
         HAPWebServerBodyParserMultipart parser;
         parser.processAndParse(req, callbackFormField);
-        
-        if (_newDevice != nullptr) {                    
+
+        if (_newDevice != nullptr) {
 
             std::vector<HAPPluginRCSwitchDevice*>::iterator it = find(_devices.begin(), _devices.end(), _newDevice);
             if(it == _devices.end()) {
@@ -582,36 +582,36 @@ void HAPPluginRCSwitch::handleHTTPPost(HTTPRequest * req, HTTPResponse * res){
 
                 _newDevice->setFakeGatoFactory(_fakeGatoFactory);
                 _newDevice->setEventManager(_eventManager);
-                
-                auto callbackSend = std::bind(&HAPPluginRCSwitch::sendDeviceCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);        
+
+                auto callbackSend = std::bind(&HAPPluginRCSwitch::sendDeviceCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
                 _newDevice->setRCSwitchSendCallback(callbackSend);
 
                 _accessorySet->addAccessory(_newDevice->initAccessory());
-                
+
                 _devices.push_back(_newDevice);
 
             }
-    
+
             _newDevice = nullptr;
 
-            struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");							
-            _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);                    
+            struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
+            _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);
         }
     }
 
     auto callbackGet = std::bind(&HAPPluginRCSwitch::handleHTTPGetKeyProcessor, this, std::placeholders::_1, std::placeholders::_2);
-#if HAP_WEBSERVER_USE_SPIFFS        
-    // template processing    
+#if HAP_WEBSERVER_USE_SPIFFS
+    // template processing
     HAPWebServerTemplateProcessor::processAndSend(res, "/index.html", callbackGet);
 #else
-    
-    HAPWebServerTemplateProcessor::processAndSendEmbedded(res, html_template_index_start, html_template_index_end, callbackGet);
-#endif 
 
-    
+    HAPWebServerTemplateProcessor::processAndSendEmbedded(res, html_template_index_start, html_template_index_end, callbackGet);
+#endif
+
+
 }
 
-void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const std::string& fieldValue) { 
+void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const std::string& fieldValue) {
 
     if (_newDevice == nullptr) {
         _newDevice = new HAPPluginRCSwitchDevice();
@@ -619,7 +619,7 @@ void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const 
 
     HAPConfigurationValidationResult result;
     result.valid = true;
-    
+
     if (fieldName == "name") {
         result = validateName(fieldValue.c_str());
         if (result.valid) {
@@ -627,8 +627,8 @@ void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const 
         } else {
             _newDevice = nullptr;
             return;
-        }            
-    } else if (fieldName == "houseAddress") {  
+        }
+    } else if (fieldName == "houseAddress") {
 
         result = validateName(fieldValue.c_str());
         if (result.valid) {
@@ -640,7 +640,7 @@ void HAPPluginRCSwitch::handleHTTPFormField(const std::string& fieldName, const 
     } else if (fieldName == "deviceAddress") {
         result = validateName(fieldValue.c_str());
         if (result.valid) {
-            _newDevice->deviceAddress = strtol(fieldValue.c_str(), (char**) NULL, 2);        
+            _newDevice->deviceAddress = strtol(fieldValue.c_str(), (char**) NULL, 2);
         } else {
             _newDevice = nullptr;
             return;
@@ -654,12 +654,12 @@ std::vector<HAPWebServerPluginNode*> HAPPluginRCSwitch::getResourceNodes(){
     std::vector<HAPWebServerPluginNode*> vector;
 
     auto callbackGet = std::bind(&HAPPluginRCSwitch::handleHTTPGet, this, std::placeholders::_1, std::placeholders::_2);
-    HAPWebServerPluginNode* getRequest = new HAPWebServerPluginNode("RCSwitch", "rcswitch", "GET", callbackGet);    
+    HAPWebServerPluginNode* getRequest = new HAPWebServerPluginNode("RCSwitch", "rcswitch", "GET", callbackGet);
     vector.push_back(getRequest);
 
 
     auto callbackPost = std::bind(&HAPPluginRCSwitch::handleHTTPPost, this, std::placeholders::_1, std::placeholders::_2);
-    HAPWebServerPluginNode* postRequest = new HAPWebServerPluginNode("RCSwitch", "rcswitch", "POST", callbackPost);    
+    HAPWebServerPluginNode* postRequest = new HAPWebServerPluginNode("RCSwitch", "rcswitch", "POST", callbackPost);
     vector.push_back(postRequest);
 
     return vector;
@@ -668,42 +668,42 @@ std::vector<HAPWebServerPluginNode*> HAPPluginRCSwitch::getResourceNodes(){
 #endif
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-HAPConfigurationPlugin* HAPPluginRCSwitch::setDefaults(){	
+HAPConfigurationPlugin* HAPPluginRCSwitch::setDefaults(){
 	_config->enabled  = HAP_PLUGIN_USE_RCSWITCH;
-	_config->interval = HAP_PLUGIN_RCSWITCH_INTERVAL;	
+	_config->interval = HAP_PLUGIN_RCSWITCH_INTERVAL;
 	_config->dataPtr = (uint8_t*)_configInternal;
 	_config->dataSize = sizeof(_configInternal);
 	return _config;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginRCSwitch::internalConfigToJson(Print& prt){
 	/*
 		{ >>> is already printed before
 			"mode": 1
 		} >>> will be printed after
-	
+
 	*/
 	// prt.print("\"data\":");
 	prt.print((const char*) _configInternal->data);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginRCSwitch::setConfiguration(HAPConfigurationPlugin* cfg){
-	_config = cfg;	
+	_config = cfg;
 	_configInternal = (HAPPluginRCSwitchConfig*)_config->dataPtr;
 	_config->setToJsonCallback(std::bind(&HAPPluginRCSwitch::internalConfigToJson, this, std::placeholders::_1));
 
 	// Serial.print("BME280 interval:");
 	// Serial.println(_config->interval);
 	// Serial.print("BME280 dataSize:");
-	// Serial.println(_config->dataSize);	
+	// Serial.println(_config->dataSize);
 	// Serial.print("BME280 mode:");
-	// Serial.println(_configInternal->mode);	
+	// Serial.println(_configInternal->mode);
 }

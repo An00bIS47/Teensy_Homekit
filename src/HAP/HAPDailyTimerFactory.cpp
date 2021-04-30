@@ -8,7 +8,7 @@
 
 
 #include "HAPDailyTimerFactory.hpp"
-  
+
 
 HAPDailyTimerFactory::HAPDailyTimerFactory(){
 	_isEnabled = false;
@@ -47,7 +47,7 @@ bool HAPDailyTimerFactory::isEnabled(){
 void HAPDailyTimerFactory::addTimer(HAPDailyTimer dailyTimer){
 	_timers.push_back(dailyTimer);
 }
-    
+
 
 
 

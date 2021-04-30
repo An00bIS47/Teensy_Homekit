@@ -1,4 +1,4 @@
-// 
+//
 // HAPSRP.cpp
 // Homekit
 //
@@ -38,18 +38,18 @@ HAPSRP::HAPSRP(){
 }
 
 HAPSRP::~HAPSRP(){
-	clear(); 
+	clear();
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::clear(){
-	
+
 	if (!_isInitialized) return;
-	mbedtls_entropy_free(&_entropy_ctx);				
+	mbedtls_entropy_free(&_entropy_ctx);
 	mbedtls_ctr_drbg_free(&_ctr_drbg_ctx);
-	
+
 
 	if (_RR != nullptr) {
 		mbedtls_mpi_free(_RR);
@@ -67,13 +67,13 @@ void HAPSRP::clear(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::begin(const char* username){
 	initRandom();
 
 	if (data == NULL) {
-		data = new HAPSRPData();	
+		data = new HAPSRPData();
 	} else {
 		data->clear();
 	}
@@ -83,17 +83,17 @@ void HAPSRP::begin(const char* username){
 
 /**
  * @brief Creates SRP Key Pair
- * 
+ *
  * bytes_B must be freed !
- * 
- * @param bytes_v 
- * @param len_v 
- * @param bytes_B 
- * @param len_B 
- * @return HAPSRP::KeyPair* 
+ *
+ * @param bytes_v
+ * @param len_v
+ * @param bytes_B
+ * @param len_B
+ * @return HAPSRP::KeyPair*
  */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPSRP::SRPKeyPair* HAPSRP::createKeyPair(SRPSession *session, const uint8_t* bytes_v, int len_v, const uint8_t** bytes_B, int * len_B){
 
@@ -106,7 +106,7 @@ HAPSRP::SRPKeyPair* HAPSRP::createKeyPair(SRPSession *session, const uint8_t* by
 
 	mbedtls_mpi_init(&tmp1);
 	mbedtls_mpi_init(&tmp2);
-	mbedtls_mpi_init(&k);	
+	mbedtls_mpi_init(&k);
 	mbedtls_mpi_init(&v);
 
 	if (mbedtls_mpi_read_binary( &v, bytes_v, len_v )!=0) {
@@ -123,7 +123,7 @@ HAPSRP::SRPKeyPair* HAPSRP::createKeyPair(SRPSession *session, const uint8_t* by
 
 #ifdef SRP_TEST_FIXED_b
 	mbedtls_mpi_read_string(&(keys->b),16,SRP_TEST_FIXED_b_STR);
-#else 
+#else
 	mbedtls_mpi_fill_random( &(keys->b), SRP_BYTES_IN_PRIVKEY,
 					 &mbedtls_ctr_drbg_random,
 					 &_ctr_drbg_ctx );
@@ -152,23 +152,23 @@ HAPSRP::SRPKeyPair* HAPSRP::createKeyPair(SRPSession *session, const uint8_t* by
 		*bytes_B = (uint8_t*) malloc( *len_B );
 
 		if( !*bytes_B ){
-			keys->clear();			
+			keys->clear();
 			mbedtls_mpi_free(&v);
 			mbedtls_mpi_free(&k);
 		}
 		mbedtls_mpi_write_binary( &(keys->B), (uint8_t*)*bytes_B, *len_B );
 	}
-	
+
 	mbedtls_mpi_free(&v);
 	mbedtls_mpi_free(&k);
-		
+
 
 	return keys;
 }
 
 /**
  * @brief Hash 2 bignums
- * 
+ *
  * @param bn 		Output bignum
  * @param alg 		Algorithm to use
  * @param n1 		bignum 1
@@ -176,7 +176,7 @@ HAPSRP::SRPKeyPair* HAPSRP::createKeyPair(SRPSession *session, const uint8_t* by
  * @param do_pad 	Do padding
  */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad)
 {
@@ -191,8 +191,8 @@ void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, 
 		if (kldiff<0) return;
 		nbytes +=kldiff;
 	} else kldiff=0;
-    
-	
+
+
 	uint8_t* bin    = (uint8_t *) malloc( nbytes );
 
     if (!bin)
@@ -213,7 +213,7 @@ void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, 
 
 /**
  * @brief Hash Bignum with salt
- * 
+ *
  * @param bn 		Output bignum
  * @param alg 		Algorithm to use
  * @param n 		Salt
@@ -221,14 +221,14 @@ void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, 
  * @param len_bytes length of bytes
  */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes )
 {
     uint8_t   		buff[ SHA512_DIGEST_LENGTH ];
     int             len_n  = mbedtls_mpi_size(n);
     int             nbytes = len_n + len_bytes;
-    
+
 	uint8_t* bin    = (uint8_t*) malloc( nbytes );
 
     if (!bin)
@@ -242,16 +242,16 @@ void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi * n, 
     // bn = (mbedtls_mpi *) malloc(sizeof(mbedtls_mpi));
     // mbedtls_mpi_init(bn);
     mbedtls_mpi_read_binary( bn, buff, HAPHash::hashLength(alg) );
-    
+
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len )
 {
 	uint8_t ucp_hash[SHA512_DIGEST_LENGTH];
-    
+
 #ifdef SRP_TEST_SHA512
 	HAPHash hash(alg);
     hash.init();
@@ -259,7 +259,7 @@ void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mp
     hash.final( ucp_hash );
 	tutils_array_print("VAR:test sha512",ucp_hash, hash.length());
 #endif
-	
+
 	HAPHash hash(alg);
     hash.init();
     hash.update( username, strlen(username) );
@@ -279,7 +279,7 @@ void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mp
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K )
 {
@@ -287,7 +287,7 @@ void HAPSRP::calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, c
     uint8_t H_g[ SHA512_DIGEST_LENGTH ];
     uint8_t H_I[ SHA512_DIGEST_LENGTH ];
     uint8_t H_xor[ SHA512_DIGEST_LENGTH ];
-    
+
 	HAPHash hash(alg);
 
     int i = 0;
@@ -317,7 +317,7 @@ void HAPSRP::calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, c
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const mbedtls_mpi * A, const uint8_t* M, const uint8_t* K )
 {
@@ -334,7 +334,7 @@ void HAPSRP::calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const m
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::initRandom()
 {
@@ -354,8 +354,8 @@ void HAPSRP::initRandom()
     );
 
 	if (_RR == nullptr ) {
-		_RR = new mbedtls_mpi();	
-	}			
+		_RR = new mbedtls_mpi();
+	}
     mbedtls_mpi_init(_RR);
 
     _isInitialized = true;
@@ -363,7 +363,7 @@ void HAPSRP::initRandom()
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPSRP::SRPSession* HAPSRP::newSession( HAPHashAlgorithm alg, NGType_t ng_type, const char * N_hex, const char * g_hex){
 	if ((unsigned)alg>=(unsigned)SRP_SHA_LAST) return NULL;
@@ -385,7 +385,7 @@ HAPSRP::SRPSession* HAPSRP::newSession( HAPHashAlgorithm alg, NGType_t ng_type, 
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::randomSeed(const uint8_t* random_data, size_t data_length )
 {
@@ -397,9 +397,9 @@ void HAPSRP::randomSeed(const uint8_t* random_data, size_t data_length )
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-void HAPSRP::createSaltedVerificationKey( SRPSession *session, const char * username,                                         
+void HAPSRP::createSaltedVerificationKey( SRPSession *session, const char * username,
                                          const uint8_t * password, int len_password,
                                          const uint8_t ** bytes_s, int * len_s,
                                          const uint8_t ** bytes_v, int * len_v)
@@ -410,7 +410,7 @@ void HAPSRP::createSaltedVerificationKey( SRPSession *session, const char * user
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPSRP::createSaltedVerificationKey1( SRPSession *session, const char * username,
 											const uint8_t * password, int len_password,
@@ -419,7 +419,7 @@ void HAPSRP::createSaltedVerificationKey1( SRPSession *session, const char * use
 {
 
 	*bytes_s = NULL;
-	*bytes_v = NULL;	
+	*bytes_v = NULL;
 
     mbedtls_mpi s;
     mbedtls_mpi v;
@@ -442,11 +442,11 @@ void HAPSRP::createSaltedVerificationKey1( SRPSession *session, const char * use
 #ifdef SRP_TEST_PRINT_SALT
 	tutils_mpi_print ("salt (s)", &s);
 #endif
-	
-	
+
+
     calculate_x( session->algorithm, &x, &s, username, password, len_password );
 
-	
+
     mbedtls_mpi_exp_mod(&v, &(session->ng->g), &x, &(session->ng->N), _RR);
 
 #ifdef SRP_TEST_PRINT_v
@@ -490,7 +490,7 @@ void HAPSRP::createSaltedVerificationKey1( SRPSession *session, const char * use
  * On failure, bytes_B will be set to NULL and len_B will be set to 0
  */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPSRP::SRPVerifier* HAPSRP::newVerifier( SRPSession *session,
                                         const char *username,
@@ -509,10 +509,10 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier( SRPSession *session,
 /* Out: bytes_B, len_B if not using SRPKeyPair keys
  *
  * On failure, bytes_B will be set to NULL and len_B will be set to 0, keys=NULL is OK!
- * bytes_B=NULL is OK 
+ * bytes_B=NULL is OK
  */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
                                         const char *username, bool copy_username,
@@ -528,11 +528,11 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 	}
 
 	if( session == NULL ) {
-#if ARDUINO_ARCH_ESP32        
+#if ARDUINO_ARCH_ESP32
         ESP_LOGE("SRP", "session is null\n");
 #else
         printf("%s - session is null:\n", "SRP");
-#endif        
+#endif
         return NULL;
     }
 
@@ -551,7 +551,7 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
     mbedtls_mpi u;
 	mbedtls_mpi_init(&u);
 
-    mbedtls_mpi S;  
+    mbedtls_mpi S;
     mbedtls_mpi_init(&S);
 
 
@@ -577,8 +577,8 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 			delete ver;
 			ver = 0;
 
-      
-#if ARDUINO_ARCH_ESP32        
+
+#if ARDUINO_ARCH_ESP32
       		ESP_LOGE("SRP", "ver->username is NULL\n");
 #else
       		printf("%s - ver->username is NULL\n", "SRP");
@@ -602,19 +602,19 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 		int temp_keys;
 		if (keys == NULL) {
 			temp_keys = 1;
-      
-#if ARDUINO_ARCH_ESP32        
+
+#if ARDUINO_ARCH_ESP32
         	ESP_LOGE("SRP", "keys is NULL\n");
 #else
         	printf("%s - keys is NULL\n", "SRP");
-#endif 
+#endif
 
 
 			keys = createKeyPair(session, bytes_v, len_v, bytes_B, len_B);
-			if (keys == NULL) {   
+			if (keys == NULL) {
 
 				delete ver;
-				             
+
 				mbedtls_mpi_free(&s);
 				mbedtls_mpi_free(&v);
 				mbedtls_mpi_free(&A);
@@ -626,7 +626,7 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 		} else temp_keys = 0;
 
 
-    	H_nn(&u, session->algorithm, &A, &(keys->B), true); 
+    	H_nn(&u, session->algorithm, &A, &(keys->B), true);
 
 		/* S = (A *(v^u)) ^ b */
 		mbedtls_mpi_exp_mod(&tmp1, &v, &u, &(session->ng->N), _RR);
@@ -658,7 +658,7 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 int HAPSRP::getVerifierIsAuthenticated( HAPSRP::SRPVerifier* ver )
 {
@@ -666,7 +666,7 @@ int HAPSRP::getVerifierIsAuthenticated( HAPSRP::SRPVerifier* ver )
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
 {
@@ -674,7 +674,7 @@ const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const uint8_t* HAPSRP::getVerifierSessionKey( HAPSRP::SRPVerifier* ver, int* key_length )
 {
@@ -684,14 +684,14 @@ const uint8_t* HAPSRP::getVerifierSessionKey( HAPSRP::SRPVerifier* ver, int* key
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 int HAPSRP::getSessionKeyLength( HAPSRP::SRPSession* ses ){
 	return HAPHash::hashLength( ses->algorithm );
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 int HAPSRP::getVerifierSessionKeyLength( HAPSRP::SRPVerifier* ver )
 {
@@ -701,7 +701,7 @@ int HAPSRP::getVerifierSessionKeyLength( HAPSRP::SRPVerifier* ver )
 
 /* user_M,bytes_HAMK are digest generated with session selected hash */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPSRP::verifySession( HAPSRP::SRPVerifier * ver, const uint8_t* user_M, const uint8_t** bytes_HAMK )
 {
@@ -719,7 +719,7 @@ bool HAPSRP::verifySession( HAPSRP::SRPVerifier * ver, const uint8_t* user_M, co
 
 /* return bytes_HAMK which is  digest generated with session selected hash */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 const uint8_t* HAPSRP::getVerifierHAMK( HAPSRP::SRPVerifier * ver) {
 	return ver->H_AMK;
