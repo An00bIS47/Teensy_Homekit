@@ -246,6 +246,7 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
         //       Probably first just a LOG message ?
         //       Therefore a reference to the aid and iid would be needed ...
         LogW("WARNING: Fakegato entry will be overwritten!", true);
+        delete _entries.shift();
     }
 
 #if HAP_DEBUG_FAKEGATO   
