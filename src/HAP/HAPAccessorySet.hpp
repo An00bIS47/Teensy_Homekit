@@ -60,14 +60,17 @@ public:
 		return _configuration->isAdmin(id);
 	}
 
-	void addPairing(const uint8_t* id, const uint8_t* key, bool isAdmin){
-		_configuration->addPairing(id, key, isAdmin);
+	void addPairing(const uint8_t* id, const uint8_t* key){
+		_configuration->addPairing(id, key);
 		_configuration->save();
 	}
 
-	void removePairing(const uint8_t* id){
-		_configuration->removePairing(id);
-		_configuration->save();
+	bool removePairing(const uint8_t* id){
+		if (_configuration->removePairing(id)) {
+			_configuration->save();
+			return true;
+		}	
+		return false;	
 	}
 
 	void removeAllPairings(){

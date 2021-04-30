@@ -145,21 +145,26 @@ public:
         return nullptr;
     }
 
-	void removePairing(const uint8_t* id){
+	bool removePairing(const uint8_t* id){
 		int index = getIndex(id);
 		if (index >= 0) {
 			pairings.erase(pairings.begin() + index);
+			return true;
+		} else {
+			LogE("ERROR: Pairing id not found!", true);
+			HAPHelper::array_print("id", id, HAP_PAIRINGS_ID_LENGTH);
+			return false;
 		}
 	}
 
-    bool addPairing(const uint8_t* id, const uint8_t* key, bool isAdmin){    
+    bool addPairing(const uint8_t* id, const uint8_t* key){    
         bool result = false;
         int index = getIndex(id);
         if (index == -1) {
             struct HAPConfigurationPairingEntry* item = new HAPConfigurationPairingEntry();
             memcpy(item->id, id, HAP_PAIRINGS_ID_LENGTH);
-            memcpy(item->key, key, HAP_PAIRINGS_LTPK_LENGTH);
-            item->isAdmin = isAdmin;
+            memcpy(item->key, key, HAP_PAIRINGS_LTPK_LENGTH);			
+            item->isAdmin = (pairings.size() == 0);	
             
 #if HAP_DEBUG_PAIRINGS		
             HAPHelper::array_print("ID:", item->id, HAP_PAIRINGS_ID_LENGTH);	
@@ -172,7 +177,7 @@ public:
             if (memcmp(pairings[index]->key, key, HAP_PAIRINGS_LTPK_LENGTH) == 0) {
                 result = true;
             }
-            pairings[index]->isAdmin = isAdmin;		
+            pairings[index]->isAdmin = (pairings.size() == 0);		
         }
 
         return result;	

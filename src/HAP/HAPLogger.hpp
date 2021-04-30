@@ -29,6 +29,7 @@
 #define COLOR_DEBUG		COLOR_CYAN
 #define COLOR_VERBOSE	COLOR_MAGENTA
 
+#if HAP_DEBUG
 
 #define Heap(X, Y)		HAPLogger::logFreeHeap(X, Y)
 #define Log(X, Y, Z) 	HAPLogger::colorPrint(X,Y,Z)
@@ -41,6 +42,19 @@
 #define LogW(Y, Z) HAPLogger::logWarning(Y,Z)
 #define LogD(Y, Z) HAPLogger::logDebug(Y,Z)
 #define LogFlush() HAPLogger::flush()
+#else
+#define Heap(X, Y) 		(0)
+#define Log(X, Y, Z) 	(0)
+
+#define LogOK(X)		(0)
+
+#define LogI(Y, Z) 		(0)
+#define LogE(Y, Z) 		(0)
+#define LogV(Y, Z) 		(0)
+#define LogW(Y, Z) 		(0)
+#define LogD(Y, Z) 		(0)
+#endif
+
 
 #define CheckError(X) HAPLogger::checkError(X)
 #define CheckErrorOk(X) HAPLogger::checkErrorOk(X)

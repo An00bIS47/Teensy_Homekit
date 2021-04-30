@@ -173,12 +173,16 @@ public:
     }
 
 
-    uint8_t getMaxEntryValueLength(){
+    uint8_t getBitmaskForAll(){
         uint8_t bitmask = 0;
         for (uint8_t i=0; i < _signatures.size(); i++){
             bitmask += (1 << i);
-        }        
-        return getEntryValueLength(bitmask);
+        }  
+        return bitmask;
+    }
+
+    uint8_t getMaxEntryValueLength(){             
+        return getEntryValueLength(getBitmaskForAll());
     }
 
     uint8_t getEntryValueLength(uint8_t bitmask){
