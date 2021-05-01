@@ -327,19 +327,19 @@ uint32_t HAPPluginKNXDeviceOutlet::getTimestampLastActivity(){
     return _timestampLastActivity;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-JsonObject HAPPluginKNXDeviceOutlet::scheduleToJson(){
-    return _fakegato->scheduleToJson();
-}
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM
+// #endif
+// JsonObject HAPPluginKNXDeviceOutlet::scheduleToJson(){
+//     return _fakegato->scheduleToJson();
+// }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPPluginKNXDeviceOutlet::scheduleFromJson(JsonObject &root){
-    _fakegato->scheduleFromJson(root);
-}
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM
+// #endif
+// void HAPPluginKNXDeviceOutlet::scheduleFromJson(JsonObject &root){
+//     _fakegato->scheduleFromJson(root);
+// }
 
 
 #if defined(ARDUINO_TEENSY41)

@@ -32,6 +32,9 @@ void HAPFakegatoSchedule::callbackTimerEnd(uint16_t state){
 	if (_callbackTimerEnd)  _callbackTimerEnd(state);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegatoSchedule::programTimers() {
 
 	for (size_t i = 0; i < _programEvents.size(); i++){
@@ -74,7 +77,9 @@ void HAPFakegatoSchedule::programTimers() {
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegatoSchedule::clear(){
 	for (int i = 0; i < _programEvents.size(); i++){
 		_programEvents[i].timerEvents.clear();
@@ -83,55 +88,55 @@ void HAPFakegatoSchedule::clear(){
 	_programEvents.clear();
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPFakegatoSchedule::scheduleFromJson(JsonObject &root){
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM
+// #endif
+// void HAPFakegatoSchedule::scheduleFromJson(JsonObject &root){
 
-	if (root["timer"].isNull()) return;
+// 	if (root["timer"].isNull()) return;
 
-	enable(root["timer"]["enabled"].as<bool>());
-	_days = HAPFakeGatoScheduleDays(root["timer"]["days"].as<uint32_t>());
+// 	enable(root["timer"]["enabled"].as<bool>());
+// 	_days = HAPFakeGatoScheduleDays(root["timer"]["days"].as<uint32_t>());
 
-	String dataStr = root["timer"]["programs"].as<String>();
+// 	String dataStr = root["timer"]["programs"].as<String>();
 
-	uint8_t data[dataStr.length() / 2];
-	HAPHelper::hexToBin(data, dataStr.c_str(), dataStr.length());
+// 	uint8_t data[dataStr.length() / 2];
+// 	HAPHelper::hexToBin(data, dataStr.c_str(), dataStr.length());
 
-	decodePrograms(data);
+// 	decodePrograms(data);
 
-}
+// }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-JsonObject HAPFakegatoSchedule::scheduleToJson(){
-	/*
-		"days": uint32_t,
-		"programs": "0503....."
-	*/
-	const size_t capacity = 256;
-	DynamicJsonDocument doc(capacity);
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM
+// #endif
+// JsonObject HAPFakegatoSchedule::scheduleToJson(){
+// 	/*
+// 		"days": uint32_t,
+// 		"programs": "0503....."
+// 	*/
+// 	const size_t capacity = 256;
+// 	DynamicJsonDocument doc(capacity);
 
-	if (_programEvents.size() == 0) {
-	    doc.shrinkToFit();
-    	return doc.as<JsonObject>();
-	}
+// 	if (_programEvents.size() == 0) {
+// 	    doc.shrinkToFit();
+//     	return doc.as<JsonObject>();
+// 	}
 
-	doc["enabled"] = isEnabled();
-	doc["days"] = _days.daysnumber();
+// 	doc["enabled"] = isEnabled();
+// 	doc["days"] = _days.daysnumber();
 
-	size_t dataSize = 0;
-	encodePrograms(nullptr, &dataSize);
-	uint8_t data[dataSize];
-	encodePrograms(data, &dataSize);
+// 	size_t dataSize = 0;
+// 	encodePrograms(nullptr, &dataSize);
+// 	uint8_t data[dataSize];
+// 	encodePrograms(data, &dataSize);
 
-	// HAPHelper::array_print("CONFIG SAVE data", data, dataSize);
+// 	// HAPHelper::array_print("CONFIG SAVE data", data, dataSize);
 
-	char hexString[(dataSize * 2) + 1];
-	HAPHelper::binToHex(data, dataSize, hexString, (dataSize * 2) + 1);
+// 	char hexString[(dataSize * 2) + 1];
+// 	HAPHelper::binToHex(data, dataSize, hexString, (dataSize * 2) + 1);
 
-	doc["programs"] = hexString;
-	return doc.as<JsonObject>();
-}
+// 	doc["programs"] = hexString;
+// 	return doc.as<JsonObject>();
+// }
 

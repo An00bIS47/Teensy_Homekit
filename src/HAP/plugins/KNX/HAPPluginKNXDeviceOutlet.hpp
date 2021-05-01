@@ -103,8 +103,8 @@ protected:
     float readPowerTotalFromKNX();
     float readPowerCurrentFromKNX();
 
-    JsonObject scheduleToJson();
-    void scheduleFromJson(JsonObject &root);
+    // JsonObject scheduleToJson();
+    // void scheduleFromJson(JsonObject &root);
 
     void saveConfig();
 

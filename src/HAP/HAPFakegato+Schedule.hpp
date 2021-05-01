@@ -142,8 +142,8 @@ public:
 	    _statusLED = mode;
     }
 
-    void scheduleFromJson(JsonObject &root);
-    JsonObject scheduleToJson();
+    // void scheduleFromJson(JsonObject &root);
+    // JsonObject scheduleToJson();
 
     void clear();
 

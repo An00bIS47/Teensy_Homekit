@@ -29,11 +29,16 @@ void HAPFakegatoScheduleEnergy::begin(){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 bool HAPFakegatoScheduleEnergy::decodeToggleOnOff(uint8_t* data){
 	return data[1] & 0x01;
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegatoScheduleEnergy::decodeDays(uint8_t *data){
 	uint32_t daysnumber = data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
 	daysnumber = daysnumber >> 4;
@@ -52,6 +57,9 @@ void HAPFakegatoScheduleEnergy::decodeDays(uint8_t *data){
  *
  * @param data
  */
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 	// clear all old programs and timers
 	clear();
@@ -139,7 +147,9 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 uint32_t HAPFakegatoScheduleEnergy::encodeTimerCount(uint8_t timerCount){
 	uint32_t result = 0;
 	if (timerCount < 3) {
@@ -150,7 +160,9 @@ uint32_t HAPFakegatoScheduleEnergy::encodeTimerCount(uint8_t timerCount){
 	return result;
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 uint8_t HAPFakegatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
 	return programCount + 1;
 }
@@ -242,7 +254,9 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 }
 
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 String HAPFakegatoScheduleEnergy::buildScheduleString(){
     TLV8 tlv;
 
