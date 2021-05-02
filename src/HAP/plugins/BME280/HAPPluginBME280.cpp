@@ -133,7 +133,7 @@ void HAPPluginBME280::changedPressure(uint16_t oldValue, uint16_t newValue) {
 
 void HAPPluginBME280::handleImpl(bool forced){
 	// if (shouldHandle() || forced) {
-	LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+	LogV(HAPTime::timeString() + " " + _config->name + "->" + "handleImpl" + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
 	if (_accessory->aid() == 0){
 		return;

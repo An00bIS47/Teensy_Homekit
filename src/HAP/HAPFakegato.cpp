@@ -292,9 +292,6 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
  *       and that you have to base64 encode if you use a string value
  *       basically have a look at the old implementation
  **/
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 String HAPFakegato::callbackGetHistoryEntries(){
 
     if (!_transfer) return F("AA==");
@@ -436,9 +433,6 @@ String HAPFakegato::callbackGetHistoryEntries(){
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
 
 #if HAP_DEBUG_FAKEGATO
@@ -494,9 +488,6 @@ void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
  * @param oldValue
  * @param newValue
  **/
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 void HAPFakegato::callbackHistorySetTime(String oldValue, String newValue){
 
     if (_isTimeSource){
@@ -611,9 +602,6 @@ void HAPFakegato::callbackHistoryRequest(String oldValue, String newValue){
  *  // ToDo: Rewrite as READ callback for characteristic
  *           Check for base64 encoding - better use mbedtls if possible
  **/
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 String HAPFakegato::callbackGetHistoryInfo(){
 
 

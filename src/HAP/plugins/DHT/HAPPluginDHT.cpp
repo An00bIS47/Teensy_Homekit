@@ -68,7 +68,7 @@ void HAPPluginDHT::changedHumidity(float oldValue, float newValue) {
 
 void HAPPluginDHT::handleImpl(bool forced){
 
-	LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+	LogV(HAPTime::timeString() + " " + _config->name + "->" + "handleImpl" + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
 	sensors_event_t sensorEventTemp;
 	sensors_event_t sensorEventHum;
