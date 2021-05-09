@@ -18,7 +18,7 @@ mbedtls_entropy_context     HAPSRP::_entropy_ctx;
 mbedtls_ctr_drbg_context    HAPSRP::_ctr_drbg_ctx;
 mbedtls_mpi*                HAPSRP::_RR				= nullptr;
 
-const uint8_t hotBits[128] PROGMEM = {
+const uint8_t hotBits[128] = {
 	82, 42, 71, 87, 124, 241, 30, 1, 54, 239, 240, 121, 89, 9, 151, 11, 60,
 	226, 142, 47, 115, 157, 100, 126, 242, 132, 46, 12, 56, 197, 194, 76,
 	198, 122, 90, 241, 255, 43, 120, 209, 69, 21, 195, 212, 100, 251, 18,

@@ -7,7 +7,7 @@
 //
 
 #include "HAPLogger.hpp"
-#include "HAPServer.hpp"
+//#include "HAPServer.hpp"
 #include "HAPTime.hpp"
 
 #if defined (ARDUINO_ARCH_ESP32)

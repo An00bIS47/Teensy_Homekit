@@ -2277,8 +2277,8 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 	if (_hapsrp->data->session != NULL) delete _hapsrp->data->session;
 
-	HAPSRP::SRPSession* session = _hapsrp->newSession(SRP_SHA512, HAPSRP::SRP_NG_3072, NULL,NULL);
-	_hapsrp->data->session = session;
+	_hapsrp->data->session = _hapsrp->newSession(SRP_SHA512, HAPSRP::SRP_NG_3072, NULL,NULL);
+	// _hapsrp->data->session = session;
 
 #if HAP_DEBUG_SRP
 	HAPHelper::mpi_print("N", &_hapsrp->data->session->ng->N);
@@ -2391,7 +2391,7 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	_hapsrp->data->verifier = _hapsrp->newVerifier1(_hapsrp->data->session,
 											_hapsrp->data->username,
-											1,
+											true,
 											_hapsrp->data->bytes_s,
 											_hapsrp->data->len_s,
 											_hapsrp->data->bytes_v,
@@ -2590,7 +2590,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	TLV8 encTLV;
 	encTLV.encode(subtlv, strlen((char*)subtlv));
 
-#if HAP_DEBUG
+#if HAP_DEBUG_TLV8
 	encTLV.print();
 #endif
 
@@ -2632,7 +2632,10 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 		HAPHelper::array_print("signature:", ios_device_signature, ios_device_signature_len);
 
+
+#if HAP_DEBUG_TLV8
 		encTLV.print();
+#endif
 
 		encTLV.clear();
 		response.clear();
@@ -3255,7 +3258,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	TLV8 response;
 	response.encode(HAP_TLV_STATE, 1, HAP_VERIFY_STATE_M4);
 
-#if HAP_DEBUG
+#if HAP_DEBUG_TLV8
 	response.print();
 #endif
 
@@ -3587,21 +3590,22 @@ void HAPServer::handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size
 	tlv.print();
 #endif
 
-	TLV8Entry *entry = tlv.searchType(tlv._head, HAP_TLV_METHOD); // 0x01
+	// TLV8Entry *entry = tlv.searchType(HAP_TLV_METHOD); // 0x01
+	// HAP_TLV_PAIR_TYPE method = (HAP_TLV_PAIR_TYPE) entry->value[0];
 
+	TLV8Entry *entry = tlv.searchType(HAP_TLV_METHOD);
 	HAP_TLV_PAIR_TYPE method = (HAP_TLV_PAIR_TYPE) entry->value[0];
-
 
 	if (method == HAP_TLV_PAIR_ADD) {
 
-		TLV8Entry *entryIdentifier = tlv.searchType(tlv._head, HAP_TLV_IDENTIFIER); // 0x01
-		TLV8Entry *entryPublicKey = tlv.searchType(tlv._head, HAP_TLV_PUBLIC_KEY); // 0x03
-		TLV8Entry *entryAdmin = tlv.searchType(tlv._head, HAP_TLV_PERMISSIONS); // 0x0b
+		TLV8Entry *entryIdentifier = tlv.searchType(HAP_TLV_IDENTIFIER); // 0x01
+		TLV8Entry *entryPublicKey = tlv.searchType(HAP_TLV_PUBLIC_KEY); // 0x03
+		TLV8Entry *entryAdmin = tlv.searchType(HAP_TLV_PERMISSIONS); // 0x0b
 
 		handlePairingsAdd(hapClient, entryIdentifier->value, entryPublicKey->value, *(entryAdmin->value) );
 
 	} else if (method == HAP_TLV_PAIR_REMOVE) {
-		TLV8Entry *entryIdentifier = tlv.searchType(tlv._head, HAP_TLV_IDENTIFIER); // 0x01
+		TLV8Entry *entryIdentifier = tlv.searchType(HAP_TLV_IDENTIFIER); // 0x01
 		handlePairingsRemove(hapClient, entryIdentifier->value);
 	} else if (method == HAP_TLV_PAIR_LIST) {
 		handlePairingsList(hapClient);

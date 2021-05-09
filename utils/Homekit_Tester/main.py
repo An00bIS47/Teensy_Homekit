@@ -1090,12 +1090,11 @@ if __name__ == '__main__':
     tester.runTest("removePairing", tester.removePairing)    
 
     
-    # for i in range(0,100):
-    #     tester.runTest("pair", tester.pair)
-    #     tester.runTest("getAccessories", tester.getAccessories)
-    #     tester.runTest("removePairing", tester.removePairing)
+    for i in range(0,100):
+        tester.runTest("pair", tester.pair)
+        tester.runTest("getAccessories", tester.getAccessories)
+        tester.runTest("removePairing", tester.removePairing)
     
-
 
     if args.summary == True:
         tester.printSummary()

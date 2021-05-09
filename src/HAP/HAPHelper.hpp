@@ -11,7 +11,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "HAPGlobals.hpp"
+// #include "HAPGlobals.hpp"
 
 #if defined( CORE_TEENSY )
 #include <time.h>
