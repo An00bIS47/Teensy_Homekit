@@ -15,7 +15,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
 
   auto contentType = req->getHeader("Content-Type");
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
   Serial.print("Content type: ");
   Serial.println(contentType.c_str());
 #endif
@@ -39,13 +39,13 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
     std::string fieldValue;
     bool isFile = false;
 
-    
+
     // HTTPReqeust::requestComplete can be used to check whether the
     // body has been parsed completely.
     while(!(req->requestComplete())) {
       const auto oldBufferSize = buffer.size();
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
       Serial.print("Old buffer size: ");
       Serial.println(oldBufferSize);
 #endif
@@ -63,13 +63,13 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
       Serial.print(" bytes): ");
       Serial.println(buffer.c_str());
 #endif
-      buffer.resize(s + oldBufferSize);      
+      buffer.resize(s + oldBufferSize);
       // reading line by line
       std::istringstream is(buffer);
       for(std::string line; is.good(); ) {
         std::getline(is, line);
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
         Serial.print("Next line is ");
         Serial.print(line.size());
         Serial.print(" bytes: ");
@@ -87,7 +87,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
             case BOUNDARY:
               if((line == boundary) || (line == lastBoundary)) {
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
                 Serial.println("Boundary found");
 #endif
 
@@ -95,7 +95,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
                 // save the previous field value
                 if(!fieldValue.empty()) {
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
                   Serial.print("Field: ");
                   Serial.println(fieldName.c_str());
                   Serial.print("Value: ");
@@ -112,7 +112,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
                 auto i = line.find(" name=");
                 if(i != std::string::npos) {
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
                   Serial.println("Correct content disposition found");
 #endif
 
@@ -139,7 +139,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
                 }
                 // save the previous field value
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
                 Serial.print("Field: ");
                 Serial.println(fieldName.c_str());
                 Serial.print("Value (");
@@ -165,7 +165,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
                 searching = BOUNDARY;
               }
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
               Serial.print("Adding (");
               Serial.print(line.size());
               Serial.print(" bytes): ");
@@ -178,7 +178,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
         } else {
           // no LF found, store the remaining chars in the buffer and read further
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
           Serial.println("No more LF found in buffer");
           Serial.print("Remaining (");
           Serial.print(line.size() + crRemoved);
@@ -195,7 +195,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
             // boundary found, at least partially
             // do nothing, the remainder will be read on the next loop iteration
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
             Serial.print("Boundary found without LF: ");
             Serial.println(line.c_str());
 #endif
@@ -209,7 +209,7 @@ void HAPWebServerBodyParserMultipart::processAndParse(HTTPRequest* req, const st
               if(isFile && crRemoved)
                 line.push_back('\r');
 
-#if DEBUG_MULTIPART_PARSER      
+#if DEBUG_MULTIPART_PARSER
               Serial.println("Adding it.");
 #endif
               fieldValue += line;

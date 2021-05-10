@@ -20,7 +20,7 @@ using namespace httpsserver;
 
 class HAPWebServerBodyParserMultipart {
 
-public:    
+public:
     static void processAndParse(HTTPRequest* req, const std::function<void(const std::string&, const std::string&)> fieldValueCallback);
 private:
 

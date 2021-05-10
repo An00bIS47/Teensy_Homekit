@@ -1,7 +1,9 @@
 {
     "gitlab.ignoreCertificateErrors": true,
     "files.associations": {
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "certs.h": "c",
+        "chachapoly.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

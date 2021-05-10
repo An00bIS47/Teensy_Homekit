@@ -11,17 +11,21 @@
 
 #include <Arduino.h>
 
+#ifndef HAP_DEBUG_TLV8
+#define HAP_DEBUG_TLV8 0
+#endif
+
 struct TLV8Entry {
 	uint8_t type;
 	uint8_t length;
-	uint8_t* value;
+	uint8_t* value = nullptr;
 
 	uint8_t id;
 
-	TLV8Entry* next;
+	TLV8Entry* next = nullptr;
 
-	~TLV8Entry(){	
-		delete[] value;
+	~TLV8Entry(){
+		if (value) delete[] value;
 	};
 };
 
@@ -31,8 +35,14 @@ public:
 	TLV8();
 	~TLV8();
 
-	void addSeperator();	
+	void addSeperator();
+
+	TLV8Entry* searchType(uint8_t type){
+		return searchType(_head, type);
+	};
+
 	TLV8Entry* searchType(TLV8Entry* ptr, uint8_t type);
+
 	TLV8Entry* searchId(TLV8Entry* ptr, uint8_t id);
 
 	TLV8Entry* getType(uint8_t type);
@@ -44,30 +54,20 @@ public:
 
 	bool encode(uint8_t type, const std::initializer_list<uint8_t> data);
 
-	
-	// uint8_t* decode() __attribute__ ((deprecated));
-	// uint8_t* decode(uint8_t type) __attribute__ ((deprecated));
-
 	size_t decode(Stream& stream);
 
 	void decode(uint8_t* out, size_t *outSize = nullptr);
 	void decode(const uint8_t type, uint8_t* out, size_t *outSize = nullptr);
 
-	void addNode( TLV8Entry* ptr);
-	void insertNode( TLV8Entry* ptr);
-	void deleteNode( TLV8Entry* ptr);
 
 	void clear();
-	void deleteList( TLV8Entry* ptr);
 
+
+#if HAP_DEBUG_TLV8
 	void print();
 	static void printList( TLV8Entry* ptr);
 	static void printNode( TLV8Entry* ptr);
-
-	TLV8Entry* initNode(const uint8_t type, const uint8_t length, const uint8_t* value);
-	TLV8Entry* initNode(const uint8_t* rawData);
-
-	TLV8Entry *_head;
+#endif
 
 
 	// Size of data values + TYPE + LENGTH
@@ -76,16 +76,24 @@ public:
 	static size_t size( TLV8Entry *ptr );
 	static size_t size( TLV8Entry *ptr, uint8_t type );
 
-//	// Length of data + type + length values
-//	size_t length();
-//	static size_t length( TLV8Entry *ptr );
-
 	// Number of entries
 	uint8_t count();
 	static uint8_t count(TLV8Entry* ptr);
 
 	static bool isValidTLVType(uint8_t type);
-private:
+
+
+	TLV8Entry *_head;
+protected:
+
+	TLV8Entry* initNode(const uint8_t type, const uint8_t length, const uint8_t* value);
+	TLV8Entry* initNode(const uint8_t* rawData);
+
+	void addNode( TLV8Entry* ptr);
+	void insertNode( TLV8Entry* ptr);
+	void deleteNode( TLV8Entry* ptr);
+
+	void deleteList( TLV8Entry* ptr);
 
 	TLV8Entry *_tail;
 	TLV8Entry *_ptr;

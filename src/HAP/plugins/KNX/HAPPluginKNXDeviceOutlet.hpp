@@ -29,10 +29,10 @@ public:
 
     HAPPluginKNXDeviceOutlet(uint8_t id_, char name[], bool enableFakegato, bool enableSchedule,  uint16_t koReadState, uint16_t koWriteState, uint16_t koWriteCurrent, uint16_t koWriteActEnergy);
 
-    HAPAccessory* initAccessory() override;    
-	
+    HAPAccessory* initAccessory() override;
+
     void handle(bool forced) override;
-    
+
     // void identify(bool oldValue, bool newValue);
     void setEventManager(EventManager* eventManager);
     void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
@@ -54,27 +54,27 @@ public:
 
     inline float getAveragedPowerVoltage() {
         return 0.0;
-    }    
+    }
 
     // uint8_t id;
     // char name[41];
-    // enum HAPPluginKNXServiceType type;  
+    // enum HAPPluginKNXServiceType type;
 
-protected:    
-    
+protected:
+
     // Default 0
     // if != 0: sensor is available
     uint16_t                _koReadState;
     uint16_t                _koWriteState;
 
     uint16_t                _koWriteCurrent;
-    uint16_t                _koWriteActEnergy;    
-    
+    uint16_t                _koWriteActEnergy;
+
     uint32_t                _timestampLastActivity;
-    
+
     HAPCharacteristicT<bool>*    _inUseState;
     HAPCharacteristicT<bool>*    _parentalLock;
-    
+
     HAPCharacteristicT<bool>*    _stateValue;
 
 
@@ -102,15 +102,15 @@ protected:
     bool readStateFromKNX();
     float readPowerTotalFromKNX();
     float readPowerCurrentFromKNX();
-    
-    JsonObject scheduleToJson();
-    void scheduleFromJson(JsonObject &root);
+
+    // JsonObject scheduleToJson();
+    // void scheduleFromJson(JsonObject &root);
 
     void saveConfig();
 
-    
 
-     
+
+
 };
 
 #endif /* HAPPLUGINKNXDEVICEOUTLET_HPP_ */

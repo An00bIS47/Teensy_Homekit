@@ -1,4 +1,4 @@
-// 
+//
 // HAPTime.hpp
 // Homekit
 //
@@ -9,7 +9,7 @@
 #ifndef HAPTIME_HPP_
 #define HAPTIME_HPP_
 
-#include <Arduino.h> 
+#include <Arduino.h>
 #include <TimeLib.h>
 #include <math.h>
 #include <functional>
@@ -45,9 +45,9 @@ public:
 
     static bool setLongitudeLatitude(float longitude, float latitude);
     static bool setTimeZone(int timezone);
-    
+
     static uint8_t dstOffset(uint8_t dayValue, uint8_t monthValue, unsigned int yearValue, uint8_t hourValue);
-    
+
     static time_t getDstCorrectedTime();
 
 #if HAP_ENABLE_NTP
@@ -58,9 +58,9 @@ public:
     static void setTimeFromTimestamp(time_t date = 0) {
         setTime(date);
     }
-    
+
     static void setCallbackGetTime(callbackGetTime_t callback);
-    
+
     static void setReftime(const uint32_t reftime){
         _refTime = reftime;
     }
@@ -75,10 +75,10 @@ protected:
     static float _latitude;
     static uint32_t _refTime;
 
-    static callbackGetTime_t _callbackGetTime;      
-    
-    static time_t sunTime(bool sunRise, time_t date = 0);     
-    
+    static callbackGetTime_t _callbackGetTime;
+
+    static time_t sunTime(bool sunRise, time_t date = 0);
+
     static bool getTimeFromString(const char *str, TimeElements& tm);
     static bool getDateFromString(const char *str, TimeElements& tm);
 
@@ -86,15 +86,15 @@ protected:
     static uint8_t _packetBuffer[NTP_PACKET_SIZE];
     static EthernetUDP _udp;
     static void sendNTPpacket(const char* address);
-#endif    
+#endif
 
 #if HAP_ENABLE_KNX_TIME
     static void setKNXComObjects(uint16_t koReadTime, uint16_t koWriteTime = 0);
     static uint16_t _koReadTime;
     static uint16_t _koWriteTime;
 #endif
-    
-    
+
+
     // zenith:      Sun's zenith for sunrise/sunset
     // offical      = 90 degrees 50'
     // civil        = 96 degrees

@@ -58,7 +58,7 @@ enum HAP_PLUGIN_TYPE {
 
 
 #if HAP_ENABLE_WEBSERVER
-struct HAPWebServerPluginNode {			
+struct HAPWebServerPluginNode {
 	std::string	name;
 	std::string	path;
 	std::string method;
@@ -73,27 +73,27 @@ struct HAPWebServerPluginNode {
 class HAPPlugin {
 
 public:
-	
+
 	//virtual HAPPlugin() = 0;
 	virtual HAPAccessory* initAccessory() = 0;
 	virtual bool begin() = 0;
 
 #if HAP_ENABLE_WEBSERVER
-	virtual JsonObject getConfigImpl() __attribute__ ((deprecated)) { DynamicJsonDocument doc(1); return doc.as<JsonObject>();};	
-	virtual void setConfigImpl(JsonObject root) __attribute__ ((deprecated)) {};	
+	virtual JsonObject getConfigImpl() __attribute__ ((deprecated)) { DynamicJsonDocument doc(1); return doc.as<JsonObject>();};
+	virtual void setConfigImpl(JsonObject root) __attribute__ ((deprecated)) {};
 #endif
 
 
 	virtual void handleImpl(bool forced = false) = 0;
 
 	virtual void setConfiguration(HAPConfigurationPlugin* cfg){
-		_config = cfg;	
+		_config = cfg;
 	}
 
 	virtual HAPConfigurationPlugin* setDefaults(); // = 0;
 
 	virtual void internalConfigToJson(Print& prt) {};
-	
+
 	void configToJson(Print& prt){
 		_config->toJson(prt);
 	}
@@ -104,35 +104,35 @@ public:
 	virtual std::vector<HAPWebServerPluginNode*> getResourceNodes() {
 		return {};
 	}
-#endif	
+#endif
 
 
 	virtual void stop()  { enable(false); };
 	virtual void start() { enable(true);  };
-	
+
 
 	virtual void identify(bool oldValue, bool newValue) {
 		LogE(F("Handle identify from plugins"), true);
 	}
-	
+
 	void handle(bool forced = false) {
-		if (shouldHandle() || forced) {	
+		if (shouldHandle() || forced) {
 			handleImpl(forced);
 		}
 	}
-	virtual void handleEvents(int eventCode, struct HAPEvent eventParam) {}	
+	virtual void handleEvents(int eventCode, struct HAPEvent eventParam) {}
 
 	// virtual HAPConfigValidationResult validateConfigImpl(JsonObject object) = 0;
 
 #if HAP_ENABLE_WEBSERVER
-	virtual HAPConfigurationValidationResult validateConfig(JsonObject object){	
+	virtual HAPConfigurationValidationResult validateConfig(JsonObject object){
 
 		// LogD(String(__PRETTY_FUNCTION__), true);
 
 		HAPConfigurationValidationResult result;
 		result.valid = false;
 
-		// ToDo: Should validation be only for enabled plugins?		
+		// ToDo: Should validation be only for enabled plugins?
 		// plugin._name.enabled
 		if (!object.containsKey("enabled")){
 			result.reason = "plugins." + name() + ".enabled is required";
@@ -144,7 +144,7 @@ public:
 			LogW("Config validation failed: " + result.reason, true);
 			return result;
 		}
-		
+
 		// plugin._name.interval
 		if (!object.containsKey("interval")){
 			result.reason = "plugins." + name() + ".interval is required";
@@ -157,10 +157,10 @@ public:
 			LogW("Config validation failed: " + result.reason, true);
 			return result;
 		}
-		
-		
+
+
 		result.valid = true;
-		return result;		
+		return result;
 	}
 
 
@@ -183,20 +183,20 @@ public:
 		// LogD("OK", true);
 	}
 
-	virtual JsonObject getConfig()  __attribute__ ((deprecated)) {	
+	virtual JsonObject getConfig()  __attribute__ ((deprecated)) {
 		// LogD(String(__PRETTY_FUNCTION__), true);
 
 		const size_t capacity = 2048;
     	DynamicJsonDocument doc(capacity);
-    	
+
     	doc["enabled"] = isEnabled();
-    	doc["interval"] = interval();	
+    	doc["interval"] = interval();
 
 		DynamicJsonDocument pluginDoc(1800);
-		pluginDoc = getConfigImpl();		
+		pluginDoc = getConfigImpl();
 
 		HAPHelper::mergeJson(doc, pluginDoc.as<JsonObject>());
-		
+
 		return doc.as<JsonObject>();
 	}
 #endif
@@ -224,7 +224,7 @@ public:
 
 	unsigned long interval(){
 		return _config->interval;
-	}	
+	}
 
 	void setInterval(unsigned long interval){
 		_config->interval = interval;
@@ -240,8 +240,8 @@ public:
 				// save the last time you blinked the LED
 				_previousMillis = currentMillis;
 
-				//LogD("Handle plugin: " + String(_name), true);			
-				return true;			
+				//LogD("Handle plugin: " + String(_name), true);
+				return true;
 			}
 		}
 
@@ -251,22 +251,22 @@ public:
 	virtual void addEventListener(EventManager* eventManager){
 		_listenerMemberFunctionPlugin.mObj = this;
 		_listenerMemberFunctionPlugin.mf = &HAPPlugin::handleEvents;
-	
+
 		// Add listener to event manager
 		_eventManager = eventManager;
 
-		// for accessory notifications and values			
+		// for accessory notifications and values
 		_eventManager->addListener( EventManager::kEventPairingComplete, &_listenerMemberFunctionPlugin );
-		_eventManager->addListener( EventManager::kEventNotifyController, &_listenerMemberFunctionPlugin );	
-		
+		_eventManager->addListener( EventManager::kEventNotifyController, &_listenerMemberFunctionPlugin );
+
 	}
 
 	void setAccessorySet(HAPAccessorySet* accessorySet){
 		_accessorySet = accessorySet;
-	}	
+	}
 
-	HAPConfigurationPlugin* getConfiguration() { 
-		return _config; 
+	HAPConfigurationPlugin* getConfiguration() {
+		return _config;
 	}
 
 	void setFakeGatoFactory(HAPFakegatoFactory* fakeGatoFactory){
@@ -279,17 +279,17 @@ public:
 
 
 	void queueNotifyEvent(uint32_t iid, String value){
-		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid, value);							
+		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid, value);
 		_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 	}
 
 	void queueNotifyEvent(HAPCharacteristicBase* characteristic){
 		if (characteristic->notifiable()){
-			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());							
+			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());
 			_eventManager->queueEvent( EventManager::kEventNotifyController, event);
-		}		
-	}	
-	
+		}
+	}
+
 
 protected:
 	enum HAP_PLUGIN_TYPE 		_type;
@@ -299,19 +299,19 @@ protected:
 	// String 						_name;
 	// bool 						_isEnabled;
 	// unsigned long 				_interval;
-	
+
 	HAPAccessory*				_accessory;
 	EventManager*				_eventManager;
 	HAPAccessorySet*			_accessorySet;
-	
+
 	MemberFunctionCallable<HAPPlugin> _listenerMemberFunctionPlugin;
-	
-	HAPFakegatoFactory*			_fakeGatoFactory;	
+
+	HAPFakegatoFactory*			_fakeGatoFactory;
 
 	HAPConfigurationPlugin*		_config;
 };
 
-	/* 
+	/*
 	 * Base class for PluginRegistrar
 	 * See PluginRegistrar below for explanations
 	 */
@@ -320,7 +320,7 @@ public:
 	virtual std::unique_ptr<HAPPlugin> getPlugin() = 0;
 };
 
-	/* 
+	/*
 	 * This is the factory, the common interface to "plugins".
 	 * Plugins registers themselves here and the factory can serve them on
 	 * demand.
@@ -348,10 +348,10 @@ private:
 	void operator=(HAPPluginFactory const&) = delete;
 };
 
-	/* 
+	/*
 	 * Helper class that registers a plugin upon construction.
 	 * Actually, the registrar registers itself, and the proxied plugin is only
-	 * created on-demand. This mechanism can be shortened by directly 
+	 * created on-demand. This mechanism can be shortened by directly
 	 * registering and instance of the plugin, but the assumption here is that
 	 * instanciating the plugin can be heavy and not necessary.
 	 */
@@ -382,7 +382,7 @@ PluginRegistrar<TPlugin>::getPlugin() {
 
 #define REGISTER_PLUGIN(CLASSNAME) \
 static PluginRegistrar<CLASSNAME> \
-CLASSNAME##_registrar( #CLASSNAME ); 
+CLASSNAME##_registrar( #CLASSNAME );
 
 
-#endif /* HAPPLUGINS_HPP_ */    
+#endif /* HAPPLUGINS_HPP_ */

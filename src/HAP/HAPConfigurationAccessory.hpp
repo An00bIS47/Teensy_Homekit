@@ -17,7 +17,7 @@
 #include "HAPHelper.hpp"
 #include "HAPConfigurationItem.hpp"
 
-// HAPConfigurationPairingEntry 
+// HAPConfigurationPairingEntry
 //	id 	=  36
 //	key =  32
 // 	bool = 1
@@ -26,11 +26,11 @@
 struct HAPConfigurationPairingEntry {
 	uint8_t id[HAP_PAIRINGS_ID_LENGTH];
 	uint8_t key[HAP_PAIRINGS_LTPK_LENGTH];
-	bool isAdmin;	
+	bool isAdmin;
 };
 
-// HAPConfigurationLTKP 
-// Long Termn Key Pair 
+// HAPConfigurationLTKP
+// Long Termn Key Pair
 //	LTPK 	=  32		Long Term Public Key
 //	LTSK	=  64		Long Term Secret Key
 //	================
@@ -44,12 +44,12 @@ struct HAPConfigurationLTKP {
 //
 // Accessory
 //
-class HAPConfigurationAccessory : public HAPConfigurationItem {	
-public:	
+class HAPConfigurationAccessory : public HAPConfigurationItem {
+public:
 	uint16_t port 			= 51628;
 	char pincode[10+1] 		= {0,};			// 031-45-712 = 8 digits + 2 "-"
 	char setupId[4+1] 		= {0,};			// setupId	4 char
-	char modelname[32+1] 	= {0,};		
+	char modelname[32+1] 	= {0,};
 
 	uint32_t initConfigNumber = HOMEKIT_CONFIGURATION_NUMBER;		// unused ...
 
@@ -71,13 +71,13 @@ public:
 	~HAPConfigurationAccessory(){
 
 	}
-		
-	HAPConfigurationAccessory(const HAPConfigurationAccessory& rhs) {		
-				
+
+	HAPConfigurationAccessory(const HAPConfigurationAccessory& rhs) {
+
 		port = rhs.port;
 		initConfigNumber = rhs.initConfigNumber;
-		
-		setPincode(rhs.pincode);		
+
+		setPincode(rhs.pincode);
 		setSetupId(rhs.setupId);
 		setModelName(rhs.modelname);
 
@@ -105,7 +105,7 @@ public:
 		}
 		strncpy(setupId, setupId_, 5);
 		setupId[4] = '\0';
-	}	
+	}
 
 	void setModelName(const char* modelName_){
 		if (strlen(modelName_) > 33) {
@@ -113,22 +113,22 @@ public:
 			return;
 		}
 		strncpy(modelname, modelName_, 33);
-		modelname[32] = '\0';		
+		modelname[32] = '\0';
 	}
-	
+
 
 	uint8_t size(){
         return pairings.size();
     }
 
-    int getIndex(const uint8_t* id){                
+    int getIndex(const uint8_t* id){
         for(int i = 0; i < pairings.size(); i++) {
             struct HAPConfigurationPairingEntry* item = pairings[i];
-            if ( memcmp(item->id, id, HAP_PAIRINGS_ID_LENGTH) == 0) {						
+            if ( memcmp(item->id, id, HAP_PAIRINGS_ID_LENGTH) == 0) {
                 return i;
             }
         }
-        return -1;        
+        return -1;
     }
 
 	HAPConfigurationPairingEntry* getPairingAtIndex(uint8_t index){
@@ -157,17 +157,17 @@ public:
 		}
 	}
 
-    bool addPairing(const uint8_t* id, const uint8_t* key){    
+    bool addPairing(const uint8_t* id, const uint8_t* key){
         bool result = false;
         int index = getIndex(id);
         if (index == -1) {
             struct HAPConfigurationPairingEntry* item = new HAPConfigurationPairingEntry();
             memcpy(item->id, id, HAP_PAIRINGS_ID_LENGTH);
-            memcpy(item->key, key, HAP_PAIRINGS_LTPK_LENGTH);			
-            item->isAdmin = (pairings.size() == 0);	
-            
-#if HAP_DEBUG_PAIRINGS		
-            HAPHelper::array_print("ID:", item->id, HAP_PAIRINGS_ID_LENGTH);	
+            memcpy(item->key, key, HAP_PAIRINGS_LTPK_LENGTH);
+            item->isAdmin = (pairings.size() == 0);
+
+#if HAP_DEBUG_PAIRINGS
+            HAPHelper::array_print("ID:", item->id, HAP_PAIRINGS_ID_LENGTH);
             HAPHelper::array_print("Key:", item->key, HAP_PAIRINGS_LTPK_LENGTH);
 #endif
 
@@ -177,10 +177,10 @@ public:
             if (memcmp(pairings[index]->key, key, HAP_PAIRINGS_LTPK_LENGTH) == 0) {
                 result = true;
             }
-            pairings[index]->isAdmin = (pairings.size() == 0);		
+            pairings[index]->isAdmin = (pairings.size() == 0);
         }
 
-        return result;	
+        return result;
     }
 
     bool isAdmin(const uint8_t *id){
@@ -198,15 +198,15 @@ public:
 		memcpy(LTKP.LTSK, secretKey, HAP_PAIRINGS_LTSK_LENGTH);
 	}
 
-	uint8_t* LTPKPtr(){		
-		return (uint8_t*)&LTKP.LTPK;	
+	uint8_t* LTPKPtr(){
+		return (uint8_t*)&LTKP.LTPK;
 	}
 
 	uint8_t* LTSKPtr(){
-		return (uint8_t*)&LTKP.LTSK;	
+		return (uint8_t*)&LTKP.LTSK;
 	}
 
-	
+
 	void clearPairings(){
 		pairings.clear();
 	}
@@ -216,7 +216,7 @@ public:
 		memset(pincode, 0, 10 + 1);
 		memset(setupId, 0, 4 + 1);
 		memset(modelname, 0, 32 + 1);
-		initConfigNumber = 0;		
+		initConfigNumber = 0;
 
 		memset(LTKP.LTSK, 0, HAP_PAIRINGS_LTPK_LENGTH);
 		memset(LTKP.LTPK, 0, HAP_PAIRINGS_LTSK_LENGTH);
@@ -224,17 +224,17 @@ public:
 
 	void setDefaults() override {
 		clear();
-		{			
+		{
 			memcpy(pincode, HAP_PIN_CODE, 10);
 		}
 
-		{			
+		{
 			memcpy(setupId, HAP_SETUP_ID, 4);
 		}
 
 		{
 			memcpy(modelname, HAP_MODELL_NAME, strlen(HAP_MODELL_NAME));
-		}		
+		}
 	}
 
 
@@ -253,40 +253,40 @@ public:
 	//			]
     // }
 	void toJson(Print& prt) override {
-		prt.print("{"); 
+		prt.print("{");
 
 		prt.print("\"port\": ");
 		prt.print(port);
-		
+
 		prt.print(",");
 		prt.print("\"initConfigNumber\": ");
 		prt.print(initConfigNumber);
-		
+
 		prt.print(",");
 		prt.print("\"pincode\": ");
 		prt.print(HAPHelper::wrap(pincode));
-		
+
 		prt.print(",");
 		prt.print("\"setupId\": ");
 		prt.print(HAPHelper::wrap(setupId));
-		
-		prt.print(",");		
+
+		prt.print(",");
 		prt.print("\"modelname\": ");
 		prt.print(HAPHelper::wrap(modelname));
 
-		prt.print(",");	
+		prt.print(",");
 		prt.print("\"pairings\": [");
         for (uint8_t i=0; i < pairings.size(); i++){
             prt.print("{");
             prt.print("\"id\": ");
             // ToDo: Print id properly
             prt.print(HAPHelper::wrap(String(pairings[i]->id[0], HEX)));
-            
+
             prt.print(",");
             prt.print("\"key\": ");
             // ToDo: Print key properly
             prt.print(HAPHelper::wrap(String(pairings[i]->key[0], HEX)));
-			
+
 			prt.print(",");
             prt.print("\"isAdmin\": ");
             prt.print(pairings[i]->isAdmin);

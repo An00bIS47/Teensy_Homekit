@@ -46,12 +46,12 @@ enum HAP_WIFI_MODE {
 
 class HAPWiFiHelper {
 public:
-	
+
 	HAPWiFiHelper();
 	~HAPWiFiHelper();
 
-	static void begin(HAPConfigurationWiFi* config, std::function<bool(bool)> callbackBegin, const char* hostname);	
-	static void connect(enum HAP_WIFI_MODE mode);	
+	static void begin(HAPConfigurationWiFi* config, std::function<bool(bool)> callbackBegin, const char* hostname);
+	static void connect(enum HAP_WIFI_MODE mode);
 
 	static bool captiveInitialized();
 	static void handle();
@@ -71,8 +71,8 @@ public:
 	static HAP_WIFI_MODE getCurrentMode();
 
 private:
-	
-#if HAP_PROVISIONING_ENABLE_BLE == 0	
+
+#if HAP_PROVISIONING_ENABLE_BLE == 0
 	static void eventHandler(WiFiEvent_t event);
 #else
 	static void eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_event_t *prov_event);
@@ -84,7 +84,7 @@ private:
 #if HAP_ENABLE_WEBSERVER
 	static void startCaptivePortal();
 	static void stopCaptivePortal();
-	
+
 	static HTTPServer* _webserver;
 	static DNSServer* _dnsServer;
 
@@ -100,13 +100,13 @@ private:
 	static HAPConfigurationWiFi* _config;
 
 	static uint8_t _errorCount;
-	
-	
+
+
 
 	static bool _captiveInitialized;
 	static bool _isProvisioned;
 
-	static std::function<bool(bool)> _callbackBegin;	
+	static std::function<bool(bool)> _callbackBegin;
 };
 
 #endif /* HAPWIFIHELPER_HPP_ */

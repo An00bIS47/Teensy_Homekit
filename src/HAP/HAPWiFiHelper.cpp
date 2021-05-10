@@ -16,7 +16,7 @@
 #if HAP_ENABLE_WEBSERVER
 #include "HAPWebServer.hpp"
 
-#if HAP_WEBSERVER_USE_SPIFFS    
+#if HAP_WEBSERVER_USE_SPIFFS
 #include <SPIFFS.h>
 #else
 #include "HAPWebServerFiles.hpp"
@@ -48,11 +48,11 @@ bool HAPWiFiHelper::_isProvisioned;
 //#define ESP_WPS_MODE WPS_TYPE_PIN
 
 HAPWiFiHelper::HAPWiFiHelper(){
-	_errorCount = 0;		
+	_errorCount = 0;
 	_captiveInitialized = false;
 	_isProvisioned = false;
 
-#if HAP_ENABLE_WEBSERVER	
+#if HAP_ENABLE_WEBSERVER
 	_webserver = nullptr;
 	_dnsServer = nullptr;
 #endif
@@ -71,7 +71,7 @@ void HAPWiFiHelper::begin(HAPConfigurationWiFi* config, std::function<bool(bool)
 
 	WiFi.persistent(false);
 	WiFi.setHostname(hostname);
-	
+
 	enum HAP_WIFI_MODE selectedMode = (enum HAP_WIFI_MODE)_config->mode;
 
 #if HAP_PROVISIONING_ENABLE_BLE == 0
@@ -85,7 +85,7 @@ void HAPWiFiHelper::begin(HAPConfigurationWiFi* config, std::function<bool(bool)
 		// strcpy(_wpsConfig.factory_info.model_number, "1");
 		strcpy(_wpsConfig.factory_info.model_name,   HAP_MODELL_NAME);
 		strcpy(_wpsConfig.factory_info.device_name,  hostname);
-	} 
+	}
 
 #if HAP_PROVISIONING_ENABLE_BLE
 
@@ -93,13 +93,13 @@ void HAPWiFiHelper::begin(HAPConfigurationWiFi* config, std::function<bool(bool)
 		//Sample uuid that user can pass during provisioning using BLE
 		/* uint8_t uuid[16] = {0xb4, 0xdf, 0x5a, 0x1c, 0x3f, 0x6b, 0xf4, 0xbf,
 					0xea, 0x4a, 0x82, 0x03, 0x04, 0x90, 0x1a, 0x02 };*/
-		
+
 
 		WiFi.onEvent(eventHandlerBLEProv);
-		WiFi.beginProvision(provSchemeBLE, WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM, WIFI_PROV_SECURITY_1, HAP_PROVISIONING_POP, HAPDeviceID::provisioningID(HAP_PROVISIONING_PREFIX).c_str(), NULL, NULL);		
+		WiFi.beginProvision(provSchemeBLE, WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM, WIFI_PROV_SECURITY_1, HAP_PROVISIONING_POP, HAPDeviceID::provisioningID(HAP_PROVISIONING_PREFIX).c_str(), NULL, NULL);
 	}
 
-	
+
 #endif /* HAP_PROVISIONING_ENABLE_BLE==0 */
 
 	connect(selectedMode);
@@ -109,7 +109,7 @@ void HAPWiFiHelper::begin(HAPConfigurationWiFi* config, std::function<bool(bool)
 void HAPWiFiHelper::startWPS(){
 
 	WiFi.mode(WIFI_MODE_STA);
-	
+
 	// ESP_ERROR_CHECK(esp_wifi_wps_enable(WPS_TYPE_PBC));
 	ESP_ERROR_CHECK(esp_wifi_wps_enable(&_wpsConfig));
 	ESP_ERROR_CHECK(esp_wifi_wps_start(0));
@@ -129,7 +129,7 @@ void HAPWiFiHelper::startWPS(){
 void HAPWiFiHelper::startCaptivePortal(){
 
 	LogI("Starting captive portal ...", false);
-	
+
 	//WiFi.disconnect();   //added to start with the wifi off, avoid crashing
 	WiFi.mode(WIFI_OFF); //added to start with the wifi off, avoid crashing
 	WiFi.mode(WIFI_AP);
@@ -142,7 +142,7 @@ void HAPWiFiHelper::startCaptivePortal(){
 
 	_dnsServer = new DNSServer();
 	_dnsServer->start(HAP_CAPTIVE_DNSSERVER_PORT , "*", apIP);
-	
+
 	// SPIFFS.begin();
 
 	_webserver = new HTTPServer();
@@ -153,7 +153,7 @@ void HAPWiFiHelper::startCaptivePortal(){
 	// servers (you could also run multiple HTTPS servers)
 	_webserver->registerNode(nodeRootGet);
 	_webserver->registerNode(nodeRootPost);
-  
+
 
 	// We do the same for the default Node
 	_webserver->setDefaultNode(nodeRootGet);
@@ -163,7 +163,7 @@ void HAPWiFiHelper::startCaptivePortal(){
 	if (_webserver->isRunning()) {
 		LogD("OK", true);
 	}
-	
+
 	_captiveInitialized = true;
 	LogI(" OK", true);
 }
@@ -172,10 +172,10 @@ void HAPWiFiHelper::startCaptivePortal(){
 void HAPWiFiHelper::handleRootGet(HTTPRequest *req, HTTPResponse *res)
 {
 	req->discardRequestBody();
-    // template processing	
-#if HAP_WEBSERVER_USE_SPIFFS        	
+    // template processing
+#if HAP_WEBSERVER_USE_SPIFFS
 	HAPWebServerTemplateProcessor::processAndSend(res, "/index.html", &rootKeyProcessor);
-#else		
+#else
 	HAPWebServerTemplateProcessor::processAndSendEmbedded(res, html_template_index_start, html_template_index_end, &rootKeyProcessor);
 #endif
 }
@@ -189,17 +189,17 @@ void HAPWiFiHelper::handleRootPost(HTTPRequest *req, HTTPResponse *res)
 	String ssid = "";
 	String password = "";
 
-	
+
 	for (auto param : parameters) {
-		
+
 		if (param.first == "ssid") {
 			ssid = param.second.c_str();
-		} else // if (param.first == "password") 
+		} else // if (param.first == "password")
 		{
 			password = param.second.c_str();
 		}
 	}
-	
+
 	if (ssid != "") {
 		_config->addNetwork(ssid, password);
 		_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;
@@ -210,32 +210,32 @@ void HAPWiFiHelper::handleRootPost(HTTPRequest *req, HTTPResponse *res)
 
 		delay(1000);
 		stopCaptivePortal();
-		
+
 		connect(HAP_WIFI_MODE_MULTI);
 	} else {
-		// template processing	
-#if HAP_WEBSERVER_USE_SPIFFS        	
+		// template processing
+#if HAP_WEBSERVER_USE_SPIFFS
     	HAPWebServerTemplateProcessor::processAndSend(res, "/index.html", &rootKeyProcessor);
-#else		
+#else
 		HAPWebServerTemplateProcessor::processAndSendEmbedded(res, html_template_index_start, html_template_index_end, &rootKeyProcessor);
-#endif		
-	}	
+#endif
+	}
 }
 
 void HAPWiFiHelper::rootKeyProcessor(const String& key, HTTPResponse * res){
-#if HAP_WEBSERVER_TEMPLATE_PROCESSING_CHUNKED							        
+#if HAP_WEBSERVER_TEMPLATE_PROCESSING_CHUNKED
     if (key == "VAR_TITLE") {
-						        
+
 		HAPWebServerTemplateProcessor::sendChunk(res, HAP_CAPTIVE_TITLE);
     } else if (key == "VAR_NAVIGATION") {
 
-      	HAPWebServerTemplateProcessor::sendChunk(res, HAPWebServer::buildNavigation(false));  
+      	HAPWebServerTemplateProcessor::sendChunk(res, HAPWebServer::buildNavigation(false));
     } else if (key == "VAR_CONTENT") {
 
 		int n = WiFi.scanNetworks();
 
 		if (n == 0) {
-			
+
 
 			HAPWebServerTemplateProcessor::sendChunk(res, "<p>No networks found</p>");
 		} else {
@@ -248,13 +248,13 @@ void HAPWiFiHelper::rootKeyProcessor(const String& key, HTTPResponse * res){
 			result += "<tbody>";
 			for (int i = 0; i < n; ++i) {
 				// res->printf("<tr><td>%s</td><td>%d</td><td>%s</td></tr>\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i), (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
-				result += "<tr>";				
+				result += "<tr>";
 				result += "<td>" + WiFi.SSID(i) + "</td>";
 				result += "<td>" + String(WiFi.RSSI(i)) + "</td>";
-				result += "<td>" + (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? String(" ") : String("*") + "</td>";								
+				result += "<td>" + (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? String(" ") : String("*") + "</td>";
 				result += "</tr>";
 			}
-			
+
 			result += "</tbody>";
 			result += "</table>";
 			result += "</div>";
@@ -276,7 +276,7 @@ void HAPWiFiHelper::rootKeyProcessor(const String& key, HTTPResponse * res){
    if (key == "VAR_TITLE") {
 		res->print(HAP_CAPTIVE_TITLE);
     } else if (key == "VAR_NAVIGATION") {
-		res->print(HAPWebServer::buildNavigation(false));	
+		res->print(HAPWebServer::buildNavigation(false));
     } else if (key == "VAR_CONTENT") {
 
 		int n = WiFi.scanNetworks();
@@ -303,7 +303,7 @@ void HAPWiFiHelper::rootKeyProcessor(const String& key, HTTPResponse * res){
 			res->print("<input type='submit' value='Save'>");
 			res->print("</form>");
 
-			
+
 		}
     } else {
 		res->print("");
@@ -325,7 +325,7 @@ void HAPWiFiHelper::stopCaptivePortal() {
 	}
 
 	delete _webserver;
-	
+
 	// SPIFFS.end();
 	LogI(" OK", true);
 
@@ -354,17 +354,17 @@ void HAPWiFiHelper::connectMulti(){
 			delay(HAP_WIFI_CONNECTION_RETRY_DELAY);
 			connectMulti();
 		}
-					
+
 	}
 }
 
 void HAPWiFiHelper::connect(enum HAP_WIFI_MODE mode){
-	
+
 	switch (mode){
 
 
 		case HAP_WIFI_MODE_AP:
-#if HAP_ENABLE_WEBSERVER		
+#if HAP_ENABLE_WEBSERVER
 			startCaptivePortal();
 			break;
 #else
@@ -372,22 +372,22 @@ void HAPWiFiHelper::connect(enum HAP_WIFI_MODE mode){
 			break;
 #endif
 
-		case HAP_WIFI_MODE_MULTI:	
-			
+		case HAP_WIFI_MODE_MULTI:
+
 			// Add networks
-			for( const auto& cred : _config->credentials ) { 					
+			for( const auto& cred : _config->credentials ) {
 				_wifiMulti.addAP(cred->ssid, cred->password);
-			}	
+			}
 			connectMulti();
 
 			break;
-		case HAP_WIFI_MODE_WPS:	
+		case HAP_WIFI_MODE_WPS:
 			startWPS();
 			break;
 
 		case HAP_WIFI_MODE_SMARTCONFIG:
 			//Init WiFi as Station, start SmartConfig
-			WiFi.mode(WIFI_AP_STA);			
+			WiFi.mode(WIFI_AP_STA);
 			WiFi.beginSmartConfig();
 
 			//Wait for SmartConfig packet from mobile
@@ -428,7 +428,7 @@ void HAPWiFiHelper::handle(){
 
 #if HAP_ENABLE_WEBSERVER
 	_dnsServer->processNextRequest();
-	
+
 	_webserver->loop();
 	// _config->config()["wifi"]["mode"] = (uint8_t)HAPWiFiModeMulti;
 	// stopCaptivePortal();
@@ -461,9 +461,9 @@ void HAPWiFiHelper::eventHandler(WiFiEvent_t event) {
 
 		case SYSTEM_EVENT_AP_STA_GOT_IP6:
 			// LogD( F("\nGot IPv6 address "), false);
-			// LogD(WiFi.localIPv6().toString().c_str(), true);			
-			break;	
-			
+			// LogD(WiFi.localIPv6().toString().c_str(), true);
+			break;
+
 		case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
 			/*point: the function esp_wifi_wps_start() only get ssid & password
 			 * so call the function esp_wifi_connect() here
@@ -475,27 +475,27 @@ void HAPWiFiHelper::eventHandler(WiFiEvent_t event) {
 			LogI("", true);
 
 			_config->addNetwork(WiFi.SSID(), WiFi.psk());
-			_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;			
+			_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;
 			_config->save();
-			
+
 			ESP_ERROR_CHECK(esp_wifi_wps_disable());
-			delay(500);			
+			delay(500);
 			WiFi.begin();
 
 			break;
 
 		case SYSTEM_EVENT_STA_WPS_ER_FAILED:
-			LogE( F("WPS failed! - Retrying"), true);			
+			LogE( F("WPS failed! - Retrying"), true);
             ESP_ERROR_CHECK(esp_wifi_wps_disable());
 			ESP_ERROR_CHECK(esp_wifi_wps_enable(&_wpsConfig));
-			ESP_ERROR_CHECK(esp_wifi_wps_start(0));  
+			ESP_ERROR_CHECK(esp_wifi_wps_start(0));
 			break;
 
 		case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
-			LogE( F("WPS timedout! - Please enable WPS on your router! Retrying"), true);			
+			LogE( F("WPS timedout! - Please enable WPS on your router! Retrying"), true);
             ESP_ERROR_CHECK(esp_wifi_wps_disable());
 			ESP_ERROR_CHECK(esp_wifi_wps_enable(&_wpsConfig));
-			ESP_ERROR_CHECK(esp_wifi_wps_start(0));            
+			ESP_ERROR_CHECK(esp_wifi_wps_start(0));
 			break;
 //		case SYSTEM_EVENT_STA_WPS_ER_PIN:
 //			Log(COLOR_GREEN, "WPS PIN Code", true);
@@ -512,7 +512,7 @@ void HAPWiFiHelper::eventHandler(WiFiEvent_t event) {
 	}
 }
 
-#else 
+#else
 
 void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_event_t *prov_event)
 {
@@ -520,24 +520,24 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 		switch (sys_event->event_id) {
 			case SYSTEM_EVENT_STA_GOT_IP:
 				LogD( F("Got IP address "), false);
-				LogD(ip4addr_ntoa(&sys_event->event_info.got_ip.ip_info.ip), true);		
+				LogD(ip4addr_ntoa(&sys_event->event_info.got_ip.ip_info.ip), true);
 				break;
 
 			case SYSTEM_EVENT_STA_DISCONNECTED:
 				LogW("WiFi lost connection.  Attempting to reconnect...", true);
-				WiFi.reconnect();			
+				WiFi.reconnect();
 				break;
 			case SYSTEM_EVENT_STA_CONNECTED:
 				//enable sta ipv6 here
-    	        WiFi.enableIpV6();			
+    	        WiFi.enableIpV6();
 				// LogV( F("OK"), true);
 				break;
 
 			case SYSTEM_EVENT_AP_STA_GOT_IP6:
 				LogD( F("\nGot IPv6 address "), false);
-				LogD(WiFi.localIPv6().toString().c_str(), true);			
-				break;	
-			
+				LogD(WiFi.localIPv6().toString().c_str(), true);
+				break;
+
 			case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
 				/*point: the function esp_wifi_wps_start() only get ssid & password
 				* so call the function esp_wifi_connect() here
@@ -549,27 +549,27 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 				LogI("", true);
 
 				_config->addNetwork(WiFi.SSID(), WiFi.psk());
-				_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;			
+				_config->mode = (uint8_t)HAP_WIFI_MODE_MULTI;
 				_config->save();
-				
+
 				ESP_ERROR_CHECK(esp_wifi_wps_disable());
-				delay(500);			
+				delay(500);
 				WiFi.begin();
 
 				break;
 
 			case SYSTEM_EVENT_STA_WPS_ER_FAILED:
-				LogE( F("WPS failed! - Retrying"), true);			
+				LogE( F("WPS failed! - Retrying"), true);
 				ESP_ERROR_CHECK(esp_wifi_wps_disable());
 				ESP_ERROR_CHECK(esp_wifi_wps_enable(&_wpsConfig));
-				ESP_ERROR_CHECK(esp_wifi_wps_start(0));  
+				ESP_ERROR_CHECK(esp_wifi_wps_start(0));
 				break;
 
 			case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
-				LogE( F("WPS timedout! - Please enable WPS on your router! Retrying"), true);			
+				LogE( F("WPS timedout! - Please enable WPS on your router! Retrying"), true);
 				ESP_ERROR_CHECK(esp_wifi_wps_disable());
 				ESP_ERROR_CHECK(esp_wifi_wps_enable(&_wpsConfig));
-				ESP_ERROR_CHECK(esp_wifi_wps_start(0));            
+				ESP_ERROR_CHECK(esp_wifi_wps_start(0));
 				break;
 	// 		case SYSTEM_EVENT_STA_WPS_ER_PIN:
 	// 			Log(COLOR_GREEN, "WPS PIN Code", true);
@@ -584,16 +584,16 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 
 			default:
 				break;
-		}      
-    } 
+		}
+    }
 
 	if (prov_event) {
         switch (prov_event->event) {
-			case WIFI_PROV_START:				
+			case WIFI_PROV_START:
 				LogI("Provisioning started! Please enter the credentials of your access point using the iPhone app", true);
 				break;
 
-			case WIFI_PROV_CRED_RECV: 
+			case WIFI_PROV_CRED_RECV:
 				{
 					LogD("Received Wi-Fi credentials: ", true);
 					wifi_sta_config_t *wifi_sta_cfg = (wifi_sta_config_t *)prov_event->event_data;
@@ -603,25 +603,25 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 					LogD((const char *) wifi_sta_cfg->password, true);
 
 					_config->addNetwork((const char *) wifi_sta_cfg->ssid, (const char *)wifi_sta_cfg->password);
-					_config->config()["wifi"]["mode"] = (uint8_t)HAP_WIFI_MODE_MULTI;			
+					_config->config()["wifi"]["mode"] = (uint8_t)HAP_WIFI_MODE_MULTI;
 					_config->save();
 
 					break;
 				}
 
-			
-			case WIFI_PROV_CRED_FAIL: 
+
+			case WIFI_PROV_CRED_FAIL:
 				{
 					wifi_prov_sta_fail_reason_t *reason = (wifi_prov_sta_fail_reason_t *)prov_event->event_data;
 					LogE("\nProvisioning failed!\nPlease reset to factory and retry provisioning\n", true);
-					if(*reason == WIFI_PROV_STA_AUTH_ERROR) 
+					if(*reason == WIFI_PROV_STA_AUTH_ERROR)
 						LogE("\nWi-Fi AP password incorrect", true);
 					else
-						LogE("\nWi-Fi AP not found....Add API \" nvs_flash_erase() \" before beginProvision()", true);        
+						LogE("\nWi-Fi AP not found....Add API \" nvs_flash_erase() \" before beginProvision()", true);
 					break;
 				}
 
-			
+
 			case WIFI_PROV_CRED_SUCCESS:
 				LogI("Provisioning was successful!", true);
 				break;
@@ -633,7 +633,7 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 
 			default:
 				break;
-		}      
+		}
     }
 }
 
@@ -655,7 +655,7 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 // 			// return CRGB::Orange;
 // 			return HAPColorOrange;
 // 		case HAP_WIFI_MODE_BLE_PROV:
-// 			// return CRGB::Blue;		
+// 			// return CRGB::Blue;
 // 			return HAPColorBlue;
 // 		case HAP_WIFI_MODE_AP_PROV:
 // 			// return CRGB::Violet;
@@ -682,7 +682,7 @@ void HAPWiFiHelper::eventHandlerBLEProv(system_event_t *sys_event, wifi_prov_eve
 // 			// return CRGB::Orange;
 // 			return HAPColorOrange;
 // 		case HAP_WIFI_MODE_BLE_PROV:
-// 			// return CRGB::Blue;		
+// 			// return CRGB::Blue;
 // 			return HAPColorBlue;
 // 		case HAP_WIFI_MODE_AP_PROV:
 // 			// return CRGB::Violet;
@@ -709,7 +709,7 @@ CRGB HAPWiFiHelper::getColorForMode(const HAP_WIFI_MODE mode){
 			// return CRGB::Orange;
 			return HAPColorOrange;
 		case HAP_WIFI_MODE_BLE_PROV:
-			// return CRGB::Blue;		
+			// return CRGB::Blue;
 			return HAPColorBlue;
 		case HAP_WIFI_MODE_AP_PROV:
 			// return CRGB::Violet;

@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegato+ScheduleEnergy.hpp
 // Teensy_Homekit
 //
@@ -26,13 +26,13 @@ public:
     void begin();
 
     static uint32_t encodeTimerCount(uint8_t timerCount);
-    static uint8_t encodeProgramCount(uint8_t programCount);    
+    static uint8_t encodeProgramCount(uint8_t programCount);
 
     bool decodeToggleOnOff(uint8_t* data);
     void decodeDays(uint8_t *data);
     void decodePrograms(uint8_t* data);
     void encodePrograms(uint8_t* data, size_t *dataSize);
-    
+
     String buildScheduleString();
 
     void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){

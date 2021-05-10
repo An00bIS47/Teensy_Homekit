@@ -11,15 +11,15 @@
 #include "HAPLogger.hpp"
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-HAPPluginKNXDevice::HAPPluginKNXDevice(){   
-    // _name    = "";    
+HAPPluginKNXDevice::HAPPluginKNXDevice(){
+    // _name    = "";
     _id = 0;
     _type = HAPPluginKNXServiceTypeNone;
-    
+
     _accessory          = nullptr;
-    _eventManager       = nullptr;  
+    _eventManager       = nullptr;
     _fakegatoFactory    = nullptr;
 }
 
@@ -29,7 +29,7 @@ HAPPluginKNXDevice::HAPPluginKNXDevice(){
 // {
 //     type = 0;
 //     _accessory          = nullptr;
-//     _eventManager       = nullptr;      
+//     _eventManager       = nullptr;
 //     _fakegatoFactory    = nullptr;
 
 //     sleepInterval       = 1;
@@ -37,31 +37,31 @@ HAPPluginKNXDevice::HAPPluginKNXDevice(){
 // }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginKNXDevice::~HAPPluginKNXDevice(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginKNXDevice::setEventManager(EventManager* eventManager){
-      
+
     _eventManager = eventManager;
-    // Serial.printf("event: %p\n", _eventManager);  
+    // Serial.printf("event: %p\n", _eventManager);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginKNXDevice::setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory){
-    
+
     _fakegatoFactory = fakegatoFactory;
     // Serial.printf("fakegato: %p\n", _fakegatoFactory);
-}   
+}
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginKNXDevice::identify(bool oldValue, bool newValue) {
     printf("Start Identify knx: %d\n", _id);

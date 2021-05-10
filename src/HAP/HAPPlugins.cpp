@@ -36,7 +36,7 @@ std::unique_ptr<HAPPlugin> HAPPluginFactory::getPlugin(String name) {
 std::vector<String> HAPPluginFactory::names(){
 	std::vector<String> v;
 	for(std::map<String, IPluginRegistrar*>::iterator it = _registry.begin(); it != _registry.end(); ++it) {
-		v.push_back(it->first);	  
+		v.push_back(it->first);
 	}
 	return v;
 }

@@ -27,7 +27,7 @@
 #define HAP_UPDATE_WEB_CHECK_URL_PATH		"/api/update"
 #define HAP_UPDATE_WEB_DOWNLOAD_URL_PATH	"/api/update"
 
-// ToDo: remove this here 
+// ToDo: remove this here
 // ToDo: Add password protection for OTA Update
 const char* rootCACertificate = \
 "-----BEGIN CERTIFICATE-----\n" \
@@ -63,7 +63,7 @@ HAPUpdate::HAPUpdate()
 	_remoteInfo = HAPUpdateVersionInfo();
 	// _localVersion = nullptr;
 
-	_configuration = nullptr;	
+	_configuration = nullptr;
 }
 
 HAPUpdate::~HAPUpdate() {
@@ -71,11 +71,11 @@ HAPUpdate::~HAPUpdate() {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPUpdate::begin(const char* hostname) {
 
-#if HAP_ENABLE_UPDATE_OTA	
+#if HAP_ENABLE_UPDATE_OTA
 
 	// Disable mDNS cause we use our own!
 	ArduinoOTA.setMdnsEnabled(false);
@@ -90,7 +90,7 @@ void HAPUpdate::begin(const char* hostname) {
 	if (strlen(_configuration->password) > 0) {
 		ArduinoOTA.setPassword(_configuration->password);
 	}
-	
+
 	// Password can be set with it's md5 value as well
 	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
 	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
@@ -126,17 +126,17 @@ void HAPUpdate::begin(const char* hostname) {
 	// set ArduinoOTA mDNS
 	mDNSExt.enableArduino(_configuration->port, (strlen(_configuration->password) > 0));
 
-#endif	
+#endif
 	// Delay first update check for 3 seconds
 	_previousMillis = (millis() + HAP_UPDATE_WEB_INTERVAL) - 3000;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPUpdate::handle() {
 
-#if HAP_ENABLE_UPDATE_OTA	
+#if HAP_ENABLE_UPDATE_OTA
 	ArduinoOTA.handle();
 #endif
 
@@ -155,7 +155,7 @@ void HAPUpdate::handle() {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPUpdate::updateAvailable(){
 	return _available;
@@ -164,8 +164,8 @@ bool HAPUpdate::updateAvailable(){
 
 #if HAP_ENABLE_UPDATE_WEB
 bool HAPUpdate::checkUpdateAvailable(){
-	
-	String url = String(HAP_UPDATE_HTTP) + _host + String(HAP_UPDATE_WEB_CHECK_URL_PATH);	
+
+	String url = String(HAP_UPDATE_HTTP) + _host + String(HAP_UPDATE_WEB_CHECK_URL_PATH);
 	LogD("Local version: " + HAPVersion(HOMEKIT_VERSION).toString(), true);
 
 	uint32_t rev = (uint32_t)strtol(HAP_PLUGIN_FEATURE_NUMBER, NULL, 2);
@@ -183,29 +183,29 @@ bool HAPUpdate::checkUpdateAvailable(){
 	String postData;
 	serializeJson(doc, postData);
 
-	LogD("Post data: " + postData, true);	
-	
+	LogD("Post data: " + postData, true);
+
 	_http = new HTTPClient();
-	
+
 	_http->begin(_host, _port , "/api/update", rootCACertificate); //HTTPS example connection
 	_http->addHeader("Content-Type", "application/json");
 
 	int httpCode = _http->POST((uint8_t*)postData.c_str(), postData.length());
-	
+
 	if (httpCode > 0) {
 		LogD("Got response code: " + String(httpCode), true);
 		//file found at server --> on unsucessful connection code will be -1
 		if (httpCode == HTTP_CODE_OK) {
 			String payload = _http->getString();
 			LogD("Got payload: " + payload, true);
-						
+
 			// // Parse response
 			const size_t capResp = JSON_OBJECT_SIZE(6) + 256;
 			DynamicJsonDocument resp(capResp);
 			deserializeJson(resp, payload);
 
 			_remoteInfo.version = HAPVersion(resp["version"].as<const char*>());
-			_remoteInfo.md5 = resp["md5"].as<const char*>();			
+			_remoteInfo.md5 = resp["md5"].as<const char*>();
 			_remoteInfo.featureRev = (uint32_t)strtol(resp["feature_rev"].as<const char*>(), NULL, 16);
 			_remoteInfo.size = resp["firmware_size"].as<uint32_t>();
 
@@ -221,7 +221,7 @@ bool HAPUpdate::checkUpdateAvailable(){
 	_http->end();
 
 	delete _http;
-	
+
 	return _available;
 }
 
@@ -247,10 +247,10 @@ void HAPUpdate::execWebupdate() {
 		String query = "/api/update?";
 		query += "name=" + String("Homekit") + "&";
 		query += "brand=" + String(HAP_MANUFACTURER) + "&";
-		query += "version=" + onlineVersion() + "&";		
-		query += "feature_rev=" + String(_remoteInfo.featureRev, 16);		
-		
-		// ToDo: urlencode query		
+		query += "version=" + onlineVersion() + "&";
+		query += "feature_rev=" + String(_remoteInfo.featureRev, 16);
+
+		// ToDo: urlencode query
 		t_httpUpdate_return ret = httpUpdate.update(client, HAP_UPDATE_SERVER_HOST, HAP_UPDATE_SERVER_PORT, query);
 
 		switch (ret) {

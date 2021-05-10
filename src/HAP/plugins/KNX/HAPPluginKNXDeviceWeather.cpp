@@ -15,15 +15,15 @@
 #define HAP_KNX_WEATHER_VERSION "0.1"
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginKNXDeviceWeather::HAPPluginKNXDeviceWeather(uint8_t id_, char name[], bool enableFakegato, uint16_t koTemperature, uint16_t koHumidity, uint16_t koAirPressure, bool useHumidityDPT9){
     _id = id_;
-    strncpy(_name, name, 40);          
-    _type    			= HAPPluginKNXServiceTypeWeather;	
+    strncpy(_name, name, 40);
+    _type    			= HAPPluginKNXServiceTypeWeather;
 
     _accessory          = nullptr;
-    _eventManager       = nullptr;      
+    _eventManager       = nullptr;
     _fakegatoFactory    = nullptr;
     _fakegato           = nullptr;
 
@@ -38,7 +38,7 @@ HAPPluginKNXDeviceWeather::HAPPluginKNXDeviceWeather(uint8_t id_, char name[], b
 
     _useHumdityDPT9     = useHumidityDPT9;
 
-    _shouldSend         = true;  
+    _shouldSend         = true;
 }
 
 
@@ -48,12 +48,12 @@ HAPPluginKNXDeviceWeather::~HAPPluginKNXDeviceWeather(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
 
     if ( (_koTemperature == 0) && (_koHumidity == 0) && (_koAirPressure == 0) ) {
-        LogE("ERROR: Please set communication objects first!", true);        
+        LogE("ERROR: Please set communication objects first!", true);
         return nullptr;
     }
 
@@ -66,7 +66,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
     _accessory->addInfoService(String(_name), "KNX", "KNX Weather", sn, callbackIdentify, HAP_KNX_WEATHER_VERSION);
 
 
-    
+
     //
 	// Temperature
 	//
@@ -82,14 +82,14 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         //HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
         _temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
         _temperatureValue->setValue(0.0F);
-                
+
         _temperatureValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceWeather::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
-        
+
         _accessory->addCharacteristicToService(temperatureService, _temperatureValue);
-        
+
         knx.getGroupObject(_koTemperature).dataPointType(DPT_Value_Temp);
         knx.getGroupObject(_koTemperature).callback(std::bind(&HAPPluginKNXDeviceWeather::setTemperatureFromKNXCallback, this, std::placeholders::_1));
-        
+
         // Read value from knx
         _temperatureValue->value(true);
     }
@@ -136,7 +136,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
         pressureServiceName->setValue("Pressure Sensor " + String(_id));
         _accessory->addCharacteristicToService(pressureService, pressureServiceName);
-        
+
         _pressureValue = new HAPCharacteristicT<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
         _pressureValue->setValue(320);
 
@@ -152,10 +152,10 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
     }
 
 
-    // 
+    //
     // Last Update characteristics  (Custom)
     // is bound to temperature service
-    // 
+    //
     // if (tmpService != nullptr) {
     //     _lastUpdate = new HAPCharacteristicString(HAP_CHARACTERISTIC_FAKEGATO_OBSERVATION_TIME, permission_read|permission_notify, 32);
     //     _lastUpdate->setDescription("Observation Time");
@@ -166,44 +166,44 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
     //     _accessory->addCharacteristicToService(tmpService, _lastUpdate);
     // }
 
-    
-    
+
+
     //
 	// FakeGato
-	// 			
+	//
     if (_enableFakegato) {
-        
+
         if (_fakegato == nullptr) {
             _fakegato = new HAPFakegato();
         }
 
 
-        if (_koTemperature > 0) _fakegato->addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginKNXDeviceWeather::getAveragedTemperatureValue, this)));        
+        if (_koTemperature > 0) _fakegato->addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginKNXDeviceWeather::getAveragedTemperatureValue, this)));
         if (_koHumidity > 0)    _fakegato->addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginKNXDeviceWeather::getAveragedHumidityValue, this)));
         if (_koAirPressure > 0) _fakegato->addCharacteristic(new HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginKNXDeviceWeather::getAveragedPressureValue, this)));
-                
+
         _fakegato->registerFakeGatoService(_accessory, String(_name));
-                
+
         auto callbackAddEntry = std::bind(&HAPPluginKNXDeviceWeather::fakeGatoCallback, this);
         _fakegatoFactory->registerFakeGato(_fakegato, callbackAddEntry);
-    }	
+    }
 
     return _accessory;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-void HAPPluginKNXDeviceWeather::setEventManager(EventManager* eventManager){      
+void HAPPluginKNXDeviceWeather::setEventManager(EventManager* eventManager){
     _eventManager = eventManager;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-void HAPPluginKNXDeviceWeather::setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory){    
+void HAPPluginKNXDeviceWeather::setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory){
     _fakegatoFactory = fakegatoFactory;
-}   
+}
 
 
 void HAPPluginKNXDeviceWeather::identify(bool oldValue, bool newValue){
@@ -228,9 +228,9 @@ void HAPPluginKNXDeviceWeather::changedPressure(uint16_t oldValue, uint16_t newV
 // }
 
 
-bool HAPPluginKNXDeviceWeather::fakeGatoCallback(){	
-    
-    uint8_t bitmask = 0;    
+bool HAPPluginKNXDeviceWeather::fakeGatoCallback(){
+
+    uint8_t bitmask = 0;
     if (_koTemperature > 0) bitmask += 1 << 0;
     if (_koHumidity > 0)    bitmask += 1 << 1;
     if (_koAirPressure > 0) bitmask += 1 << 2;
@@ -244,10 +244,10 @@ void HAPPluginKNXDeviceWeather::handle(bool forced){
 }
 
 /**
- * @brief 
+ * @brief
  *  Reads the values WRITTEN into this group object and sets the temperature characteristic accordingly
- * 
- * @param go 
+ *
+ * @param go
  */
 void HAPPluginKNXDeviceWeather::setTemperatureFromKNXCallback(GroupObject& go){
     float result = go.value();
@@ -261,17 +261,17 @@ void HAPPluginKNXDeviceWeather::setTemperatureFromKNXCallback(GroupObject& go){
 
 
 /**
- * @brief 
+ * @brief
  *  Reads the values WRITTEN into this group object and sets the humidity characteristic accordingly
- * 
- * @param go 
+ *
+ * @param go
  */
 void HAPPluginKNXDeviceWeather::setHumidityFromKNXCallback(GroupObject& go){
-    uint8_t result = go.value();    
+    uint8_t result = go.value();
     float floatResult = result * 1.0;
-    
+
     // Serial.println("Humiditiy: " + String(floatResult));
-    
+
     _humidityValue->setValue(floatResult);
     _humidityAverage.addValue(floatResult);
     queueNotifyEvent(_humidityValue);
@@ -279,10 +279,10 @@ void HAPPluginKNXDeviceWeather::setHumidityFromKNXCallback(GroupObject& go){
 
 
 /**
- * @brief 
+ * @brief
  *  Reads the values WRITTEN into this group object and sets the air pressure characteristic accordingly
- * 
- * @param go 
+ *
+ * @param go
  */
 void HAPPluginKNXDeviceWeather::setPressureFromKNXCallback(GroupObject& go){
     uint16_t result = go.value();

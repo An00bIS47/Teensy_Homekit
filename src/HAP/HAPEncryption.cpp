@@ -32,8 +32,8 @@ int HAPEncryption::begin(){
 }
 
 
-int HAPEncryption::pad(size_t *padded_buflen_p, uint8_t *msg, 
-        const uint8_t *buf, size_t unpadded_buflen, size_t blocksize, 
+int HAPEncryption::pad(size_t *padded_buflen_p, uint8_t *msg,
+        const uint8_t *buf, size_t unpadded_buflen, size_t blocksize,
         size_t max_msglen, bool zeroPadded )
 {
     unsigned char          *tail;
@@ -58,19 +58,19 @@ int HAPEncryption::pad(size_t *padded_buflen_p, uint8_t *msg,
         return -1;
     }
     xpadded_len = unpadded_buflen + xpadlen;
-    
+
 
     if (max_msglen != 0) {
         if (xpadded_len >= max_msglen) {
             return -1;
-        } 
+        }
     }
-   
-    
+
+
     if (padded_buflen_p != NULL) {
         *padded_buflen_p = xpadded_len + 1U;
     }
-    
+
     if (msg == NULL) {
         return -2;
     }
@@ -86,9 +86,9 @@ int HAPEncryption::pad(size_t *padded_buflen_p, uint8_t *msg,
         if (zeroPadded) {
             tail[-i] = (tail[-i] & mask) | (0x00 & barrier_mask);
         } else {
-            tail[-i] = (tail[-i] & mask) | (0x80 & barrier_mask);    
+            tail[-i] = (tail[-i] & mask) | (0x80 & barrier_mask);
         }
-        
+
         mask |= barrier_mask;
     }
     return 0;
@@ -102,11 +102,11 @@ int HAPEncryption::unpad(size_t *unpadded_buflen_p, const unsigned char *buf,
 {
     const unsigned char *tail;
     unsigned char        acc = 0U;
-    
+
     unsigned char        valid = 0U;
     volatile size_t      pad_len = 0U;
     size_t               i;
-    
+
 
     if (padded_buflen < blocksize || blocksize <= 0U) {
         return -1;
@@ -133,8 +133,8 @@ int HAPEncryption::unpad(size_t *unpadded_buflen_p, const unsigned char *buf,
 
 
 
-int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText, 
-            size_t cipherTextLength, uint8_t* AAD, uint8_t *nonce, 
+int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText,
+            size_t cipherTextLength, uint8_t* AAD, uint8_t *nonce,
             uint8_t *key) {
 
     begin();
@@ -151,18 +151,18 @@ int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText,
     int paddedAADLengthNum       = paddedLength(HAP_ENCRYPTION_AAD_SIZE, 8);
     int paddedCipherLengthNum    = paddedLength( HAPHelper::numDigits(paddedCipherLength), 8);
 
-    int paddedLength        = paddedAADLength 
-                            + paddedCipherLength 
-                            + paddedAADLengthNum 
+    int paddedLength        = paddedAADLength
+                            + paddedCipherLength
+                            + paddedAADLengthNum
                             + paddedCipherLengthNum;
 
 
     uint8_t msg[paddedLength];
-    
-#if HAP_DEBUG_ENCRYPTION    
+
+#if HAP_DEBUG_ENCRYPTION
     Serial.printf("paddedLength: %d\n", paddedLength);
 #endif
-    
+
     int aad_len = HAP_ENCRYPTION_AAD_SIZE;
 
     memcpy(msg, AAD, aad_len);
@@ -183,11 +183,11 @@ int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText,
         return -1;
     }
 #else
-    // ToDo: 
+    // ToDo:
 #endif
 
 
-#if HAP_DEBUG_ENCRYPTION    
+#if HAP_DEBUG_ENCRYPTION
     Serial.println("polyKey: ");
     HAPHelper::arrayPrint(polyKey, HAP_ENCRYPTION_KEY_SIZE);
 #endif
@@ -200,10 +200,10 @@ int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText,
         return -1;
     }
 #else
-    // ToDo: 
-#endif    
-    
-#if HAP_DEBUG_ENCRYPTION    
+    // ToDo:
+#endif
+
+#if HAP_DEBUG_ENCRYPTION
     Serial.println("generated hmac:");
     HAPHelper::arrayPrint(hmac, crypto_onetimeauth_BYTES);
     //Serial.printf("msg: %d\n", sizeof msg);
@@ -221,7 +221,7 @@ int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText,
 // calculate the HMAC is not compatible with homekit
 // (long story short, it uses [ AAD, AAD.length, CipherText, CipherText.length ]
 // whereas homekit expects [ AAD, CipherText, AAD.length, CipherText.length ]
-// 
+//
 // function verifyAndDecrypt(cipherText, mac, AAD, nonce, key) {
 //     const matches =
 //         Sodium.crypto_verify_16(
@@ -236,8 +236,8 @@ int HAPEncryption::computePoly1305(uint8_t* hmac, uint8_t* cipherText,
 //
 //     return null;
 // }
-int HAPEncryption::verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[], 
-            uint16_t length, uint8_t mac[], uint8_t aad[], 
+int HAPEncryption::verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[],
+            uint16_t length, uint8_t mac[], uint8_t aad[],
             int decryptCount, uint8_t key[]){
 
 
@@ -246,32 +246,32 @@ int HAPEncryption::verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[],
     if ( length > 1024 + HAP_ENCRYPTION_AAD_SIZE + HAP_ENCRYPTION_HMAC_SIZE ){
         LogE("NOWNOW!!", true);
     }
-    
+
     // nonce
     // the nonce is 12 byte long
-    // 
-    // the first 4 bytes are always 
-    //      
-    //      00 00 00 00 
-    // 
+    //
+    // the first 4 bytes are always
+    //
+    //      00 00 00 00
+    //
     // the nonce is incremented each time a decryption with the same
     // encryption key is performed
-    // 
+    //
     // !!! the counter starts at the last bits (10, 11) (!started by 0!)
-    // 
+    //
     // thus the remaining 8 bytes will look as follows
-    // 
-    //      | 00 00 00 00 | 00 00 00 00 00 00 00 01 
+    //
+    //      | 00 00 00 00 | 00 00 00 00 00 00 00 01
     //          first 4       remaining 8 bytes   ^
     //                                            | -> this will be incremented each time this function is called
-    //  
-    //                                               
-    uint8_t nonce[HAP_ENCRYPTION_NONCE_SIZE] = { 0, };            
+    //
+    //
+    uint8_t nonce[HAP_ENCRYPTION_NONCE_SIZE] = { 0, };
     nonce[4] = decryptCount % 256;
     nonce[5] = decryptCount++ / 256;
-    
 
-#if HAP_DEBUG_ENCRYPTION    
+
+#if HAP_DEBUG_ENCRYPTION
     LogD("decryptCount: " + String(decryptCount), true);
 
     Serial.println("nonce:");
@@ -300,7 +300,7 @@ int HAPEncryption::verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[],
         return -1;
     }
 
-#if HAP_DEBUG_ENCRYPTION  
+#if HAP_DEBUG_ENCRYPTION
     Serial.println("computed hmac:");
     HAPHelper::arrayPrint(hmac, HAP_ENCRYPTION_HMAC_SIZE);
 #endif
@@ -308,33 +308,33 @@ int HAPEncryption::verifyAndDecrypt(uint8_t *plainText, uint8_t cipherText[],
 
 
     if ( crypto_verify_16(mac, hmac) != 0 ) {
-#if !HAP_ENCRYPTION_SUPPRESS_WARNINGS      
+#if !HAP_ENCRYPTION_SUPPRESS_WARNINGS
         LogW("[WARNING] crypto_verify_16 failed! - Trying to decrypt it anyway ...", true);
 #endif
 
-#if HAP_ENCRYPTION_EXIT_ON_FAILURE      
+#if HAP_ENCRYPTION_EXIT_ON_FAILURE
         return -1;
 #endif
     }
 
-    
-    // 
+
+    //
     // The output from the AEAD is twofold:
     //   -  A ciphertext of the same length as the plaintext.
     //   -  A 128-bit tag, which is the output of the Poly1305 function.
-    // 
+    //
 
     if ( crypto_stream_chacha20_ietf_xor_ic(plainText, cipherText, length, nonce, 1, key) != 0 ) {
         LogE("[ERROR] crypto_stream_chacha20_xor_ic failed!", true);
         return -1;
     }
 
-#if HAP_DEBUG_ENCRYPTION  
+#if HAP_DEBUG_ENCRYPTION
     Serial.printf("plainText: %d\n", length );
     HAPHelper::arrayPrint(plainText, length);
     Serial.println((char*) plainText);
 #endif
-    
+
     return 0;
 }
 #endif
@@ -350,7 +350,7 @@ int HAPEncryption::decrypt(const uint8_t tag[CHACHA20_POLY1305_TAG_BYTES],
         size_t n_len,
         const uint8_t k[CHACHA20_POLY1305_KEY_BYTES]){
 
-    mbedtls_chachapoly_context ctx;    
+    mbedtls_chachapoly_context ctx;
 
     int ret;
 
@@ -361,7 +361,7 @@ int HAPEncryption::decrypt(const uint8_t tag[CHACHA20_POLY1305_TAG_BYTES],
         return -1;
     }
 
-    if (a_len > 0) {        
+    if (a_len > 0) {
         ret = chacha20_poly1305_update_aad(&ctx, MBEDTLS_CHACHAPOLY_DECRYPT, a, a_len, n, n_len, k);
         if (ret != 0){
             mbedtls_chachapoly_free(&ctx);
@@ -385,7 +385,7 @@ int HAPEncryption::decrypt(const uint8_t tag[CHACHA20_POLY1305_TAG_BYTES],
         return -1;
     }
 
-    return memcmp(tag, tag2, CHACHA20_POLY1305_TAG_BYTES) == 0;    
+    return memcmp(tag, tag2, CHACHA20_POLY1305_TAG_BYTES) == 0;
 }
 
 
@@ -400,8 +400,8 @@ int HAPEncryption::chacha20_poly1305_update_aad(
     if (chacha20_poly1305_update(ctx, mode, NULL, NULL, 0, n, n_len, k) != 0){
         return -1;
     }
-    
-    return mbedtls_chachapoly_update_aad(ctx, a, a_len);  
+
+    return mbedtls_chachapoly_update_aad(ctx, a, a_len);
 }
 
 
@@ -409,7 +409,7 @@ int HAPEncryption::chacha20_poly1305_update( mbedtls_chachapoly_context* ctx, mb
 
     int ret;
 
-    
+
     if (n_len >= CHACHA20_POLY1305_NONCE_BYTES_MAX) {
         n_len = CHACHA20_POLY1305_NONCE_BYTES_MAX;
     }
@@ -422,7 +422,7 @@ int HAPEncryption::chacha20_poly1305_update( mbedtls_chachapoly_context* ctx, mb
     if (ret != 0){
         return -1;
     }
-    
+
     if (input_len > 0) {
         ret = mbedtls_chachapoly_update(ctx, input_len, input, output);
         if (ret != 0){
@@ -436,14 +436,14 @@ int HAPEncryption::chacha20_poly1305_update( mbedtls_chachapoly_context* ctx, mb
 
 // ToDo: Move to hapClient ?
 /**
- * @brief 
- * 
- * @param message 
- * @param length 
- * @param encrypted_len 
- * @param key 
- * @param encryptCount 
- * @return char* 
+ * @brief
+ *
+ * @param message
+ * @param length
+ * @param encrypted_len
+ * @param key
+ * @param encryptCount
+ * @return char*
  */
 uint8_t* HAPEncryption::encrypt(uint8_t *message, size_t length, int* encrypted_len, uint8_t* key, uint16_t encryptCount) {
 
@@ -491,7 +491,7 @@ uint8_t* HAPEncryption::encrypt(uint8_t *message, size_t length, int* encrypted_
         printf("chunk_len %d\n", chunk_len);
         printf("length %zu\n", length);
 #endif
-		err_code = chacha20_poly1305_encrypt_with_nonce(nonce, key, aad, HAP_ENCRYPTION_AAD_SIZE, decrypted_ptr, chunk_len, encrypted_ptr);	
+		err_code = chacha20_poly1305_encrypt_with_nonce(nonce, key, aad, HAP_ENCRYPTION_AAD_SIZE, decrypted_ptr, chunk_len, encrypted_ptr);
 
 #if HAP_DEBUG_ENCRYPTION
         HAPHelper::array_print("encrypted_ptr", encrypted_ptr, chunk_len + 16);

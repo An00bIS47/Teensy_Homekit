@@ -46,7 +46,7 @@
 using namespace httpsserver;
 
 class HAPWebServer {
-public:	
+public:
 	HAPWebServer();
 	~HAPWebServer();
 
@@ -63,7 +63,7 @@ public:
 	static void handle();
 
 	static void setAccessorySet(HAPAccessorySet* accessorySet);
-	static void setConfig(HAPConfiguration *config);	
+	static void setConfig(HAPConfiguration *config);
 	// static void registerPluginNode(const std::string name, const std::string path, const std::string method, const HTTPSCallbackFunction * callback, const std::string tag = "");
 
 	static void registerPluginNode(HAPWebServerPluginNode* pluginNode);
@@ -74,11 +74,11 @@ public:
 private:
 
 	static std::vector<HAPWebServerPluginNode*> _pluginNodes;
-	
+
 	static std::vector<std::string> splitString(std::string data, std::string token);
 	//SSLCert* _serverCert;
 
-#if HAP_WEBSERVER_USE_SSL	
+#if HAP_WEBSERVER_USE_SSL
 	static HTTPSServer* _secureServer;
 #else
 	static HTTPServer* _secureServer;
@@ -92,19 +92,19 @@ private:
 
 	// ====================================================================================================
 	// Websites
-	// ====================================================================================================	
+	// ====================================================================================================
 	// /
 	static void handleRoot(HTTPRequest * req, HTTPResponse * res);
 	static void rootKeyProcessor(const String& key, HTTPResponse* res);
 
 	// /config
-	static void handleConfigGet(HTTPRequest * req, HTTPResponse * res);	
+	static void handleConfigGet(HTTPRequest * req, HTTPResponse * res);
 	static void configGetKeyProcessor(const String& key, HTTPResponse* res);
-	static void handleConfigPost(HTTPRequest * req, HTTPResponse * res);	
-	
+	static void handleConfigPost(HTTPRequest * req, HTTPResponse * res);
+
 	// /wifi
-	static void handleWifiGet(HTTPRequest * req, HTTPResponse * res);	
-	static void handleWifiPost(HTTPRequest * req, HTTPResponse * res);	
+	static void handleWifiGet(HTTPRequest * req, HTTPResponse * res);
+	static void handleWifiPost(HTTPRequest * req, HTTPResponse * res);
 
 	// /update
 	static void handleUpdateGet(HTTPRequest * req, HTTPResponse * res);
@@ -112,13 +112,13 @@ private:
 	static void updateKeyProcessor(const String& key, HTTPResponse* res);
 
 	// -> remove
-	static void handleLogin(HTTPRequest * req, HTTPResponse * res);	
+	static void handleLogin(HTTPRequest * req, HTTPResponse * res);
 
 	// 404
 	static void handle404(HTTPRequest * req, HTTPResponse * res);
 
 	// /plugin/*
-	static void handlePluginNodes(HTTPRequest * req, HTTPResponse * res);		
+	static void handlePluginNodes(HTTPRequest * req, HTTPResponse * res);
 	static bool validatePluginNodesGet(std::string s);
 	static bool validatePluginNodesPost(std::string s);
 
@@ -127,7 +127,7 @@ private:
 	// ====================================================================================================
 	// /api/*
 	static void handleApi(HTTPRequest * req, HTTPResponse * res);
-	
+
 	// validators
 	static bool validateApiGet(const std::string s);
 	static bool validateApiPost(const std::string s);
@@ -138,7 +138,7 @@ private:
 
 
 	// GET /api/setup
-	static void handleApiSetup(HTTPRequest * req, HTTPResponse * res);	// ? delete ?	
+	static void handleApiSetup(HTTPRequest * req, HTTPResponse * res);	// ? delete ?
 
 
 	// GET /api/uptime
@@ -148,8 +148,8 @@ private:
 	static void handleApiRefTimeGet(HTTPRequest *req, HTTPResponse *res);
 	// POST /api/reftime
 	static void handleApiRefTimePost(HTTPRequest *req, HTTPResponse *res);
-	
-	
+
+
 	// GET /api/restart
 	static void handleApiRestart(HTTPRequest * req, HTTPResponse * res);
 
@@ -157,11 +157,11 @@ private:
 	static void handleApiReset(HTTPRequest *req, HTTPResponse *res);
 
 	// POST /api/config
-	static void handleApiConfigPost(HTTPRequest * req, HTTPResponse * res);	
+	static void handleApiConfigPost(HTTPRequest * req, HTTPResponse * res);
 	// GET /api/config
 	static void handleApiConfigGet(HTTPRequest *req, HTTPResponse *res);
-	
-	
+
+
 	// DELETE /api/pairings
 	static void handleApiPairingsDelete(HTTPRequest *req, HTTPResponse *res);
 
@@ -175,7 +175,7 @@ private:
 	// Keystore
 	// ====================================================================================================
 	// POST /api/keystore
-	static void handleApiKeystorePost(HTTPRequest * req, HTTPResponse * res);		
+	static void handleApiKeystorePost(HTTPRequest * req, HTTPResponse * res);
 #endif
 
 
@@ -196,7 +196,7 @@ private:
 	//       resource.
 	//       For more details, see the definition below.
 	static void middlewareLogging(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
-	
+
 	static void middlewareBasicAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
 	static void middlewareBasicAuthorization(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
 

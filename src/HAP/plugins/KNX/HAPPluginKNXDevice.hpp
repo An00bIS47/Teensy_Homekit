@@ -33,41 +33,41 @@ enum HAPPluginKNXServiceType {
 class HAPPluginKNXDevice {
 public:
     HAPPluginKNXDevice();
-    
+
     // HAPPluginKNXDevice(uint8_t id, char name[], bool enableFakegato, uint16_t koTemperature, uint16_t koHumidity, uint16_t koAirPressure);
 
     ~HAPPluginKNXDevice();
-                                
-    virtual HAPAccessory* initAccessory() = 0;    
+
+    virtual HAPAccessory* initAccessory() = 0;
     virtual void handle(bool forced) = 0;
 
     void identify(bool oldValue, bool newValue);
     void setEventManager(EventManager* eventManager);
-    void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);    
+    void setFakeGatoFactory(HAPFakegatoFactory* fakegatoFactory);
 
     static inline String serviceEnumToString(HAPPluginKNXServiceType e){
         switch (e)
         {
         case HAPPluginKNXServiceTypeWeather:
             return "weather";
-        
+
         case HAPPluginKNXServiceTypeOutlet:
             return "outlet";
-        
+
         case HAPPluginKNXServiceTypeSwitch:
-            return "switch"; 
+            return "switch";
 
         default:
-            return "";   
-        }    
+            return "";
+        }
     }
 
-protected:    
-    // std::function<void(NewSettingsPacket)> _callbackSendSettings = NULL;  
+protected:
+    // std::function<void(NewSettingsPacket)> _callbackSendSettings = NULL;
 
     uint8_t _id;
     char _name[41];
-    HAPPluginKNXServiceType _type;   
+    HAPPluginKNXServiceType _type;
 
     bool _shouldSend;
     bool _enableFakegato;
@@ -81,14 +81,14 @@ protected:
     inline void queueNotifyEvent(HAPCharacteristicBase* characteristic){
         if (characteristic->notifiable()){
             if (_eventManager){
-                struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());							            
+                struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());
                 _eventManager->queueEvent( EventManager::kEventNotifyController, event);
             }
-			
-		}	
+
+		}
     }
-   
-    virtual bool fakeGatoCallback() = 0;  
+
+    virtual bool fakeGatoCallback() = 0;
 };
 
 #endif /* HAPPLUGINKNXDEVICE_HPP_ */

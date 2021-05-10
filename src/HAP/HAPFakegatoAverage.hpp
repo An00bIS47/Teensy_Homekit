@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegatoAverage.hpp
 // Teensy_Homekit
 //

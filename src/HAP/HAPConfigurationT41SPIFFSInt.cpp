@@ -1,4 +1,4 @@
-// 
+//
 // HAPConfigurationT41SPIFFSInt.cpp
 // Homekit
 //
@@ -151,14 +151,14 @@ s32_t HAPConfigurationT41SPIFFSInt::erase(u32_t addr, u32_t size) {
         addr += 4096;
         s -= 4096;
     }
-#if HAP_DEBUG_SPIFFS    
+#if HAP_DEBUG_SPIFFS
     Serial.printf("erase %0X len %d\n", addr, size);
-#endif    
+#endif
     return SPIFFS_OK;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPConfigurationT41SPIFFSInt::mount() {
 
@@ -191,7 +191,7 @@ bool HAPConfigurationT41SPIFFSInt::mount() {
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPConfigurationT41SPIFFSInt::begin(){
     return mount();
@@ -212,13 +212,13 @@ size_t HAPConfigurationT41SPIFFSInt::readBytes(const char* label, uint8_t* outpu
         LogE("ERROR: Failed to read from SPIFFS file " + String(label) + ": Reason: " + String(SPIFFS_errno(&_fs)), true);
         read = 0;
     }
-        
+
     SPIFFS_close(&_fs, fd);
     return read;
 }
 
 size_t HAPConfigurationT41SPIFFSInt::writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen){
-    
+
     Serial.println("1");
     Serial.send_now();
 
@@ -236,7 +236,7 @@ size_t HAPConfigurationT41SPIFFSInt::writeBytes(const char* label, const uint8_t
         LogE("ERROR: Failed to write to SPIFFS file " + String(label) + ": Reason: " + String(SPIFFS_errno(&_fs)), true);
         written = 0;
     }
-    
+
     Serial.println("3");
     Serial.send_now();
     SPIFFS_close(&_fs, fd);
@@ -249,16 +249,16 @@ size_t HAPConfigurationT41SPIFFSInt::writeBytes(const char* label, const uint8_t
 
 size_t HAPConfigurationT41SPIFFSInt::getBytesLength(const char* label){
     spiffs_stat s;
-    
+
     int res = SPIFFS_stat(&_fs, label, &s);
-    
+
     if (res < 0) return 0;
     return s.size;
 }
 
 
 bool HAPConfigurationT41SPIFFSInt::getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize){
-    char label[20];	
+    char label[20];
 	sprintf(label, "p%s", name);
     size_t read = readBytes(label, data, dataSize);
     if (read == dataSize) return true;
@@ -271,7 +271,7 @@ void HAPConfigurationT41SPIFFSInt::reset(){
 }
 
 size_t HAPConfigurationT41SPIFFSInt::getDataLengthForPlugin(const char* name){
-    char label[20];	
+    char label[20];
 	sprintf(label, "p%s", name);
 	return getBytesLength(label);
 }
@@ -279,16 +279,16 @@ size_t HAPConfigurationT41SPIFFSInt::getDataLengthForPlugin(const char* name){
 void HAPConfigurationT41SPIFFSInt::validateConfig(){
 
     uint8_t magNum[2];
-    HAPHelper::u16_to_u8(HAP_SPIFFS_MAGIC_BYTE, magNum);    
+    HAPHelper::u16_to_u8(HAP_SPIFFS_MAGIC_BYTE, magNum);
 
-    writeBytes("validate", magNum, 2);    
+    writeBytes("validate", magNum, 2);
 }
 
 bool HAPConfigurationT41SPIFFSInt::validConfig(){
 
     uint8_t magNum[2];
-    size_t res = readBytes("validate", magNum, 2);    
-    
+    size_t res = readBytes("validate", magNum, 2);
+
     if (res == 0) return false;
 
     uint16_t magicNum = HAPHelper::u8_to_u16(magNum);

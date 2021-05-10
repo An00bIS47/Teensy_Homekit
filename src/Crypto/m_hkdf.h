@@ -1,3 +1,11 @@
+// 
+// m_hkdf.h
+// Homekit
+//
+//  Created on: 10.05.2021
+//      Author: michael
+//
+
 /* See RFC 5869 */
 
 #ifndef _M_HKDF_H

@@ -48,7 +48,7 @@ public:
 	void setInterval(uint16_t interval){
 		_interval = interval;
 	}
-	
+
 	bool updateAvailable();
 
 #if HAP_ENABLE_UPDATE_WEB
@@ -62,20 +62,20 @@ public:
 
 private:
 	bool 			_isOTADone;
-	
+
 	String 			_host;
 	uint16_t 		_port;
 	uint32_t 		_interval;
-	unsigned long 	_previousMillis;	
+	unsigned long 	_previousMillis;
 	bool 			_available;
 
 	HAPConfigurationArduinoOTA* _configuration;
 
 
  	HAPUpdateVersionInfo _remoteInfo;
-#if HAP_ENABLE_UPDATE_WEB	
+#if HAP_ENABLE_UPDATE_WEB
 	HTTPClient* _http;
-#endif	
+#endif
 	// String getHeaderValue(String header, String headerName);
 };
 

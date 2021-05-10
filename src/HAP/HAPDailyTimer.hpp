@@ -27,22 +27,22 @@ typedef std::function<void(uint16_t)> HAPDailyTimerCallback;
 // #define MAX_TIMER_INSTANCES 10
 
 enum EventDays{
-	SUNDAYS = 0, 
-	MONDAYS, 
-	TUESDAYS, 
-	WEDNESDAYS, 
-	THURSDAYS, 
-	FRIDAYS, 
-	SATURDAYS, 
-	WEEKENDS, 
-	WEEKDAYS, 
+	SUNDAYS = 0,
+	MONDAYS,
+	TUESDAYS,
+	WEDNESDAYS,
+	THURSDAYS,
+	FRIDAYS,
+	SATURDAYS,
+	WEEKENDS,
+	WEEKDAYS,
 	EVERY_DAY
 };
 
 enum RandomType{
-	FIXED, 
-	RANDOM, 
-	RANDOM_START, 
+	FIXED,
+	RANDOM,
+	RANDOM_START,
 	RANDOM_END
 };
 
@@ -59,13 +59,13 @@ const uint8_t dayTemplate[] = {
 	0b01111100, // Weekdays
 	0b11111110  // Everyday
 };
-  
+
 class HAPDailyTimer{
   public:
-  
+
     HAPDailyTimer(uint8_t StartHour, uint8_t StartMinute, uint8_t daysMask, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_);
     HAPDailyTimer(uint8_t StartHour, uint8_t StartMinute, EventDays DaysOfTheWeek, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_);
-    
+
     HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t StartMinute, uint8_t EndHour, uint8_t EndMinute, uint8_t daysMask, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_, HAPDailyTimerCallback endCallback, uint16_t targetStateEnd_);
     HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t StartMinute, uint8_t EndHour, uint8_t EndMinute, EventDays DaysOfTheWeek, RandomType type, HAPDailyTimerCallback startCallback, uint16_t targetStateStart_, HAPDailyTimerCallback endCallback, uint16_t targetStateEnd_);
 
@@ -75,14 +75,14 @@ class HAPDailyTimer{
     void setRandomOffset(uint8_t random_minutes, RandomType randomSetting);
     void setStartTime(uint8_t hour, uint8_t minute);
     void setEndTime(uint8_t hour, uint8_t minute);
-    
-    bool begin(); 
+
+    bool begin();
     uint8_t getDays() const;
-    static time_t tmConvert_t(int YYYY, uint8_t MM, uint8_t DD, uint8_t hh, uint8_t mm, uint8_t ss);    
+    static time_t tmConvert_t(int YYYY, uint8_t MM, uint8_t DD, uint8_t hh, uint8_t mm, uint8_t ss);
     bool isActive();
 
     // int getInstanceCount(void) const;
-    // static void update();    
+    // static void update();
 
 
 #if !defined( CORE_TEENSY) && !defined( HAS_TIMELIB )
@@ -113,27 +113,27 @@ protected:
     };
 
     bool sync();
-    
+
 	// void(*startTimeCallback)(); 	//
     // void(*endTimeCallback)();   	//
 
-    
+
 
     uint8_t onMask;                	// compact ON days storage
     uint8_t offMask;               	// compact OFF days storage
-    
+
     bool autoSync;              	// will run startTimeCallback if timer is in active state when times are changed or powerup
     TimerTime startTime;        	//
-    TimerTime endTime;          	// 
+    TimerTime endTime;          	//
     TimerTime randomStartTime;  	// calculated once daily
     TimerTime randomEndTime;    	// calculated once daily
-    RandomType randomType;          // 
+    RandomType randomType;          //
     uint8_t currentDay;          	// for comparison of a daily event to randomize the Start and end times
     uint8_t offset;             	// minutes of fuzziness for random Starts and Ends
-    
-    	
 
-	
+
+
+
     // static HAPDailyTimer* instanceAddress;
     // static uint8_t instanceCount;
 };

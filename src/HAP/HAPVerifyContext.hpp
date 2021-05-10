@@ -25,16 +25,16 @@ struct HAPEncryptionContext {
 	, decryptCount(0){
 		memset(encryptKey, 0, CURVE25519_SECRET_LENGTH);
 		memset(decryptKey, 0, CURVE25519_SECRET_LENGTH);
-	}	
+	}
 };
 
 
 struct HAPVerifyContext {
 	uint8_t secret[HKDF_KEY_LEN];
-	uint8_t sessionKey[CURVE25519_SECRET_LENGTH]; 	
-	uint8_t accessoryLTPK[ED25519_PUBLIC_KEY_LENGTH];	
+	uint8_t sessionKey[CURVE25519_SECRET_LENGTH];
+	uint8_t accessoryLTPK[ED25519_PUBLIC_KEY_LENGTH];
 	uint8_t deviceLTPK[ED25519_PUBLIC_KEY_LENGTH];
-	
+
 	HAPVerifyContext() {
 		memset(secret, 0, HKDF_KEY_LEN);
 		memset(sessionKey, 0, CURVE25519_SECRET_LENGTH);

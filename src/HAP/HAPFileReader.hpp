@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakeGatoEWeather.hpp
 // Homekit
 //
@@ -62,7 +62,7 @@ public:
             } else {
                 mCurrentPosition++;
             }
-                
+
             return true;
         }
     }
@@ -84,4 +84,4 @@ public:
 };
 
 
-#endif 
+#endif

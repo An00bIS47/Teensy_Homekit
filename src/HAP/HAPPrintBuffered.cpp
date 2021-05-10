@@ -8,7 +8,7 @@
 
 #include "HAPPrintBuffered.hpp"
 
-HAPPrintBuffered::HAPPrintBuffered(Print& target_, uint8_t* buffer_, size_t size_) 
+HAPPrintBuffered::HAPPrintBuffered(Print& target_, uint8_t* buffer_, size_t size_)
 : _target(target_)
 , _buffer(buffer_)
 , _size(size_)

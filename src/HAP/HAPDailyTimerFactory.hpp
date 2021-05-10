@@ -13,19 +13,19 @@
 #include <vector>
 
 #include "HAPDailyTimer.hpp"
-  
+
 class HAPDailyTimerFactory{
 public:
     HAPDailyTimerFactory();
 
     void handle();
     bool isActive(uint8_t index);
-    
+
     void enable(bool on);
     bool isEnabled();
 
     void addTimer(HAPDailyTimer dailyTimer);
-    
+
     inline void clear(){
         _timers.clear();
     }

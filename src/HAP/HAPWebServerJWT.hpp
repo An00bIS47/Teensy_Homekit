@@ -27,7 +27,6 @@ public:
 private:
     static char* mbedtlsError(int errnum);
 
-    
 };
 
 

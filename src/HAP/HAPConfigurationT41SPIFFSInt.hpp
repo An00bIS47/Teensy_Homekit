@@ -1,4 +1,4 @@
-// 
+//
 // HAPConfigurationT41SPIFFSInt.hpp
 // Teensy_Homekit
 //
@@ -33,21 +33,21 @@ public:
 	void validateConfig() override;
 	bool validConfig() override;
 
-    // 
+    //
     // SPIFFS CALLBACKS FOR INTERNAL FLASH
-    // 
+    //
     static s32_t read(u32_t addr, u32_t size, u8_t *dst);
     static s32_t erase(u32_t addr, u32_t size);
     static s32_t write(u32_t addr, u32_t size, u8_t *src);
 
-    
+
 protected:
 
 	size_t writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen) override;
 	size_t readBytes(const char* label, uint8_t* output, const size_t expectedDataLen) override;
 	size_t getBytesLength(const char* label) override;
 
-    // 
+    //
     // SPIFFS INTERNAL FLASH
     //
     static void flash_wait();

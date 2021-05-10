@@ -1,4 +1,4 @@
-// 
+//
 // HAPSRP.hpp
 // Homekit
 //
@@ -10,8 +10,6 @@
 #define HAPSRP_HPP_
 
 #define HAP_SRP_SUPPORT_ALL_NG_SIZES 0
-
-
 
 #include "HAPHash.hpp"
 #include "mbedtls/bignum.h"
@@ -26,7 +24,7 @@ typedef struct NGHex {
 /* All constants here were pulled from Appendix A of RFC 5054 */
 const NGHex global_Ng_constants[] PROGMEM = {
 
- #if HAP_SRP_SUPPORT_ALL_NG_SIZES
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
 	{ /* 512 */
 	"D66AAFE8E245F9AC245A199F62CE61AB8FA90A4D80C71CD2ADFD0B9DA163B29F2A34AFBDB3B"
 	"1B5D0102559CE63D8B6E86B0AA59C14E79D4AA62D1748E4249DF3",
@@ -73,7 +71,7 @@ const NGHex global_Ng_constants[] PROGMEM = {
 	"E0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF",
 		"5"
 	},
-#if HAP_SRP_SUPPORT_ALL_NG_SIZES 
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
 	{ /* 4096 */
 	"FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08"
 	"8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B"
@@ -136,7 +134,7 @@ const NGHex global_Ng_constants[] PROGMEM = {
 	"60C980DD98EDD3DFFFFFFFFFFFFFFFFF",
 	"13"
 	},
-#endif 
+#endif
 	{0,0} /* null sentinel */
 };
 
@@ -174,7 +172,7 @@ public:
 
     struct SRPKeyPair {
         mbedtls_mpi B;
-        mbedtls_mpi b;        
+        mbedtls_mpi b;
 
         SRPKeyPair(){
             mbedtls_mpi_init(&B);
@@ -193,17 +191,17 @@ public:
 
 
     typedef enum {
-#if HAP_SRP_SUPPORT_ALL_NG_SIZES    
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
         SRP_NG_512,
         SRP_NG_768,
         SRP_NG_1024,
         SRP_NG_2048,
-#endif    
+#endif
 	    SRP_NG_3072,
-#if HAP_SRP_SUPPORT_ALL_NG_SIZES    
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
         SRP_NG_4096,
         SRP_NG_8192,
-#endif    
+#endif
         SRP_NG_CUSTOM,
         SRP_NG_LAST
     } NGType_t;
@@ -216,7 +214,7 @@ public:
         mbedtls_mpi g;
         bool _isInit = false;
 
-        NGConstant(NGType_t ng_type, const char * N_hex, const char * g_hex){            
+        NGConstant(NGType_t ng_type, const char * N_hex, const char * g_hex){
 
             mbedtls_mpi_init(&N);
             mbedtls_mpi_init(&g);
@@ -243,8 +241,8 @@ public:
             mbedtls_mpi_init(&g);
 
             if(!(mbedtls_mpi_copy(&N, &rhs.N)==0  && mbedtls_mpi_copy(&g, &rhs.g)==0)){
-                clear(); 
-                return;     
+                clear();
+                return;
             }
             _isInit = true;
         }
@@ -271,7 +269,7 @@ public:
             clear();
         }
     };
-    
+
 
     struct SRPVerifier {
         HAPHashAlgorithm algorithm;
@@ -300,18 +298,18 @@ public:
         SRPKeyPair *keys = NULL;
         SRPVerifier *verifier = NULL;
 
-        const uint8_t* bytes_s = NULL; 
-        int len_s = 0;        
+        const uint8_t* bytes_s = NULL;
+        int len_s = 0;
         const uint8_t* bytes_v = NULL;
-        int len_v = 0;        
-        const uint8_t* bytes_B = NULL; 
+        int len_v = 0;
+        const uint8_t* bytes_B = NULL;
         int len_B = 0;
-        
+
         char username[10] = {0,};
 
 
         void clear(){
-            if (verifier != NULL) {			
+            if (verifier != NULL) {
                 //verifier->clear();
                 delete verifier;
                 verifier = NULL;
@@ -320,7 +318,7 @@ public:
                 //session->clear();
                 delete session;
                 session = NULL;
-            } 	
+            }
             if (keys != NULL) {
                 //keys->clear();
                 delete keys;
@@ -335,7 +333,7 @@ public:
             bytes_v = NULL; len_v = 0;
             bytes_B = NULL; len_B = 0;
         }
-        
+
         ~HAPSRPData(){
             clear();
         }
@@ -347,18 +345,18 @@ public:
     HAPSRP();
     ~HAPSRP();
 
-    int getHashLength(SRPSession* session){
-        return HAPHash::hashLength(session->algorithm);
+    int length(SRPSession* session){
+        return HAPHash::digestLength(session->algorithm);
     }
 
     void begin(const char* username);
     void clear();
     void randomSeed(const uint8_t* random_data, size_t data_length);
-    
+
 
     SRPKeyPair* createKeyPair(SRPSession *session, const uint8_t* bytes_v, int len_v, const uint8_t** bytes_B, int* len_B);
 
-    void createSaltedVerificationKey( SRPSession *session, const char * username,                                         
+    void createSaltedVerificationKey( SRPSession *session, const char * username,
                                     const uint8_t * password, int len_password,
                                     const uint8_t ** bytes_s, int * len_s,
                                     const uint8_t ** bytes_v, int * len_v);
@@ -396,26 +394,21 @@ public:
 
 protected:
     char* _username;
-    
+
     static bool                        _isInitialized;
     static mbedtls_entropy_context     _entropy_ctx;
     static mbedtls_ctr_drbg_context    _ctr_drbg_ctx;
     static mbedtls_mpi*                _RR;
 
-    
-
-
     static void H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad);
     static void H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg,const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes);
-    
-    
 
     void calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len );
     static void calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K );
     static void calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const mbedtls_mpi * A, const uint8_t* M, const uint8_t* K );
 
     void initRandom();
-    
+
 };
 
 #endif /* HAPSRP_HPP_ */

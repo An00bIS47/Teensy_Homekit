@@ -33,9 +33,9 @@ public:
     ~HAPPluginRCSwitchDevice();
 
 
-    HAPAccessory* initAccessory();    
+    HAPAccessory* initAccessory();
 
-    void setState(String pwrState);    
+    void setState(String pwrState);
 
     void identify(bool oldValue, bool newValue);
     void setEventManager(EventManager* eventManager);
@@ -75,27 +75,27 @@ public:
 
     inline float getAveragedPowerVoltage() {
         return 0.0;
-    }  
+    }
 
 
-protected:    
+protected:
 
     bool getPowerState();
 
     inline void queueNotifyEvent(HAPCharacteristicBase* characteristic){
         if (characteristic->notifiable()){
             if (_eventManager){
-                struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());							            
+                struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());
                 _eventManager->queueEvent( EventManager::kEventNotifyController, event);
             }
-			
-		}	
+
+		}
     }
 
-    std::function<void(uint8_t, uint8_t, uint8_t)> _callbackRCSwitchSend = NULL;  
+    std::function<void(uint8_t, uint8_t, uint8_t)> _callbackRCSwitchSend = NULL;
 
     HAPFakegatoScheduleEnergy  _fakegato;
-    
+
     HAPAccessory*           _accessory;
     EventManager*			_eventManager;
     HAPFakegatoFactory*     _fakegatoFactory;
@@ -113,8 +113,8 @@ protected:
 	void changedPowerCurrent(float oldValue, float newValue);
 	void changedPowerTotal(float oldValue, float newValue);
     void changedState(bool oldValue, bool newValue);
-   
-    bool fakeGatoCallback();  
+
+    bool fakeGatoCallback();
 };
 
 #endif /* HAPPLUGINRCSWITCHDEVICE_HPP_ */

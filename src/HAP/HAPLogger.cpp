@@ -7,7 +7,7 @@
 //
 
 #include "HAPLogger.hpp"
-#include "HAPServer.hpp"
+//#include "HAPServer.hpp"
 #include "HAPTime.hpp"
 
 #if defined (ARDUINO_ARCH_ESP32)
@@ -27,14 +27,14 @@
   static const unsigned OCRAM_START = 0x20200000UL;
   static const unsigned OCRAM_SIZE = 512;
   static const unsigned FLASH_SIZE = 7936;
-#if TEENSYDUINO>151  
-  extern "C" uint8_t external_psram_size; 
-#endif  
+#if TEENSYDUINO>151
+  extern "C" uint8_t external_psram_size;
+#endif
 #endif
 
 // int staticVar ;
 
-// uint32_t FreeMem(){ 
+// uint32_t FreeMem(){
 // 	uint32_t heapTop;
 // 	// current position of heap.
 // 	void* hTop = malloc(1);
@@ -77,7 +77,7 @@ unsigned long maxstack(void) {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void progInfo(void) {
   Serial.println(__FILE__ " " __DATE__ " " __TIME__ );
@@ -88,7 +88,7 @@ void progInfo(void) {
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void flexRamInfo(void) {
 
@@ -119,13 +119,13 @@ void flexRamInfo(void) {
   }
 
   const char* fmtstr = "%-6s%7d %5.02f%% of %4dkB (%7d Bytes free) %s\n";
- 
+
   Serial.printf(fmtstr, "FLASH:",
                 (unsigned)&_flashimagelen,
                 (double)((unsigned)&_flashimagelen) / (FLASH_SIZE * 1024) * 100,
                 FLASH_SIZE,
                 FLASH_SIZE * 1024 - ((unsigned)&_flashimagelen), "FLASHMEM, PROGMEM");
-  
+
   unsigned long szITCM = itcm>0?(unsigned long)&_etext:0;
   Serial.printf(fmtstr, "ITCM:",
                 szITCM,
@@ -142,7 +142,7 @@ void flexRamInfo(void) {
 	Serial.printf(F("PSRAM: %d MB\n"), external_psram_size);
   } else {
 	Serial.printf(F("PSRAM: none\n"), external_psram_size);
-  }	  
+  }
 #endif
   Serial.printf(F("OCRAM:\n  %7d Bytes (%d kB)\n"), OCRAM_SIZE * 1024, OCRAM_SIZE);
   Serial.printf(F("- %7d Bytes (%d kB) DMAMEM\n"), ((unsigned)&_heap_start - OCRAM_START), ((unsigned)&_heap_start - OCRAM_START) / 1024);
@@ -172,14 +172,14 @@ LogLevel HAPLogger::_logLevel(LogLevel::INFO);
 Stream* HAPLogger::_printer(&Serial);
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPLogger::HAPLogger() {
 
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPLogger::~HAPLogger() {
 	// TODO Auto-generated destructor stub
@@ -188,13 +188,14 @@ HAPLogger::~HAPLogger() {
 void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 	if (HAPLogger::_logLevel >= LogLevel::DEBUG) {
 		_printer->print(color);
-#if HAP_ENABLE_NTP		
-		_printer->print(HAPTime::timeString() + " ");
-#else					
-		_printer->printf(F("%lu "), millis());		
+#if HAP_ENABLE_NTP
+		_printer->print(HAPTime::timeString());
+		_printer->print(F(" "));
+#else
+		_printer->printf(F("%lu "), millis());
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32)		
+#if defined(ARDUINO_ARCH_ESP32)
 		_printer->print( "HAPServer->heap [   ] current: ") ;
 		_printer->print(ESP.getFreeHeap());
 		_printer->print(  " - minimum: ") ;
@@ -202,7 +203,7 @@ void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 #elif defined( CORE_TEENSY )
 		_printer->print(F("HAPServer->heap [   ] current: ")) ;
 		_printer->print(heapfree());
-#endif		
+#endif
 		_printer->print(F(" [clients:"));
 		_printer->print(clients);
 		_printer->print(F("]"));
@@ -211,13 +212,13 @@ void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 		_printer->print(F("]"));
 		_printer->println(COLOR_RESET);
 	}
-	
+
 #if defined( CORE_TEENSY )
 	Serial.send_now();
 
 	// flexRamInfo();
 
-#endif	
+#endif
 }
 
 void HAPLogger::logInfo(const String &str, bool newLine){
@@ -273,11 +274,11 @@ void HAPLogger::colorPrint(const char* color, int num, bool newLine) {
 
 #if defined( CORE_TEENSY )
 	Serial.send_now();
-#endif		
+#endif
 }
 
 void HAPLogger::colorPrint(const char* color, const char* text, bool newLine) {
-	
+
 	if (strcmp(text, "") != 0){
 		_printer->print(color);
 		_printer->print(text);
@@ -286,15 +287,15 @@ void HAPLogger::colorPrint(const char* color, const char* text, bool newLine) {
 			_printer->println(COLOR_RESET);
 		else
 			_printer->print(COLOR_RESET);
-	}		
+	}
 
 #if defined( CORE_TEENSY )
 	Serial.send_now();
-#endif			
+#endif
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::checkErrorOK(int err_code) {
 	if (err_code != 0) {
@@ -307,7 +308,7 @@ void HAPLogger::checkErrorOK(int err_code) {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::checkError(int err_code) {
 	if (err_code != 0) {
@@ -317,28 +318,28 @@ void HAPLogger::checkError(int err_code) {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::setLogLevel(uint8_t lvl){
 	_logLevel = (LogLevel)lvl;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::setLogLevel(LogLevel lvl){
 	_logLevel = lvl;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 LogLevel HAPLogger::getLogLevel(){
 	return _logLevel;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::logOK(const char* color) {
 	colorPrint(color, "OK", true);
@@ -358,7 +359,7 @@ Stream* HAPLogger::stream(){
 }
 */
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::printInfo(){
 	_printer->println();
@@ -374,7 +375,7 @@ void HAPLogger::printInfo(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPLogger::printTeensyInfo(){
 	progInfo();

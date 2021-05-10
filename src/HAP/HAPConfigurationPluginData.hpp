@@ -20,9 +20,9 @@
 // //
 // // HAPConfigurationPluginData
 // //
-// struct HAPConfigurationPluginData {	
+// struct HAPConfigurationPluginData {
 // 	uint8_t* 	dataPtr = nullptr;
-// 	size_t 		dataSize = 0;	
+// 	size_t 		dataSize = 0;
 
 // 	std::function<bool(void)> _callbackSave;
 // 	std::function<void(Print&)> _callbackToJson;
@@ -49,15 +49,15 @@
 // 	}
 
 // 	HAPConfigurationPluginData(){
-		
+
 // 	}
 
 // 	HAPConfigurationPluginData(uint8_t* dataPtr_, size_t dataSize_)
 // 		: dataPtr(dataPtr_)
-// 		, dataSize(dataSize_) {			
+// 		, dataSize(dataSize_) {
 // 		}
-		
-// 	HAPConfigurationPluginData(const HAPConfigurationPluginData& rhs) {				
+
+// 	HAPConfigurationPluginData(const HAPConfigurationPluginData& rhs) {
 // 		dataPtr = rhs.dataPtr;
 // 		dataSize = rhs.dataSize;
 // 	}
@@ -67,34 +67,34 @@
 // 		if (this == &rhs) {
 // 			return (*this);
 // 		}
-		
+
 // 		dataPtr = rhs.dataPtr;
-// 		dataSize = rhs.dataSize;	
-// 		return (*this);	
+// 		dataSize = rhs.dataSize;
+// 		return (*this);
 // 	}
 
 // 	bool operator== (const HAPConfigurationPluginData &rhs) const {
-// 		/* your logic for comparision between "*this" and "rhs" */ 
-// 		return ( 
-// 			( this->dataSize == rhs.dataSize ) && 
+// 		/* your logic for comparision between "*this" and "rhs" */
+// 		return (
+// 			( this->dataSize == rhs.dataSize ) &&
 // 			( memcmp(this->dataPtr, rhs.dataPtr, this->dataSize) == 0 )
 // 		) ? true : false;
-// 	}	
+// 	}
 // };
 
 
 
 class HAPConfigurationPlugin : public HAPConfigurationItem {
-public:	
+public:
 	char 		name[20 + 1] = {0, };
 	bool 		enabled = true;
-	uint32_t 	interval = 0;	
+	uint32_t 	interval = 0;
 	size_t 		dataSize = 0;
 	uint8_t* 	dataPtr = nullptr;
 
 	// HAPConfigurationPluginData* data;
 
-	
+
 	std::function<void(Print&)> _callbackToJson;
 
 
@@ -117,7 +117,7 @@ public:
 		}
 
 		// common
-		strncpy(name, name_, 20);				
+		strncpy(name, name_, 20);
 		enabled = enabled_;
 		interval = interval_;
 		setData(dataPtr_, dataSize_);
@@ -128,15 +128,15 @@ public:
 	}
 
 	bool setName(const char* name_){
-				
+
 		uint8_t size = strlen(name_);
 
 		if (size > 20) {
 			LogE(F("ERROR: NAME is too long!"), true);
 			return false;
 		}
-		strncpy(name, name_, 20);	
-		
+		strncpy(name, name_, 20);
+
 		return true;
 	}
 
@@ -151,9 +151,9 @@ public:
 
 	HAPConfigurationPlugin(const HAPConfigurationPlugin& rhs)
 		: enabled(rhs.enabled)
-		, interval(rhs.interval)	
-	{	
-		setName(rhs.name);	
+		, interval(rhs.interval)
+	{
+		setName(rhs.name);
 		setData(rhs.dataPtr, rhs.dataSize);
 	}
 
@@ -170,29 +170,29 @@ public:
 		if (this == &rhs) {
 			return (*this);
 		}
-		
+
 		enabled = rhs.enabled;
 		interval = rhs.interval;
 
 		setName(rhs.name);
 		setData(rhs.dataPtr, rhs.dataSize);
 
-		return (*this);	
+		return (*this);
 	}
 
 	bool operator== (const HAPConfigurationPlugin &rhs) const {
-		/* your logic for comparision between "*this" and "rhs" */ 
-		return ( 
-			( this->dataSize == rhs.dataSize ) && 			
-			( memcmp(this->dataPtr, rhs.dataPtr, this->dataSize) == 0 ) && 
-			( strncmp(this->name, rhs.name, strlen(this->name)) == 0 ) && 
-			( this->enabled == rhs.enabled ) && 			
+		/* your logic for comparision between "*this" and "rhs" */
+		return (
+			( this->dataSize == rhs.dataSize ) &&
+			( memcmp(this->dataPtr, rhs.dataPtr, this->dataSize) == 0 ) &&
+			( strncmp(this->name, rhs.name, strlen(this->name)) == 0 ) &&
+			( this->enabled == rhs.enabled ) &&
 			( this->interval == rhs.interval )
 		) ? true : false;
 	}
 
 	/*
-        {	
+        {
 			"name": "ABCD",
 			"enabled": true,
             "interval": 1000,
@@ -205,29 +205,29 @@ public:
 		prt.print("{");
 		prt.print("\"name\": ");
 		prt.print(HAPHelper::wrap(name));
-		
+
 
 		prt.print(",");
 		prt.print("\"enabled\": ");
 		prt.print(enabled);
-		
-		
+
+
 		prt.print(",");
 		prt.print("\"interval\": ");
 		prt.print(interval);
-		
+
 		prt.print(",");
-		prt.print("\"internal\": {");	
+		prt.print("\"internal\": {");
 			if (_callbackToJson){
 				_callbackToJson(prt);
-			}			
+			}
 		prt.print("}");
 
 		prt.print("}");
 	}
 
 	void clear() override {
-		
+
 	}
 
 	void setDefaults() override {

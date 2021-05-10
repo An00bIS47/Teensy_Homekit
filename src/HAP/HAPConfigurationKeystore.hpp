@@ -25,20 +25,20 @@ class HAPConfigurationKeystore : public HAPConfigurationItem {
 
 public:
 
-	char keystore[HAP_KEYSTORE_LABEL_LENGTH + 1] = {0,};		
+	char keystore[HAP_KEYSTORE_LABEL_LENGTH + 1] = {0,};
 
 	HAPConfigurationKeystore(){
 		memcpy(keystore, HAP_KEYSTORE_PARTITION_LABEL, HAP_KEYSTORE_LABEL_LENGTH);
 	}
 
-	~HAPConfigurationKeystore(){		
+	~HAPConfigurationKeystore(){
 	}
 
-	HAPConfigurationKeystore(const char* keystore_){	
-			strncpy(keystore, keystore_, HAP_KEYSTORE_LABEL_LENGTH);			
+	HAPConfigurationKeystore(const char* keystore_){
+			strncpy(keystore, keystore_, HAP_KEYSTORE_LABEL_LENGTH);
 		}
-		
-	HAPConfigurationKeystore(const HAPConfigurationKeystore& rhs) {				
+
+	HAPConfigurationKeystore(const HAPConfigurationKeystore& rhs) {
 		{
 			uint8_t size = strlen(rhs.keystore);
 
@@ -75,17 +75,17 @@ public:
 				return (*this);
 			}
 			strncpy(keystore, rhs.keystore, HAP_KEYSTORE_LABEL_LENGTH);
-		}	
-		return (*this);	
+		}
+		return (*this);
 	}
 
 	bool operator== (const HAPConfigurationKeystore &rhs) const {
-		/* your logic for comparision between "*this" and "rhs" */ 
-		return ( 
-			( strncmp(this->keystore, rhs.keystore, strlen(this->keystore)) == 0 ) 
+		/* your logic for comparision between "*this" and "rhs" */
+		return (
+			( strncmp(this->keystore, rhs.keystore, strlen(this->keystore)) == 0 )
 		) ? true : false;
 	}
-		
+
 
 	void clear() override {
 		memset(keystore, 0, HAP_KEYSTORE_LABEL_LENGTH);
@@ -94,8 +94,8 @@ public:
 	void setDefaults() override {
 		memcpy(keystore, HAP_KEYSTORE_PARTITION_LABEL, HAP_KEYSTORE_LABEL_LENGTH);
 	}
-	
-	
+
+
 	// {
 	// 		"active": "keystore_0"
     // }

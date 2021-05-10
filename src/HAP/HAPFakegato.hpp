@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegato.hpp
 // Teensy_Homekit
 //
@@ -36,16 +36,16 @@
 
 #define HAP_SERVICE_FAKEGATO_ENDING                             "-079E-48FF-8F27-9C2605A29F52"
 
-// 
+//
 // Services
-// 
+//
 #define HAP_SERVICE_FAKEGATO_WEATHER                            "E863F001-079E-48FF-8F27-9C2605A29F52"  // 001
 #define HAP_SERVICE_FAKEGATO_HISTORY                            "E863F007-079E-48FF-8F27-9C2605A29F52"  // 007
 #define HAP_SERVICE_FAKEGATO_AIR_PRESSURE_SENSOR                "E863F00A-079E-48FF-8F27-9C2605A29F52"  // 00A
 
-// 
+//
 // Characteristics
-// 
+//
 #define HAP_CHARACTERISTIC_FAKEGATO_VOLTAGE                     "E863F10A-079E-48FF-8F27-9C2605A29F52"  // 10A
 #define HAP_CHARACTERISTIC_FAKEGATO_AIR_PARTICULATE_DENSITY     "E863F10B-079E-48FF-8F27-9C2605A29F52"  // 10B
 #define HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION           "E863F10C-079E-48FF-8F27-9C2605A29F52"  // 10C
@@ -85,23 +85,23 @@
 #define HAP_CHARACTERISTIC_FAKEGATO_WIND_DIRECTION              "46F1284C-1912-421B-82F5-EB75008B167E"  // unit:                string  pr ev
 #define HAP_CHARACTERISTIC_FAKEGATO_WIND_SPEED                  "49C8AE5A-A3A5-41AB-BF1F-12D5654F9F41"  // unit: km/h           float   pr ev       minVal: 0       maxVal: 100     step 0.1
 
-// 
+//
 // Characteristics Common
-// 
+//
 #define HAP_CHARACTERISTIC_FAKEGATO_RESET_TOTAL                 "E863F112-079E-48FF-8F27-9C2605A29F52"  // 112  => Reset Total
 #define HAP_CHARACTERISTIC_FAKEGATO_FIRMWARE_UPDATE             "E863F11E-079E-48FF-8F27-9C2605A29F52"  // 11E  => Firmware Update ??
 
-// 
+//
 // Characteristics History
-// 
+//
 #define HAP_CHARACTERISTIC_FAKEGATO_SET_TIME                    "E863F121-079E-48FF-8F27-9C2605A29F52"  // 121  => S2W2
 #define HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST             "E863F11C-079E-48FF-8F27-9C2605A29F52"  // 11C  => S2W1
 #define HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS              "E863F116-079E-48FF-8F27-9C2605A29F52"  // 116  => S2R1
 #define HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES             "E863F117-079E-48FF-8F27-9C2605A29F52"  // 117  => S2R2
 
-// 
+//
 // Characteristics Schedule
-// 
+//
 #define HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ                 "E863F131-079E-48FF-8F27-9C2605A29F52"  // 131  => Config Read
 #define HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE                "E863F11D-079E-48FF-8F27-9C2605A29F52"  // 11D  => Config Write
 
@@ -110,7 +110,7 @@
 enum HAP_FAKEGATO_TYPE {
     HAP_FAKEGATO_TYPE_NONE      = 0x00,
     HAP_FAKEGATO_TYPE_WEATHER,
-    HAP_FAKEGATO_TYPE_CUSTOM   
+    HAP_FAKEGATO_TYPE_CUSTOM
 };
 
 class HAPFakegato {
@@ -123,7 +123,7 @@ public:
     void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
 
     void addEntry(uint8_t bitmask);
-    
+
     String name() { return _name; }
 
     uint32_t timestampLastEntry(){
@@ -163,9 +163,9 @@ public:
 
 
     void getSignature(uint8_t* bytes){
-        
+
         uint8_t offset = 0;
-        for (auto &sig : _signatures){            
+        for (auto &sig : _signatures){
             uint8_t len = 0;
             sig->getSignatureBytes(bytes + offset, &len);
             offset += len;
@@ -177,22 +177,22 @@ public:
         uint8_t bitmask = 0;
         for (uint8_t i=0; i < _signatures.size(); i++){
             bitmask += (1 << i);
-        }  
+        }
         return bitmask;
     }
 
-    uint8_t getMaxEntryValueLength(){             
+    uint8_t getMaxEntryValueLength(){
         return getEntryValueLength(getBitmaskForAll());
     }
 
     uint8_t getEntryValueLength(uint8_t bitmask){
         uint8_t length = 0;
         for (uint8_t i=0; i < _signatures.size(); i++){
-            if (bitmask && (1 << i)){                        
+            if (bitmask && (1 << i)){
                 length += _signatures[i]->valueLength();
             }
         }
-        return length;    
+        return length;
     }
 
     uint8_t valueLength(){
@@ -205,7 +205,7 @@ public:
 
     uint8_t signatureLength(){
         return (_signatures.size() * 2);
-    }    
+    }
 
     void enablePeriodicUpdates(bool mode = true){
         _periodicUpdates = mode;
@@ -267,9 +267,9 @@ protected:
 
 
 
-    // FIXME: Change to uint8_t* data characteristic with base64 encoding inside of the charactersitic 
-    //        Add this to a new file specific for data chars ? 
-    HAPCharacteristicT<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics; 
+    // FIXME: Change to uint8_t* data characteristic with base64 encoding inside of the charactersitic
+    //        Add this to a new file specific for data chars ?
+    HAPCharacteristicT<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics;
     HAPCharacteristicT<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
     HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
     HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
@@ -277,7 +277,7 @@ protected:
     // Schedules
     HAPCharacteristicT<String>* _configRead     = nullptr;
     HAPCharacteristicT<String>* _configWrite    = nullptr;
-    
+
     virtual void scheduleRead(String oldValue, String newValue)     {}
     virtual void scheduleWrite(String oldValue, String newValue)    {}
     virtual String buildScheduleString() { return ""; }
@@ -288,8 +288,8 @@ protected:
     // uint8_t _signature[12] = {0, };
     // uint8_t _sigLength;
     // uint8_t _fakegatoType = 0;
-    size_t  _requestedIndex = 0;    
-    
+    size_t  _requestedIndex = 0;
+
     uint32_t _previousMillis = 0;
     uint32_t _interval = HAP_FAKEGATO_INTERVAL;
 
@@ -298,7 +298,7 @@ protected:
     bool    _isEnabled = true;
     bool    _periodicUpdates = true;
 
-    bool    _transfer = false;    
+    bool    _transfer = false;
 
     std::vector< std::unique_ptr<HAPFakegatoCharacteristic> > _signatures;
     CircularBuffer<HAPFakegatoDataEntry*, HAP_FAKEGATO_BUFFER_SIZE> _entries;

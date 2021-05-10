@@ -11,7 +11,7 @@
 // Services
 // ============================================================================================================
 
-// Fertility Service 
+// Fertility Service
 // used for:
 //	- MiFlora
 #define HAP_CUSTOM_SERVICE_FERTILITY 			        "00000001-6B66-4FFD-88CC-16A60B5C4E03"
@@ -21,18 +21,18 @@
 // Characteristics
 // ============================================================================================================
 
-// Fertility Characteristic 
+// Fertility Characteristic
 // used for:
 //	- MiFlora
 #define HAP_CUSTOM_CHARACTERISTICS_FERTITLITY	        "000001EA-6B66-4FFD-88CC-16A60B5C4E03"
 
 
-// Measure Mode Characteristic 
+// Measure Mode Characteristic
 // used for:
 //	- RF24 Remote Weather Device
 #define HAP_CUSTOM_CHARACTERISTICS_MEASURE_MODE	        "000003EA-6B66-4FFD-88CC-16A60B5C4E03"
 
-// Heartbeat Characteristic 
+// Heartbeat Characteristic
 // used for:
 //	- RF24 Remote Weather Device
 //  - ToDo: MiFlora

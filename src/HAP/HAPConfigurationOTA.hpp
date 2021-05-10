@@ -28,9 +28,9 @@ public:
 
 	bool enabled = false;
 	uint16_t port = 0;
-	char password[HAP_OTA_PASSWORD_LENGTH + 1] = {0,};	
+	char password[HAP_OTA_PASSWORD_LENGTH + 1] = {0,};
 
-	
+
 
 	HAPConfigurationArduinoOTA(){
 		enabled = true;
@@ -48,17 +48,17 @@ public:
 	}
 
 
-	HAPConfigurationArduinoOTA(bool enabled_, uint16_t port_, const char* password_) 
+	HAPConfigurationArduinoOTA(bool enabled_, uint16_t port_, const char* password_)
 		: enabled(enabled_)
 		, port(port_)
-		{	
-			strncpy(password, password_, 32);			
+		{
+			strncpy(password, password_, 32);
 		}
 
 	bool isEnabled(){ return enabled; }
 
-	HAPConfigurationArduinoOTA(const HAPConfigurationArduinoOTA& rhs) {		
-		
+	HAPConfigurationArduinoOTA(const HAPConfigurationArduinoOTA& rhs) {
+
 		enabled = rhs.enabled;
 		port = rhs.port;
 
@@ -85,7 +85,7 @@ public:
 		if (this == &rhs) {
 			return (*this);
 		}
-		
+
 		enabled = rhs.enabled;
 		port = rhs.port;
 
@@ -97,19 +97,19 @@ public:
 				return (*this);
 			}
 			strncpy(password, rhs.password, 32);
-		}	
-		return (*this);	
+		}
+		return (*this);
 	}
 
 	bool operator== (const HAPConfigurationArduinoOTA &rhs) const {
-		/* your logic for comparision between "*this" and "rhs" */ 
-		return ( 
-			( this->enabled == rhs.enabled ) && 
-			( strncmp(this->password, rhs.password, strlen(this->password)) == 0 ) && 
+		/* your logic for comparision between "*this" and "rhs" */
+		return (
+			( this->enabled == rhs.enabled ) &&
+			( strncmp(this->password, rhs.password, strlen(this->password)) == 0 ) &&
 			( this->port == rhs.port )
 		) ? true : false;
 	}
-		
+
 
 	void clear() override {
 		memset(password, 0, 32);

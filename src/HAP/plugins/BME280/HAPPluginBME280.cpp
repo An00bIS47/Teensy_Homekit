@@ -12,7 +12,7 @@
 #define BME280_BASE_ADDRESS        	0x76
 #define HAP_PLUGIN_BME280_INTERVAL	5000
 
-#define SDA_PIN				SDA	
+#define SDA_PIN				SDA
 #define SCL_PIN				SCL
 
 #define VERSION_MAJOR       0
@@ -21,20 +21,20 @@
 #define VERSION_BUILD       0
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginBME280::HAPPluginBME280(){
 	_type 				= HAP_PLUGIN_TYPE_ACCESSORY;
 	// _config->name 				= "BME280";
 	// _isEnabled 			= HAP_PLUGIN_USE_BME280;
-	// _config->interval 			= HAP_PLUGIN_BME280_config->interval;		
-	// _mode 				= HAP_PLUGIN_BME280_INDOOR;	
+	// _config->interval 			= HAP_PLUGIN_BME280_config->interval;
+	// _mode 				= HAP_PLUGIN_BME280_INDOOR;
 	_previousMillis 	= 0;
 
     _version.major      = VERSION_MAJOR;
     _version.minor      = VERSION_MINOR;
     _version.revision   = VERSION_REVISION;
-    _version.build      = VERSION_BUILD;	
+    _version.build      = VERSION_BUILD;
 
 	_humidityValue		= nullptr;
 	_temperatureValue	= nullptr;
@@ -52,7 +52,7 @@ HAPPluginBME280::HAPPluginBME280(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginBME280::~HAPPluginBME280(){
 	delete _configInternal;
@@ -64,7 +64,7 @@ HAPPluginBME280::~HAPPluginBME280(){
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginBME280::identify(bool oldValue, bool newValue) {
 	Serial.printf("Start Identify %s\n", _config->name);
@@ -79,8 +79,8 @@ float HAPPluginBME280::readTemperature(){
 #else
 	if (_timestampLastRead + 1000 <= millis()) {
 		_bme->takeForcedMeasurement(); // has no effect in normal mode
-		_timestampLastRead = millis();		
-	}		
+		_timestampLastRead = millis();
+	}
 	value = _bme->readTemperature();
 #endif
 	return value;
@@ -93,8 +93,8 @@ float HAPPluginBME280::readHumidity(){
 #else
 	if (_timestampLastRead + 1000 <= millis()) {
 		_bme->takeForcedMeasurement(); // has no effect in normal mode
-		_timestampLastRead = millis();		
-	}		
+		_timestampLastRead = millis();
+	}
 	value = _bme->readHumidity();
 #endif
 	return value;
@@ -103,25 +103,25 @@ float HAPPluginBME280::readHumidity(){
 uint16_t HAPPluginBME280::readPressure(){
 	uint16_t value = 0;
 #if HAP_PLUGIN_BME280_USE_DUMMY
-	value = random(30, 110) * 10;	
+	value = random(30, 110) * 10;
 #else
 	if (_timestampLastRead + 1000 <= millis()) {
 		_bme->takeForcedMeasurement(); // has no effect in normal mode
-		_timestampLastRead = millis();		
-	}		
+		_timestampLastRead = millis();
+	}
 	value = _bme->readPressure();
 #endif
 	return value;
 }
 
 
-void HAPPluginBME280::changedTemperature(float oldValue, float newValue) {	
+void HAPPluginBME280::changedTemperature(float oldValue, float newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change temperature from " + String(oldValue) + " to " + String(newValue), true);
 	Serial.println("[" + String(_config->name) + "] Changed temperature " + String(oldValue) + " >>> " + String(newValue));
 
 }
 
-void HAPPluginBME280::changedHumidity(float oldValue, float newValue) {		
+void HAPPluginBME280::changedHumidity(float oldValue, float newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change humidity from " + String(oldValue) + " to " + String(newValue), true);
 	Serial.println("[" + String(_config->name) + "] Changed humidity " + String(oldValue) + " >>> " + String(newValue));
 }
@@ -131,9 +131,9 @@ void HAPPluginBME280::changedPressure(uint16_t oldValue, uint16_t newValue) {
 	Serial.println("[" + String(_config->name) + "] Changed pressure " + String(oldValue) + " >>> " + String(newValue));
 }
 
-void HAPPluginBME280::handleImpl(bool forced){	
-	// if (shouldHandle() || forced) {		
-	LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+void HAPPluginBME280::handleImpl(bool forced){
+	// if (shouldHandle() || forced) {
+	LogV(HAPTime::timeString() + " " + _config->name + "->" + "handleImpl" + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
 	if (_accessory->aid() == 0){
 		return;
@@ -148,7 +148,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 	_humidityValue->setValue(relative_humidity, false);
 	_humidityAverage.addValue(relative_humidity);
 	queueNotifyEvent(_humidityValue);
-	
+
 	uint16_t pressure 		= readPressure();
 	_pressureValue->setValue(pressure, false);
 	_pressureAverage.addValue(pressure);
@@ -157,30 +157,30 @@ void HAPPluginBME280::handleImpl(bool forced){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPAccessory* HAPPluginBME280::initAccessory(){
 	LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
-	
-	// 
+
+	//
 	// Unique serial number !!!
-	// 
+	//
     char hex[6];
 #if HAP_PLUGIN_BME280_USE_DUMMY
 	sprintf(hex, "%s", "DUMMY");
 #else
     sprintf(hex, "%x", _bme->sensorID());
-#endif	
+#endif
 	String sn = HAPDeviceID::serialNumber("BME", String(hex));
 
-	// 
+	//
 	// Add new accessory
-	// 
+	//
 	_accessory = new HAPAccessory();
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
    	_accessory->addInfoService("Weather", "ACME", "BME280 " + String(hex), sn, callbackIdentify, version());
 
-	
+
 	//
 	// Temperature
 	//
@@ -191,7 +191,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		HAPCharacteristicT<String> *temperatureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
 		temperatureServiceName->setValue("BME280 Temperature Sensor");
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
-		
+
 		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
 		_temperatureValue->setValue(0.0F);
 
@@ -201,13 +201,13 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 	}
 
-	
+
 	//
 	// Humidity
 	//
 	HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
 	_accessory->addService(humidityService);
-	{	
+	{
 		HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
 		humServiceName->setValue("BME280 Humidity Sensor");
 		_accessory->addCharacteristicToService(humidityService, humServiceName);
@@ -221,17 +221,17 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_accessory->addCharacteristicToService(humidityService, _humidityValue);
 	}
 
-	
+
 	//
 	// AirPressure
 	//
 	HAPService* pressureService = new HAPService(HAP_SERVICE_FAKEGATO_AIR_PRESSURE_SENSOR);
 	_accessory->addService(pressureService);
-	{	
+	{
 		HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
 		pressureServiceName->setValue("BME280 AirPressure Sensor");
 		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
-		
+
 		_pressureValue = new HAPCharacteristicT<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
 		_pressureValue->setValue(320);
 
@@ -241,21 +241,21 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_accessory->addCharacteristicToService(pressureService, _pressureValue);
 	}
 
-	// 
+	//
 	// Link services
-	// 
+	//
 	temperatureService->addLinkedServiceId(humidityService->aid());
 	temperatureService->addLinkedServiceId(pressureService->aid());
 
 	//
 	// FakeGato
-	// 			
+	//
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginBME280::getAveragedTemperatureValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginBME280::getAveragedHumidityValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginBME280::getAveragedPressureValue, this)));
-	
+
 	_fakegato.registerFakeGatoService(_accessory, "BME280 " + String(hex));
-			
+
 	auto callbackAddEntry = std::bind(&HAPPluginBME280::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
 
@@ -264,10 +264,10 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	return _accessory;
 }
 
-#if HAP_ENABLE_WEBSERVER	
+#if HAP_ENABLE_WEBSERVER
 HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject object){
     HAPConfigurationValidationResult result;
-    
+
     result = HAPPlugin::validateConfig(object);
     if (result.valid == false) {
         return result;
@@ -275,7 +275,7 @@ HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject obje
 
 	/*
         "HAPPluginBME280": {
-            "enabled": true,	
+            "enabled": true,
             "interval": 1000,
             "mode": 1,
         }
@@ -301,7 +301,7 @@ HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject obje
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPPluginBME280::begin(){
 	LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
@@ -313,14 +313,14 @@ bool HAPPluginBME280::begin(){
 	LogW("   - Using BME280 dummy!", true);
 	_config->interval = HAP_PLUGIN_BME280_INTERVAL;
 #else
-	
+
 	Wire.begin(SDA_PIN, SCL_PIN);
-	
-    uint8_t status = _bme->begin(BME280_BASE_ADDRESS, &Wire);  
+
+    uint8_t status = _bme->begin(BME280_BASE_ADDRESS, &Wire);
     char hex[5];
     sprintf(hex, "%x", _bme->sensorID());
 
-    if (!status) {        
+    if (!status) {
         LogE("\nCould not find a valid BME280 sensor, check wiring, address, sensor ID!", true);
         LogE("SensorID was: 0x" + String(hex), true);
         LogE("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085", true);
@@ -363,10 +363,10 @@ bool HAPPluginBME280::begin(){
                     Adafruit_BME280::SAMPLING_NONE, // pressure
                     Adafruit_BME280::SAMPLING_X1,   // humidity
                     Adafruit_BME280::FILTER_OFF );
-                      
+
     	// suggested rate is 1Hz (1s)
     	// _config->interval = 1000;  // in milliseconds
-	
+
 	} else if (_configInternal->mode == HAP_PLUGIN_BME280_INDOOR) {
 		// Serial.println("-- Indoor Navigation Scenario --");
 		// Serial.println("normal mode, 16x pressure / 2x temperature / 1x humidity oversampling,");
@@ -377,7 +377,7 @@ bool HAPPluginBME280::begin(){
                     Adafruit_BME280::SAMPLING_X1,  // humidity
                     Adafruit_BME280::FILTER_X16,
                     Adafruit_BME280::STANDBY_MS_0_5 );
-    
+
 		// suggested rate is 25Hz
 		// 1 + (2 * T_ovs) + (2 * P_ovs + 0.5) + (2 * H_ovs + 0.5)
 		// T_ovs = 2
@@ -398,7 +398,7 @@ bool HAPPluginBME280::begin(){
 						Adafruit_BME280::SAMPLING_NONE, // humidity
 						Adafruit_BME280::FILTER_X16,
 						Adafruit_BME280::STANDBY_MS_0_5 );
-						
+
 		// Suggested rate is 83Hz
 		// 1 + (2 * T_ovs) + (2 * P_ovs + 0.5)
 		// T_ovs = 1
@@ -408,67 +408,66 @@ bool HAPPluginBME280::begin(){
 	} else {
 		_config->interval = HAP_PLUGIN_BME280_INTERVAL;
 	}
-  
+
 
 #endif
 
 	return true;
 }
 
-bool HAPPluginBME280::fakeGatoCallback(){	
+bool HAPPluginBME280::fakeGatoCallback(){
 	// 0102 0202 0302
-	//	|	  |	   +-> Pressure	
+	//	|	  |	   +-> Pressure
 	//  |	  +-> Humidity
 	//  +-> Temp
-	// 
+	//
 	// 0x07 => all			= 111
 	// 0x01 => temp			= 001
 	// 0x02 => hum			= 010
 	// 0x04 => pressure		= 100
 	_fakegato.addEntry(_fakegato.getBitmaskForAll());
-	
 	return true;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationPlugin* HAPPluginBME280::setDefaults(){
 	_configInternal->mode = HAP_PLUGIN_BME280_INDOOR;
 	_config->enabled  = HAP_PLUGIN_USE_BME280;
-	_config->interval = HAP_PLUGIN_BME280_INTERVAL;	
+	_config->interval = HAP_PLUGIN_BME280_INTERVAL;
 	_config->dataPtr = (uint8_t*)_configInternal;
 	_config->dataSize = sizeof(_configInternal);
 	return _config;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginBME280::internalConfigToJson(Print& prt){
 	/*
 		{ >>> is already printed before
 			"mode": 1
 		} >>> will be printed after
-	
+
 	*/
 	prt.print("\"mode\":");
 	prt.print(_configInternal->mode);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginBME280::setConfiguration(HAPConfigurationPlugin* cfg){
-	_config = cfg;	
+	_config = cfg;
 	_configInternal = (HAPPluginBME280Config*)_config->dataPtr;
 	_config->setToJsonCallback(std::bind(&HAPPluginBME280::internalConfigToJson, this, std::placeholders::_1));
 
 	// Serial.print("BME280 interval:");
 	// Serial.println(_config->interval);
 	// Serial.print("BME280 dataSize:");
-	// Serial.println(_config->dataSize);	
+	// Serial.println(_config->dataSize);
 	// Serial.print("BME280 mode:");
-	// Serial.println(_configInternal->mode);	
+	// Serial.println(_configInternal->mode);
 }
 

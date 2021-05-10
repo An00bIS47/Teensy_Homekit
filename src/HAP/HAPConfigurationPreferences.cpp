@@ -5,18 +5,18 @@
 //  Created on: 14.12.2018
 //      Author: michael
 //
-//  Used partitions: 
-// 		* config			
-// 
+//  Used partitions:
+// 		* config
+//
 //  Used labels:
-//    Configuration		
-// 		* cPltfrm		= 0x01	
-// 		* cAcc			= 0x02	
-// 		* cWiFi			= 0x03	
+//    Configuration
+// 		* cPltfrm		= 0x01
+// 		* cAcc			= 0x02
+// 		* cWiFi			= 0x03
 // 		* cOTA			= 0x04
 // 		* cWebSvr		= 0x05
 // 		* cKeySt		= 0x06
-// 
+//
 
 #include "HAPPlugins.hpp"
 #include "HAPConfigurationPreferences.hpp"
@@ -45,7 +45,7 @@ size_t HAPConfigurationPreferences::readBytes(const char* label, uint8_t* output
 size_t HAPConfigurationPreferences::writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen){
 	_prefs.begin("config", false);
 	size_t dataLen = _prefs.getBytesLength(label);
-	
+
 	if (dataLen == expectedDataLen) {
 		uint8_t buffer[dataLen];
 		readBytes(label, buffer, dataLen);
@@ -54,7 +54,7 @@ size_t HAPConfigurationPreferences::writeBytes(const char* label, const uint8_t*
 			_prefs.end();
 			return expectedDataLen;
 		}
-	} 
+	}
 
 	size_t written = _prefs.putBytes(label, input, expectedDataLen);
 	_prefs.end();
@@ -76,8 +76,8 @@ void HAPConfigurationPreferences::reset() {
 }
 
 
-bool HAPConfigurationPreferences::getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize){	
-	char label[20];	
+bool HAPConfigurationPreferences::getBytesForPlugin(const char* name, uint8_t* data, size_t dataSize){
+	char label[20];
 	sprintf(label, "p%s",name);
 
 	// Serial.println("Loading data from EEPROM: ");
@@ -89,7 +89,7 @@ bool HAPConfigurationPreferences::getBytesForPlugin(const char* name, uint8_t* d
 	// Serial.println(dataSize);
 
 	// uint8_t buffer[dataSize];
-	size_t read = readBytes(label, data, dataSize);		
+	size_t read = readBytes(label, data, dataSize);
 
 #if HAP_DEBUG_CONFIGURATION
 	char text[32];
@@ -104,7 +104,7 @@ bool HAPConfigurationPreferences::getBytesForPlugin(const char* name, uint8_t* d
 }
 
 size_t HAPConfigurationPreferences::getDataLengthForPlugin(const char* name){
-	char label[20];	
+	char label[20];
 	sprintf(label, "p%s", name);
-	return getBytesLength(label);	
+	return getBytesLength(label);
 }

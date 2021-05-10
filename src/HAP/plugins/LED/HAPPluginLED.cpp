@@ -8,7 +8,7 @@
 #include "HAPPluginLED.hpp"
 #include "HAPServer.hpp"
 
-#define HAP_PLUGIN_LED_INTERVAL 1000	
+#define HAP_PLUGIN_LED_INTERVAL 1000
 
 #if 0
 #ifndef BUILTIN_LED
@@ -35,7 +35,7 @@
 #endif
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPPluginLED::HAPPluginLED(){
     _type               = HAP_PLUGIN_TYPE_ACCESSORY;
@@ -61,10 +61,10 @@ void HAPPluginLED::changePower(bool oldValue, bool newValue) {
     // LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
     if (newValue == true) {
-        digitalWrite(_gpio, HIGH);     // dont know why to put low here, maybe because of SPI ?  
+        digitalWrite(_gpio, HIGH);     // dont know why to put low here, maybe because of SPI ?
     } else {
         digitalWrite(_gpio, LOW);
-    }      
+    }
 }
 
 void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
@@ -72,19 +72,19 @@ void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
 
     if (newValue != oldValue) {
         _blinkingEnabled = newValue;
-        
+
         _powerState->setValue(newValue);
 
         // Config update notification
-        struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");							
-        _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);                           
-    }     
+        struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
+        _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);
+    }
 }
 
 
 
 void HAPPluginLED::handleImpl(bool forced){
-    
+
     if (isEnabled() && _blinkingEnabled) {
         LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
 
@@ -92,44 +92,44 @@ void HAPPluginLED::handleImpl(bool forced){
         queueNotifyEvent(_powerState);
 
     }
-      
+
 
 
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 bool HAPPluginLED::begin(){
     LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
 
-    pinMode(_gpio, OUTPUT);    
+    pinMode(_gpio, OUTPUT);
     digitalWrite(_gpio, _isOn);
 
     return true;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPAccessory* HAPPluginLED::initAccessory(){
-    
+
     LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
 
     String sn = HAPDeviceID::serialNumber("LED", String(_gpio));
 
-    // 
+    //
     // Add new accessory
-    // 
+    //
 	_accessory = new HAPAccessory();
 	//HAPAccessory::addInfoServiceToAccessory(_accessory, "Builtin LED", "ACME", "LED", "123123123", &identify);
     auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
     _accessory->addInfoService("Builtin LED", "ACME", "LED", sn, callbackIdentify, version());
 
 
-    // 
+    //
     // Lightbulb Service
-    // 
+    //
     HAPService* _service = new HAPService(HAP_SERVICE_LIGHTBULB);
     // _service->setPrimaryService(true);
     _accessory->addService(_service);
@@ -142,15 +142,15 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     _powerState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
     _powerState->setValue(_isOn);
 
-    auto callbackPowerState = std::bind(&HAPPluginLED::changePower, this, std::placeholders::_1, std::placeholders::_2);        
+    auto callbackPowerState = std::bind(&HAPPluginLED::changePower, this, std::placeholders::_1, std::placeholders::_2);
     _powerState->setValueChangeCallback(callbackPowerState);
     _accessory->addCharacteristicToService(_service, _powerState);
 
-    
 
-    // 
+
+    //
     // Outlet Service / Switch Service
-    // 
+    //
     HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
     _accessory->addService(switchService);
 
@@ -161,8 +161,8 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     _enabledState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
     _enabledState->setDescription("Enabled");
     _enabledState->setValue(_blinkingEnabled);
-    
-    auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);        
+
+    auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);
     _enabledState->setValueChangeCallback(callbackEnabledState);
     _accessory->addCharacteristicToService(switchService, _enabledState);
 
@@ -176,7 +176,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
     Serial.printf(F("Start Identify Light from member\n"));
@@ -185,17 +185,17 @@ void HAPPluginLED::identify(bool oldValue, bool newValue) {
 #if HAP_ENABLE_WEBSERVER
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object){
     HAPConfigurationValidationResult result;
-    
+
     result = HAPPlugin::validateConfig(object);
     if (result.valid == false) {
         return result;
     }
     result.valid = false;
-    
+
     // plugin._name.username
     if (object.containsKey("gpio") && !object["gpio"].is<uint8_t>()) {
         result.reason = "plugins." + String(_config->name) + ".gpio is not an integer";
@@ -219,7 +219,7 @@ JsonObject HAPPluginLED::getConfigImpl(){
     Serial.println();
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32)	
+#if defined(ARDUINO_ARCH_ESP32)
 	doc.shrinkToFit();
 #endif
 	return doc.as<JsonObject>();
@@ -237,11 +237,11 @@ void HAPPluginLED::setConfigImpl(JsonObject root){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
 	_config->enabled  = HAP_PLUGIN_USE_LED;
-	_config->interval = HAP_PLUGIN_LED_INTERVAL;	
+	_config->interval = HAP_PLUGIN_LED_INTERVAL;
 	_config->dataPtr = nullptr;
 	_config->dataSize = 0;
 	return _config;
@@ -249,8 +249,8 @@ HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPPluginLED::setConfiguration(HAPConfigurationPlugin* cfg){
-	_config = cfg;	
+	_config = cfg;
 }

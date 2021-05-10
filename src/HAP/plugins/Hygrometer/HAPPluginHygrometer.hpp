@@ -28,17 +28,17 @@ public:
 
 	bool begin();
 	HAPAccessory* initAccessory() override;
-	
+
 	void changedHumidity(float oldValue, float newValue);
 
 	void identify(bool oldValue, bool newValue);
-    void handleImpl(bool forced = false);	
-	
+    void handleImpl(bool forced = false);
+
 	inline float getAveragedHumidityValue(){
 		return _humidityAverage.getAverage();
 	}
 
-#if HAP_ENABLE_WEBSERVER	
+#if HAP_ENABLE_WEBSERVER
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 	JsonObject getConfigImpl();
 	void setConfigImpl(JsonObject root);
@@ -53,12 +53,12 @@ private:
 	HAPCharacteristicT<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
-// #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED	
-// 	HAPCharacteristicUInt8*	_leakSensor;	
+// #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED
+// 	HAPCharacteristicUInt8*	_leakSensor;
 // #endif
 
 	bool _leakSensorEnabled;
-	
+
 	bool fakeGatoCallback();
 
 	HAPFakegato _fakegato;
@@ -70,4 +70,4 @@ private:
 
 REGISTER_PLUGIN(HAPPluginHygrometer)
 
-#endif /* HAPPLUGINHYGROMETER_HPP_ */ 
+#endif /* HAPPLUGINHYGROMETER_HPP_ */

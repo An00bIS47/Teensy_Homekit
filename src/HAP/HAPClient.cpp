@@ -30,7 +30,7 @@ HAPClient::HAPClient()
 }
 
 HAPClient::~HAPClient() {
-	
+
 
 	subscribtions.clear();
 	clear();
@@ -39,29 +39,29 @@ HAPClient::~HAPClient() {
 }
 
 bool HAPClient::operator==(const HAPClient &hap) const {
-#if defined( ARDUINO_ARCH_ESP32 )	
+#if defined( ARDUINO_ARCH_ESP32 )
 	return hap.client.fd() == client.fd();
 #elif defined( CORE_TEENSY )
 	return hap.client.getSocketNumber() == client.getSocketNumber();
-#endif	
+#endif
 }
 
 void HAPClient::clear() {
 	_headerSent = false;
-	
-	_headers.clear();	
+
+	_headers.clear();
 	request.clear();
 }
 
 void HAPClient::subscribe(int aid, int iid, bool value){
 	struct HAPSubscribtionItem item = HAPSubscribtionItem(aid, iid);
-	
+
 	if (value){
 		subscribtions.insert(item);
 	} else {
 		subscribtions.erase(item);
 	}
-	
+
 }
 
 bool HAPClient::isSubscribed(int aid, int iid) const {
@@ -70,51 +70,51 @@ bool HAPClient::isSubscribed(int aid, int iid) const {
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 int HAPClient::available(){
 	return client.available();
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 int HAPClient::peek(){
 	return client.peek();
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 int HAPClient::read(){
 	return client.read();
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPClient::flush(){
 	client.flush();
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 String HAPClient::buildHeaderAndStatus(int statusCode, size_t size){
-	
+
 	String response = "";
 	if (_headerSent == true) return response;
 
 	// Status code and Status message
 	response += F("HTTP/1.1 ");
 	response += String(statusCode) + " " + statusMessage(statusCode);
-	response += F("\r\n");		
+	response += F("\r\n");
 
 	// Headers
 	for (auto & elem : _headers){
 		response += elem.describe();
 		response += F("\r\n");
-	}	
+	}
 
 	// Transfer-Encoding or Content length
 	if (_chunkedMode) {
@@ -124,7 +124,7 @@ String HAPClient::buildHeaderAndStatus(int statusCode, size_t size){
 		response += String(size);
 		response += F("\r\n");
 	}
-		
+
 	// end of headers
 	response += F("\r\n");
 
@@ -134,15 +134,15 @@ String HAPClient::buildHeaderAndStatus(int statusCode, size_t size){
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
-size_t HAPClient::write(const uint8_t* buffer, size_t size) {	
+size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 
 	size_t bytesSend = 0;
-	
+
 	uint8_t writeBuffer[1360];
 	size_t writeBufferUsed = 0;
-	
+
 	String headerStr = buildHeaderAndStatus(200, size);
 
 	// WriteBufferingStream bufferedWifiClient{client, 1360};
@@ -157,14 +157,14 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 
 		LogV(F("\nSending unencrypted response!"), true);
 
-		size_t bytesChunk = 0;	
+		size_t bytesChunk = 0;
 
 		if (headerStr != ""){
 			memcpy(writeBuffer, headerStr.c_str(), headerStr.length());
 			writeBufferUsed += headerStr.length();
 			_headerSent = true;
-		}	
-		
+		}
+
 		int remainingSize = size;
 		size_t written = 0;
 
@@ -184,21 +184,21 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 			memcpy(writeBuffer + writeBufferUsed, buffer + written, toWrite);
 			writeBufferUsed += toWrite;
 
-#if HAP_DEBUG_REQUESTS_DETAILED	
+#if HAP_DEBUG_REQUESTS_DETAILED
 			HAPHelper::array_print(F("Response:"), writeBuffer, writeBufferUsed);
 #endif
 
 			bytesSend += client.write(writeBuffer, writeBufferUsed);
 			writeBufferUsed = 0;
-			
+
 			written += toWrite;
 			remainingSize -= written;
 
-			bytesChunk += client.write((uint8_t*) "\r\n", 2);			
+			bytesChunk += client.write((uint8_t*) "\r\n", 2);
 
-#if HAP_DEBUG_REQUESTS_DETAILED	
+#if HAP_DEBUG_REQUESTS_DETAILED
 			HAPHelper::array_print("endline:", (uint8_t*)"\r\n", 2);
-#endif			
+#endif
 			bytesSend += bytesChunk;
 		}
 
@@ -209,19 +209,19 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 			char chunkSize[8];
 			sprintf(chunkSize, "%x\r\n", 0);
 
-#if HAP_DEBUG_REQUESTS_DETAILED	
+#if HAP_DEBUG_REQUESTS_DETAILED
 			HAPHelper::array_print("chunksize 0:", (uint8_t*) chunkSize, strlen(chunkSize));
-#endif			
-			bytesSend += client.write((uint8_t*) chunkSize, strlen(chunkSize));				
+#endif
+			bytesSend += client.write((uint8_t*) chunkSize, strlen(chunkSize));
 		}
 
-#if HAP_DEBUG_REQUESTS_DETAILED	
+#if HAP_DEBUG_REQUESTS_DETAILED
 		HAPHelper::array_print("endline:", (uint8_t*)"\r\n", 2);
 #endif
 		// send end of request
-		bytesSend += client.write((uint8_t*) "\r\n", 2);			
+		bytesSend += client.write((uint8_t*) "\r\n", 2);
 
-		
+
 	}
 	//  else {
 
@@ -240,8 +240,8 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 	// 	if (headerStr != ""){
 	// 		memcpy(writeBuffer, headerStr.c_str(), headerStr.length());
 	// 		writeBufferUsed += headerStr.length();
-	// 		bytesHeader = headerStr.length();			
-	// 	}	
+	// 		bytesHeader = headerStr.length();
+	// 	}
 
 	// 	// chunk size for payload
 	// 	if (_chunkedMode) {
@@ -250,7 +250,7 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 
 	// 		memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
 	// 		writeBufferUsed	+= strlen(chunkSize);
-	// 		bytesChunk += strlen(chunkSize);		
+	// 		bytesChunk += strlen(chunkSize);
 	// 	}
 
 	// 	uint8_t nonce[12] = {0,};
@@ -263,15 +263,15 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 	// 		LogE("Error: mbedtls_chachapoly_starts failed", true);
 	// 	}
 
-		
+
 	// 	uint8_t aad[HAP_ENCRYPTION_AAD_SIZE];
 	// 	aad[0] = size % 256;
-	// 	aad[1] = size / 256;			
+	// 	aad[1] = size / 256;
 
 	// 	ret = mbedtls_chachapoly_update_aad( &chachapoly_ctx, aad, HAP_ENCRYPTION_AAD_SIZE );
 	// 	if( ret != 0 ) {
 	// 		LogE("Error: mbedtls_chachapoly_update_aad failed", true);
-	// 	}		
+	// 	}
 
 	// 	int remainingSize = size;
 	// 	size_t written = 0;
@@ -279,7 +279,7 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 
 	// 	while (remainingSize > 0){
 	// 		int toWrite = (remainingSize > 1360 - writeBufferUsed) ? 1360 - writeBufferUsed : remainingSize;
-			
+
 	// 		uint8_t encryptedBuffer[toWrite + bytesHeader + bytesChunk];
 
 	// 		if (!_headerSent){
@@ -294,14 +294,14 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 	// 		ret = mbedtls_chachapoly_update( &chachapoly_ctx, toWrite, writeBuffer, encryptedBuffer);
 	// 		if( ret != 0 ) {
 	// 			LogE("Error: mbedtls_chachapoly_update failed", true);
-	// 		}				
+	// 		}
 	// 		writeBufferUsed += toWrite + bytesHeader + bytesChunk;
-			
+
 	// 		// bytesSend += bufferedWifiClient.write(encryptedBuffer, sizeof(encryptedBuffer));
 	// 		bytesSend += client.write(encryptedBuffer, sizeof(encryptedBuffer));
 
 	// 		writeBufferUsed = 0;
-			
+
 	// 		written += toWrite;
 	// 		remainingSize -= toWrite + bytesHeader + bytesChunk;
 	// 	}
@@ -321,7 +321,7 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 	// 		char chunkSize[8];
 	// 		sprintf(chunkSize, "%x\r\n", 0);
 	// 		memcpy(writeBuffer + writeBufferUsed, chunkSize, strlen(chunkSize));
-	// 		writeBufferUsed	+= strlen(chunkSize);						
+	// 		writeBufferUsed	+= strlen(chunkSize);
 	// 	}
 
 	// 	{
@@ -330,7 +330,7 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 	// 		writeBufferUsed	+= strlen(chunkSize);
 	// 	}
 
-		
+
 	// 	uint8_t encryptedBuffer[writeBufferUsed];
 	// 	ret = mbedtls_chachapoly_update( &chachapoly_ctx, writeBufferUsed, writeBuffer, encryptedBuffer);
 	// 	if( ret != 0 ) {
@@ -339,37 +339,37 @@ size_t HAPClient::write(const uint8_t* buffer, size_t size) {
 
 	// 	// bytesSend += bufferedWifiClient.write(encryptedBuffer, writeBufferUsed);
 	// 	bytesSend += client.write(encryptedBuffer, writeBufferUsed);
-		
+
 	// 	uint8_t tag[16];
 	// 	ret = mbedtls_chachapoly_finish( &chachapoly_ctx, tag );
 	// 	if( ret != 0 ) {
 	// 		LogE("Error: mbedtls_chachapoly_finish failed", true);
 	// 	}
-		
-	// 	// bytesSend += bufferedWifiClient.write(tag, 16);		
+
+	// 	// bytesSend += bufferedWifiClient.write(tag, 16);
 	// 	bytesSend += client.write(tag, 16);
-	// }	
+	// }
 
 	// bufferedWifiClient.flush();
 	return bytesSend;
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 size_t HAPClient::write(uint8_t b){
 	return client.write(b);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPClient::setHeader(HAPClientHeader header){
 	setHeader(header.name, header.value);
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPClient::setHeader(const String& name, const String& value) {
 	bool found = false;
@@ -391,21 +391,21 @@ void HAPClient::setHeader(const String& name, const String& value) {
 #if HAP_API_ADMIN_MODE
 // ToDo: Replace with streaming method
 String HAPClient::describe() const {
-	
+
 	String keys[4];
     String values[4];
     int i=0;
     {
-        keys[i] = "isEncrypted";        
+        keys[i] = "isEncrypted";
         values[i++] = String(_isEncrypted);
     }
 	{
-        keys[i] = "state";        
+        keys[i] = "state";
         values[i++] = String(state);
     }
 
 	{
-        keys[i] = "ip";        
+        keys[i] = "ip";
         values[i++] = HAPHelper::wrap(client.remoteIP().toString());
     }
 
@@ -421,7 +421,7 @@ String HAPClient::describe() const {
         values[i++] = HAPHelper::arrayWrap(subs, noOfSubscribtions);
         delete [] subs;
     }
-	
+
     return HAPHelper::dictionaryWrap(keys, values, i);
 }
 
@@ -429,35 +429,35 @@ String HAPClient::describe() const {
 #endif
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 String HAPClient::statusMessage(int statusCode){
 
 	switch(statusCode) {
-        case 200:                        
+        case 200:
             return F("OK");
-		case 201:                        
-            return F("Created");	
-		case 202:                        
-            return F("Accepted");			
-		case 204:                        
-            return F("No Content");	
+		case 201:
+            return F("Created");
+		case 202:
+            return F("Accepted");
+		case 204:
+            return F("No Content");
 		case 400:
 			return F("Bad Request");
 		case 401:
-			return F("Unauthorized");	
+			return F("Unauthorized");
 		case 403:
-			return F("Forbidden");			
+			return F("Forbidden");
 		case 404:
-			return F("Not Found");		
+			return F("Not Found");
 		case 405:
-			return F("Method not allowed");	
+			return F("Method not allowed");
 		case 409:
-			return F("Conflict");		
+			return F("Conflict");
 		case 413:
 			return F("Payload too large");
 		case 420:
-			return F("Enhance your calm");	
+			return F("Enhance your calm");
 		default:
 			return F("");
 	}

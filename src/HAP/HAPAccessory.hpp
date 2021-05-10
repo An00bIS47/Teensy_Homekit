@@ -48,15 +48,15 @@ public:
 	// String describe() const;
 
 	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");
-	
+
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
-	
+
 	void setFirmware(const String& firmwareRev);
 
 	uint8_t aid() { return _aid; }
     void setAID(uint8_t aid) { _aid = aid; }
-	
+
 protected:
 
 	void initInfoService();
@@ -65,7 +65,7 @@ protected:
 	uint32_t _numberOfInstances = 0;
 
 	std::vector<std::unique_ptr<HAPService>> _services;
-	
+
 	HAPService*	_infoService;
 	HAPCharacteristicT<bool>* 	_identify;
 	HAPCharacteristicT<String>* _accessoryName;

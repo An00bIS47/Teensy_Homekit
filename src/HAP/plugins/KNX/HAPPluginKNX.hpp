@@ -5,7 +5,7 @@
 //  Created on: 20.12.2019
 //      Author: michael
 //
-// 
+//
 
 #ifndef HAPPLUGINKNX_HPP_
 #define HAPPLUGINKNX_HPP_
@@ -31,7 +31,7 @@
   #ifndef HAP_PLUGIN_KNX_USE_TASK
     #define HAP_PLUGIN_KNX_USE_TASK 1
   #endif
-#else 
+#else
   #define HAP_PLUGIN_KNX_USE_TASK 0
 #endif
 
@@ -43,28 +43,28 @@ public:
 
 	bool begin();
 
-	HAPAccessory* initAccessory() override;		
-	
+	HAPAccessory* initAccessory() override;
+
 	// void identify(bool oldValue, bool newValue);
-    void handleImpl(bool forced = false);	
+    void handleImpl(bool forced = false);
 
 
 #if HAP_ENABLE_WEBSERVER
-	HAPConfigurationValidationResult validateConfig(JsonObject object);	
+	HAPConfigurationValidationResult validateConfig(JsonObject object);
 #endif
-	
+
 	HAPConfigurationPlugin* setDefaults();
-	void internalConfigToJson(Print& prt); 	
+	void internalConfigToJson(Print& prt);
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
-	
+
 	// void remoteTempCallback(GroupObject& go);
 
 #if HAP_ENABLE_WEBSERVER
-	std::vector<HAPWebServerPluginNode*> getResourceNodes();	
+	std::vector<HAPWebServerPluginNode*> getResourceNodes();
 
-	void handleHTTPGet(HTTPRequest * req, HTTPResponse * res);	
+	void handleHTTPGet(HTTPRequest * req, HTTPResponse * res);
 	void handleHTTPGetKeyProcessor(const String& key, HTTPResponse * res);
-	
+
 	void handleHTTPPost(HTTPRequest * req, HTTPResponse * res);
 	void handleHTTPFormField(const std::string& fieldName, const std::string& fieldValue);
 #endif
@@ -72,20 +72,20 @@ public:
 #if HAP_PLUGIN_KNX_USE_TASK
 	static void taskKNX( void * parameter );
 #endif
-	
-private:	
+
+private:
 
 #if SMALL_GROUPOBJECT
 	void callbackReceived(GroupObject& go);
 #endif
 
-	int indexOfDevice(HAPPluginKNXDevice* device);    	
+	int indexOfDevice(HAPPluginKNXDevice* device);
 
 	std::vector<HAPPluginKNXDevice*> _devices;
-    
+
 	bool fakeGatoCallback();
 };
 
 REGISTER_PLUGIN(HAPPluginKNX)
 
-#endif /* HAPPLUGINKNX_HPP_ */ 
+#endif /* HAPPLUGINKNX_HPP_ */

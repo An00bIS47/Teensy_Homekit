@@ -14,31 +14,31 @@
 #include "HAPLogger.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
-	
+
 
 class HAPPluginLED: public HAPPlugin {
 public:
 
 	HAPPluginLED();
 	HAPAccessory* initAccessory() override;
-	
+
 	bool begin();
 
 	void setValue(int iid, String oldValue, String newValue);
 
 	void changePower(bool oldValue, bool newValue);
-	void changeEnabled(bool oldValue, bool newValue);	
+	void changeEnabled(bool oldValue, bool newValue);
 
 	void handleImpl(bool forced=false);
 	void identify( bool oldValue, bool newValue);
-	
+
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 
 	HAPConfigurationPlugin* setDefaults();
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
 
 
-protected:	
+protected:
 	HAPCharacteristicT<bool>* 	_powerState;
 	HAPCharacteristicT<bool>* 	_enabledState;
 
@@ -49,4 +49,4 @@ protected:
 
 REGISTER_PLUGIN(HAPPluginLED)
 
-#endif /* HAPPLUGINLED_HPP_ */ 
+#endif /* HAPPLUGINLED_HPP_ */

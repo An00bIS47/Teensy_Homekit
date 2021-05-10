@@ -27,11 +27,11 @@ public:
 
 	uint8_t aid(){ return _aid; };
 	void begin();
-	
+
 	bool isPaired(){
 		return (_configuration->pairings.size() > 0);
 	}
-	
+
 	// HAPPairings* getPairings() {
 	// 	return &_pairings;
 	// }
@@ -69,8 +69,8 @@ public:
 		if (_configuration->removePairing(id)) {
 			_configuration->save();
 			return true;
-		}	
-		return false;	
+		}
+		return false;
 	}
 
 	void removeAllPairings(){
@@ -80,7 +80,7 @@ public:
 
 	uint8_t accessoryType();
 	void setAccessoryType(enum HAP_ACCESSORY_TYPE accessoryType);
-	
+
 	void addAccessoryInfo();
 
 	const char* setupID();
@@ -103,17 +103,17 @@ public:
 
 	bool removeAccessory(HAPAccessory *acc);
 	void addAccessory(HAPAccessory *acc);
-	
+
 	HAPAccessory* accessoryAtIndex(uint8_t index);
 	HAPAccessory* accessoryWithAID(uint8_t aid);
 
-	
+
 
 	int32_t getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize);
 
-	HAPCharacteristicBase* getCharacteristic(uint8_t aid, uint32_t iid);	
+	HAPCharacteristicBase* getCharacteristic(uint8_t aid, uint32_t iid);
 
-	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, uint8_t type);	
+	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, uint8_t type);
 	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, const char* type);
 
 	void setIdentifyCharacteristic(bool value);
@@ -127,7 +127,7 @@ public:
 
 
 protected:
-	
+
 	uint8_t _accessoryType; // enum HAP_ACCESSORY_TYPE
 
 	// Setup ID can be provided, although, per spec, should be random
@@ -137,10 +137,10 @@ protected:
 	char		_setupHash[9] = {0,};
 	char		_xhm[21] = {0,};
 
-	// String 		_modelName;	
+	// String 		_modelName;
 	// String 		_pinCode;	// xxx-xx-xxx
 
-private:	
+private:
 	void computeSetupHash();
 	char randomChar(char* letters);
 
@@ -150,7 +150,7 @@ private:
 
 	// HAPPairings _pairings;
 	std::vector<std::unique_ptr<HAPAccessory>> _accessories;
-    
+
 	uint8_t _aid = 0;
 };
 

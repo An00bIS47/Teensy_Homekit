@@ -48,11 +48,11 @@
 #define HAP_RESET_EEPROM 			0		// ToDo: Deprecated
 #endif
 
-#ifndef HAP_RESET_PAIRINGS	
+#ifndef HAP_RESET_PAIRINGS
 #define HAP_RESET_PAIRINGS			0
 #endif
 
-#define HAP_BUTTON_PIN 				0       // PIN of onboard button 
+#define HAP_BUTTON_PIN 				0       // PIN of onboard button
 
 
 #define HAP_ADD_DESC_TO_JSON		1		// Adds description for each chr to accessory.json
@@ -128,7 +128,7 @@
 #define HAP_DEBUG_ENCRYPTION		0
 #endif
 
-#ifndef HAP_DEBUG_EVENTMANAGER		
+#ifndef HAP_DEBUG_EVENTMANAGER
 #define HAP_DEBUG_EVENTMANAGER		0
 #endif
 
@@ -247,7 +247,7 @@
 #define HAP_USE_SPIFFS_CONFIGURATION 1
 #endif
 
-#else	/* END CORE_TEENSY */ 
+#else	/* END CORE_TEENSY */
 //#define HAP_SPRINTF_UI32			"%lu"
 #endif
 
@@ -263,12 +263,12 @@
 /**
  * Preferences / EEPROM
  ********************************************************************/
-#ifndef HAP_USE_EEPROM 
+#ifndef HAP_USE_EEPROM
   #ifndef HAP_USE_SPIFFS_CONFIGURATION
    #ifndef HAP_USE_PREFERENCES
 	#define HAP_USE_EEPROM 				1
    #endif
- #endif  
+ #endif
 #endif
 
 #ifndef HAP_USE_PREFERENCES
@@ -322,20 +322,20 @@
  ********************************************************************/
 
 #ifndef HAP_ENABLE_WIFI
-#define HAP_ENABLE_WIFI 	1				
-#endif	
+#define HAP_ENABLE_WIFI 	1
+#endif
 
 
 #if HAP_ENABLE_WIFI
 #ifndef HAP_WIFI_MODE_DEFAULT
-#define HAP_WIFI_MODE_DEFAULT			1	// 0 = HAPWiFiModeAccessPoint	
+#define HAP_WIFI_MODE_DEFAULT			1	// 0 = HAPWiFiModeAccessPoint
 #endif										// 1 = HAPWiFiModeMulti
 											// 2 = HAPWiFiModeWPS			-> push button only
 											// 3 = HAPWiFiModeSmartConfig	-> not working with ios13 ?
-											// 4 = HAPWiFiModeBLEProv	
-											// 5 = HAPWiFiModeAPProv	
+											// 4 = HAPWiFiModeBLEProv
+											// 5 = HAPWiFiModeAPProv
 
-#define HAP_WIFI_CONNECTION_MAX_RETRIES 5	// max retries for connection error 
+#define HAP_WIFI_CONNECTION_MAX_RETRIES 5	// max retries for connection error
                                             // before switching back to default mode
 											// default: 5
 #define HAP_WIFI_CONNECTION_RETRY_DELAY	2000
@@ -346,7 +346,7 @@
 #endif
 
 #if HAP_PROVISIONING_ENABLE_BLE
-#ifndef HAP_PROVISIONING_POP			
+#ifndef HAP_PROVISIONING_POP
 #define HAP_PROVISIONING_POP			"abcd1234" 		// Proof of possesion
 #endif
 #ifndef HAP_PROVISIONING_PREFIX
@@ -376,7 +376,7 @@
 #endif
 
 /**
- * Keystore 
+ * Keystore
  ********************************************************************/
 #ifndef HAP_ENABLE_KEYSTORE
 #define HAP_ENABLE_KEYSTORE				1
@@ -388,7 +388,7 @@
 
 
 /**
- * WebServer 
+ * WebServer
  ********************************************************************/
 #ifndef HAP_ENABLE_WEBSERVER
 #define HAP_ENABLE_WEBSERVER		1		// Enable Webinterface
@@ -405,8 +405,8 @@
 											// currently not implemented properly
 
 #ifndef HAP_WEBSERVER_USE_SSL
-#define HAP_WEBSERVER_USE_SSL		1		// use SSL for WebServer 
-#endif										// Default: 1	
+#define HAP_WEBSERVER_USE_SSL		1		// use SSL for WebServer
+#endif										// Default: 1
 
 
 #ifndef HAP_WEBSERVER_ADMIN_USERNAME
@@ -446,7 +446,7 @@
 
 
 /**
- * Captive Portal 
+ * Captive Portal
  ********************************************************************/
 #define HAP_CAPTIVE_DNSSERVER_PORT	53
 #define HAP_CAPTIVE_AP_IP			"192.168.0.1"
@@ -455,11 +455,11 @@
 
 
 /**
- * Fakegato 
+ * Fakegato
  ********************************************************************/
 
 #ifndef HAP_FAKEGATO_BUFFER_SIZE
-#define HAP_FAKEGATO_BUFFER_SIZE	768     // Number of history entries for each characteristic 
+#define HAP_FAKEGATO_BUFFER_SIZE	768     // Number of history entries for each characteristic
 #endif										// default: 768
 
 
@@ -479,8 +479,8 @@
  ********************************************************************/
 
 #ifndef HAP_ENABLE_UPDATE_OTA
-#define HAP_ENABLE_UPDATE_OTA		1		// Enable ArduinoOTA	
-#endif										// Default: 1	
+#define HAP_ENABLE_UPDATE_OTA		1		// Enable ArduinoOTA
+#endif										// Default: 1
 
 #ifndef HAP_ENABLE_UPDATE_WEB
 #define HAP_ENABLE_UPDATE_WEB 	0		// Use HAP update server to check
@@ -502,7 +502,7 @@
 
 
 #if HAP_ENABLE_UPDATE_WEB
-//#define HAP_UPDATE_SERVER_URL 	"192.168.178.151"	
+//#define HAP_UPDATE_SERVER_URL 	"192.168.178.151"
 #define HAP_UPDATE_SERVER_HOST 		"homebridge"		// HTTP Server url for updates
 #define HAP_UPDATE_SERVER_PORT		3001				// Update Server port
 #define HAP_UPDATE_ENABLE_SSL		1					// enable SSL for HAP Update
@@ -519,7 +519,7 @@
 #ifndef HAP_ENABLE_NTP
 #define HAP_ENABLE_NTP 			1		// Enable SNTP client
 											// Default: 1
-#endif										
+#endif
 
 
 #if HAP_ENABLE_NTP
@@ -562,7 +562,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #define UNIX_OFFSET					2208988800UL
 
 #define HAP_NTP_TIMEOUT	5000
-#define HAP_TIME_SYNC_INTERVAL 600000   
+#define HAP_TIME_SYNC_INTERVAL 600000
 #endif /* ARDUINO_ARCH_ESP32 */
 #endif /* HAP_ENABLE_NTP */
 
@@ -571,15 +571,15 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 /**
  * EEPROM
  ********************************************************************/
-#if defined(ARDUINO_TEENSY30) || defined(ARDUINO_TEENSY31) || defined(ARDUINO_TEENSY32)        
+#if defined(ARDUINO_TEENSY30) || defined(ARDUINO_TEENSY31) || defined(ARDUINO_TEENSY32)
 #define HAP_EEPROM_SIZE 2048      // Teensy 3.0/3.1/3.2
-#elif defined(ARDUINO_TEENSYLC)        
+#elif defined(ARDUINO_TEENSYLC)
 #define HAP_EEPROM_SIZE 128       // Teensy LC
-#elif defined(ARDUINO_TEENSY35) || defined(ARDUINO_TEENSY36)      
+#elif defined(ARDUINO_TEENSY35) || defined(ARDUINO_TEENSY36)
 #define HAP_EEPROM_SIZE 4096       // Teensy 3.5/3.6
-#elif definedARDUINO_TEENSY40               
+#elif definedARDUINO_TEENSY40
 #define HAP_EEPROM_SIZE 1080      // Teensy 4.0
-#elif defined(ARDUINO_TEENSY41)        
+#elif defined(ARDUINO_TEENSY41)
 #define HAP_EEPROM_SIZE 4284      // Teensy 4.1
 #else
 #define HAP_EEPROM_SIZE 8192
@@ -602,7 +602,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 /**
  * Event Manager
  ********************************************************************/
-#ifndef HAP_EVENTMANAGER_LISTENER_SIZE		
+#ifndef HAP_EVENTMANAGER_LISTENER_SIZE
 #define HAP_EVENTMANAGER_LISTENER_SIZE	32
 #endif
 
@@ -616,7 +616,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 
 
 /**
- * Crypto 
+ * Crypto
  ********************************************************************/
 #define HAP_USE_MBEDTLS_HKDF		1		// Use MBEDTLS HDKF
 											// Default: 1
@@ -624,7 +624,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #define HAP_USE_MBEDTLS_SRP			1		// if 0 then use WolfSSL SRP
 											// Default: 1
 
-#define HAP_USE_MBEDTLS_POLY		1		// if 0 then use WolfSSL ChaCha20 Poly1305											
+#define HAP_USE_MBEDTLS_POLY		1		// if 0 then use WolfSSL ChaCha20 Poly1305
 											// Default: 1
 
 #define HAP_USE_MBEDTLS_CURVE25519 	0		// not working -> use HAP_USE_LIBSODIUM __deprecated__!
@@ -634,18 +634,18 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 
 
 /**
- * QR Code 
+ * QR Code
  ********************************************************************/
 #define HAP_PRINT_QRCODE			0		// !!! HAP_GENERATE_XHM must be enabled !!!
 											// Print QR code on console
-											// Default: 0								
+											// Default: 0
 
 #define HAP_PRINT_QRCODE_SVG		0
 
 
 /**
  * Plugins
- * !!! Add new plugins on top here and 
+ * !!! Add new plugins on top here and
  *     add them as well on top of the define bellow !!!
  ********************************************************************/
 
@@ -711,7 +711,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 
 /**
  * Plugin Logic
- *    
+ *
  ********************************************************************/
 // Enable IR if Honeywell is enabled
 #if HAP_PLUGIN_USE_FAN_HONEYWELL
@@ -741,7 +741,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 
 /**
  * Plugins feature rev calculation
- * !!! Add new plugins on top here !!!     
+ * !!! Add new plugins on top here !!!
  ********************************************************************/
 #define HAP_PLUGIN_FEATURE_NUMBER \
 STR(HAP_PLUGIN_USE_NIMBLE_MIFLORA) \
@@ -757,7 +757,7 @@ STR(HAP_PLUGIN_USE_INFLUXDB) \
 STR(HAP_PLUGIN_USE_HYGROMETER) \
 STR(HAP_PLUGIN_USE_RCSWITCH) \
 STR(HAP_PLUGIN_USE_DHT) \
-STR(HAP_PLUGIN_USE_BME280) 
+STR(HAP_PLUGIN_USE_BME280)
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -772,11 +772,11 @@ STR(HAP_PLUGIN_USE_BME280)
 											// Send all data via wifi in *one* response
 											// Default: 1
 											// Not yet working without buffered send :(
-	
+
 
 #define HAP_LONG_UUID				0		// Use long uuid as type in accessory json
 											// Default: 0
-											
+
 
 
 #define HAP_MINIMAL_PLUGIN_INTERVAL	1000	// Minimal plugin handle interval in ms
@@ -787,7 +787,7 @@ STR(HAP_PLUGIN_USE_BME280)
 
 
 /**
- * Limits 
+ * Limits
  * !! Do not edit !!!
  ********************************************************************/
 #if HAP_BUFFERED_SEND
@@ -803,7 +803,7 @@ STR(HAP_PLUGIN_USE_BME280)
 #endif
 
 
-#define HAP_PAIRINGS_MAX			16		// Number of available pairings 
+#define HAP_PAIRINGS_MAX			16		// Number of available pairings
 											// Default: 16
 
 #define HAP_STRING_LENGTH_MAX		64		// Max length of strings for config validation
@@ -817,7 +817,7 @@ STR(HAP_PLUGIN_USE_BME280)
 
 
 /**
- * SRP 
+ * SRP
  * !! Do not edit !!!
  ********************************************************************/
 #define SRP_TEST					0		// Test SRP - keep disabled !
@@ -988,7 +988,7 @@ STR(HAP_PLUGIN_USE_BME280)
  * BME280
  *****************************/
 #ifndef HAP_PLUGIN_BME280_USE_DUMMY
-#define HAP_PLUGIN_BME280_USE_DUMMY		0	// if 0 then use real sensor, 
+#define HAP_PLUGIN_BME280_USE_DUMMY		0	// if 0 then use real sensor,
 #endif  									// if 1 then use random values without any real sensor connected
 
 #ifndef SEALEVELPRESSURE_HPA
@@ -1016,15 +1016,15 @@ STR(HAP_PLUGIN_USE_BME280)
 #endif
 
 #ifndef HAP_PLUGIN_IR_SEND_PIN
-#define HAP_PLUGIN_IR_ENABLE_RECV 			1		
+#define HAP_PLUGIN_IR_ENABLE_RECV 			1
 #endif
 
-#ifndef HAP_PLUGIN_IR_ENABLE_RECV 
+#ifndef HAP_PLUGIN_IR_ENABLE_RECV
 #define HAP_PLUGIN_IR_ENABLE_RECV 			1
 #endif
 
 
-#if HAP_PLUGIN_IR_ENABLE_RECV 
+#if HAP_PLUGIN_IR_ENABLE_RECV
 
 #ifndef HAP_PLUGIN_IR_RECV_PIN
 #define HAP_PLUGIN_IR_RECV_PIN				A2
@@ -1053,7 +1053,7 @@ STR(HAP_PLUGIN_USE_BME280)
 #endif
 
 #ifndef HAP_PLUGIN_NEOPIXEL_DATA_PIN
-#define HAP_PLUGIN_NEOPIXEL_DATA_PIN A5	
+#define HAP_PLUGIN_NEOPIXEL_DATA_PIN A5
 #endif
 
 /**

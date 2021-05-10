@@ -30,7 +30,7 @@ public:
     // void toJson(JsonArray& array) __attribute__ ((deprecated));
     // void toJson(JsonObject& nested) __attribute__ ((deprecated));
     // std::vector<HAPCharacteristic*> _characteristics;
-    
+
     bool isHidden() { return (_features && 0x01); }
     void setHidden(bool mode = true) { _features = mode << 0; }
 
@@ -46,21 +46,21 @@ public:
     // }
 
 #if defined(ARDUINO_TEENSY41)
-    FLASHMEM 
+    FLASHMEM
 #endif
     size_t numberOfCharacteristics() { return _characteristics.size(); }
 
-    
+
 #if defined(ARDUINO_TEENSY41)
-    FLASHMEM 
+    FLASHMEM
 #endif
 	HAPCharacteristicBase* characteristicAtIndex(size_t index) {
         return _characteristics.at(index).get();
     }
 
-    
+
 #if defined(ARDUINO_TEENSY41)
-    FLASHMEM 
+    FLASHMEM
 #endif
 	HAPCharacteristicBase* characteristicWithIID(uint32_t iid) {
         for (int i=0; i < _characteristics.size(); i++){
@@ -69,7 +69,7 @@ public:
             }
         }
         return nullptr;
-    }    
+    }
 
 	// void* operator new(size_t size);
     // void operator delete(void* ptr);
@@ -79,13 +79,13 @@ protected:
     uint32_t    _aid;
     uint8_t     _uuid;
     String      _uuidString;
-    
+
 
     uint8_t     _features; // hidden == 0x01, primary == 0x02
     // bool        _hidden;
     // bool        _primary;
 
-    
+
     std::vector<uint32_t> _linkedServiceIds;
 
 };

@@ -30,26 +30,26 @@ struct HAPConfigurationWebServerCredentials {
 	uint8_t permission   = 0; // enum HAPConfigurationWebServerPermission permission;
 	char 	username[32 + 1] = {0,};
 	char 	password[32 + 1] = {0,};
-	
-	
+
+
 	static size_t getDataSize(){
 		return (sizeof(uint8_t) + (sizeof(char) * 32) + (sizeof(char) * 32));
 	}
-		
+
 
 	HAPConfigurationWebServerCredentials(){
-		
+
 	}
-	
+
 	HAPConfigurationWebServerCredentials(const uint8_t permission_, const char* username_, const char* password_)
-		: permission(permission_) {		
-			
+		: permission(permission_) {
+
 		strncpy(username, username_, 32);
 		strncpy(password, password_, 32);
-	}	
+	}
 
-	HAPConfigurationWebServerCredentials(const HAPConfigurationWebServerCredentials& rhs) {		
-		
+	HAPConfigurationWebServerCredentials(const HAPConfigurationWebServerCredentials& rhs) {
+
 		permission = rhs.permission;
 
 		{
@@ -68,7 +68,7 @@ struct HAPConfigurationWebServerCredentials {
 			if (size > 32) {
 				LogE(F("ERROR: PASSWORD is too long!"), true);
 				return;
-			}			
+			}
 			strncpy(password, rhs.password, 32);
 		}
 
@@ -78,7 +78,7 @@ struct HAPConfigurationWebServerCredentials {
 		if (this == &rhs) {
 			return (*this);
 		}
-		
+
 		permission = rhs.permission;
 
 		{
@@ -99,15 +99,15 @@ struct HAPConfigurationWebServerCredentials {
 				return (*this);
 			}
 			strncpy(password, rhs.password, 32);
-		}	
-		return (*this);	
+		}
+		return (*this);
 	}
 
 	bool operator== (const HAPConfigurationWebServerCredentials &rhs) const {
-		/* your logic for comparision between "*this" and "rhs" */ 
-		return ( 
-			( strncmp(this->username, rhs.username, strlen(this->username)) == 0 ) && 
-			( strncmp(this->password, rhs.password, strlen(this->password)) == 0 ) && 
+		/* your logic for comparision between "*this" and "rhs" */
+		return (
+			( strncmp(this->username, rhs.username, strlen(this->username)) == 0 ) &&
+			( strncmp(this->password, rhs.password, strlen(this->password)) == 0 ) &&
 			( this->permission == rhs.permission )
 		) ? true : false;
 	}
@@ -116,14 +116,14 @@ struct HAPConfigurationWebServerCredentials {
 
 
 class HAPConfigurationWebServer : public HAPConfigurationItem{
-public:	
+public:
 	bool  enabled;
-	uint16_t port;	
+	uint16_t port;
 	std::vector<HAPConfigurationWebServerCredentials*> credentials;
 
 	bool isEnabled(){ return enabled; }
 
-	
+
 
 	static size_t getDataSize(){
 		return (sizeof(bool) + sizeof(uint16_t) + (HAP_WEBSERVER_MAX_CREDENTIALS * HAPConfigurationWebServerCredentials::getDataSize()));
@@ -139,19 +139,19 @@ public:
 	}
 
 	void addCredentials(const uint8_t permission, const char* username, const char* password){
-		int index = getIndexOfUsername(username);		
+		int index = getIndexOfUsername(username);
 
-		if (index < 0) {			
+		if (index < 0) {
 			credentials.push_back(new HAPConfigurationWebServerCredentials(permission, username, password));
-		} else {			
+		} else {
 			HAPConfigurationWebServerCredentials* newCred = new HAPConfigurationWebServerCredentials(permission, username, password);
 			if (newCred == credentials[index]){
-								
+
 			} else {
 				credentials[index] = newCred;
 			}
-			
-			delete newCred;			
+
+			delete newCred;
 		}
 	}
 
@@ -169,7 +169,7 @@ public:
 		if (index >= 0) {
 			strncpy(password_, credentials[index]->password, 32);
 			return true;
-		} 
+		}
 		return false;
 	}
 
@@ -186,7 +186,7 @@ public:
 	bool isAdminUser(const char* username, uint8_t permission){
 		int index = getIndexOfUsername(username);
 		if (index >= 0) {
-			return (permission & HAPConfigurationWebserverPermission_Admin);			
+			return (permission & HAPConfigurationWebserverPermission_Admin);
 		}
 		return false;
 	}
@@ -194,11 +194,11 @@ public:
 	bool isAPIUser(const char* username, uint8_t permission){
 		int index = getIndexOfUsername(username);
 		if (index >= 0) {
-			return ((permission & HAPConfigurationWebserverPermission_API) || (permission & HAPConfigurationWebserverPermission_Admin));			
+			return ((permission & HAPConfigurationWebserverPermission_API) || (permission & HAPConfigurationWebserverPermission_Admin));
 		}
 		return false;
 	}
-	
+
 	void clear() override {
 		credentials.clear();
 	}
@@ -211,15 +211,15 @@ public:
 		port = 443;
 
 #if defined(HAP_WEBSERVER_ADMIN_USERNAME)
-		{			
-			credentials.push_back(new HAPConfigurationWebServerCredentials(HAPConfigurationWebserverPermission_Admin, HAP_WEBSERVER_ADMIN_USERNAME, HAP_WEBSERVER_ADMIN_PASSWORD));			
-		}		
+		{
+			credentials.push_back(new HAPConfigurationWebServerCredentials(HAPConfigurationWebserverPermission_Admin, HAP_WEBSERVER_ADMIN_USERNAME, HAP_WEBSERVER_ADMIN_PASSWORD));
+		}
 #endif
 
 #if defined(HAP_WEBSERVER_API_USERNAME)
-		{				
+		{
 			credentials.push_back(new HAPConfigurationWebServerCredentials(HAPConfigurationWebserverPermission_API, HAP_WEBSERVER_API_USERNAME, HAP_WEBSERVER_API_PASSWORD));
-		}	
+		}
 #endif
 
 	}
@@ -253,10 +253,10 @@ public:
 		prt.print(port);
 		prt.print(",");
 
-		prt.print("\"credentials\": [");				
+		prt.print("\"credentials\": [");
 		for (uint8_t i = 0; i < credentials.size(); i++){
 			prt.print("{");
-			
+
 			prt.print("\"permission\":");
 			prt.print(credentials[i]->permission);
 			prt.print(",");
@@ -270,7 +270,7 @@ public:
 				prt.print(",");
 			}
 		}
-				
+
 		prt.print("]");
 		prt.print("}");
 	}

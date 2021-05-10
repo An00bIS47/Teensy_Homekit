@@ -1,4 +1,4 @@
-// 
+//
 // HAPHash.hpp
 // Homekit
 //
@@ -42,6 +42,8 @@ typedef union {
 
 class HAPHash {
 public:
+
+
     explicit HAPHash(HAPHashAlgorithm algorithm);
     ~HAPHash();
 
@@ -72,19 +74,19 @@ public:
     void hash_num( const mbedtls_mpi * n, uint8_t* dest );
     void update_hash_n( const mbedtls_mpi * n );
 
-    uint8_t length(){
-        return hashLength(_hashAlgorithm);
+    uint8_t digestLength(){
+        return digestLength(_hashAlgorithm);
     }
 
     HAPHashAlgorithm algorithm() { return _hashAlgorithm; }
 
-    static uint8_t hashLength( HAPHashAlgorithm alg );
+    static uint8_t digestLength( HAPHashAlgorithm alg );
     static void init( HAPHashAlgorithm alg, HAPHashContext* context);
     static void update( HAPHashAlgorithm alg, HAPHashContext *context, const uint8_t *data, size_t len );
     static void final( HAPHashAlgorithm alg, HAPHashContext *context, uint8_t* md );
     static void clear( HAPHashAlgorithm alg, HAPHashContext* context);
     static void hash( HAPHashAlgorithm alg, const uint8_t* d, size_t n, uint8_t* md );
-    
+
 protected:
     HAPHashAlgorithm _hashAlgorithm;
     HAPHashContext*  _context;

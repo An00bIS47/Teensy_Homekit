@@ -6,20 +6,20 @@
 //      Author: michael
 //
 // Wiring:
-// 
+//
 //  BME280       ESP32 Module
-//  VIN      ->  3V3 
+//  VIN      ->  3V3
 //  GND      ->  GND
 //  SCL      ->  22
 //  SDA      ->  21
-// 
+//
 // All Qwiic cables have the following color scheme and arrangement:
-// 
+//
 // 	Black = GND
 // 	Red = 3.3V
 // 	Blue = SDA
 // 	Yellow = SCL
-// 
+//
 
 #ifndef HAPPLUGINBME280_HPP_
 #define HAPPLUGINBME280_HPP_
@@ -39,11 +39,11 @@
 //#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-// 
+//
 // Set these values in the HAPGlobals.hpp
-// 
+//
 #ifndef HAP_PLUGIN_BME280_USE_DUMMY
-#define HAP_PLUGIN_BME280_USE_DUMMY		0	// if 0 then use real sensor, 
+#define HAP_PLUGIN_BME280_USE_DUMMY		0	// if 0 then use real sensor,
 											// if 1 then use random values without any real sensor connected
 #endif
 
@@ -70,7 +70,7 @@ public:
 
 	bool begin();
 
-	HAPAccessory* initAccessory() override;	
+	HAPAccessory* initAccessory() override;
 
 	void changedTemperature(float oldValue, float newValue);
 	void changedHumidity(float oldValue, float newValue);
@@ -81,12 +81,12 @@ public:
 	uint16_t readPressure();
 
 	void identify(bool oldValue, bool newValue);
-    void handleImpl(bool forced = false);	
+    void handleImpl(bool forced = false);
 
-#if HAP_ENABLE_WEBSERVER	
+#if HAP_ENABLE_WEBSERVER
 	HAPConfigurationValidationResult validateConfig(JsonObject object);
 
-#endif	
+#endif
 
 	inline float getAveragedTemperatureValue(){
 		return _temperatureAverage.getAverage();
@@ -100,16 +100,16 @@ public:
 		return _pressureAverage.getAverage();
 	}
 
-	
+
 	HAPConfigurationPlugin* setDefaults() override;
-	void internalConfigToJson(Print& prt); 	
+	void internalConfigToJson(Print& prt);
 	void setConfiguration(HAPConfigurationPlugin* cfg) override;
-	
+
 protected:
 
 
  	struct HAPPluginBME280Config* _configInternal;
-	
+
 	HAPCharacteristicT<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
@@ -120,7 +120,7 @@ protected:
 	HAPCharacteristicT<uint16_t>*	_pressureValue;
 	HAPFakegatoAverage<uint16_t>	_pressureAverage;
 
-	
+
 	// HAPCharacteristicFloat*		_humidityValue;
 	// HAPCharacteristicFloat*		_temperatureValue;
 	// HAPCharacteristicUInt16*	_pressureValue;
@@ -135,4 +135,4 @@ protected:
 
 REGISTER_PLUGIN(HAPPluginBME280)
 
-#endif /* HAPPLUGINS_HPP_ */ 
+#endif /* HAPPLUGINS_HPP_ */

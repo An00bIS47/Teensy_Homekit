@@ -1081,6 +1081,7 @@ if __name__ == '__main__':
     for historyEntry in tester.fakegatoHistories:    
          tester.openInHexFiend(historyEntry)
 
+<<<<<<< HEAD:test/Homekit_Tester/main.py
 
     tester.runTest("pair", tester.pair)
     for i in range(0,10):
@@ -1095,7 +1096,22 @@ if __name__ == '__main__':
     #     tester.runTest("getAccessories", tester.getAccessories)
     #     tester.runTest("removePairing", tester.removePairing)
     
+=======
+>>>>>>> dev:utils/Homekit_Tester/main.py
 
+    tester.runTest("pair", tester.pair)
+    for i in range(0,10):
+        print(i)
+        time.sleep(0.1)
+        tester.runTest("getAccessories", tester.getAccessories)        
+    tester.runTest("removePairing", tester.removePairing)    
+
+    
+    for i in range(0,100):
+        tester.runTest("pair", tester.pair)
+        tester.runTest("getAccessories", tester.getAccessories)
+        tester.runTest("removePairing", tester.removePairing)
+    
 
     if args.summary == True:
         tester.printSummary()

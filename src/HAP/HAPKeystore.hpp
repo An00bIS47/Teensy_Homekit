@@ -28,12 +28,12 @@ using namespace httpsserver;
 
 enum HAP_KEYSTORE_TYPE {
     HAP_KEYSTORE_TYPE_ROOT_CA                       = 0x00,
-    HAP_KEYSTORE_TYPE_ROOT_CA_PUBLIC_KEY_SIGNATURE  = 0x01, 
+    HAP_KEYSTORE_TYPE_ROOT_CA_PUBLIC_KEY_SIGNATURE  = 0x01,
 
     HAP_KEYSTORE_TYPE_DEVICE_CLIENT_CERT            = 0x10,
     HAP_KEYSTORE_TYPE_DEVICE_PRIVATE_KEY            = 0x11,
     HAP_KEYSTORE_TYPE_DEVICE_PUBLIC_KEY             = 0x12,
-    HAP_KEYSTORE_TYPE_DEVICE_WEBSERVER_CERT         = 0x13,       
+    HAP_KEYSTORE_TYPE_DEVICE_WEBSERVER_CERT         = 0x13,
 
     HAP_KEYSTORE_TYPE_UPDATE_SERVER_CERT            = 0x20,
 
@@ -47,7 +47,7 @@ enum HAP_KEYSTORE_TYPE {
     HAP_KEYSTORE_TYPE_PLUGIN_7                      = 0x37,
     HAP_KEYSTORE_TYPE_PLUGIN_8                      = 0x38,
     HAP_KEYSTORE_TYPE_PLUGIN_9                      = 0x39,
-    
+
     HAP_KEYSTORE_TYPE_CONTAINER_ID                  = 0xFD,
     HAP_KEYSTORE_TYPE_SIGNATURE                     = 0xFE,
 };
@@ -59,7 +59,7 @@ public:
     ~HAPKeystore();
 
     static bool verifySignature(const uint8_t* publicKey, size_t publicKeyLength, const uint8_t* hash, const uint8_t* signature, size_t signatureLength);
-    
+
     // static bool createCSR(const uint8_t* privateKey, size_t privateKey_Length, const char* hostname);
 
     bool begin();
@@ -77,10 +77,10 @@ public:
 
 
     uint8_t getContainerId();
-    
+
     uint16_t getRootCaLength() {
     	return _rootCaLength;
-    }    
+    }
 
     uint16_t getRootCaPublicKeySignatureLength() {
     	return _rootCaPublicKeySignatureLength;
@@ -127,7 +127,7 @@ public:
     uint8_t* getRootCa(){
         return _rootCa;
     }
-    
+
     uint8_t* getRootCaPublicKeySignature();
 
 
@@ -135,7 +135,7 @@ public:
     uint8_t* getDeviceClientCert(){
         return _deviceClientCert;
     }
-    
+
 
 
     uint8_t* getDevicePrivateKey();
@@ -145,8 +145,8 @@ public:
     uint8_t* getDevicePublicKey(){
         return _devicePublicKey;
     }
-    
-    
+
+
     uint8_t* getUpdateServerCert(){
         return _updateServerCert;
     }
@@ -162,17 +162,17 @@ public:
     }
     uint8_t* getPluginServerCert_3(){
         return _pluginServerCert_3;
-    }  
-    
-#if HAP_ENABLE_WEBSERVER    
+    }
+
+#if HAP_ENABLE_WEBSERVER
     bool parseRequest(HTTPRequest * req);
-#endif    
+#endif
 private:
     bool readFromNVS(const char* entryName, uint8_t* buffer, uint16_t* len);
-    
+
 
     char _currentPartition[15];
-    
+
     void init();
 
     HAPPreferencesExt _prefs;
@@ -186,7 +186,7 @@ private:
     uint8_t* _devicePrivateKey;
     uint8_t* _devicePublicKey;
     uint8_t* _deviceWebserverCert;
-    
+
     uint8_t* _updateServerCert;
 
     uint8_t* _pluginServerCert_0;
@@ -205,7 +205,7 @@ private:
     uint16_t _rootCaPublicKeySignatureLength;
 
     uint16_t _deviceClientCertLength;
-    uint16_t _devicePrivateKeyLength;    
+    uint16_t _devicePrivateKeyLength;
     uint16_t _devicePublicKeyLength;
     uint16_t _deviceWebserverCertLength;
 
@@ -214,9 +214,9 @@ private:
     uint16_t _pluginServerCert_0Length;
     uint16_t _pluginServerCert_1Length;
     uint16_t _pluginServerCert_2Length;
-    uint16_t _pluginServerCert_3Length;  
+    uint16_t _pluginServerCert_3Length;
 
-    
+
     bool _isValid;
     bool _isStarted;
 };

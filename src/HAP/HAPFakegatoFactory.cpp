@@ -1,4 +1,4 @@
-// 
+//
 // HAPFakegatoFactory.cpp
 // Homekit
 //
@@ -15,21 +15,21 @@ void HAPFakegatoFactory::handle(bool forced){
         if (forced) {
             gato->handle();
         } else {
-            if (gato->isEnabled()) {		
+            if (gato->isEnabled()) {
                 gato->handle();
             }
         }
-			        
-	} 
+
+	}
 }
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void HAPFakegatoFactory::registerFakeGato(HAPFakegato* fakegato, std::function<bool()> callback, uint32_t interval){
-    fakegato->begin();     
+    fakegato->begin();
     fakegato->setInterval(interval);
     fakegato->registerCallbackAddEntry(callback);
     _fakegatos.push_back(fakegato);
-    LogD(HAPTime::timeString() + " " + "HAPFakegatoFactory" + "->" + String(__FUNCTION__) + " [   ] " + "Registered fakegato for: " + fakegato->name() + " (" + String(_fakegatos.size()) + ")", true);      
+    LogD(HAPTime::timeString() + " " + "HAPFakegatoFactory" + "->" + String(__FUNCTION__) + " [   ] " + "Registered fakegato for: " + fakegato->name() + " (" + String(_fakegatos.size()) + ")", true);
 }

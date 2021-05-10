@@ -1,4 +1,4 @@
-// 
+//
 // HAPConfigurationItem.hpp
 // Homekit
 //
@@ -13,7 +13,7 @@ class HAPConfigurationItem {
 public:
     HAPConfigurationItem() : _callbackSave(nullptr) {};
     virtual ~HAPConfigurationItem() {};
-    
+
     virtual void clear() = 0;
     virtual void setDefaults() = 0;
     virtual void toJson(Print& prt) = 0;
