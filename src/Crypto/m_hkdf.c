@@ -9,10 +9,10 @@
 #include <mbedtls/hkdf.h>
 #include <stdio.h>
 
-#if ARDUINO_ARCH_ESP32
-#include <esp_log.h>
-#define TAG "HKDF"
-#endif
+// #if ARDUINO_ARCH_ESP32
+// #include <esp_log.h>
+// #define TAG "HKDF"
+// #endif
 
 const mbedtls_md_info_t *sha512_info = NULL;
 
@@ -65,11 +65,11 @@ int hkdf_key_get(enum hkdf_key_type type, uint8_t* inkey, int inkey_len, uint8_t
     inkey_len,(uint8_t*)salt_info->info,strlen(salt_info->info), key, CHACHA20_POLY1305_AEAD_KEYSIZE);
 
     if (err < 0) {
-#if ARDUINO_ARCH_ESP32
-        ESP_LOGE(TAG, "mbedtls_hkdf failed. %d\n", err);
-#else
-        printf("%s - mbedtls_hkdf failed. err:%d\n", TAG, err);
-#endif
+// #if ARDUINO_ARCH_ESP32
+//         ESP_LOGE(TAG, "mbedtls_hkdf failed. %d\n", err);
+// #else
+//         printf("%s - mbedtls_hkdf failed. err:%d\n", "HKDF", err);
+// #endif
         return err;
     }
 
