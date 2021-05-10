@@ -24,7 +24,7 @@ static uint32_t gWDT_trng_priorT[16];
 static uint8_t gWDT_trng_indexT=16;
 static uint32_t retValT;
 static uint32_t share_entropy;
-static isInit = false;
+static bool isInit = false;
 static uint8_t byte_positionT=0;
 
 // This function returns a unsigned char (8-bit) with the number of unsigned long values

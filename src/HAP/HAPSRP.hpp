@@ -24,7 +24,7 @@ typedef struct NGHex {
 /* All constants here were pulled from Appendix A of RFC 5054 */
 const NGHex global_Ng_constants[] PROGMEM = {
 
- #if HAP_SRP_SUPPORT_ALL_NG_SIZES
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
 	{ /* 512 */
 	"D66AAFE8E245F9AC245A199F62CE61AB8FA90A4D80C71CD2ADFD0B9DA163B29F2A34AFBDB3B"
 	"1B5D0102559CE63D8B6E86B0AA59C14E79D4AA62D1748E4249DF3",
@@ -345,8 +345,8 @@ public:
     HAPSRP();
     ~HAPSRP();
 
-    int getHashLength(SRPSession* session){
-        return HAPHash::hashLength(session->algorithm);
+    int length(SRPSession* session){
+        return HAPHash::digestLength(session->algorithm);
     }
 
     void begin(const char* username);
@@ -400,13 +400,8 @@ protected:
     static mbedtls_ctr_drbg_context    _ctr_drbg_ctx;
     static mbedtls_mpi*                _RR;
 
-
-
-
     static void H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad);
     static void H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg,const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes);
-
-
 
     void calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len );
     static void calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K );

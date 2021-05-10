@@ -13,6 +13,8 @@
 #define SRP_BYTES_IN_PRIVKEY (SRP_BITS_IN_PRIVKEY/8)
 #define SRP_DEFAULT_SALT_BYTES 32
 
+
+
 bool                        HAPSRP::_isInitialized 	= false;
 mbedtls_entropy_context     HAPSRP::_entropy_ctx;
 mbedtls_ctr_drbg_context    HAPSRP::_ctr_drbg_ctx;
@@ -29,6 +31,58 @@ const uint8_t hotBits[128] PROGMEM = {
 	9, 184, 89, 70, 247, 125, 97, 213, 240, 85, 243, 91, 226, 127, 64, 136,
 	37, 154, 232
 };
+
+#ifdef SRP_TEST
+
+#define SRP_TEST_FIXED_SALT
+//                               1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6
+#define SRP_TEST_FIXED_SALT_STR "BEB25379D1A8581EB5A727673A2441EE"
+
+#define SRP_TEST_PRINT_SALT
+#define SRP_TEST_PRINT_v
+
+#define SRP_TEST_FIXED_b
+#define SRP_TEST_FIXED_b_STR "E487CB59D31AC550471E81F00F6928E01DDA08E974A004F49E61F5D105284D20"
+#define SRP_TEST_PRINT_B
+#define SRP_TEST_PRINT_b
+
+#define SRP_TEST_FIXED_a
+#define SRP_TEST_FIXED_a_STR "60975527035CF2AD1989806F0407210BC81EDC04E2762A56AFD529DDDA2D4393"
+#define SRP_TEST_PRINT_A
+#define SRP_TEST_PRINT_a
+
+#define SRP_TEST_DBG_VER
+#define SRP_TEST_SHA512
+
+
+void tutils_array_print(const char* tag, const unsigned char* buf, int len){
+    Serial.printf("=== [%s] (len:%d) ===\n", tag, len);
+	int need_lf=1;
+    for (int i=0; i<len; i++) {
+        if ((i & 0xf) == 0xf) {
+	        Serial.printf("%02X\n", buf[i]);
+			need_lf=0;
+		} else {
+	        Serial.printf("%02X ", buf[i]);
+			need_lf=1;
+		}
+    }
+    if (need_lf){
+		Serial.printf("\n======\n");
+	} else {
+		Serial.printf("======\n");
+	}
+}
+
+void tutils_mpi_print(const char* tag, const mbedtls_mpi* x){
+    int len_x = mbedtls_mpi_size(x);
+    unsigned char* num = malloc(len_x);
+    mbedtls_mpi_write_binary(x, num, len_x);
+	tutils_array_print(tag, num, len_x);
+    free(num);
+}
+
+#endif
 
 
 HAPSRP::HAPSRP(){
@@ -207,7 +261,7 @@ void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, 
     // mbedtls_mpi * bn;
     // bn = (mbedtls_mpi *) malloc(sizeof(mbedtls_mpi));
     // mbedtls_mpi_init(bn);
-    mbedtls_mpi_read_binary( bn, buff, HAPHash::hashLength(alg) );
+    mbedtls_mpi_read_binary( bn, buff, HAPHash::digestLength(alg) );
     return;
 }
 
@@ -241,7 +295,7 @@ void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi * n, 
     // mbedtls_mpi * bn;
     // bn = (mbedtls_mpi *) malloc(sizeof(mbedtls_mpi));
     // mbedtls_mpi_init(bn);
-    mbedtls_mpi_read_binary( bn, buff, HAPHash::hashLength(alg) );
+    mbedtls_mpi_read_binary( bn, buff, HAPHash::digestLength(alg) );
 
 }
 
@@ -251,14 +305,6 @@ void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi * n, 
 void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len )
 {
 	uint8_t ucp_hash[SHA512_DIGEST_LENGTH];
-
-#ifdef SRP_TEST_SHA512
-	HAPHash hash(alg);
-    hash.init();
-    hash.update( "abc", 3 );
-    hash.final( ucp_hash );
-	tutils_array_print("VAR:test sha512",ucp_hash, hash.length());
-#endif
 
 	HAPHash hash(alg);
     hash.init();
@@ -272,9 +318,9 @@ void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mp
 	tutils_array_print("VER:username",username, strlen(username));
 	tutils_array_print("VAR:password",password, password_len);
 	tutils_mpi_print("VAR:salt",salt);
-	tutils_array_print("VAR:ucp_hash",ucp_hash, hash.length());
+	tutils_array_print("VAR:ucp_hash",ucp_hash, hash.digestLength());
 #endif
-    return H_ns( x, alg, salt, ucp_hash, hash.length() );
+    return H_ns( x, alg, salt, ucp_hash, hash.digestLength() );
 }
 
 
@@ -291,7 +337,7 @@ void HAPSRP::calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, c
 	HAPHash hash(alg);
 
     int i = 0;
-    uint8_t hash_len = hash.length();
+    uint8_t hash_len = hash.digestLength();
 
     hash.hash_num( &(ng->N), H_N );
     hash.hash_num( &(ng->g), H_g );
@@ -325,8 +371,8 @@ void HAPSRP::calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const m
     hash.init();
 
     hash.update_hash_n( A );
-    hash.update( M, hash.length() );
-    hash.update( K, hash.length() );
+    hash.update( M, hash.digestLength() );
+    hash.update( K, hash.digestLength() );
 
     hash.final( dest );
 
@@ -431,7 +477,7 @@ void HAPSRP::createSaltedVerificationKey1( SRPSession *session, const char * use
 	mbedtls_mpi_init(&x);
 
 #ifdef SRP_TEST_FIXED_SALT
-	mbedtls_mpi_read_string(s,16,SRP_TEST_FIXED_SALT_STR);
+	mbedtls_mpi_read_string(&s,16,SRP_TEST_FIXED_SALT_STR);
 #else
 
     mbedtls_mpi_fill_random( &s, len_s,
@@ -531,7 +577,7 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 #if ARDUINO_ARCH_ESP32
         ESP_LOGE("SRP", "session is null\n");
 #else
-        printf("%s - session is null:\n", "SRP");
+        Serial.printf("%s - session is null:\n", "SRP");
 #endif
         return NULL;
     }
@@ -581,7 +627,7 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 #if ARDUINO_ARCH_ESP32
       		ESP_LOGE("SRP", "ver->username is NULL\n");
 #else
-      		printf("%s - ver->username is NULL\n", "SRP");
+      		Serial.printf("%s - ver->username is NULL\n", "SRP");
 #endif
 
 			mbedtls_mpi_free(&s);
@@ -606,7 +652,7 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
 #if ARDUINO_ARCH_ESP32
         	ESP_LOGE("SRP", "keys is NULL\n");
 #else
-        	printf("%s - keys is NULL\n", "SRP");
+        	Serial.printf("%s - keys is NULL\n", "SRP");
 #endif
 
 
@@ -679,7 +725,7 @@ const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
 const uint8_t* HAPSRP::getVerifierSessionKey( HAPSRP::SRPVerifier* ver, int* key_length )
 {
     if (key_length)
-        *key_length = HAPHash::hashLength( ver->algorithm );
+        *key_length = HAPHash::digestLength( ver->algorithm );
     return ver->session_key;
 }
 
@@ -687,7 +733,7 @@ const uint8_t* HAPSRP::getVerifierSessionKey( HAPSRP::SRPVerifier* ver, int* key
 //FLASHMEM
 //#endif
 int HAPSRP::getSessionKeyLength( HAPSRP::SRPSession* ses ){
-	return HAPHash::hashLength( ses->algorithm );
+	return HAPHash::digestLength( ses->algorithm );
 }
 
 //#if defined(ARDUINO_TEENSY41)
@@ -695,7 +741,7 @@ int HAPSRP::getSessionKeyLength( HAPSRP::SRPSession* ses ){
 //#endif
 int HAPSRP::getVerifierSessionKeyLength( HAPSRP::SRPVerifier* ver )
 {
-    return HAPHash::hashLength( ver->algorithm );
+    return HAPHash::digestLength( ver->algorithm );
 }
 
 
@@ -705,7 +751,10 @@ int HAPSRP::getVerifierSessionKeyLength( HAPSRP::SRPVerifier* ver )
 //#endif
 bool HAPSRP::verifySession( HAPSRP::SRPVerifier * ver, const uint8_t* user_M, const uint8_t** bytes_HAMK )
 {
-    if ( memcmp( ver->M, user_M, HAPHash::hashLength(ver->algorithm) ) == 0 )
+
+	tutils_array_print("verifier proof", ver->M, 64);
+
+    if ( memcmp( ver->M, user_M, HAPHash::digestLength(ver->algorithm) ) == 0 )
     {
         ver->authenticated = 1;
         if (bytes_HAMK) *bytes_HAMK = ver->H_AMK;
