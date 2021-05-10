@@ -12,6 +12,7 @@
 using namespace fakeit;
 #endif
 
+#include "../test_config.h"
 #include "HAP/HAPHash.hpp"
 
 void setUp(void)
@@ -301,22 +302,23 @@ void test_hash_512_static(void){
 int runAllTests(){
     UNITY_BEGIN();
 
+    for (int i=0; i < TEST_ITERATIONS; i++){
+        RUN_TEST(test_hash_512);
+        RUN_TEST(test_hash_384);
+        RUN_TEST(test_hash_256);
+        RUN_TEST(test_hash_224);
+        RUN_TEST(test_hash_1);
 
-    RUN_TEST(test_hash_512);
-    RUN_TEST(test_hash_384);
-    RUN_TEST(test_hash_256);
-    RUN_TEST(test_hash_224);
-    RUN_TEST(test_hash_1);
+        RUN_TEST(test_hash_512_seq);
+        RUN_TEST(test_hash_384_seq);
+        RUN_TEST(test_hash_256_seq);
+        RUN_TEST(test_hash_224_seq);
+        RUN_TEST(test_hash_1_seq);
 
-    RUN_TEST(test_hash_512_seq);
-    RUN_TEST(test_hash_384_seq);
-    RUN_TEST(test_hash_256_seq);
-    RUN_TEST(test_hash_224_seq);
-    RUN_TEST(test_hash_1_seq);
-
-    RUN_TEST(test_hash_512_static);
-    RUN_TEST(test_hash_256_static);
-    RUN_TEST(test_hash_1_static);
+        RUN_TEST(test_hash_512_static);
+        RUN_TEST(test_hash_256_static);
+        RUN_TEST(test_hash_1_static);
+    }
 
     return UNITY_END();
 }
@@ -325,7 +327,7 @@ int runAllTests(){
 void setup() {
     // NOTE!!! Wait for >2 secs
     // if board doesn't support software reset via Serial.DTR/RTS
-    delay(2000);
+    delay(3000);
 
     runAllTests();
 }

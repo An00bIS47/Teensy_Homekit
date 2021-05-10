@@ -2829,10 +2829,6 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 /**
  * handlePairVerifyM1
- * checked with heap trace:
- * 6711 bytes 'leaked' in trace (24 allocations)
- *	total allocations 137 total frees 130
- *
  */
 bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
@@ -2860,29 +2856,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	LogD(F("\nGenerating accessory curve25519 keys ..."), false);
 
-#if HAP_USE_LIBSODIUM
-
-	uint8_t acc_curve_public_key[CURVE25519_KEY_LENGTH]= {0,};
-	uint8_t acc_curve_private_key[CURVE25519_KEY_LENGTH]= {0,};
-
-	// if (crypto_box_keypair(acc_curve_public_key, acc_curve_private_key) != 0){
-	// 	LogE( F("[ERROR] crypto_sign_keypair failed"), true);
-	// 	response.encode(HAP_TLV_STATE, 1, VERIFY_STATE_M2);
-	// 	response.encode(HAP_TLV_ERROR, 1, HAP_ERROR_UNKNOWN);
-
-    //     sendResponse(hapClient, &response);
-	// 	return false;
-	// }
-
-	/* Create server's secret and public keys */
-	randombytes_buf(acc_curve_private_key, crypto_scalarmult_SCALARBYTES);
-	if (crypto_scalarmult_base(acc_curve_public_key, acc_curve_private_key) != 0) {
-		LogE( F("[ERROR] crypto_sign_keypair failed"), true);
-		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
-		return false;
-	}
-
-#else
 	uint8_t acc_curve_public_key[CURVE25519_KEY_LENGTH] = {0,};		// my_key_public
 	uint8_t acc_curve_private_key[CURVE25519_KEY_LENGTH] = {0,};	// my_key
 
@@ -2893,7 +2866,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 		return false;
 	}
-#endif
 	else {
 		LogD(F("OK"), true);
 	}
@@ -2924,27 +2896,11 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LogD(F("Generating Curve25519 shared secret ..."), false);
 	uint8_t sharedSecret[CURVE25519_SECRET_LENGTH] = {0,};
 
-
-#if HAP_USE_LIBSODIUM
-	/* The server derives a shared key from its secret key and the client's public key */
-	/* shared key = h(q ‖ client_publickey ‖ server_publickey) */
-	if (crypto_scalarmult(sharedSecret, acc_curve_private_key, ios_device_curve_key) != 0) {
-    	LogE( F("[ERROR] crypto_scalarmult failed"), true);
-		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
-		return false;
-	}
-
-#else
-
 	if (X25519_scalarmult(sharedSecret, acc_curve_private_key, ios_device_curve_key) < 0) {
 		LogE( F("ERROR: X25519_scalarmult failed"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}
-
-#endif
-
-
 	LogD( F("OK"), true);
 
 	LogD(F("Generating signature ..."), false);
@@ -2956,13 +2912,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 
 	uint8_t acc_signature[ED25519_SIGN_LENGTH] = {0,};
-
-
-
 	ed25519_sign(acc_signature, acc_info, acc_info_len, _accessorySet->LTSK(), _accessorySet->LTPK());
-
-
-
 	concat_free(acc_info);
 	LogD(F("OK"), true);
 
@@ -3125,11 +3075,8 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LogD(F("OK"), true);
 
 
-	// ToDo:
-	// LogD("Decrypting data ...", false);
-	// Serial.println(encryptedDataLen);
-	// Serial.send_now();
 
+	LogD("Decrypting data ...", false);
 	uint8_t subtlvData[encryptedDataLen];
 
 	// Serial.println("chacha20_poly1305_decrypt");
@@ -3138,10 +3085,14 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PV03, subtlv_key, NULL, 0, encryptedData, encryptedDataLen, subtlvData);
 	if (err_code != 0) {
 		LogE("[ERROR] Decrypting failed: Reason: " + String(err_code), true);
+
+		HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
+		HAPHelper::array_print("encryptedData", encryptedData, encryptedDataLen);
+
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}
-
+	LogD( F("OK"), true);
 
 	TLV8 subTlv;
 	subTlv.encode(subtlvData, encryptedDataLen);

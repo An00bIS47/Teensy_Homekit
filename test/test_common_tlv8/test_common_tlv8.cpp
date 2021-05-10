@@ -12,6 +12,7 @@
 using namespace fakeit;
 #endif
 
+#include "../test_config.h"
 #include "HAP/HAPTLV8.hpp"
 
 void setUp(void)
@@ -261,16 +262,19 @@ void test_tlv_separator(void) {
 int runAllTests(){
     UNITY_BEGIN();
 
-    RUN_TEST(test_tlv8_simple_encode);
-    RUN_TEST(test_tlv_duo);
-    RUN_TEST(test_tlv_duo_get_single);
-    RUN_TEST(test_tlv_separator);
-    RUN_TEST(test_tlv_long);
-    RUN_TEST(test_tlv_long_sub);
+    for (int i=0; i < TEST_ITERATIONS; i++){
+        RUN_TEST(test_tlv8_simple_encode);
+        RUN_TEST(test_tlv_duo);
+        RUN_TEST(test_tlv_duo_get_single);
+        RUN_TEST(test_tlv_separator);
+        RUN_TEST(test_tlv_long);
+        RUN_TEST(test_tlv_long_sub);
 
-    RUN_TEST(test_tlv_long_combined);
-    RUN_TEST(test_tlv_long_combined_two);
-    RUN_TEST(test_tlv_long_combined_three);
+        RUN_TEST(test_tlv_long_combined);
+        RUN_TEST(test_tlv_long_combined_two);
+        RUN_TEST(test_tlv_long_combined_three);
+    }
+
 
     return UNITY_END();
 }
@@ -279,7 +283,7 @@ int runAllTests(){
 void setup() {
     // NOTE!!! Wait for >2 secs
     // if board doesn't support software reset via Serial.DTR/RTS
-    delay(2000);
+    delay(3000);
 
     runAllTests();
 }

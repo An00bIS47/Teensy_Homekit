@@ -1,4 +1,10 @@
-
+// 
+// m_ed25519.h
+// Teensy_Homekit
+//
+//  Created on: 10.05.2021
+//      Author: michael
+//
 #ifndef _M_ED25519_H_
 #define _M_ED25519_H_
 

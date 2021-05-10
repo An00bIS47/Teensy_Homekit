@@ -32,6 +32,14 @@ const uint8_t hotBits[128] PROGMEM = {
 	37, 154, 232
 };
 
+
+#ifdef UNIT_TEST
+#ifdef SRP_TEST
+#undef SRP_TEST
+#endif
+#define SRP_TEST 1
+#endif
+
 #ifdef SRP_TEST
 
 #define SRP_TEST_FIXED_SALT

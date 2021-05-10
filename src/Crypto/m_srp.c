@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2019 Stoian Ivanov
  * https://github.com/sdrsdr/mbedtls-csrp
- * 
+ *
  * Copyright (c) 2017 Johannes Schriewer
  * https://github.com/dunkelstern/mbedtls-csrp
  *
@@ -129,7 +129,7 @@ static NGHex global_Ng_constants[] = {
    "E0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF",
     "5"
  },
-#if HAP_SRP_SUPPORT_ALL_NG_SIZES 
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
  { /* 4096 */
    "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08"
    "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B"
@@ -192,7 +192,7 @@ static NGHex global_Ng_constants[] = {
    "60C980DD98EDD3DFFFFFFFFFFFFFFFFF",
    "13"
  },
-#endif 
+#endif
  {0,0} /* null sentinel */
 };
 
@@ -206,8 +206,8 @@ NGConstant * srp_ng_new( SRP_NGType ng_type, const char * n_hex, const char * g_
        return NULL;
 
     ng->N = (mbedtls_mpi *) malloc(sizeof(mbedtls_mpi));
-	if (!ng->N) { 
-		free(ng); 
+	if (!ng->N) {
+		free(ng);
 		return NULL;
 	}
     ng->g = (mbedtls_mpi *) malloc(sizeof(mbedtls_mpi));
@@ -318,7 +318,7 @@ SRPKeyPair * srp_keypair_new(SRPSession *session,const unsigned char * bytes_v, 
 
 #ifdef SRP_TEST_FIXED_b
 	mbedtls_mpi_read_string(keys->b,16,SRP_TEST_FIXED_b_STR);
-#else 
+#else
 	mbedtls_mpi_fill_random( keys->b, SRP_BYTES_IN_PRIVKEY,
                      &mbedtls_ctr_drbg_random,
                      &ctr_drbg_ctx );
@@ -620,7 +620,7 @@ static void calculate_H_AMK( SRP_HashAlgorithm alg, unsigned char *dest, const m
 
 
 void srp_clear()
-{   
+{
     if (!g_initialized) return;
 
     mbedtls_entropy_free( &entropy_ctx);
@@ -841,7 +841,7 @@ SRPVerifier *  srp_verifier_new( SRPSession *session,
 /* Out: bytes_B, len_B if not using SRPKeyPair keys
  *
  * On failure, bytes_B will be set to NULL and len_B will be set to 0, keys=NULL is OK!
- * bytes_B=NULL is OK 
+ * bytes_B=NULL is OK
  */
 SRPVerifier *  srp_verifier_new1( SRPSession *session,
                                         const char *username, int copy_username,
@@ -857,11 +857,11 @@ SRPVerifier *  srp_verifier_new1( SRPSession *session,
 	}
 
 	if( session==NULL ) {
-#if ARDUINO_ARCH_ESP32        
+#if ARDUINO_ARCH_ESP32
         ESP_LOGE("SRP", "session is null\n");
 #else
         printf("%s - session is null:\n", "SRP");
-#endif        
+#endif
         return NULL;
     }
 
@@ -903,16 +903,16 @@ SRPVerifier *  srp_verifier_new1( SRPSession *session,
     ver = (SRPVerifier *) malloc( sizeof(SRPVerifier) );
 
     if(!S || !tmp1 || !tmp2 || !ver ) {
-		if (ver) { 
-            free(ver); 
-            ver = NULL; 
+		if (ver) {
+            free(ver);
+            ver = NULL;
         }
-        
-#if ARDUINO_ARCH_ESP32        
+
+#if ARDUINO_ARCH_ESP32
         ESP_LOGE("SRP", "!S || !tmp1 || !tmp2 || !ver is NULL\n");
 #else
         printf("%s - !S || !tmp1 || !tmp2 || !ver is NULL\n", "SRP");
-#endif         
+#endif
         goto cleanup_and_exit;
     }
 
@@ -927,8 +927,8 @@ SRPVerifier *  srp_verifier_new1( SRPSession *session,
 			free(ver);
 			ver = 0;
 
-      
-#if ARDUINO_ARCH_ESP32        
+
+#if ARDUINO_ARCH_ESP32
       ESP_LOGE("SRP", "ver->username is NULL\n");
 #else
       printf("%s - ver->username is NULL\n", "SRP");
@@ -946,16 +946,16 @@ SRPVerifier *  srp_verifier_new1( SRPSession *session,
 		int temp_keys;
 		if (keys==NULL) {
 			temp_keys=1;
-      
-#if ARDUINO_ARCH_ESP32        
+
+#if ARDUINO_ARCH_ESP32
         ESP_LOGE("SRP", "keys is NULL\n");
 #else
         printf("%s - keys is NULL\n", "SRP");
-#endif 
+#endif
 
 
 			keys=srp_keypair_new(session,bytes_v,len_v,bytes_B,len_B);
-			if (keys==NULL) {                
+			if (keys==NULL) {
                 goto cleanup_and_exit;
             }
 		} else temp_keys=0;
@@ -966,14 +966,14 @@ SRPVerifier *  srp_verifier_new1( SRPSession *session,
 
        //k = H_nn(session->hash_alg, session->ng->N, session->ng->g);
 
-       // B = kv + g^b 
+       // B = kv + g^b
        //mbedtls_mpi_mul_mpi( tmp1, k, v);
        //mbedtls_mpi_exp_mod( tmp2, session->ng->g, b, session->ng->N, RR );
        //mbedtls_mpi_add_mpi( tmp1, tmp1, tmp2 );
        //mbedtls_mpi_mod_mpi( B, tmp1, session->ng->N );
 		*/
 
-       u = H_nn(session->hash_alg, A, keys->B,1); 
+       u = H_nn(session->hash_alg, A, keys->B,1);
 
        /* S = (A *(v^u)) ^ b */
        mbedtls_mpi_exp_mod(tmp1, v, u, session->ng->N, RR);
@@ -1163,7 +1163,7 @@ void srp_user_delete( SRPUser * usr )
 	mbedtls_mpi_free( usr->a ); free( usr->a );
 	mbedtls_mpi_free( usr->A ); free( usr->A );
 	mbedtls_mpi_free( usr->S ); free( usr->S );
-	
+
 	srp_ng_delete( usr->ng );
 
 	memset((void*)usr->password, 0, usr->password_len);
@@ -1328,7 +1328,7 @@ void  srp_user_process_challenge( SRPUser * usr,
 
         *bytes_M = usr->M;
         *len_M = hash_length( usr->hash_alg );
-        
+
     }
     else
     {

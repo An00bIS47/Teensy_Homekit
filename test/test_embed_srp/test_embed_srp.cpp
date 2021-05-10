@@ -13,7 +13,7 @@
 using namespace fakeit;
 #endif
 
-
+#include "../test_config.h"
 #include "HAP/HAPSRP.hpp"
 
 #define USERNAME "alice"
@@ -151,8 +151,11 @@ void test_srp_copyUsername(void){
 int runAllTests(){
     UNITY_BEGIN();
 
-    RUN_TEST(test_srp);
-    RUN_TEST(test_srp_copyUsername);
+    for (int i=0; i < TEST_ITERATIONS; i++){
+        RUN_TEST(test_srp);
+        RUN_TEST(test_srp_copyUsername);
+    }
+
 
     return UNITY_END();
 }
@@ -161,7 +164,7 @@ int runAllTests(){
 void setup() {
     // NOTE!!! Wait for >2 secs
     // if board doesn't support software reset via Serial.DTR/RTS
-    delay(2000);
+    delay(3000);
 
     runAllTests();
 }

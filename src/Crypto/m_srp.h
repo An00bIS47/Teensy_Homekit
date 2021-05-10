@@ -6,7 +6,7 @@ extern "C" {
  *
  * Copyright (c) 2019 Stoian Ivanov
  * https://github.com/sdrsdr/mbedtls-csrp
- * 
+ *
  * Copyright (c) 2017 Johannes Schriewer
  * https://github.com/dunkelstern/mbedtls-csrp
  *
@@ -87,17 +87,17 @@ typedef struct NGConstant NGConstant;
 
 typedef enum
 {
-#if HAP_SRP_SUPPORT_ALL_NG_SIZES    
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
 	SRP_NG_512,
 	SRP_NG_768,
     SRP_NG_1024,
     SRP_NG_2048,
-#endif    
+#endif
 	SRP_NG_3072,
-#if HAP_SRP_SUPPORT_ALL_NG_SIZES    
+#if HAP_SRP_SUPPORT_ALL_NG_SIZES
     SRP_NG_4096,
     SRP_NG_8192,
-#endif    
+#endif
     SRP_NG_CUSTOM,
 	SRP_NG_LAST
 } SRP_NGType;
@@ -147,7 +147,7 @@ NGConstant * srp_ng_new1( NGConstant * copy_from_ng);
 /*
  * Free NGConstant. Make sure it is needed as some functions take ownership of passed ng
  */
-void srp_ng_delete( NGConstant * ng ); 
+void srp_ng_delete( NGConstant * ng );
 
 /*
  * The n_hex and g_hex parameters should be 0 unless SRP_NG_CUSTOM is used for ng_type.
@@ -186,7 +186,7 @@ void srp_create_salted_verification_key1( SRPSession * session,
 //bytes_B=NULL is ok
 SRPKeyPair * srp_keypair_new( SRPSession *session,const unsigned char * bytes_v, int len_v,
                               const unsigned char ** bytes_B, int * len_B);
-							  
+
 void srp_keypair_delete( SRPKeyPair * keys ) ;
 
 
@@ -228,7 +228,7 @@ const unsigned char * srp_verifier_get_session_key( SRPVerifier * ver, int * key
 int                   srp_verifier_get_session_key_length( SRPVerifier * ver );
 
 
-/* user_M must be exactly srp_verifier_get_session_key_length() bytes in size 
+/* user_M must be exactly srp_verifier_get_session_key_length() bytes in size
  * return 1 if remote provided user_M matches localy calculated
  * optionally return bytes_HAMK for server to client verify hash
  */
