@@ -301,7 +301,6 @@
                 "HAP_USE_SPIFFS_CONFIGURATION=1",
                 "HAP_FAKEGATO_BUFFER_SIZE=768",
                 "TEENSY_DEBUG=1",
-                "SRP_TEST=1",
                 "ARDUINO=10805",
                 "TEENSYDUINO=153",
                 "CORE_TEENSY",

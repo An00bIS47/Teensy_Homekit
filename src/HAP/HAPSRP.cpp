@@ -752,7 +752,7 @@ int HAPSRP::getVerifierSessionKeyLength( HAPSRP::SRPVerifier* ver )
 bool HAPSRP::verifySession( HAPSRP::SRPVerifier * ver, const uint8_t* user_M, const uint8_t** bytes_HAMK )
 {
 
-	tutils_array_print("verifier proof", ver->M, 64);
+	// tutils_array_print("verifier proof", ver->M, 64);
 
     if ( memcmp( ver->M, user_M, HAPHash::digestLength(ver->algorithm) ) == 0 )
     {

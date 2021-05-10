@@ -2420,7 +2420,7 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	LogV( "Verifying device proof ...", false);
 
-	if (decodedLen != _hapsrp->getHashLength(_hapsrp->data->session) ){
+	if (decodedLen != _hapsrp->length(_hapsrp->data->session) ){
 
 		LogE(F("ERROR: Client SRP proof does not match session hash length"), true);
 
