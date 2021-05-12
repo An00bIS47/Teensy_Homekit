@@ -93,21 +93,6 @@ void TLV8::decode(const uint8_t type, uint8_t* out, size_t *outSize){
 }
 
 
-
-size_t TLV8::decode(Stream& stream) {
-	size_t length = 0;
-
-	uint8_t out[size()];
-	decode(out, &length);
-
-#if HAP_DEBUG_HOMEKIT || HAP_DEBUG_TLV8
-	HAPHelper::array_print("Response", out, length);
-#endif
-	return stream.write(out, length);
-}
-
-
-
 void TLV8::decode(uint8_t* out, size_t *outSize){
 
 	if (_head == NULL || !out) {

@@ -13,6 +13,10 @@ HAPPrintChunked::HAPPrintChunked(Print &target, char* buffer, size_t size)
   : HAPPrintBuffered(target, (uint8_t*)buffer + ENCODING_RESERVE, size - ENCODING_RESERVE) {
 }
 
+HAPPrintChunked::HAPPrintChunked(Print &target, uint8_t* buffer, size_t size)
+  : HAPPrintBuffered(target, buffer + ENCODING_RESERVE, size - ENCODING_RESERVE) {
+}
+
 void HAPPrintChunked::begin() {
     HAPPrintBuffered::flush();
     _encode = true;

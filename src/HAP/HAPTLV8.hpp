@@ -54,8 +54,6 @@ public:
 
 	bool encode(uint8_t type, const std::initializer_list<uint8_t> data);
 
-	size_t decode(Stream& stream);
-
 	void decode(uint8_t* out, size_t *outSize = nullptr);
 	void decode(const uint8_t type, uint8_t* out, size_t *outSize = nullptr);
 

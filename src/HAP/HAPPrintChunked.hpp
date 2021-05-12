@@ -20,6 +20,7 @@ protected:
 
 public:
   HAPPrintChunked(Print &target, char* buffer, size_t size);
+  HAPPrintChunked(Print &target, uint8_t* buffer, size_t size);
   ~HAPPrintChunked() { end(); }
 
   void begin();

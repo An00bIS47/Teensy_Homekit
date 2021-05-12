@@ -10,26 +10,28 @@
 #define HAPSERVER_HPP_
 
 #include <Arduino.h>
-#include "HAPGlobals.hpp"
-
 #include <vector>
 #include <map>
 
+#include "HAPGlobals.hpp"
+
 #include <ArduinoJson.h>
+#include <StreamUtils.h>
+
 #include "HAPClient.hpp"
 #include "HAPAccessorySet.hpp"
 #include "HAPVerifyContext.hpp"
 #include "HAPVersion.hpp"
-
-
 #include "HAPSRP.hpp"
-
 #include "HAPTLV8Types.hpp"
+#include "HAPFakegatoFactory.hpp"
+#include "HAPTime.hpp"
+#include "HAPPrintEncrypted.hpp"
+#include "EventManager.h"
+
 #include "HAPPlugins.hpp"
 #include "plugins/Plugins.hpp"
-#include "HAPFakegatoFactory.hpp"
 
-#include "EventManager.h"
 // #include "HAPEventManager.hpp"
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -78,7 +80,7 @@
 #include <NativeEthernet.h>
 #endif
 
-#include "HAPTime.hpp"
+
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 #include "HAPIndicatorPixel.hpp"
@@ -88,7 +90,7 @@
 #include "HAPUpdate.hpp"
 #endif
 
-#include "HAPPrintEncrypted.hpp"
+
 
 #define Homekit_setFirmware(name, version, rev) \
 const char* __FLAGGED_FW_NAME 		= "\xbf\x84\xe4\x13\x54" name "\x93\x44\x6b\xa7\x75"; \
@@ -386,8 +388,8 @@ private:
 	//
 
 	// parsing
-	void processIncomingRequest(HAPClient* hapClient);
-	void processIncomingEncryptedRequest(HAPClient* hapClient);
+	void processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
+	void processIncomingEncryptedRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
 
 	void processIncomingLine(HAPClient* hapClient, String line);
 	static void processPathParameters(HAPClient* hapClient, String line, int curPos);
@@ -437,7 +439,7 @@ private:
 	//
 	// TLV8 Encoding
 	//
-	static bool encode(HAPClient* hapClient);
+	static bool encode(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
 
 	static bool _isConnected;
 
