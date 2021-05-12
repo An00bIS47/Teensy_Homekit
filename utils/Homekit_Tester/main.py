@@ -1065,38 +1065,41 @@ if __name__ == '__main__':
 
     tester = HomekitTester(args)
 
-    tester.runTest("pair", tester.pair)
 
-    tester.runTest("getAccessories", tester.getAccessories)
-    tester.runTest("getCharacteristic", tester.getCharacteristic, characteristics)
-    #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
-    tester.runTest("getAccessories", tester.getAccessories) 
+    for k in range(0,10):
 
-    tester.runTest("listenEvents", tester.listenEvents)
-
-    tester.runFakegato()
-
-    for historyEntry in tester.fakegatoHistories:    
-        tester.openInHexFiend(historyEntry)
-
-    tester.runTest("removePairing", tester.removePairing)
-
-
-
-    tester.runTest("pair", tester.pair)
-    for i in range(0,10):
-        print(i)
-        time.sleep(0.1)
-        tester.runTest("getAccessories", tester.getAccessories)        
-    tester.runTest("removePairing", tester.removePairing)    
-
-    
-    for i in range(0,10):
-        print(i)
-        time.sleep(0.1)
         tester.runTest("pair", tester.pair)
+
         tester.runTest("getAccessories", tester.getAccessories)
+        tester.runTest("getCharacteristic", tester.getCharacteristic, characteristics)
+        #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
+        tester.runTest("getAccessories", tester.getAccessories) 
+
+        tester.runTest("listenEvents", tester.listenEvents)
+
+        tester.runFakegato()
+
+        for historyEntry in tester.fakegatoHistories:    
+            tester.openInHexFiend(historyEntry)
+
         tester.runTest("removePairing", tester.removePairing)
+
+
+
+        tester.runTest("pair", tester.pair)
+        for i in range(0,10):
+            print(i)
+            time.sleep(0.1)
+            tester.runTest("getAccessories", tester.getAccessories)        
+        tester.runTest("removePairing", tester.removePairing)    
+
+        
+        for i in range(0,10):
+            print(i)
+            time.sleep(0.1)
+            tester.runTest("pair", tester.pair)
+            tester.runTest("getAccessories", tester.getAccessories)
+            tester.runTest("removePairing", tester.removePairing)
     
 
     if args.summary == True:

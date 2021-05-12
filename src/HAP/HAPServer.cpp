@@ -1422,8 +1422,8 @@ void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_l
     		//Serial.print(decrypted[i]);
 		if ( msg[i] == '\r' && msg[i + 1] == '\n' ) {
 
-
-			processIncomingLine(hapClient, String(msg).substring(curPos, i));
+			String curLine = String(msg).substring(curPos, i);
+			processIncomingLine(hapClient, curLine);
 			i++;
 
 			if (i - curPos == 2) {
@@ -1621,7 +1621,7 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 }
 
 
-void HAPServer::processPathParameters(HAPClient* hapClient, String line, int curPos){
+void HAPServer::processPathParameters(HAPClient* hapClient, String& line, int curPos){
 
 	int index = line.indexOf("?", curPos);
 
@@ -1676,7 +1676,7 @@ void HAPServer::processPathParameters(HAPClient* hapClient, String line, int cur
 }
 
 
-void HAPServer::processIncomingLine(HAPClient* hapClient, String line){
+void HAPServer::processIncomingLine(HAPClient* hapClient, String& line){
 
 	// Print Line
 #if HAP_DEBUG_HOMEKIT_REQUEST
