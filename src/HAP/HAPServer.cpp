@@ -2534,9 +2534,10 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 
 	LogV(F("\nClearing SRP ..."), false);
-
-	if (_hapsrp != nullptr) delete _hapsrp;
-	_hapsrp = nullptr;
+	if (_hapsrp != nullptr) {
+		delete _hapsrp;
+		_hapsrp = nullptr;
+	}
 	LogV(F("OK"), true);
 
 
@@ -2546,7 +2547,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	size_t decodedLen = 0;
 	size_t encryptedTLVLen = hapClient->request.tlv.size(HAP_TLV_ENCRYPTED_DATA);
 
-	uint8_t encryptedTLV[encryptedTLVLen];
+	uint8_t encryptedTLV[encryptedTLVLen] = {0,};
 	hapClient->request.tlv.decode(HAP_TLV_ENCRYPTED_DATA, encryptedTLV, &decodedLen);
 
 
@@ -2573,22 +2574,32 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
     LogV(F("Decrypting chacha20_poly1305 ..."), false);
     // uint8_t *subtlv = (uint8_t*) malloc(sizeof(uint8_t) * encrypted_tlv_len);
-    uint8_t subtlv[encryptedTLVLen];
-
-
+    
+	size_t decryptedLen = encryptedTLVLen - CHACHA20_POLY1305_AUTH_TAG_LENGTH;
+	uint8_t subtlv[decryptedLen];
+#if HAP_DEBUG_HOMEKIT
+	HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
+	HAPHelper::array_print("encryptedTLV", encryptedTLV, encryptedTLVLen);
+#endif
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PS05, subtlv_key, NULL, 0, encryptedTLV, encryptedTLVLen, subtlv);
 
     if (err_code != 0) {
         LogE(F("ERROR: Decrypting CHACHA20_POLY1305_TYPE_PS05 failed! Reason: ") + String(err_code), true);
+#if HAP_DEBUG_HOMEKIT		
+		HAPHelper::array_print("subtlv", subtlv, decryptedLen);
+#endif
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		response.clear();
         return false;
     }
     LogD( F("OK"), true);
 
+#if HAP_DEBUG_HOMEKIT
+	HAPHelper::array_print("subtlv", subtlv, decryptedLen);
+#endif
 
 	TLV8 encTLV;
-	encTLV.encode(subtlv, strlen((char*)subtlv));
+	encTLV.encode(subtlv, decryptedLen);
 
 #if HAP_DEBUG_TLV8
 	encTLV.print();
@@ -3074,15 +3085,16 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 
 	LogD("Decrypting data ...", false);
-	uint8_t subtlvData[encryptedDataLen - 16] = {0,};
+	size_t decryptedLen = encryptedDataLen - CHACHA20_POLY1305_AUTH_TAG_LENGTH;
+	uint8_t subtlvData[decryptedLen] = {0,};
 
 	// Serial.println("chacha20_poly1305_decrypt");
 	// Serial.send_now();
 
-#if 1
+#if HAP_DEBUG_HOMEKIT
 	HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
-	HAPHelper::array_print("encryptedData", encryptedData, encryptedDataLen - 16);
-	HAPHelper::array_print("mac", encryptedData + (encryptedDataLen - 16), 16);
+	HAPHelper::array_print("encryptedData", encryptedData, decryptedLen);
+	HAPHelper::array_print("mac", encryptedData + decryptedLen, CHACHA20_POLY1305_AUTH_TAG_LENGTH);
 #endif
 
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PV03, subtlv_key, NULL, 0, encryptedData, encryptedDataLen, subtlvData);
@@ -3092,7 +3104,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 		// HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
 		// HAPHelper::array_print("encryptedData", encryptedData, encryptedDataLen - 16);
 		// HAPHelper::array_print("mac", encryptedData + (encryptedDataLen - 16), 16);
-		HAPHelper::array_print("subtlvData", subtlvData, encryptedDataLen - 16);
+		HAPHelper::array_print("subtlvData", subtlvData, decryptedLen);
 
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		return false;
@@ -3100,11 +3112,11 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LogD( F("OK"), true);
 
 #if HAP_DEBUG_TLV8
-	HAPHelper::array_print("subtlvData", subtlvData, encryptedDataLen - 16);
+	HAPHelper::array_print("subtlvData", subtlvData, decryptedLen);
 #endif
 
 	TLV8 subTlv;
-	subTlv.encode(subtlvData, encryptedDataLen - 16);
+	subTlv.encode(subtlvData, decryptedLen);
 
 // #if HAP_DEBUG
 // 	LogD("subTLV: ", true);

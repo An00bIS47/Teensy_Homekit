@@ -10,7 +10,7 @@
 #define TEST_CONFIG_H_
 
 #ifndef TEST_ITERATIONS
-#define TEST_ITERATIONS 3
+#define TEST_ITERATIONS 1
 #endif
 
 #ifndef SRP_TEST
