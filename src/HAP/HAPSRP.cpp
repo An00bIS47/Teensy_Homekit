@@ -84,7 +84,7 @@ void tutils_array_print(const char* tag, const unsigned char* buf, int len){
 
 void tutils_mpi_print(const char* tag, const mbedtls_mpi* x){
     int len_x = mbedtls_mpi_size(x);
-    unsigned char* num = malloc(len_x);
+    uint8_t* num = (uint8_t*)malloc(len_x);
     mbedtls_mpi_write_binary(x, num, len_x);
 	tutils_array_print(tag, num, len_x);
     free(num);
@@ -323,7 +323,7 @@ void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mp
 	hash.clear();
 
 #ifdef SRP_TEST_DBG_VER
-	tutils_array_print("VER:username",username, strlen(username));
+	tutils_array_print("VER:username",(const unsigned char*)username, strlen(username));
 	tutils_array_print("VAR:password",password, password_len);
 	tutils_mpi_print("VAR:salt",salt);
 	tutils_array_print("VAR:ucp_hash",ucp_hash, hash.digestLength());
