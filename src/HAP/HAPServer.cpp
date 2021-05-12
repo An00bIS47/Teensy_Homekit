@@ -1198,36 +1198,11 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 
 	ReadBufferingClient bufferedClient{hapClient->client, 1024 + 16};
 
-	// while (bufferedClient.available()){
 	if (hapClient->isEncrypted()) {
 		processIncomingEncryptedRequest( hapClient, &bufferedClient );
 	} else {
 		processIncomingRequest( hapClient, &bufferedClient );
 	}
-	// };
-
-
-// 	while ( hapClient->client.available() ) {
-// 		// Serial.print("AVAILBALE: ");
-// 		// Serial.println(hapClient->client.available());
-
-// 		delay(1);
-
-// // #if defined(CORE_TEENSY)
-// // 		Serial.print("_curLine: *");
-// // 		Serial.print(_curLine);
-// // 		Serial.println("*");
-// // 		delay(1);
-// // #endif
-
-// 		if (hapClient->isEncrypted()) {
-// 			processIncomingEncryptedRequest( hapClient );
-// 		} else {
-// 			processIncomingRequest( hapClient );
-// 		}
-// 	}
-
-	// Serial.println(">>>>>>>>>>>>>>> END REQUEST <<<<<<<<<<<<<<<<<<<<");
 
 #if HAP_DEBUG_HOMEKIT
 	if (_curLine != "")
