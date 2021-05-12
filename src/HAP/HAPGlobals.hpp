@@ -113,7 +113,7 @@
 #endif
 
 #ifndef HAP_DEBUG_FAKEGATO_SCHEDULE
-#define HAP_DEBUG_FAKEGATO_SCHEDULE 1
+#define HAP_DEBUG_FAKEGATO_SCHEDULE 0
 #endif
 
 #ifndef HAP_DEBUG_PAIRINGS
@@ -149,11 +149,11 @@
 #endif
 
 #ifndef HAP_DEBUG_IR
-#define HAP_DEBUG_IR				1
+#define HAP_DEBUG_IR				0
 #endif
 
 #ifndef HAP_DEBUG_CONFIGURATION
-#define HAP_DEBUG_CONFIGURATION		1
+#define HAP_DEBUG_CONFIGURATION		0
 #endif
 
 /**

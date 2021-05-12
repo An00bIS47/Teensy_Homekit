@@ -31,7 +31,7 @@
 #include <ArduinoJson.h>
 #endif
 
-#undef write
+
 
 enum HAP_CLIENT_STATE {
 	HAP_CLIENT_STATE_DISCONNECTED = 0,
@@ -59,39 +59,10 @@ struct HAPSubscribtionItem {
 	}
 };
 
-
-class HAPClientHeader : public Printable {
-public:
-	String name;
-	String value;
-
-	HAPClientHeader(String name_, String value_) : name(name_), value(value_) {};
-
-	size_t printTo(Print& p) const {
-  		return p.print(name + ": " + value);
-  	}
-
-	String describe() const {
-		return name + ": " + value;
-	}
-
-	// size_t length(){
-	// 	return (name.length() + 2 + value.length() + 2);
-	// }
-
-	bool operator==(const HAPClientHeader &header) const {
-		return header.name == name && header.value == value;
-	}
-};
-
-class HAPClient : public Stream {
+class HAPClient {
 public:
 	HAPClient();
 	~HAPClient();
-
-	//struct HAPKeys {
-	//	byte accessorySRPProof[SHA512_DIGEST_LENGTH];
-	//} keys;
 
 	HAPRequest		request;
 
@@ -109,15 +80,6 @@ public:
 	struct HAPVerifyContext 		verifyContext;
 	struct HAPEncryptionContext 	encryptionContext;
 
-	// From Stream:
-  	size_t write(const uint8_t* buffer, size_t size);
-  	size_t write(uint8_t b);
-
-	int available();
-	int read();
-	int peek();
-	void flush();
-
 	void setEncryped(bool mode) {
 		_isEncrypted = mode;
 	}
@@ -125,17 +87,6 @@ public:
 	bool isEncrypted() {
 		return _isEncrypted;
 	}
-
-	void setChunkedMode(bool mode) {
-		_chunkedMode = mode;
-	}
-
-	bool chunkedMode() {
-		return _chunkedMode;
-	}
-
-	void setHeader(HAPClientHeader header);
-	void setHeader(const String& name, const String& value);
 
 	void clear();
 
@@ -158,9 +109,6 @@ public:
 	String describe() const;
 #endif
 
-	static String statusMessage(int statusCode);
-	void sendStatusAndHeader(int statusCode, size_t size);
-
 	const uint8_t* getId(){
 		return _idPtr;
 	}
@@ -171,16 +119,9 @@ public:
 
 protected:
 	bool			_isEncrypted;
-	bool			_headerSent;
 	bool			_isAdmin;
-	bool			_chunkedMode;
-
-	std::vector<HAPClientHeader> _headers;
-
-	String buildHeaderAndStatus(int statusCode, size_t size = 0);
 
 	uint8_t	_idPtr[HAP_PAIRINGS_ID_LENGTH];
-
 };
 
 #endif /* HAPCLIENT_HPP_ */

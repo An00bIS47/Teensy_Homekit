@@ -9,12 +9,6 @@
 #include <mbedtls/hkdf.h>
 #include <stdio.h>
 
-// #if ARDUINO_ARCH_ESP32
-// #include <esp_log.h>
-// #define TAG "HKDF"
-// #endif
-
-const mbedtls_md_info_t *sha512_info = NULL;
 
 struct hkdf_salt_info {
     char* salt;
@@ -56,23 +50,11 @@ static struct hkdf_salt_info* _salt_info_get(enum hkdf_key_type type)
 
 int hkdf_key_get(enum hkdf_key_type type, uint8_t* inkey, int inkey_len, uint8_t* outkey)
 {
-    uint8_t key[CHACHA20_POLY1305_AEAD_KEYSIZE];
-
     struct hkdf_salt_info* salt_info = _salt_info_get(type);
+    const mbedtls_md_info_t *sha512_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA512);
 
-    sha512_info=mbedtls_md_info_from_type(MBEDTLS_MD_SHA512);
     int err = mbedtls_hkdf(sha512_info,(uint8_t*)salt_info->salt,strlen(salt_info->salt),inkey,
-    inkey_len,(uint8_t*)salt_info->info,strlen(salt_info->info), key, CHACHA20_POLY1305_AEAD_KEYSIZE);
+    inkey_len,(uint8_t*)salt_info->info,strlen(salt_info->info), outkey, HKDF_KEY_LEN);
 
-    if (err < 0) {
-// #if ARDUINO_ARCH_ESP32
-//         ESP_LOGE(TAG, "mbedtls_hkdf failed. %d\n", err);
-// #else
-//         printf("%s - mbedtls_hkdf failed. err:%d\n", "HKDF", err);
-// #endif
-        return err;
-    }
-
-    memcpy(outkey, key, CHACHA20_POLY1305_AEAD_KEYSIZE);
-    return 0;
+    return err;
 }

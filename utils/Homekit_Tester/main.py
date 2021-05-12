@@ -1076,10 +1076,11 @@ if __name__ == '__main__':
 
     tester.runFakegato()
 
+    for historyEntry in tester.fakegatoHistories:    
+        tester.openInHexFiend(historyEntry)
+
     tester.runTest("removePairing", tester.removePairing)
 
-    for historyEntry in tester.fakegatoHistories:    
-         tester.openInHexFiend(historyEntry)
 
 <<<<<<< HEAD:test/Homekit_Tester/main.py
 
@@ -1107,7 +1108,9 @@ if __name__ == '__main__':
     tester.runTest("removePairing", tester.removePairing)    
 
     
-    for i in range(0,100):
+    for i in range(0,10):
+        print(i)
+        time.sleep(0.1)
         tester.runTest("pair", tester.pair)
         tester.runTest("getAccessories", tester.getAccessories)
         tester.runTest("removePairing", tester.removePairing)
@@ -1120,5 +1123,6 @@ if __name__ == '__main__':
         tester.saveReport("./reports/", args.reportFormat)
         tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
         
+
 
 

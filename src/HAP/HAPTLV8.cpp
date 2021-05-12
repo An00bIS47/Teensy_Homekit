@@ -90,28 +90,7 @@ void TLV8::decode(const uint8_t type, uint8_t* out, size_t *outSize){
 		_head = _head->next;
 	}
 	_head = tmp;
-
-#if HAP_DEBUG_TLV8
-	LogV( "uint8_ts decoded: " false);
-	LogV(offset, true);
-#endif
-
 }
-
-
-
-size_t TLV8::decode(Stream& stream) {
-	size_t length = 0;
-
-	uint8_t out[size()];
-	decode(out, &length);
-
-#if HAP_DEBUG_HOMEKIT || HAP_DEBUG_TLV8
-	HAPHelper::array_print("Response", out, length);
-#endif
-	return stream.write(out, length);
-}
-
 
 
 void TLV8::decode(uint8_t* out, size_t *outSize){
@@ -155,11 +134,6 @@ void TLV8::decode(uint8_t* out, size_t *outSize){
 	}
 
 	_head = tmp;
-
-#if HAP_DEBUG_TLV8
-	LogV( "uint8_ts decoded: " false);
-	LogV(offset, true);
-#endif
 }
 
 
@@ -246,11 +220,6 @@ bool TLV8::encode(uint8_t type, size_t length, const uint8_t* rawData) {
 		TLV8Entry *ptr = initNode(type, length, rawData);
 		addNode(ptr);
 	}
-
-#if HAP_DEBUG_TLV8
-	LogV( "uint8_ts encoded: " false);
-	LogV(bdone, true);
-#endif
 
 	return (bdone == length) ? true : false;
 }

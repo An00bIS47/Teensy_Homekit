@@ -23,13 +23,8 @@
 #define MBEDTLS_ERR_HKDF_BAD_PARAM  -0x5300  /**< Bad parameter */
 /* \} name */
 
-
-#ifndef CHACHA20_POLY1305_AEAD_KEYSIZE
-#define CHACHA20_POLY1305_AEAD_KEYSIZE      32
-#endif
-
 #ifndef HKDF_KEY_LEN
-#define HKDF_KEY_LEN      CHACHA20_POLY1305_AEAD_KEYSIZE
+#define HKDF_KEY_LEN      32
 #endif
 
 #ifdef __cplusplus
