@@ -7,6 +7,8 @@ import tlv8
 import base64
 import json
 import binascii
+import uuid
+import ed25519
 
 from homekit.controller import Controller
 from homekit.log_support import setup_logging, add_log_arguments
@@ -14,6 +16,8 @@ from homekit.model.characteristics import CharacteristicsTypes, CharacteristicsD
 from homekit.model.services import ServicesTypes
 from homekit.model.characteristics.characteristic_formats import CharacteristicFormats
 from homekit.controller.tools import AbstractPairing
+from homekit.exceptions import AlreadyPairedError, HomeKitException
+from homekit.controller.additional_pairing import AdditionalPairing
 
 from termcolor import colored, cprint
 import struct
@@ -857,11 +861,215 @@ class HomekitTester(object):
         return 1, None
 
     @measure
+    def listPairings(self, testname):
+        loggingArray = []
+
+        if self.args.alias not in self.controller.get_pairings():
+            cprint('"{a}" is no known alias'.format(a=self.args.alias), "red")
+            self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=self.args.alias))
+            return 0, None
+
+        pairing = self.controller.get_pairings()[self.args.alias]
+        try:
+            with TimingManager(testname, loggingArray) as tm:
+                pairings = pairing.list_pairings()
+
+                data = []
+                counter = 1
+                print("")
+                for pairing in pairings:
+                    data.append({"pairingId": pairing['pairingId'], "publicKey": pairing['publicKey'], "permissions": pairing['permissions'], "controllerType": pairing['controllerType']})
+                    if self.args.quiet == False:
+                        cprint('{c}. Pairing Id: {id}'.format(c=counter, id=pairing['pairingId']), "green")
+                        cprint('   Public Key: 0x{key}'.format(key=pairing['publicKey']), "green")
+                        cprint('   Permissions: {perm} ({type})'.format(perm=pairing['permissions'],
+                                                                    type=pairing['controllerType']), "green")
+                    counter = counter + 1
+
+            self.report.addStep(testname, (len(pairings) > 0), loggingArray, data)
+
+        except Exception as e:
+            cprint("Failed to list pairings {a}".format(a=e), "red")
+            self.report.addStep(testname, False, loggingArray,"Failed to list pairings {a}".format(a=self.args.alias))
+            logging.debug(e, exc_info=True)
+            return 0, None
+
+        return 1, None
+
+    @measure
+    def prepareAddAdditionalPairing(self, testname):
+        loggingArray = []
+        print("")
+        try:
+            with TimingManager(testname, loggingArray) as tm:
+                pairings = self.controller.get_pairings()
+                if self.args.alias in pairings:
+                    pairing_data = pairings[self.args.alias]._get_pairing_data()
+                    additional_controller_pairing_identifier = pairing_data['iOSPairingId']
+                    ios_device_ltpk = pairing_data['iOSDeviceLTPK']
+                    text = 'Alias "{a}" is already in state add additional pairing.\n'\
+                        'Please add this to homekit.add_additional_pairing:\n'\
+                        '    -i {id} -k {pk}'\
+                        .format(a=args.alias,
+                                id=additional_controller_pairing_identifier,
+                                pk=ios_device_ltpk
+                                )
+                    cprint(text, "green")
+                    a = {
+                        'iOSPairingId': additional_controller_pairing_identifier,
+                        'iOSDeviceLTPK': ios_device_ltpk,
+                        'Connection': 'ADDITIONAL_PAIRING'
+                    }
+                    self.report.addStep(testname, True, loggingArray, text)
+                    return 0, a
+
+
+                additional_controller_pairing_identifier = str(uuid.uuid4())
+                ios_device_ltsk, ios_device_ltpk = ed25519.create_keypair()
+
+                public_key = binascii.hexlify(ios_device_ltpk.to_bytes()).decode()
+
+                text = 'Please add this to homekit.add_additional_pairing:\n' \
+                    '    -i {id} -k {pk}' \
+                    .format(id=additional_controller_pairing_identifier,
+                            pk=public_key
+                            )
+                cprint(text, "green")
+
+                a = {
+                    'iOSPairingId': additional_controller_pairing_identifier,
+                    'iOSDeviceLTSK': ios_device_ltsk.to_ascii(encoding='hex').decode()[:64],
+                    'iOSDeviceLTPK': public_key,
+                    'Connection': 'ADDITIONAL_PAIRING'
+                }
+                pairings[self.args.alias] = AdditionalPairing(a)
+                self.controller.save_data(self.args.file)
+
+            self.report.addStep(testname, True, loggingArray, a)
+            return 0, a
+
+        except Exception as e:
+            cprint(e, "red")
+            logging.debug(e, exc_info=True)
+            self.report.addStep(testname, False, loggingArray, e)
+            return -1, None
+
+    @measure
+    def addAdditionalPairing(self, testname, pairing_id, key, permission):
+        loggingArray = []
+        print("")
+        if self.args.alias not in self.controller.get_pairings():
+            cprint('"{a}" is no known alias'.format(a=self.args.alias), "red")
+            self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=self.args.alias))
+            return -1, None
+
+        try:
+            with TimingManager(testname, loggingArray) as tm:
+                pairing = self.controller.get_pairings()[self.args.alias]
+                pairing.add_pairing(pairing_id, key, permission)
+                if pairing.pairing_data['Connection'] == 'IP':
+                    text = 'Please add this to homekit.finish_add_remote_pairing:\n' \
+                        '    -c {c} -i {id} -k {pk}' \
+                        .format(c=pairing.pairing_data['Connection'],
+                                id=pairing.pairing_data['AccessoryPairingID'],
+                                pk=pairing.pairing_data['AccessoryLTPK']
+                                )
+                    cprint(text, "green")
+                    self.report.addStep(testname, True, loggingArray, text)
+                    return 0, {"Connection": pairing.pairing_data['Connection'], "AccessoryPairingID": pairing.pairing_data['AccessoryPairingID'], "AccessoryLTPK": pairing.pairing_data['AccessoryLTPK']}
+
+                elif pairing.pairing_data['Connection'] == 'BLE':
+                    text = 'Please add this to homekit.finish_add_remote_pairing:\n' \
+                        '    -c {c} -i {id} -m {mac} -k {pk}' \
+                        .format(c=pairing.pairing_data['Connection'],
+                                id=pairing.pairing_data['AccessoryPairingID'],
+                                mac=pairing.pairing_data['AccessoryMAC'],
+                                pk=pairing.pairing_data['AccessoryLTPK']
+                                )
+                    cprint(text, "green")
+                    self.report.addStep(testname, True, loggingArray, text)
+                    return 0, {"Connection": pairing.pairing_data['Connection'], "AccessoryPairingID": pairing.pairing_data['AccessoryPairingID'], "AccessoryLTPK": pairing.pairing_data['AccessoryLTPK']}
+
+                else:
+                    print('Not known')
+                    self.report.addStep(testname, False, loggingArray, "Not known")
+                    return -1, None
+        except HomeKitException as exception:
+            print(exception)
+            logging.debug(exception, exc_info=True)
+            self.report.addStep(testname, False, loggingArray, exception)
+            return -1, None
+
+    @measure
+    def finishAddAdditionalPairing(self, testname, id, key, mac):
+        loggingArray = []
+        print("")
+        try:
+            with TimingManager(testname, loggingArray) as tm:
+                pairings = self.controller.get_pairings()
+                if self.args.alias not in pairings:
+                    cprint('"{a}" is no known alias'.format(a=self.args.alias), "red")
+                    self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=self.args.alias))
+                    return -1, None
+
+                pairing_data = pairings[self.args.alias]._get_pairing_data()
+                #pairing_data['Connection'] = self.args.connection
+                pairing_data['Connection'] = 'IP'
+                # if args.connection == 'IP':
+                pairing_data['AccessoryPairingID'] = id
+                pairing_data['AccessoryLTPK'] = key
+                # elif args.connection == 'BLE':
+                #     pairing_data['AccessoryPairingID'] = id
+                #     pairing_data['AccessoryLTPK'] = key
+                #     pairing_data['AccessoryMAC'] = mac
+
+                self.controller.save_data(self.args.file)
+                self.report.addStep(testname, True, loggingArray)
+                return 0, None
+        except Exception as e:
+            cprint(e, "red")
+            logging.debug(e, exc_info=True)
+            self.report.addStep(testname, False, loggingArray,"{a}".format(a=e))
+            return -1, None
+
+        try:
+            pairing = self.controller.get_pairings()[self.args.alias]
+            data = pairing.list_accessories_and_characteristics()
+            self.controller.save_data(self.args.file)
+
+            self.report.addStep(testname, True, loggingArray, data)
+
+            return 0, None
+        except Exception as e:
+            cprint(e, "red")
+            logging.debug(e, exc_info=True)
+            self.report.addStep(testname, False, loggingArray,"{a}".format(a=e))
+            return -1, None
+
+
+    @measure
+    def addPairing(self, testname):
+        loggingArray = []
+        with TimingManager(testname, loggingArray) as tm:
+            result, data = self.prepareAddAdditionalPairing(testname + " step 1")
+            if result != 0:
+                return -1, None
+            print(data)
+            result, data = self.addAdditionalPairing(testname + " step 2", data["iOSPairingId"], data["iOSDeviceLTPK"], 0)
+            if result != 0:
+                return -1, None
+            print(data)
+            self.finishAddAdditionalPairing(testname + " step 3", data["AccessoryPairingID"], data["AccessoryLTPK"], None)
+
+            return 0, None
+
+
+    @measure
     def pair(self, testname):
 
         loggingArray = []
         if self.args.alias in self.controller.get_pairings():
-            print('"{a}" is a already known alias'.format(a=self.args.alias))
+            cprint('"{a}" is a already known alias'.format(a=self.args.alias), "green")
             self.report.addStep(testname + " step 1", False, loggingArray)
             self.report.addStep(testname + " step 2", False, loggingArray, "SKIPPED")
             return 0, None
@@ -1011,7 +1219,7 @@ class HomekitTester(object):
             else:
                 self.requestedEntry = 0
 
-            
+
 
 
             historyData = bytearray()
@@ -1123,6 +1331,8 @@ if __name__ == '__main__':
 
         tester.runTest("pair", tester.pair)
 
+        tester.runTest("listPairings", tester.listPairings)
+
         tester.runTest("getAccessories", tester.getAccessories)
         tester.runTest("getCharacteristic", tester.getCharacteristic, characteristics)
         #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
@@ -1135,14 +1345,15 @@ if __name__ == '__main__':
         for historyEntry in tester.fakegatoHistories:
             tester.openInHexFiend(historyEntry)
 
-        tester.runTest("removePairing", tester.removePairing)
+        tester.runTest("addPairing", tester.addPairing)
 
+        tester.runTest("removePairing", tester.removePairing)
 
 
         tester.runTest("pair", tester.pair)
         for i in range(0, args.iterations):
             print(i)
-            time.sleep(0.2)
+            time.sleep(0.1)
             tester.runTest("getAccessories", tester.getAccessories)
         tester.runTest("removePairing", tester.removePairing)
 
@@ -1159,7 +1370,7 @@ if __name__ == '__main__':
         tester.printSummary()
 
     if args.uploadReport == True:
-        tester.uploadReportToGitlab()        
+        tester.uploadReportToGitlab()
 
     if args.report == True:
         tester.saveReport("./reports/", args.reportFormat)
