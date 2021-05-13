@@ -46,12 +46,12 @@ class TestReport(object):
         parts = timing.split(":")
 
         millis += (int(parts[0]) * 86400 * 1000)
-        
+
         millis += (int(parts[1]) *  3600 * 1000)
-        
-        seconds_parts = parts[2].split(".")        
-        millis += (int(seconds_parts[0]) * 1000)        
-        millis += int(seconds_parts[1]) / 1000        
+
+        seconds_parts = parts[2].split(".")
+        millis += (int(seconds_parts[0]) * 1000)
+        millis += int(seconds_parts[1]) / 1000
         return millis
 
 
@@ -70,13 +70,13 @@ class TestReport(object):
             "name": name,
             "timings": timingsArray,
             "passed": result,
-            "data": data                    
+            "data": data
         }
         self.steps.append(step)
-        
+
 
         if result == False:
-            self.passed = False            
+            self.passed = False
 
 
     def stepsCount(self):
@@ -84,13 +84,13 @@ class TestReport(object):
 
 
     def getTotalDuration(self):
-        totalDuration = 0        
+        totalDuration = 0
         for step in self.steps:
             for t in step["timings"]:
                 totalDuration += int(t["duration"])
         return totalDuration
 
-    
+
     def summary(self):
         print("")
         print("")
@@ -106,28 +106,28 @@ class TestReport(object):
             ["Duration", str(self.getTotalDuration()) + " ms"]
         ]
         print(tabulate(table))
-        
+
         print("")
         print("Details: ".format())
         table = []
-        
+
         for step in self.steps:
             passed = ""
-            
+
             if step["passed"] == True:
                 passed = "OK"
             else:
                 passed = "FAILED"
 
-            duration = 0            
+            duration = 0
             for t in step["timings"]:
                 duration += int(t["duration"])
 
             if step["passed"] == False:
                 tableRow = [step["name"], passed, duration, "ms", str(step["data"])]
-            else: 
+            else:
                 tableRow = [step["name"], passed, duration, "ms", ""]
-            
+
             table.append(tableRow)
 
 
@@ -169,28 +169,28 @@ class TestReport(object):
                     ["Duration", str(self.getTotalDuration()) + " ms"]
                 ]
         result += tabulate(table, headers=["Key","Info"], tablefmt="github")
-        
+
         result += "\n"
         result += "## Details: ".format() + "\n"
         table = []
-        
+
         for step in self.steps:
             passed = ""
-            
+
             if step["passed"] == True:
                 passed = ":white_check_mark:"
             else:
                 passed = ":red_circle:"
 
-            duration = 0            
+            duration = 0
             for t in step["timings"]:
                 duration += int(t["duration"])
 
             if step["passed"] == False:
                 tableRow = [step["name"], passed, str(duration), str(step["data"])]
-            else: 
+            else:
                 tableRow = [step["name"], passed, str(duration), ""]
-            
+
             table.append(tableRow)
 
 
@@ -234,7 +234,7 @@ class TimingManager(object):
 
     with TimingManager() as t:
        # Code to time
-    """    
+    """
     def __init__(self, desc=None, loggingArray=None):
         self.clock = timeit.default_timer
         self.desc  = desc
@@ -314,7 +314,7 @@ class HomekitTester(object):
     """docstring for ClassName"""
     def __init__(self, args):
         super(HomekitTester, self).__init__()
-        self.args = args    
+        self.args = args
 
         setup_logging(self.args.loglevel)
 
@@ -323,7 +323,7 @@ class HomekitTester(object):
         self.createStorageFile()
 
         self.report = TestReport(args=' '.join(sys.argv[0:]), gitCommit=self.args.gitCommit)
-        
+
         self.requestedEntry = 0
 
         self.fakegatoHistories = []
@@ -335,14 +335,14 @@ class HomekitTester(object):
         except Exception as e:
             print(e)
             logging.debug(e, exc_info=True)
-            sys.exit(-1)    
+            sys.exit(-1)
 
 
     def printSummary(self):
         self.report.summary()
 
     def saveReport(self, filepath, format="json"):
-        
+
         filename = filepath + "/" + dt.datetime.now().strftime("%d-%m-%Y_%H-%M") + "_report." + format
 
         result = ""
@@ -380,18 +380,18 @@ class HomekitTester(object):
                 # Add to Testreport Overview
                 page = project.wikis.get('Testreport-Overview')
                 addLine = "| " + date_time
-                addLine += " | " + ":white_check_mark:" if self.report.passed == True else ":red_circle:" 
+                addLine += " | :white_check_mark:" if self.report.passed == True else " | :red_circle:"
                 addLine += " | " + self.report.gitCommit
-                addLine += " | " + "[report](Testreports " + date_time + ")"
+                addLine += " | " + "[report](Testreports/Testreport " + date_time + ")"
                 addLine += " |\n"
 
                 page.content = page.content + addLine
                 page.save()
 
-    def validateAccessory(self, data):        
+    def validateAccessory(self, data):
         assertions = []
         success = True
-        data = {"accessories": data}  
+        data = {"accessories": data}
 
         for accessory in data["accessories"]:
             aid = accessory['aid']
@@ -413,7 +413,7 @@ class HomekitTester(object):
                     c_type = CharacteristicsTypes.get_short(c_type)
                     if 'maxLen' in characteristic:
                         maxLen = characteristic.get('maxLen')
-                                    
+
                         if value is not None and len(value) <= maxLen:
 
                             if self.args.quiet == False:
@@ -441,7 +441,7 @@ class HomekitTester(object):
                                                                                               perms=perms,
                                                                                               description=desc))
                         else:
-                            
+
                             cprint('  {aid}.{iid}: {value} [len: {length} <= {maxLen}] ({description}) >{ctype}< [{perms}]'.format(aid=aid,
                                                                                               iid=c_iid,
                                                                                               value=value,
@@ -455,7 +455,7 @@ class HomekitTester(object):
                             assertion["result"] = False
                             assertions.append(assertion)
                             success = False
-                    
+
 
                     elif 'minValue' in characteristic and 'maxValue' in characteristic:
 
@@ -465,7 +465,7 @@ class HomekitTester(object):
 
                         if isinstance(value, int):
 
-                        
+
 
 
                             if minValue <= value and value <= maxValue:
@@ -479,7 +479,7 @@ class HomekitTester(object):
                                                                                                   description=desc,
                                                                                                   minValue=minValue,
                                                                                                   maxValue=maxValue), "green")
-                                
+
                                 assertion["text"] = "Check value of {}.{}: {} < {} < {}".format(aid, c_iid, minValue, value, maxValue)
                                 assertion["result"] = True
                                 assertions.append(assertion)
@@ -520,7 +520,7 @@ class HomekitTester(object):
     """
         Create Storage File
     """
-    def createStorageFile(self):    
+    def createStorageFile(self):
         if not os.path.isfile(self.args.file):
             try:
                 with open(self.args.file, 'w') as fp:
@@ -615,10 +615,10 @@ class HomekitTester(object):
 
 
 
-    def runTest(self, name, function, *args):        
+    def runTest(self, name, function, *args):
         if self.args.quiet == False:
             print("=========================== {} ===========================".format(name))
-        
+
         data, result = None, None
         if args != None:
             data, result = function(name, *args)
@@ -644,7 +644,7 @@ class HomekitTester(object):
             with TimingManager(testname, loggingArray) as tm:
                 pairing = self.controller.get_pairings()[args.alias]
 
-                
+
                 characteristics = self.handle_file_values(characteristics)
                 results = pairing.put_characteristics(characteristics, do_conversion=convert)
 
@@ -670,8 +670,8 @@ class HomekitTester(object):
                                                                                                     reason=desc,
                                                                                                     code=status), "red")
                 passed = False
-            
-        
+
+
         self.report.addStep(testname, passed, loggingArray, strData)
         if passed == True:
             if self.args.quiet == False:
@@ -745,15 +745,15 @@ class HomekitTester(object):
             self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=self.args.alias))
             return -1, None
 
-        try:            
+        try:
             with TimingManager(testname, loggingArray) as tm:
                 pairing = self.controller.get_pairings()[self.args.alias]
                 data = pairing.list_accessories_and_characteristics()
-                
+
             self.accessoryData = data
 
-            self.controller.save_data(self.args.file)            
-            
+            self.controller.save_data(self.args.file)
+
 
         except Exception as e:
             cprint(e, "red")
@@ -768,7 +768,7 @@ class HomekitTester(object):
         if args.output == 'json':
             print(json.dumps(data, indent=4, cls=tlv8.JsonEncoder))
 
-        
+
         result = self.validateAccessory(data)
         self.report.addStep(testname, result, loggingArray, data)
 
@@ -783,16 +783,19 @@ class HomekitTester(object):
 
     @measure
     def listenEvents(self, testname):
+        loggingArray = []
         if self.args.alias not in self.controller.get_pairings():
-            print('"{a}" is no known alias'.format(a=self.args.alias))
-            sys.exit(-1)
+            cprint('"{a}" is no known alias'.format(a=self.args.alias), "red")
+            logging.debug(e, exc_info=True)
+            self.report.addStep(testname, False, loggingArray, '"{a}" is no known alias'.format(a=self.args.alias))
+            return -1, None
 
         print("Waiting for {} events ...".format(self.args.eventCount))
 
-        loggingArray = []
+
         try:
-            
-            with TimingManager(testname, loggingArray) as tm:                
+
+            with TimingManager(testname, loggingArray) as tm:
 
                 pairing = self.controller.get_pairings()[self.args.alias]
                 characteristics = [(int(c.split('.')[0]), int(c.split('.')[1])) for c in self.args.characteristicsEvent]
@@ -805,7 +808,7 @@ class HomekitTester(object):
             #sys.exit(-1)
             self.report.addStep(testname, False, loggingArray, "User canceled")
             return -1, None
-            
+
         except Exception as e:
             print(e)
             logging.debug(e, exc_info=True)
@@ -823,7 +826,7 @@ class HomekitTester(object):
                                                                                                     reason=desc,
                                                                                                   code=status))
 
-        
+
         if self.eventCount == self.args.eventCount:
             cprint('Received {}/{} events'.format(self.eventCount, self.args.eventCount), "green")
             return True, None
@@ -842,7 +845,7 @@ class HomekitTester(object):
             self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=self.args.alias))
             return 0, None
 
-        
+
         with TimingManager(testname, loggingArray) as tm:
             self.controller.remove_pairing(self.args.alias, self.args.controllerPairingId)
 
@@ -860,23 +863,23 @@ class HomekitTester(object):
         if self.args.alias in self.controller.get_pairings():
             print('"{a}" is a already known alias'.format(a=self.args.alias))
             self.report.addStep(testname + " step 1", False, loggingArray)
-            self.report.addStep(testname + " step 2", False, loggingArray, "SKIPPED")            
+            self.report.addStep(testname + " step 2", False, loggingArray, "SKIPPED")
             return 0, None
 
         if self.args.pin:
             self.pin_function = self.pin_from_parameter(self.args.pin)
         else:
             self.pin_function = self.pin_from_keyboard()
-        
+
         try:
 
             with TimingManager(testname + " step 1", loggingArray) as tm:
                 finish_pairing = self.controller.start_pairing(self.args.alias, self.args.device)
                 finish_pairing(self.pin_function())
-            
+
             self.report.addStep(testname + " step 1", True, loggingArray)
 
-            
+
         except Exception as e:
             cprint(e, "red")
             logging.debug(e, exc_info=True)
@@ -889,7 +892,7 @@ class HomekitTester(object):
             with TimingManager(testname + " step 2", loggingArray) as tm:
                 pairing = self.controller.get_pairings()[self.args.alias]
                 data = pairing.list_accessories_and_characteristics()
-                self.accessoryData = {"accessories": data } 
+                self.accessoryData = {"accessories": data }
 
             self.report.addStep(testname + " step 2", True, loggingArray)
 
@@ -917,7 +920,7 @@ class HomekitTester(object):
             #print(data)
             return passed, data
             #print(b)
-            
+
 
         return passed, None
 
@@ -946,13 +949,13 @@ class HomekitTester(object):
             hexdata = "".join(map(lambda b: format(b, "02x"), base64_bytes))
             b = bytearray.fromhex(hexdata)
             #print(b)
-            
+
             self.openInHexFiend(b)
 
 
             s = struct.unpack('<iiib', b[:13])
             #print(s)
-            
+
             fmt = "<iiib"
             fmt_len = 13
             for i in range(0, s[3]):
@@ -967,7 +970,7 @@ class HomekitTester(object):
             #print(s)
 
             signature = []
-            for i in range(4,len(s)-3):                    
+            for i in range(4,len(s)-3):
                 signature.append(s[i])
 
             fakegatoInfo = {
@@ -999,7 +1002,7 @@ class HomekitTester(object):
 
             if info is None:
                 return False, None
-            
+
             if self.args.quiet == False:
                 print(info)
 
@@ -1008,19 +1011,19 @@ class HomekitTester(object):
             else:
                 self.requestedEntry = 0
 
-            
+
 
 
             historyData = bytearray()
 
             allPassed = True
             while self.requestedEntry < info["size"]:
-                
+
                 if self.args.quiet == False:
                     print("requestedEntry: " + str(self.requestedEntry))
 
                 self.putHistoryAddress(self.requestedEntry + 1)
-                passed, data = self.getHistoryEntry()        
+                passed, data = self.getHistoryEntry()
                 if passed == True:
                     base64_bytes = base64.b64decode(data[(2, 19)]["value"])
 
@@ -1028,15 +1031,15 @@ class HomekitTester(object):
                     historyData.extend(bytearray.fromhex(hexdata))
                 else:
                     allPassed = False
-                
+
                 self.requestedEntry += 16
-                
+
                 if self.requestedEntry > info["used"] or data[(2,19)]["value"] == "AA==":
                     break
 
 
             self.fakegatoHistories.append(historyData)
-            
+
             self.report.addStep("Fakegato", allPassed, loggingArray)
         return allPassed, self.fakegatoHistories
 
@@ -1068,7 +1071,7 @@ def setup_args_parser():
     parser.add_argument('-n', action='store', required=False, dest='eventCount', help='max number of events before end',
                         default=-1, type=int)
     parser.add_argument('-N', action='store', required=False, dest='iterations', help='iterations do execute',
-                        default=-1, type=int)                        
+                        default=-1, type=int)
     parser.add_argument('-s', action='store', required=False, dest='secondsCount', default=-1, type=int,
                         help='max number of seconds before end')
     parser.add_argument('-r', action='store_true', required=False, dest='report',
@@ -1098,8 +1101,8 @@ if __name__ == '__main__':
     args = setup_args_parser()
 
 
-    #print(args.characteristics) 
-    #print(args.characteristicsPut)    
+    #print(args.characteristics)
+    #print(args.characteristicsPut)
 
     # convert the command line parameters to the required form
     characteristics = [(int(c.split('.')[0]), int(c.split('.')[1])) for c in args.characteristics]
@@ -1108,13 +1111,13 @@ if __name__ == '__main__':
                                 c[1]) for c in args.characteristicsPut]
 
 
-    #print(characteristics) 
-    #print(characteristicsPut)    
+    #print(characteristics)
+    #print(characteristicsPut)
 
 
     tester = HomekitTester(args)
 
-    
+
 
     for k in range(0, args.iterations):
 
@@ -1123,13 +1126,13 @@ if __name__ == '__main__':
         tester.runTest("getAccessories", tester.getAccessories)
         tester.runTest("getCharacteristic", tester.getCharacteristic, characteristics)
         #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
-        tester.runTest("getAccessories", tester.getAccessories) 
+        tester.runTest("getAccessories", tester.getAccessories)
 
         tester.runTest("listenEvents", tester.listenEvents)
 
         tester.runFakegato()
 
-        for historyEntry in tester.fakegatoHistories:    
+        for historyEntry in tester.fakegatoHistories:
             tester.openInHexFiend(historyEntry)
 
         tester.runTest("removePairing", tester.removePairing)
@@ -1140,17 +1143,17 @@ if __name__ == '__main__':
         for i in range(0, args.iterations):
             print(i)
             time.sleep(0.2)
-            tester.runTest("getAccessories", tester.getAccessories)        
-        tester.runTest("removePairing", tester.removePairing)    
+            tester.runTest("getAccessories", tester.getAccessories)
+        tester.runTest("removePairing", tester.removePairing)
 
-        
+
         for i in range(0, args.iterations):
             print(i)
             time.sleep(0.2)
             tester.runTest("pair", tester.pair)
             tester.runTest("getAccessories", tester.getAccessories)
             tester.runTest("removePairing", tester.removePairing)
-    
+
 
     if args.summary == True:
         tester.printSummary()
