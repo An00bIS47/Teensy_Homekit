@@ -20,6 +20,7 @@ import struct
 
 import time
 import datetime as dt
+import gitlab
 import timeit
 from tabulate import tabulate
 from functools import wraps
@@ -30,10 +31,12 @@ class TestReport(object):
 
     """docstring for ClassName"""
 
-    def __init__(self, desc=None):
+    def __init__(self, desc=None, args=None, gitCommit=None):
         super(TestReport, self).__init__()
 
+        self.args = args
         self.desc = desc
+        self.gitCommit = gitCommit
         self.passed = True
         self.steps = []
         self.startTime = dt.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -95,6 +98,8 @@ class TestReport(object):
         print("Summary: ".format())
         table = [
             ["Description", self.desc],
+            ["Command Line", self.args],
+            ["Git Commit", self.gitCommit],
             ["Date", self.startTime],
             ["Passed", self.passed],
             ["Steps", self.stepsCount()],
@@ -132,6 +137,8 @@ class TestReport(object):
     def toJson(self):
         data = {}
         data["desc"] = self.desc
+        data["cmd"] = self.args
+        data["git"] = self.gitCommit
         data["date"] = self.startTime
         data["passed"] = self.passed
         data["steps"] = []
@@ -154,8 +161,10 @@ class TestReport(object):
         result += "## Summary: ".format() + "\n"
         table = [
                     ["Description", self.desc],
+                    ["Command Line", self.args],
+                    ["Git Commit", self.gitCommit],
                     ["Date", self.startTime],
-                    ["Passed", self.passed],
+                    ["Passed", ":white_check_mark:" if self.passed == True else ":red_circle:"  ],
                     ["Steps", self.stepsCount()],
                     ["Duration", str(self.getTotalDuration()) + " ms"]
                 ]
@@ -169,9 +178,9 @@ class TestReport(object):
             passed = ""
             
             if step["passed"] == True:
-                passed = "OK"
+                passed = ":white_check_mark:"
             else:
-                passed = "FAILED"
+                passed = ":red_circle:"
 
             duration = 0            
             for t in step["timings"]:
@@ -192,16 +201,22 @@ class TestReport(object):
         if accessoryJson != None:
             result += "\n"
             result += "## Accessory Details" + "\n"
-            result += "```" + "\n"
+            result += "<details>" + "\n"
+            result += "<summary>Click this to collapse/fold.</summary>" + "\n"
+            result += "<pre><code>" + "\n"
             result += json.dumps(accessoryJson, indent=4) + "\n"
-            result += "```" + "\n"+ "\n"
+            result += "</code></pre>" + "\n"
+            result += "</details>" + "\n"
 
 
         result += "\n"
         result += "## Report Details" + "\n"
-        result += "```" + "\n"
+        result += "<details>" + "\n"
+        result += "<summary>Click this to collapse/fold.</summary>" + "\n"
+        result += "<pre><code>" + "\n"
         result += json.dumps(self.toJson(), indent=4) + "\n"
-        result += "```" + "\n"+ "\n"
+        result += "</code></pre>" + "\n"
+        result += "</details>" + "\n"
 
         return result
 
@@ -307,7 +322,7 @@ class HomekitTester(object):
 
         self.createStorageFile()
 
-        self.report = TestReport()
+        self.report = TestReport(args=' '.join(sys.argv[0:]), gitCommit=self.args.gitCommit)
         
         self.requestedEntry = 0
 
@@ -339,6 +354,39 @@ class HomekitTester(object):
         with open(filename, 'w') as the_file:
             the_file.write(result)
 
+    def getReport(self, format="json"):
+        result = ""
+        if format == "json":
+            result = self.report.__str__()
+        elif format == "md" or format == "markdown":
+            result = self.report.toMarkDown(self.accessoryData)
+        return result
+
+    def uploadReportToGitlab(self, section = 'synologynas', configFile = './gitlab.ini', projectName = "Teensy_Homekit"):
+        gl = gitlab.Gitlab.from_config(section, [configFile])
+
+        # list all the projects
+        projects = gl.projects.list()
+        for project in projects:
+            if project.name == projectName:
+                #print(project.id)
+                now = dt.datetime.now() # current date and time
+                date_time = now.strftime("%Y-%m-%d")
+                #print("date and time:",date_time)
+
+                project.wikis.create({'title': 'Testreports/Testreport ' + date_time,
+                                    'content': self.report.toMarkDown(self.accessoryData)})
+
+                # Add to Testreport Overview
+                page = project.wikis.get('Testreport-Overview')
+                addLine = "| " + date_time
+                addLine += " | " + ":white_check_mark:" if self.report.passed == True else ":red_circle:" 
+                addLine += " | " + self.report.gitCommit
+                addLine += " | " + "[report](Testreports " + date_time + ")"
+                addLine += " |\n"
+
+                page.content = page.content + addLine
+                page.save()
 
     def validateAccessory(self, data):        
         assertions = []
@@ -999,6 +1047,7 @@ def setup_args_parser():
     parser.add_argument('-p', action='store', required=False, dest='pin', help='HomeKit configuration code')
     parser.add_argument('-f', action='store', required=True, dest='file', help='HomeKit pairing data file')
     parser.add_argument('-a', action='store', required=True, dest='alias', help='alias for the pairing')
+    parser.add_argument('-g', action='store', required=False, dest='gitCommit', default=None, help='git commit sha1')
     parser.add_argument('-i', action='store', required=False, dest='controllerPairingId',
                         help='this pairing ID identifies the controller who should be REMOVED from accessory')
     parser.add_argument('-o', action='store', dest='output', default='compact', choices=['json', 'compact'],
@@ -1016,6 +1065,8 @@ def setup_args_parser():
                         help='Use aid.iid for subscribing to a characteristic. Repeat to subscribe to multiple characteristics.')
     parser.add_argument('-n', action='store', required=False, dest='eventCount', help='max number of events before end',
                         default=-1, type=int)
+    parser.add_argument('-N', action='store', required=False, dest='iterations', help='iterations do execute',
+                        default=-1, type=int)                        
     parser.add_argument('-s', action='store', required=False, dest='secondsCount', default=-1, type=int,
                         help='max number of seconds before end')
     parser.add_argument('-r', action='store_true', required=False, dest='report',
@@ -1041,10 +1092,6 @@ def setup_args_parser():
 
 
 
-
-
-
-
 if __name__ == '__main__':
     args = setup_args_parser()
 
@@ -1065,8 +1112,9 @@ if __name__ == '__main__':
 
     tester = HomekitTester(args)
 
+    
 
-    for k in range(0,10):
+    for k in range(0, args.iterations):
 
         tester.runTest("pair", tester.pair)
 
@@ -1087,14 +1135,14 @@ if __name__ == '__main__':
 
 
         tester.runTest("pair", tester.pair)
-        for i in range(0,10):
+        for i in range(0, args.iterations):
             print(i)
             time.sleep(0.1)
             tester.runTest("getAccessories", tester.getAccessories)        
         tester.runTest("removePairing", tester.removePairing)    
 
         
-        for i in range(0,10):
+        for i in range(0, args.iterations):
             print(i)
             time.sleep(0.1)
             tester.runTest("pair", tester.pair)
@@ -1106,9 +1154,10 @@ if __name__ == '__main__':
         tester.printSummary()
 
     if args.report == True:
-        tester.saveReport("./reports/", args.reportFormat)
-        tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
-        
+        #tester.saveReport("./reports/", args.reportFormat)
+        #tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
+        tester.uploadReportToGitlab()
+
 
 
 

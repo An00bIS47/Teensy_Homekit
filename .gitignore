@@ -375,6 +375,9 @@ dmypy.json
 # homekitstorage.json
 homekitStorage.json
 
+# homekitstorage.json
+gitlab.ini
+
 # TestReports* 
 reports*
 
