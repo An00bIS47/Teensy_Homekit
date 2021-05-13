@@ -1755,6 +1755,9 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, String& line){
  * @return true
  * @return false
  */
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 bool HAPServer::encode(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
 
 	uint16_t written = 0;
@@ -1882,7 +1885,9 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 	}
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 
 	if (httpStatus == HTTP_204) {
@@ -2032,27 +2037,27 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 
 bool HAPServer::send204(HAPClient* hapClient){
 
-	LogD(F("\nEncrpyting response ..."), false);
+	// LogD(F("\nEncrpyting response ..."), false);
 
 	uint8_t* encrypted = nullptr;
 	int encryptedLen = 0;
 	encrypted = HAPEncryption::encrypt((uint8_t*)HTTP_204, strlen(HTTP_204), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
     if (encryptedLen == 0) {
-    	LogE(F("ERROR: Encrpyting response failed!"), true);
+    	// LogE(F("ERROR: Encrpyting response failed!"), true);
     	hapClient->request.clear();
 		hapClient->clear();
     	return false;
     } else {
-		LogD(F("OK"), true);
+		// LogD(F("OK"), true);
     }
 
-#if defined( ARDUINO_ARCH_ESP32 )
-	LogD("\n>>> Sending " + String(encryptedLen) + " bytes encrypted response to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
-#elif defined( CORE_TEENSY )
-	LogD(F("\n>>> Sending ") + String(encryptedLen) + F(" bytes encrypted response to client ["), false);
-	Serial.print(hapClient->client.remoteIP());
-	LogD("] ...", false);
-#endif
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 	LogD("\n>>> Sending " + String(encryptedLen) + " bytes encrypted response to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
+// #elif defined( CORE_TEENSY )
+// 	LogD(F("\n>>> Sending ") + String(encryptedLen) + F(" bytes encrypted response to client ["), false);
+// 	Serial.print(hapClient->client.remoteIP());
+// 	LogD("] ...", false);
+// #endif
 
 	WriteBufferingClient bufferedWifiClient{hapClient->client, 64};
 	size_t bytesSend = bufferedWifiClient.write(encrypted, encryptedLen);
@@ -2061,9 +2066,9 @@ bool HAPServer::send204(HAPClient* hapClient){
 	free(encrypted);
 
 	if (bytesSend == encryptedLen){
-		LogD( F("OK"), true);
+		// LogD( F("OK"), true);
 	} else {
-		LogE( F("ERROR: Could not send all bytes! ") + String(bytesSend) + "/" + String(encryptedLen), true);
+		// LogE( F("ERROR: Could not send all bytes! ") + String(bytesSend) + "/" + String(encryptedLen), true);
 		return false;
 	}
 	return true;

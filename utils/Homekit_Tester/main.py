@@ -1011,7 +1011,7 @@ class HomekitTester(object):
             else:
                 self.requestedEntry = 0
 
-
+            
 
 
             historyData = bytearray()
@@ -1082,6 +1082,8 @@ def setup_args_parser():
                         help='print summary')
     parser.add_argument('-q', action='store_true', required=False, default=False, dest='quiet',
                         help='surpress output')
+    parser.add_argument('-u', action='store_true', required=False, default=False, dest='uploadReport',
+                        help='Upload report to gitlab')
 
     add_log_arguments(parser)
     args = parser.parse_args()
@@ -1117,8 +1119,6 @@ if __name__ == '__main__':
 
     tester = HomekitTester(args)
 
-
-
     for k in range(0, args.iterations):
 
         tester.runTest("pair", tester.pair)
@@ -1130,10 +1130,10 @@ if __name__ == '__main__':
 
         tester.runTest("listenEvents", tester.listenEvents)
 
-        # tester.runFakegato()
+        tester.runFakegato()
 
-        # for historyEntry in tester.fakegatoHistories:
-        #     tester.openInHexFiend(historyEntry)
+        for historyEntry in tester.fakegatoHistories:
+            tester.openInHexFiend(historyEntry)
 
         tester.runTest("removePairing", tester.removePairing)
 
@@ -1158,10 +1158,14 @@ if __name__ == '__main__':
     if args.summary == True:
         tester.printSummary()
 
+    if args.uploadReport == True:
+        tester.uploadReportToGitlab()        
+
     if args.report == True:
         tester.saveReport("./reports/", args.reportFormat)
         #tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
-        #tester.uploadReportToGitlab()
+
+
 
 
 
