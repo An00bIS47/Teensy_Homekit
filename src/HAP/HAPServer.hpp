@@ -122,7 +122,7 @@ hap.__setBrand(__FLAGGED_BRAND);
 
 // ToDo: Remove?
 static const char HTTP_200[] PROGMEM 					= "HTTP/1.1 200 OK\r\n";
-static const char HTTP_204[] PROGMEM 					= "HTTP/1.1 204 No Content\r\n";
+static const char HTTP_204[] PROGMEM 					= "HTTP/1.1 204 No Content\r\n\r\n";
 static const char HTTP_207[] PROGMEM 					= "HTTP/1.1 207 Multi-Status\r\n";
 static const char HTTP_400[] PROGMEM 					= "HTTP/1.1 400 Bad Request\r\n";
 
@@ -406,18 +406,22 @@ private:
 	//
 	// Sending responses
 	//
-	bool sendResponse(HAPClient* hapClient, TLV8* response, bool chunked = true, bool closeConnection = false);
-	bool sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked = true);
-	bool sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType);
+	void sendResponse(HAPClient* hapClient, TLV8* response);
+
+	// bool sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked = true);
+	// bool sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType);
 
 	bool send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-
-
-
+	bool send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const String httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
+		return send(hapClient, httpStatus, (const uint8_t*)data, length, mode, contentType);
+	}
 
 	void sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error);
 
 	bool sendEvent(HAPClient* hapClient, const JsonDocument& response);
+	
+	bool send204(HAPClient* hapClient);
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 	// ToDo: Pixel Indicator

@@ -189,7 +189,7 @@ class TestReport(object):
             if step["passed"] == False:
                 tableRow = [step["name"], passed, str(duration), str(step["data"])]
             else:
-                tableRow = [step["name"], passed, str(duration), ""]
+                tableRow = [step["name"], passed, str(duration), ":warning:" if duration > 1000 and step["name"] == "pair step 2" else ""]
 
             table.append(tableRow)
 
@@ -1130,10 +1130,10 @@ if __name__ == '__main__':
 
         tester.runTest("listenEvents", tester.listenEvents)
 
-        tester.runFakegato()
+        # tester.runFakegato()
 
-        for historyEntry in tester.fakegatoHistories:
-            tester.openInHexFiend(historyEntry)
+        # for historyEntry in tester.fakegatoHistories:
+        #     tester.openInHexFiend(historyEntry)
 
         tester.runTest("removePairing", tester.removePairing)
 
@@ -1159,9 +1159,9 @@ if __name__ == '__main__':
         tester.printSummary()
 
     if args.report == True:
-        #tester.saveReport("./reports/", args.reportFormat)
+        tester.saveReport("./reports/", args.reportFormat)
         #tester.saveReport("/Volumes/docker/markserv/data/Testreports", args.reportFormat)
-        tester.uploadReportToGitlab()
+        #tester.uploadReportToGitlab()
 
 
 

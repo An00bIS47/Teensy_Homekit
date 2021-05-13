@@ -70,6 +70,7 @@ public:
 	void endHeader();
 
 	size_t write(uint8_t b) override;
+	size_t write(const uint8_t* b, size_t len);
 
 	void end();
 

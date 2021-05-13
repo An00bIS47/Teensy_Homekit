@@ -1883,9 +1883,81 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 }
 
 
+bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 
+	if (httpStatus == HTTP_204) {
+		send204(hapClient);
+		return true;
+	}
+
+	uint8_t buf[HAP_PRINT_ENCRYPTED_BUFFER_SIZE];
+	HAPPrintEncrypted eStream(hapClient->client, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
+
+	eStream.setEncryptCount(hapClient->encryptionContext.encryptCount);
+	eStream.setKey(hapClient->encryptionContext.encryptKey);
+
+	eStream.begin();
+
+	eStream.print(httpStatus);
+
+	// Content-Type
+	eStream.print(F("Content-Type: "));
+	eStream.print(contentType);
+	eStream.print(HTTP_CRLF);
+
+
+	// Keep Alive
+	if ( httpStatus != EVENT_200 ) {
+		eStream.print( HTTP_KEEP_ALIVE );
+	}
+
+	if ( mode == HAP_ENCRYPTION_MODE_PLAIN ) {
+		eStream.print(F("Content-Length: "));
+		eStream.print(length);
+		eStream.print(HTTP_CRLF);
+
+		// end header
+		eStream.print(HTTP_CRLF);
+
+	} else if (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) {
+		eStream.print( HTTP_TRANSFER_ENCODING );
+		eStream.print(HTTP_CRLF);
+
+		// begin chunk
+		eStream.begin();
+	} else {
+		eStream.print( HTTP_TRANSFER_ENCODING );
+		eStream.print(HTTP_CRLF);
+
+		// end header
+		eStream.endHeader();
+	}
+
+	if ((httpStatus != HTTP_204) && (length > 0)) {
+		// Body start
+		eStream.write(data, length);
+	}
+
+
+	eStream.end();
+
+	if ( ( mode == HAP_ENCRYPTION_MODE_PLAIN ) || (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) ) {
+		return 0;
+	}
+
+	hapClient->encryptionContext.encryptCount = eStream.encryptCount();
+
+	return 0;
+
+}
 
 bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
+
+
+	if (httpStatus == HTTP_204) {
+		send204(hapClient);
+		return true;
+	}
 
 	// set timeout to 10 seconds
 	// hapClient->client.setTimeout(10000);
@@ -1894,6 +1966,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 	// WriteLoggingStream wifiClientWithLog(hapClient->client, Serial);
 
 	uint8_t buf[HAP_PRINT_ENCRYPTED_BUFFER_SIZE];
+	// HAPPrintEncrypted eStream(wifiClientWithLog, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
 	HAPPrintEncrypted eStream(hapClient->client, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
 
 	eStream.setEncryptCount(hapClient->encryptionContext.encryptCount);
@@ -1905,46 +1978,46 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 	eStream.begin();
 
 	eStream.print(httpStatus);
-	if (httpStatus == HTTP_204) {
 
-	} else {
-
-		// Content-Type
-		eStream.print("Content-Type: ");
-		eStream.print(contentType);
-		eStream.print(HTTP_CRLF);
+	// Content-Type
+	eStream.print(F("Content-Type: "));
+	eStream.print(contentType);
+	eStream.print(HTTP_CRLF);
 
 
-		// Keep Alive
-		if ( httpStatus != EVENT_200 ) {
-			eStream.print( HTTP_KEEP_ALIVE );
-		}
+	// Keep Alive
+	if ( httpStatus != EVENT_200 ) {
+		eStream.print( HTTP_KEEP_ALIVE );
 	}
 
+
 	if ( mode == HAP_ENCRYPTION_MODE_PLAIN ) {
-		eStream.print("Content-Length: " + String(jsonLength) + "\r\n" );
+		eStream.print(F("Content-Length: "));
+		eStream.print(jsonLength);
+		eStream.print(HTTP_CRLF);
+
+		// end header
 		eStream.print(HTTP_CRLF);
 
 	} else if (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) {
 		eStream.print( HTTP_TRANSFER_ENCODING );
 		eStream.print(HTTP_CRLF);
 
+		// begin chunk
 		eStream.begin();
 	} else {
-
 		eStream.print( HTTP_TRANSFER_ENCODING );
 		eStream.print(HTTP_CRLF);
 
+		// end header
 		eStream.endHeader();
 	}
 
+	if (httpStatus != HTTP_204){
+		// Body start
+		serializeJson(doc, eStream);
+	}
 
-	// Body start
-	serializeJson(doc, eStream);
-
-
-	// Body end
-	// eStream.print( HTTP_CRLF );
 
 	eStream.end();
 
@@ -1957,104 +2030,13 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 	return 0;
 }
 
+bool HAPServer::send204(HAPClient* hapClient){
 
-
-bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType){
-	bool result = true;
-
-	LogD("\nEncrpyting response ...", false);
-
-	String response;
+	LogD(F("\nEncrpyting response ..."), false);
 
 	uint8_t* encrypted = nullptr;
 	int encryptedLen = 0;
-
-
-	response = httpStatus;
-	//response += String( HTTP_CRLF );
-
-	if (httpStatus == HTTP_204) {
-		response += String(HTTP_CRLF);
-
-		encrypted = HAPEncryption::encrypt((uint8_t*)response.c_str(), response.length(), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
-
-	} else {
-		response += String( "Content-Type: " );
-		response += String(ContentType);
-		response += String(HTTP_CRLF);
-
-
-		if ( httpStatus != EVENT_200 ) {
-			response += String( HTTP_KEEP_ALIVE );
-			//response += "Host: " + String(_accessorySet->modelName()) + ".local\r\n";
-		}
-
-
-		if (chunked) {
-			response += String( HTTP_TRANSFER_ENCODING );
-			response += String( HTTP_CRLF );
-
-			char chunkSize[10];
-			sprintf(chunkSize, "%x%s", length, HTTP_CRLF);
-			response += String(chunkSize);
-
-		} else {
-			response += String("Content-Length: " + String(length) + "\r\n" );
-			response += String( HTTP_CRLF );
-		}
-
-		int buffersize = response.length() + length + 10;
-		uint8_t* buffer;
-
-		buffer = (uint8_t*) malloc(sizeof(uint8_t) * buffersize);
-		buffersize = 0;
-
-		memcpy(buffer, response.c_str(), response.length());
-		buffersize += response.length();
-
-		memcpy(buffer + response.length(), bytes, length);
-		buffersize += length;
-
-		// CRLF after payload
-		{
-			const char* chunkSize = "\r\n";
-			memcpy(buffer + buffersize, chunkSize, strlen(chunkSize));
-			buffersize	+= strlen(chunkSize);
-		}
-
-
-		if (chunked) {
-
-			{
-				char chunkSize[8];
-				sprintf(chunkSize, "%x\r\n", 0);
-				memcpy(buffer + buffersize, (uint8_t*)chunkSize, strlen(chunkSize));
-
-				buffersize += strlen(chunkSize);
-			}
-
-			// CRLF for ending
-			{
-				const char* chunkSize = "\r\n";
-				memcpy(buffer + buffersize, chunkSize, strlen(chunkSize));
-				buffersize	+= strlen(chunkSize);
-			}
-
-		}
-
-
-
-
-		// Serial.println((char*)buffer);
-// #if HAP_DEBUG_RESPONSES
-		HAPHelper::array_print("Response:", buffer, buffersize);
-// #endif
-
-		encrypted = HAPEncryption::encrypt(buffer, buffersize, &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
-
-		free(buffer);
-	}
-
+	encrypted = HAPEncryption::encrypt((uint8_t*)HTTP_204, strlen(HTTP_204), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
     if (encryptedLen == 0) {
     	LogE(F("ERROR: Encrpyting response failed!"), true);
     	hapClient->request.clear();
@@ -2064,8 +2046,6 @@ bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8
 		LogD(F("OK"), true);
     }
 
-
-
 #if defined( ARDUINO_ARCH_ESP32 )
 	LogD("\n>>> Sending " + String(encryptedLen) + " bytes encrypted response to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
 #elif defined( CORE_TEENSY )
@@ -2074,54 +2054,184 @@ bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8
 	LogD("] ...", false);
 #endif
 
-// #if HAP_DEBUG
-// 	LogD(response, true);
-// 	HAPHelper::array_print("encrypted response", (uint8_t*)encrypted, encryptedLen);
-// #endif
+	WriteBufferingClient bufferedWifiClient{hapClient->client, 64};
+	size_t bytesSend = bufferedWifiClient.write(encrypted, encryptedLen);
+	bufferedWifiClient.flush();  // <- OPTIONAL
 
-#if defined (CORE_TEENSY)
-	int bytesSent = 0;
-
-	// for (int i = 0; i < encryptedLen; i++){
-	// 	bytesSent += hapClient->client.write(encrypted[i]);
-	// }
-
-
-	int remain = encryptedLen;
-    while (remain)
-    {
-      int toCpy = remain > HAP_SEND_BUFFER_SIZE ? HAP_SEND_BUFFER_SIZE : remain;
-	  bytesSent += hapClient->client.write(encrypted + bytesSent, toCpy);
-      remain -= toCpy;
-	//   Serial.println("remaining: " + String(remain));
-    }
-
-#else
-	int bytesSent = hapClient->client.write(encrypted, encryptedLen);
-	hapClient->client.flush();
-
-
-#endif
-
-	// Serial.println("Sent");
 	free(encrypted);
 
-	if (bytesSent < encryptedLen) {
-		LogE( F("ERROR: Could not send all bytes"), true );
-		result = false;
-	} else {
+	if (bytesSend == encryptedLen){
 		LogD( F("OK"), true);
+	} else {
+		LogE( F("ERROR: Could not send all bytes! ") + String(bytesSend) + "/" + String(encryptedLen), true);
+		return false;
 	}
-
-	hapClient->request.clear();
-	hapClient->clear();
-
-	return result;
+	return true;
 }
 
-bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked){
-	return sendEncrypt(hapClient, httpStatus, (const uint8_t*)plainText.c_str(), plainText.length(), chunked, "application/hap+json");
-}
+// bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType){
+// 	bool result = true;
+
+// 	LogD("\nEncrpyting response ...", false);
+
+// 	String response;
+
+// 	uint8_t* encrypted = nullptr;
+// 	int encryptedLen = 0;
+
+
+// 	response = httpStatus;
+// 	//response += String( HTTP_CRLF );
+
+// 	if (httpStatus == HTTP_204) {
+// 		response += String(HTTP_CRLF);
+
+// 		encrypted = HAPEncryption::encrypt((uint8_t*)response.c_str(), response.length(), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
+
+// 	} else {
+// 		response += String( "Content-Type: " );
+// 		response += String(ContentType);
+// 		response += String(HTTP_CRLF);
+
+
+// 		if ( httpStatus != EVENT_200 ) {
+// 			response += String( HTTP_KEEP_ALIVE );
+// 			//response += "Host: " + String(_accessorySet->modelName()) + ".local\r\n";
+// 		}
+
+
+// 		if (chunked) {
+// 			response += String( HTTP_TRANSFER_ENCODING );
+// 			response += String( HTTP_CRLF );
+
+// 			char chunkSize[10];
+// 			sprintf(chunkSize, "%x%s", length, HTTP_CRLF);
+// 			response += String(chunkSize);
+
+// 		} else {
+// 			response += String("Content-Length: " + String(length) + "\r\n" );
+// 			response += String( HTTP_CRLF );
+// 		}
+
+// 		int buffersize = response.length() + length + 10;
+// 		uint8_t* buffer;
+
+// 		buffer = (uint8_t*) malloc(sizeof(uint8_t) * buffersize);
+// 		buffersize = 0;
+
+// 		memcpy(buffer, response.c_str(), response.length());
+// 		buffersize += response.length();
+
+// 		memcpy(buffer + response.length(), bytes, length);
+// 		buffersize += length;
+
+// 		// CRLF after payload
+// 		{
+// 			const char* chunkSize = "\r\n";
+// 			memcpy(buffer + buffersize, chunkSize, strlen(chunkSize));
+// 			buffersize	+= strlen(chunkSize);
+// 		}
+
+
+// 		if (chunked) {
+
+// 			{
+// 				char chunkSize[8];
+// 				sprintf(chunkSize, "%x\r\n", 0);
+// 				memcpy(buffer + buffersize, (uint8_t*)chunkSize, strlen(chunkSize));
+
+// 				buffersize += strlen(chunkSize);
+// 			}
+
+// 			// CRLF for ending
+// 			{
+// 				const char* chunkSize = "\r\n";
+// 				memcpy(buffer + buffersize, chunkSize, strlen(chunkSize));
+// 				buffersize	+= strlen(chunkSize);
+// 			}
+
+// 		}
+
+
+
+
+// 		// Serial.println((char*)buffer);
+// // #if HAP_DEBUG_RESPONSES
+// 		HAPHelper::array_print("Response:", buffer, buffersize);
+// // #endif
+
+// 		encrypted = HAPEncryption::encrypt(buffer, buffersize, &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
+
+// 		free(buffer);
+// 	}
+
+//     if (encryptedLen == 0) {
+//     	LogE(F("ERROR: Encrpyting response failed!"), true);
+//     	hapClient->request.clear();
+// 		hapClient->clear();
+//     	return false;
+//     } else {
+// 		LogD(F("OK"), true);
+//     }
+
+
+
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 	LogD("\n>>> Sending " + String(encryptedLen) + " bytes encrypted response to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
+// #elif defined( CORE_TEENSY )
+// 	LogD(F("\n>>> Sending ") + String(encryptedLen) + F(" bytes encrypted response to client ["), false);
+// 	Serial.print(hapClient->client.remoteIP());
+// 	LogD("] ...", false);
+// #endif
+
+// // #if HAP_DEBUG
+// // 	LogD(response, true);
+// // 	HAPHelper::array_print("encrypted response", (uint8_t*)encrypted, encryptedLen);
+// // #endif
+
+// #if defined (CORE_TEENSY)
+// 	int bytesSent = 0;
+
+// 	// for (int i = 0; i < encryptedLen; i++){
+// 	// 	bytesSent += hapClient->client.write(encrypted[i]);
+// 	// }
+
+
+// 	int remain = encryptedLen;
+//     while (remain)
+//     {
+//       int toCpy = remain > HAP_SEND_BUFFER_SIZE ? HAP_SEND_BUFFER_SIZE : remain;
+// 	  bytesSent += hapClient->client.write(encrypted + bytesSent, toCpy);
+//       remain -= toCpy;
+// 	//   Serial.println("remaining: " + String(remain));
+//     }
+
+// #else
+// 	int bytesSent = hapClient->client.write(encrypted, encryptedLen);
+// 	hapClient->client.flush();
+
+
+// #endif
+
+// 	// Serial.println("Sent");
+// 	free(encrypted);
+
+// 	if (bytesSent < encryptedLen) {
+// 		LogE( F("ERROR: Could not send all bytes"), true );
+// 		result = false;
+// 	} else {
+// 		LogD( F("OK"), true);
+// 	}
+
+// 	hapClient->request.clear();
+// 	hapClient->clear();
+
+// 	return result;
+// }
+
+// bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked){
+// 	return sendEncrypt(hapClient, httpStatus, (const uint8_t*)plainText.c_str(), plainText.length(), chunked, "application/hap+json");
+// }
 
 
 
@@ -2139,7 +2249,12 @@ bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, String plai
  * @return true     Return true on success
  * @return false 	Return false on error
  */
-bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked, bool closeConnection){
+void HAPServer::sendResponse(HAPClient* hapClient, TLV8* response){
+
+	// uint8_t tlvdata[response->size()];
+	// size_t outlen = 0;
+	// response->decode(tlvdata, &outlen);
+	// send(hapClient, HTTP_200, tlvdata, outlen, HAP_ENCRYPTION_MODE_PLAIN_CHUNKED, "application/pairing+tlv8");
 
 	uint8_t buffer[1360];
 	HAPPrintChunked chunk(hapClient->client, buffer, 1360);
@@ -2155,9 +2270,11 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 	// Encoding chunked
 	chunk.print( HTTP_TRANSFER_ENCODING );
 
-
+	// end header
 	chunk.print(HTTP_CRLF);
 
+
+	// begin 1st chunk
 	chunk.begin();
 
 	uint8_t tlvdata[response->size()];
@@ -2166,6 +2283,7 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 
 	size_t bytesSent = chunk.write(tlvdata, outlen);
 
+	// end last chunk
 	chunk.end();
 
 	LogV("\nSent " + String(bytesSent) + " bytes", true);
@@ -2173,8 +2291,6 @@ bool HAPServer::sendResponse(HAPClient* hapClient, TLV8* response, bool chunked,
 	response->clear();
 	hapClient->request.clear();
 	hapClient->clear();
-
-	return true;
 }
 
 #if defined(ARDUINO_TEENSY41)
@@ -2871,8 +2987,17 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	}
 
 	uint8_t ios_device_curve_key_len = hapClient->request.tlv.size(HAP_TLV_PUBLIC_KEY);
-	uint8_t ios_device_curve_key[ios_device_curve_key_len];
+	if (ios_device_curve_key_len == 0){
+		LogE(F("ERROR: ios_device_curve_key_len is 0!"), true);
+		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 
+		hapClient->request.clear();
+		hapClient->clear();
+		return false;
+	}
+
+
+	uint8_t ios_device_curve_key[ios_device_curve_key_len];
 	size_t decodedLen = 0;
 	hapClient->request.tlv.decode(HAP_TLV_PUBLIC_KEY, ios_device_curve_key, &decodedLen);
 
@@ -3354,7 +3479,8 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 	size_t length = 0;
 
 	response.decode(data, &length);
-	sendEncrypt(hapClient, HTTP_200, data, length, true, "application/pairing+tlv8");
+	// sendEncrypt(hapClient, HTTP_200, data, length, true, "application/pairing+tlv8");
+	send(hapClient, HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
 	hapClient->request.clear();
@@ -3405,8 +3531,8 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	size_t length = 0;
 
 	response.decode(data, &length);
-	sendEncrypt(hapClient, HTTP_200, data, length, true, "application/pairing+tlv8");
-
+	// sendEncrypt(hapClient, HTTP_200, data, length, true, "application/pairing+tlv8");
+	send(hapClient, HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
 	hapClient->request.clear();
@@ -3473,7 +3599,8 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	size_t length = 0;
 
 	response.decode(data, &length);
-	sendEncrypt(hapClient, HTTP_200, data, length, true, "application/pairing+tlv8");
+	//sendEncrypt(hapClient, HTTP_200, data, length, true, "application/pairing+tlv8");
+	send(hapClient,  HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
 	hapClient->request.clear();
@@ -3782,7 +3909,8 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 		// sendEncrypt(hapClient, HTTP_207, response, false);
 		send(hapClient, HTTP_207, responseRoot, HAP_ENCRYPTION_MODE_ENCRYPT);
 	} else {
-		sendEncrypt(hapClient, HTTP_204, "", false);
+		// sendEncrypt(hapClient, HTTP_204, "", false);
+		send(hapClient, HTTP_204, "", 0, HAP_ENCRYPTION_MODE_ENCRYPT);
 	}
 
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
