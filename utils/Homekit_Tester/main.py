@@ -987,7 +987,8 @@ class HomekitTester(object):
             return fakegatoInfo
 
     def openInHexFiend(self, byte):
-        os.system("echo " + byte.hex() + " | xxd -r -p | hexf")
+        if self.args.openHexfiend:
+            os.system("echo " + byte.hex() + " | xxd -r -p | hexf")
 
 
     def runFakegato(self):
@@ -1048,6 +1049,7 @@ def setup_args_parser():
     parser.add_argument('-f', action='store', required=True, dest='file', help='HomeKit pairing data file')
     parser.add_argument('-a', action='store', required=True, dest='alias', help='alias for the pairing')
     parser.add_argument('-g', action='store', required=False, dest='gitCommit', default=None, help='git commit sha1')
+    parser.add_argument('-H', action='store', required=False, dest='openHexfiend', default=False, help='open fakegato in hex fiend', type=bool)
     parser.add_argument('-i', action='store', required=False, dest='controllerPairingId',
                         help='this pairing ID identifies the controller who should be REMOVED from accessory')
     parser.add_argument('-o', action='store', dest='output', default='compact', choices=['json', 'compact'],
@@ -1137,14 +1139,14 @@ if __name__ == '__main__':
         tester.runTest("pair", tester.pair)
         for i in range(0, args.iterations):
             print(i)
-            time.sleep(0.1)
+            time.sleep(0.2)
             tester.runTest("getAccessories", tester.getAccessories)        
         tester.runTest("removePairing", tester.removePairing)    
 
         
         for i in range(0, args.iterations):
             print(i)
-            time.sleep(0.1)
+            time.sleep(0.2)
             tester.runTest("pair", tester.pair)
             tester.runTest("getAccessories", tester.getAccessories)
             tester.runTest("removePairing", tester.removePairing)
