@@ -1005,7 +1005,7 @@ void HAPServer::handle() {
 		if (hapClient->client.connected()) {
 
 			// Available
-			unsigned long timeout = 50;
+			unsigned long timeout = 15;
 			unsigned long previousMillis = millis();
 			while ( millis() - previousMillis < timeout) {
 
@@ -1029,23 +1029,29 @@ void HAPServer::handle() {
 		// LogV( "HAPClient state " + hapClient.getClientState(), true );
 	}
 
+	// unsigned long timeout = 10;
+	// unsigned long previousMillis = millis();
+	// while ( millis() - previousMillis < timeout) {
 
 	// Handle new clients
 #if defined(ARDUINO_ARCH_ESP32)
-	WiFiClient client = _server.available();
+		WiFiClient client = _server.available();
 #elif defined( CORE_TEENSY)
-	EthernetClient client = _server.available();
+
+		EthernetClient client = _server.available();
 #endif
-	if (client) {
+		if (client) {
 
-		HAPClient* hapClient = new HAPClient();
+			HAPClient* hapClient = new HAPClient();
 
-		// New client connected
-		hapClient->client = client;
-		hapClient->state = HAP_CLIENT_STATE_CONNECTED;
+			// New client connected
+			hapClient->client = client;
+			hapClient->state = HAP_CLIENT_STATE_CONNECTED;
 
-		handleClientState(hapClient);
-	}
+			handleClientState(hapClient);
+			// break;
+		}
+	// }
 
 	// Handle Webserver
 #if HAP_ENABLE_WEBSERVER
