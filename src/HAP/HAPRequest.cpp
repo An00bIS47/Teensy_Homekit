@@ -22,6 +22,9 @@ HAPRequest::~HAPRequest() {
 	clear();
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 String HAPRequest::toString() const {
 	String result = F("method: ");
 	result += method;

@@ -2074,172 +2074,6 @@ bool HAPServer::send204(HAPClient* hapClient){
 	return true;
 }
 
-// bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, const uint8_t* bytes, size_t length, bool chunked, const char* ContentType){
-// 	bool result = true;
-
-// 	LogD("\nEncrpyting response ...", false);
-
-// 	String response;
-
-// 	uint8_t* encrypted = nullptr;
-// 	int encryptedLen = 0;
-
-
-// 	response = httpStatus;
-// 	//response += String( HTTP_CRLF );
-
-// 	if (httpStatus == HTTP_204) {
-// 		response += String(HTTP_CRLF);
-
-// 		encrypted = HAPEncryption::encrypt((uint8_t*)response.c_str(), response.length(), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
-
-// 	} else {
-// 		response += String( "Content-Type: " );
-// 		response += String(ContentType);
-// 		response += String(HTTP_CRLF);
-
-
-// 		if ( httpStatus != EVENT_200 ) {
-// 			response += String( HTTP_KEEP_ALIVE );
-// 			//response += "Host: " + String(_accessorySet->modelName()) + ".local\r\n";
-// 		}
-
-
-// 		if (chunked) {
-// 			response += String( HTTP_TRANSFER_ENCODING );
-// 			response += String( HTTP_CRLF );
-
-// 			char chunkSize[10];
-// 			sprintf(chunkSize, "%x%s", length, HTTP_CRLF);
-// 			response += String(chunkSize);
-
-// 		} else {
-// 			response += String("Content-Length: " + String(length) + "\r\n" );
-// 			response += String( HTTP_CRLF );
-// 		}
-
-// 		int buffersize = response.length() + length + 10;
-// 		uint8_t* buffer;
-
-// 		buffer = (uint8_t*) malloc(sizeof(uint8_t) * buffersize);
-// 		buffersize = 0;
-
-// 		memcpy(buffer, response.c_str(), response.length());
-// 		buffersize += response.length();
-
-// 		memcpy(buffer + response.length(), bytes, length);
-// 		buffersize += length;
-
-// 		// CRLF after payload
-// 		{
-// 			const char* chunkSize = "\r\n";
-// 			memcpy(buffer + buffersize, chunkSize, strlen(chunkSize));
-// 			buffersize	+= strlen(chunkSize);
-// 		}
-
-
-// 		if (chunked) {
-
-// 			{
-// 				char chunkSize[8];
-// 				sprintf(chunkSize, "%x\r\n", 0);
-// 				memcpy(buffer + buffersize, (uint8_t*)chunkSize, strlen(chunkSize));
-
-// 				buffersize += strlen(chunkSize);
-// 			}
-
-// 			// CRLF for ending
-// 			{
-// 				const char* chunkSize = "\r\n";
-// 				memcpy(buffer + buffersize, chunkSize, strlen(chunkSize));
-// 				buffersize	+= strlen(chunkSize);
-// 			}
-
-// 		}
-
-
-
-
-// 		// Serial.println((char*)buffer);
-// // #if HAP_DEBUG_RESPONSES
-// 		HAPHelper::array_print("Response:", buffer, buffersize);
-// // #endif
-
-// 		encrypted = HAPEncryption::encrypt(buffer, buffersize, &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
-
-// 		free(buffer);
-// 	}
-
-//     if (encryptedLen == 0) {
-//     	LogE(F("ERROR: Encrpyting response failed!"), true);
-//     	hapClient->request.clear();
-// 		hapClient->clear();
-//     	return false;
-//     } else {
-// 		LogD(F("OK"), true);
-//     }
-
-
-
-// #if defined( ARDUINO_ARCH_ESP32 )
-// 	LogD("\n>>> Sending " + String(encryptedLen) + " bytes encrypted response to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
-// #elif defined( CORE_TEENSY )
-// 	LogD(F("\n>>> Sending ") + String(encryptedLen) + F(" bytes encrypted response to client ["), false);
-// 	Serial.print(hapClient->client.remoteIP());
-// 	LogD("] ...", false);
-// #endif
-
-// // #if HAP_DEBUG
-// // 	LogD(response, true);
-// // 	HAPHelper::array_print("encrypted response", (uint8_t*)encrypted, encryptedLen);
-// // #endif
-
-// #if defined (CORE_TEENSY)
-// 	int bytesSent = 0;
-
-// 	// for (int i = 0; i < encryptedLen; i++){
-// 	// 	bytesSent += hapClient->client.write(encrypted[i]);
-// 	// }
-
-
-// 	int remain = encryptedLen;
-//     while (remain)
-//     {
-//       int toCpy = remain > HAP_SEND_BUFFER_SIZE ? HAP_SEND_BUFFER_SIZE : remain;
-// 	  bytesSent += hapClient->client.write(encrypted + bytesSent, toCpy);
-//       remain -= toCpy;
-// 	//   Serial.println("remaining: " + String(remain));
-//     }
-
-// #else
-// 	int bytesSent = hapClient->client.write(encrypted, encryptedLen);
-// 	hapClient->client.flush();
-
-
-// #endif
-
-// 	// Serial.println("Sent");
-// 	free(encrypted);
-
-// 	if (bytesSent < encryptedLen) {
-// 		LogE( F("ERROR: Could not send all bytes"), true );
-// 		result = false;
-// 	} else {
-// 		LogD( F("OK"), true);
-// 	}
-
-// 	hapClient->request.clear();
-// 	hapClient->clear();
-
-// 	return result;
-// }
-
-// bool HAPServer::sendEncrypt(HAPClient* hapClient, String httpStatus, String plainText, bool chunked){
-// 	return sendEncrypt(hapClient, httpStatus, (const uint8_t*)plainText.c_str(), plainText.length(), chunked, "application/hap+json");
-// }
-
-
-
 
 /**
  * @brief Sends a TLV8 formatted response to the hapClient
@@ -2897,10 +2731,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	response.clear();
 
 
-	// Save to Pairings as admin (first pairing is admin pairing!)
-	// this is done in the addPairing routine
+	// Save to Pairings as admin
 	LogD(F("Saving pairing ..."), false);
-	_accessorySet->addPairing(ios_device_pairing_id, ios_device_ltpk);
+	_accessorySet->addPairing(ios_device_pairing_id, ios_device_ltpk, true);
 	LogV( F("OK"), true);
 
 
@@ -3524,7 +3357,7 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	if (_accessorySet->numberOfPairings() >= HAP_PAIRINGS_MAX) {
 		response.encode(HAP_TLV_ERROR, 1, HAP_ERROR_MAX_PEERS);
 	} else {
-		_accessorySet->addPairing(identifier, publicKey);
+		_accessorySet->addPairing(identifier, publicKey, isAdmin);
 	}
 
 #if HAP_DEBUG_TLV8
