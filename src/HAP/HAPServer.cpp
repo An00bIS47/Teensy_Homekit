@@ -1108,65 +1108,103 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 }
 
 void HAPServer::handleClientState(HAPClient* hapClient) {
-	switch(hapClient->state) {
-		case HAP_CLIENT_STATE_DISCONNECTED:
+
+	if (hapClient->state == HAP_CLIENT_STATE_DISCONNECTED){
+		handleClientDisconnect( hapClient );
+		return;
+	}
+
+	if (hapClient->client.connected()){
+#if defined( ARDUINO_ARCH_ESP32 )
+		LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] connected", true );
+#elif defined( CORE_TEENSY )
+		LogD( ">>> client [", false);
+		Serial.print(hapClient->client.remoteIP());
+		LogD("] ", false);
+#endif
+	} else {
+		handleClientDisconnect( hapClient );
+		return;
+	}
+
+	if (hapClient->state == HAP_CLIENT_STATE_CONNECTED) {
+		LogD(F("connected"), true);
+		_clients.push_back(std::move(hapClient));
+		if (hapClient->client.available()) {
+			hapClient->state = HAP_CLIENT_STATE_AVAILABLE;
+		}
+	}
+
+	if (hapClient->state == HAP_CLIENT_STATE_AVAILABLE) {
+		LogD(F("available: "), false);
+		LogD(hapClient->client.available(), true);
+		handleClientAvailable(hapClient);
+	} else if (hapClient->state == HAP_CLIENT_STATE_IDLE) {
+		LogD(F("idle"), true);
+	} else if (hapClient->state == HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED) {
+		LogD(F("all pairings removed"), true);
+		handleAllPairingsRemoved();
+	}
+
+// 	switch(hapClient->state) {
+// 		case HAP_CLIENT_STATE_DISCONNECTED:
+// // #if defined( ARDUINO_ARCH_ESP32 )
+// // 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] disconnected", true );
+// // #elif defined( CORE_TEENSY )
+// // 			LogD( ">>> client [", false);
+// // 			Serial.print(hapClient->client.remoteIP());
+// // 			LogD("] disconnected", true);
+// // #endif
+// 			handleClientDisconnect( hapClient );
+// 			break;
+// 		case HAP_CLIENT_STATE_CONNECTED:
 // #if defined( ARDUINO_ARCH_ESP32 )
-// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] disconnected", true );
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] connected", true );
 // #elif defined( CORE_TEENSY )
 // 			LogD( ">>> client [", false);
 // 			Serial.print(hapClient->client.remoteIP());
-// 			LogD("] disconnected", true);
+// 			LogD("] connected", true);
 // #endif
-			handleClientDisconnect( hapClient );
-			break;
-		case HAP_CLIENT_STATE_CONNECTED:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] connected", true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] connected", true);
-#endif
-			_clients.push_back(std::move(hapClient));
+// 			_clients.push_back(std::move(hapClient));
 
-			break;
-		case HAP_CLIENT_STATE_AVAILABLE:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] available: " + String(hapClient->client.available()), true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] available: " + String(hapClient->client.available()), true);
-#endif
-			handleClientAvailable(hapClient);
+// 			break;
+// 		case HAP_CLIENT_STATE_AVAILABLE:
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] available: " + String(hapClient->client.available()), true );
+// #elif defined( CORE_TEENSY )
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] available: " + String(hapClient->client.available()), true);
+// #endif
+// 			handleClientAvailable(hapClient);
 
-			break;
-		case HAP_CLIENT_STATE_SENT:
-			LogD( F("<<< client sent"), true );
-			break;
-		case HAP_CLIENT_STATE_RECEIVED:
-			LogD( F("<<< client received"), true );
-			break;
-		case HAP_CLIENT_STATE_IDLE:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] idle", true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] idle", true);
-#endif
-			break;
-		case HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] removed all pairings", true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] removed all pairings", true);
-#endif
-			handleAllPairingsRemoved();
-			break;
-	}
+// 			break;
+// 		case HAP_CLIENT_STATE_SENT:
+// 			LogD( F("<<< client sent"), true );
+// 			break;
+// 		case HAP_CLIENT_STATE_RECEIVED:
+// 			LogD( F("<<< client received"), true );
+// 			break;
+// 		case HAP_CLIENT_STATE_IDLE:
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] idle", true );
+// #elif defined( CORE_TEENSY )
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] idle", true);
+// #endif
+// 			break;
+// 		case HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED:
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] removed all pairings", true );
+// #elif defined( CORE_TEENSY )
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] removed all pairings", true);
+// #endif
+// 			handleAllPairingsRemoved();
+// 			break;
+// 	}
 }
 
 #if defined(ARDUINO_TEENSY41)
