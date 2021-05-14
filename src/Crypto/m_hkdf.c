@@ -53,8 +53,8 @@ int hkdf_key_get(enum hkdf_key_type type, uint8_t* inkey, int inkey_len, uint8_t
     struct hkdf_salt_info* salt_info = _salt_info_get(type);
     const mbedtls_md_info_t *sha512_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA512);
 
-    int err = mbedtls_hkdf(sha512_info,(uint8_t*)salt_info->salt,strlen(salt_info->salt),inkey,
-    inkey_len,(uint8_t*)salt_info->info,strlen(salt_info->info), outkey, HKDF_KEY_LEN);
+    int err = mbedtls_hkdf(sha512_info,(const uint8_t*)salt_info->salt,strlen(salt_info->salt),inkey,
+    inkey_len,(const uint8_t*)salt_info->info,strlen(salt_info->info), outkey, HKDF_KEY_LEN);
 
     return err;
 }

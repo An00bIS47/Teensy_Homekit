@@ -1005,7 +1005,7 @@ void HAPServer::handle() {
 		if (hapClient.client.connected()) {
 
 			// Available
-			unsigned long timeout = 150;
+			unsigned long timeout = 50;
 			unsigned long previousMillis = millis();
 			while ( millis() - previousMillis < timeout) {
 
@@ -1044,7 +1044,12 @@ void HAPServer::handle() {
 		hapClient.client = client;
 		hapClient.state = HAP_CLIENT_STATE_CONNECTED;
 
+		if (hapClient.client.available()) {
+			hapClient.state = HAP_CLIENT_STATE_AVAILABLE;
+			_clients.push_back(hapClient);
+		}
 		handleClientState(&hapClient);
+
 	}
 
 	// Handle Webserver
@@ -1210,7 +1215,7 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 #endif
 
 	// clear request
-	hapClient->request.clear();
+	
 	hapClient->clear();
 
 	if ( !hapClient->client.connected() ) {
@@ -1404,7 +1409,7 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 		LogE(" - path: " + String(hapClient->request.path), true);
 		LogE(" - Content-Type: " + String(hapClient->request.contentType), true);
 
-		hapClient->request.clear();
+		
 		hapClient->client.stop();
 		return false;
 	}
@@ -1466,7 +1471,7 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 	sendResponse(hapClient, &response);
 	response.clear();
 
-	hapClient->request.clear();
+	
 	hapClient->clear();
 	hapClient->client.stop();
 
@@ -1877,7 +1882,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 
 	hapClient->client.write( HTTP_CRLF );
 
-	hapClient->request.clear();
+	
 	hapClient->clear();
 
 	if (c != NULL){
@@ -2044,7 +2049,7 @@ bool HAPServer::send204(HAPClient* hapClient){
 	encrypted = HAPEncryption::encrypt((uint8_t*)HTTP_204, strlen(HTTP_204), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
     if (encryptedLen == 0) {
     	// LogE(F("ERROR: Encrpyting response failed!"), true);
-    	hapClient->request.clear();
+    	
 		hapClient->clear();
     	return false;
     } else {
@@ -2128,7 +2133,7 @@ void HAPServer::sendResponse(HAPClient* hapClient, TLV8* response){
 	LogV("\nSent " + String(bytesSent) + " bytes", true);
 
 	response->clear();
-	hapClient->request.clear();
+	
 	hapClient->clear();
 }
 
@@ -2273,7 +2278,6 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 	sendResponse(hapClient, &response);
 
-	hapClient->request.clear();
 	response.clear();
 	hapClient->clear();
 
@@ -2422,7 +2426,6 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	sendResponse(hapClient, &response);
 	LogV(F("OK"), true);
 
-	hapClient->request.clear();
 	response.clear();
 
 	hapClient->clear();
@@ -2511,6 +2514,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	size_t decryptedLen = encryptedTLVLen - CHACHA20_POLY1305_AUTH_TAG_LENGTH;
 	uint8_t subtlv[decryptedLen];
+
 #if HAP_DEBUG_HOMEKIT
 	HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
 	HAPHelper::array_print("encryptedTLV", encryptedTLV, encryptedTLVLen);
@@ -2519,6 +2523,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
     if (err_code != 0) {
         LogE(F("ERROR: Decrypting CHACHA20_POLY1305_TYPE_PS05 failed! Reason: ") + String(err_code), true);
+
 #if HAP_DEBUG_HOMEKIT
 		HAPHelper::array_print("subtlv", subtlv, decryptedLen);
 #endif
@@ -2760,8 +2765,6 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	_eventManager.queueEvent(EventManager::kEventPairingComplete, HAPEvent());
 
 
-
-	hapClient->request.clear();
 	hapClient->clear();
 
 	//stopEvents(false);
@@ -2784,7 +2787,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LogV(F("] -> /pair-verify Step 1/2 ..."), false);
 #endif
 
-	_eventManager.queueEvent(EventManager::kEventVerifyStep1, HAPEvent());
+	// _eventManager.queueEvent(EventManager::kEventVerifyStep1, HAPEvent());
 
 	int err_code = 0;
 
@@ -2792,7 +2795,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 		LogW(F("\nWARNING: Attempt to verify unpaired accessory!\n"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 
-		hapClient->request.clear();
 		hapClient->clear();
 		return false;
 	}
@@ -2816,7 +2818,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 		LogE(F("ERROR: X25519_scalarmult_base failed! Reason: ") + String(err_code), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 
-		hapClient->request.clear();
 		hapClient->clear();
 		return false;
 	}
@@ -2829,7 +2830,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 		LogE(F("ERROR: ios_device_curve_key_len is 0!"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_UNKNOWN);
 
-		hapClient->request.clear();
 		hapClient->clear();
 		return false;
 	}
@@ -2843,7 +2843,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 		LogE( F("ERROR: PAIR-VERIFY M1 - HAP_TLV_ENCRYPTED_DATA failed "), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
 
-		hapClient->request.clear();
 		hapClient->clear();
 		return false;
 	}
@@ -2863,7 +2862,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	if (X25519_scalarmult(sharedSecret, _accessorySet->LTSK(), ios_device_curve_key) < 0) {
 		LogE( F("ERROR: X25519_scalarmult failed"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M2, HAP_ERROR_AUTHENTICATON);
-		hapClient->request.clear();
+
 		hapClient->clear();
 		return false;
 	}
@@ -2947,9 +2946,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LogD( F("OK"), true);
 
 	LogD(F("Saving context ..."), false);
-
 	memcpy(hapClient->verifyContext.secret, sharedSecret, HKDF_KEY_LEN);
-	// memcpy(hapClient->verifyContext.sessionKey, sessionKey, CURVE25519_SECRET_LENGTH);
 	memcpy(hapClient->verifyContext.accessoryLTPK, acc_curve_public_key, ED25519_PUBLIC_KEY_LENGTH);
 	memcpy(hapClient->verifyContext.deviceLTPK, ios_device_curve_key, ED25519_PUBLIC_KEY_LENGTH);
 	LogD( F("OK"), true);
@@ -2966,6 +2963,12 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	//HAPHelper::arrayPrint(encryptedData, tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH);
 #endif
 
+
+#if HAP_DEBUG_HOMEKIT
+	LogV(F(""), true);
+	HAPHelper::array_print("hapClient->verifyContext.secret step1", hapClient->verifyContext.secret, HKDF_KEY_LEN);
+#endif
+
 	sendResponse(hapClient, &response);
 	LogD( F("OK"), true);
 	response.clear();
@@ -2973,7 +2976,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	subTLV->clear();
 	delete subTLV;
 
-	hapClient->request.clear();
 	hapClient->clear();
 
 	LogI(F("OK"), true);
@@ -2991,10 +2993,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LogV(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
 	LogV(F("] -> /pair-verify Step 2/2 ..."), false);
-
 #endif
 
-	_eventManager.queueEvent(EventManager::kEventVerifyStep2, HAPEvent());
+	// _eventManager.queueEvent(EventManager::kEventVerifyStep2, HAPEvent());
 
 	int err_code = 0;
 
@@ -3013,7 +3014,8 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	HAPHelper::array_print("hapClient->verifyContext.secret", hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH);
+	LogV(F(""), true);
+	HAPHelper::array_print("hapClient->verifyContext.secret step2", hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH);
 #endif
 
 	LogD("\nGenerating decrpytion key ...", false);
@@ -3126,7 +3128,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 
 	int ios_device_info_len = 0;
-    uint8_t* ios_device_info = concat3(hapClient->verifyContext.deviceLTPK, HKDF_KEY_LEN,
+    uint8_t* ios_device_info = concat3(hapClient->verifyContext.deviceLTPK, ED25519_PUBLIC_KEY_LENGTH,
             ios_device_pairing_id, ios_device_pairing_id_len,
             hapClient->verifyContext.accessoryLTPK, ED25519_PUBLIC_KEY_LENGTH, &ios_device_info_len);
 
@@ -3181,7 +3183,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 	subTlv.clear();
 	response.clear();
-	hapClient->request.clear();
+	
 	hapClient->clear();
 
 	// following messages from this client will be encrypted
@@ -3268,7 +3270,7 @@ void HAPServer::handleAccessories(HAPClient* hapClient) {
 	LogV(F("OK"), true);
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
 
-	hapClient->request.clear();
+	
 	hapClient->clear();
 }
 
@@ -3328,7 +3330,7 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 	send(hapClient, HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
-	hapClient->request.clear();
+	
 	hapClient->clear();
 
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
@@ -3380,7 +3382,7 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	send(hapClient, HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
-	hapClient->request.clear();
+	
 	hapClient->clear();
 
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
@@ -3448,7 +3450,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	send(hapClient,  HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
-	hapClient->request.clear();
+	
 
 	if (removeItsOwnPairings) {
 		hapClient->client.stop();
