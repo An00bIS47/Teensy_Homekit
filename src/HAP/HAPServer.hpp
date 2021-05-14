@@ -230,7 +230,7 @@ protected:
 	void updateConfig();
 
 	HAPAccessorySet* _accessorySet;
-	std::vector<HAPClient> _clients;
+	std::vector<HAPClient*> _clients;
 
 	HAPTime _time;
 

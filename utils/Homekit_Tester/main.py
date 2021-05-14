@@ -856,11 +856,11 @@ class HomekitTester(object):
             with TimingManager(testname, loggingArray) as tm:
                 self.controller.remove_pairing(self.args.alias, self.args.controllerPairingId)
 
-                self.report.addStep(testname, True, loggingArray)
+            self.report.addStep(testname, True, loggingArray)
 
-                self.controller.save_data(self.args.file)
-                if self.args.quiet == False:
-                    cprint('Pairing for "{a}" was removed.'.format(a=self.args.alias), "green")
+            self.controller.save_data(self.args.file)
+            if self.args.quiet == False:
+                cprint('Pairing for "{a}" was removed.'.format(a=self.args.alias), "green")
 
 
         except Exception as e:
