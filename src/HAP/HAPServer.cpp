@@ -1044,10 +1044,10 @@ void HAPServer::handle() {
 		hapClient.client = client;
 		hapClient.state = HAP_CLIENT_STATE_CONNECTED;
 
-		if (hapClient.client.available()) {
-			hapClient.state = HAP_CLIENT_STATE_AVAILABLE;
-			_clients.push_back(hapClient);
-		}
+		// if (hapClient.client.available()) {
+		// 	hapClient.state = HAP_CLIENT_STATE_AVAILABLE;
+		// 	_clients.push_back(hapClient);
+		// }
 		handleClientState(&hapClient);
 
 	}
@@ -1113,65 +1113,107 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 }
 
 void HAPServer::handleClientState(HAPClient* hapClient) {
-	switch(hapClient->state) {
-		case HAP_CLIENT_STATE_DISCONNECTED:
+
+	if (hapClient->state == HAP_CLIENT_STATE_DISCONNECTED) {
+		handleClientDisconnect( hapClient );
+		return;
+	}
+
+#if defined( ARDUINO_ARCH_ESP32 )
+	LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] ", false );
+#elif defined( CORE_TEENSY )
+	LogD( F(">>> client ["), false);
+	Serial.print(hapClient->client.remoteIP());
+	LogD(F("] "), false);
+#endif
+
+	if (hapClient->state == HAP_CLIENT_STATE_CONNECTED) {
+		LogD(F("connected"), true);
+		if (hapClient->client.available()) {
+			hapClient->state = HAP_CLIENT_STATE_AVAILABLE;
+#if defined( ARDUINO_ARCH_ESP32 )
+			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] ", false );
+#elif defined( CORE_TEENSY )
+			LogD( F(">>> client ["), false);
+			Serial.print(hapClient->client.remoteIP());
+			LogD(F("] "), false);
+#endif
+		}
+	}
+
+	if (hapClient->state == HAP_CLIENT_STATE_AVAILABLE) {
+		LogD(F("available [") + String(hapClient->client.available()) + F("]"), true);
+		handleClientAvailable(hapClient);
+	} else if (hapClient->state == HAP_CLIENT_STATE_IDLE) {
+		LogD(F("idle"), true);
+	} else if (hapClient->state == HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED) {
+		LogD(F("removed all pairings"), true);
+		handleAllPairingsRemoved();
+	}
+
+// 	switch(hapClient->state) {
+// 		case HAP_CLIENT_STATE_DISCONNECTED:
+// // #if defined( ARDUINO_ARCH_ESP32 )
+// // 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] disconnected", true );
+// // #elif defined( CORE_TEENSY )
+// // 			LogD( ">>> client [", false);
+// // 			Serial.print(hapClient->client.remoteIP());
+// // 			LogD("] disconnected", true);
+// // #endif
+// 			handleClientDisconnect( hapClient );
+// 			break;
+// 		case HAP_CLIENT_STATE_CONNECTED:
 // #if defined( ARDUINO_ARCH_ESP32 )
-// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] disconnected", true );
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] connected", true );
 // #elif defined( CORE_TEENSY )
 // 			LogD( ">>> client [", false);
 // 			Serial.print(hapClient->client.remoteIP());
-// 			LogD("] disconnected", true);
+// 			LogD("] connected", true);
 // #endif
-			handleClientDisconnect( hapClient );
-			break;
-		case HAP_CLIENT_STATE_CONNECTED:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] connected", true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] connected", true);
-#endif
-			_clients.push_back(*hapClient);
+// 			_clients.push_back(*hapClient);
 
-			break;
-		case HAP_CLIENT_STATE_AVAILABLE:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] available: " + String(hapClient->client.available()), true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] available: " + String(hapClient->client.available()), true);
-#endif
-			handleClientAvailable(hapClient);
+// 			if (hapClient->client.available()){
+// 				handleClientAvailable(hapClient);
+// 			}
 
-			break;
-		case HAP_CLIENT_STATE_SENT:
-			LogD( F("<<< client sent"), true );
-			break;
-		case HAP_CLIENT_STATE_RECEIVED:
-			LogD( F("<<< client received"), true );
-			break;
-		case HAP_CLIENT_STATE_IDLE:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] idle", true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] idle", true);
-#endif
-			break;
-		case HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED:
-#if defined( ARDUINO_ARCH_ESP32 )
-			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] removed all pairings", true );
-#elif defined( CORE_TEENSY )
-			LogD( ">>> client [", false);
-			Serial.print(hapClient->client.remoteIP());
-			LogD("] removed all pairings", true);
-#endif
-			handleAllPairingsRemoved();
-			break;
-	}
+// 			break;
+// 		case HAP_CLIENT_STATE_AVAILABLE:
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] available: " + String(hapClient->client.available()), true );
+// #elif defined( CORE_TEENSY )
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] available: " + String(hapClient->client.available()), true);
+// #endif
+// 			handleClientAvailable(hapClient);
+
+// 			break;
+// 		case HAP_CLIENT_STATE_SENT:
+// 			LogD( F("<<< client sent"), true );
+// 			break;
+// 		case HAP_CLIENT_STATE_RECEIVED:
+// 			LogD( F("<<< client received"), true );
+// 			break;
+// 		case HAP_CLIENT_STATE_IDLE:
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] idle", true );
+// #elif defined( CORE_TEENSY )
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] idle", true);
+// #endif
+// 			break;
+// 		case HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED:
+// #if defined( ARDUINO_ARCH_ESP32 )
+// 			LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] removed all pairings", true );
+// #elif defined( CORE_TEENSY )
+// 			LogD( ">>> client [", false);
+// 			Serial.print(hapClient->client.remoteIP());
+// 			LogD("] removed all pairings", true);
+// #endif
+// 			handleAllPairingsRemoved();
+// 			break;
+// 	}
 }
 
 #if defined(ARDUINO_TEENSY41)
@@ -1215,7 +1257,7 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 #endif
 
 	// clear request
-	
+
 	hapClient->clear();
 
 	if ( !hapClient->client.connected() ) {
@@ -1409,7 +1451,7 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 		LogE(" - path: " + String(hapClient->request.path), true);
 		LogE(" - Content-Type: " + String(hapClient->request.contentType), true);
 
-		
+
 		hapClient->client.stop();
 		return false;
 	}
@@ -1471,7 +1513,7 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 	sendResponse(hapClient, &response);
 	response.clear();
 
-	
+
 	hapClient->clear();
 	hapClient->client.stop();
 
@@ -1829,8 +1871,8 @@ bool HAPServer::encode(HAPClient* hapClient, ReadBufferingClient* bufferedClient
 			}
 
 		} else {
-			
-			
+
+
 #if HAP_DEBUG_TLV8
 			uint8_t read = bufferedClient->read();
 			LogW( "WARNING: Invalid TLV8 type: ", false );
@@ -1882,7 +1924,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 
 	hapClient->client.write( HTTP_CRLF );
 
-	
+
 	hapClient->clear();
 
 	if (c != NULL){
@@ -2049,7 +2091,7 @@ bool HAPServer::send204(HAPClient* hapClient){
 	encrypted = HAPEncryption::encrypt((uint8_t*)HTTP_204, strlen(HTTP_204), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
     if (encryptedLen == 0) {
     	// LogE(F("ERROR: Encrpyting response failed!"), true);
-    	
+
 		hapClient->clear();
     	return false;
     } else {
@@ -2133,7 +2175,7 @@ void HAPServer::sendResponse(HAPClient* hapClient, TLV8* response){
 	LogV("\nSent " + String(bytesSent) + " bytes", true);
 
 	response->clear();
-	
+
 	hapClient->clear();
 }
 
@@ -2966,6 +3008,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 	LogV(F(""), true);
+	Serial.printf("hapClient step1: %p", hapClient);
 	HAPHelper::array_print("hapClient->verifyContext.secret step1", hapClient->verifyContext.secret, HKDF_KEY_LEN);
 #endif
 
@@ -2995,6 +3038,8 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LogV(F("] -> /pair-verify Step 2/2 ..."), false);
 #endif
 
+
+
 	// _eventManager.queueEvent(EventManager::kEventVerifyStep2, HAPEvent());
 
 	int err_code = 0;
@@ -3015,6 +3060,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 	LogV(F(""), true);
+	Serial.printf("hapClient step1: %p", hapClient);
 	HAPHelper::array_print("hapClient->verifyContext.secret step2", hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH);
 #endif
 
@@ -3183,7 +3229,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 	subTlv.clear();
 	response.clear();
-	
+
 	hapClient->clear();
 
 	// following messages from this client will be encrypted
@@ -3270,7 +3316,7 @@ void HAPServer::handleAccessories(HAPClient* hapClient) {
 	LogV(F("OK"), true);
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
 
-	
+
 	hapClient->clear();
 }
 
@@ -3330,7 +3376,7 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 	send(hapClient, HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
-	
+
 	hapClient->clear();
 
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
@@ -3382,7 +3428,7 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 	send(hapClient, HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
-	
+
 	hapClient->clear();
 
 	hapClient->state = HAP_CLIENT_STATE_IDLE;
@@ -3450,7 +3496,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 	send(hapClient,  HTTP_200, data, length, HAP_ENCRYPTION_MODE_ENCRYPT, "application/pairing+tlv8");
 
 	response.clear();
-	
+
 
 	if (removeItsOwnPairings) {
 		hapClient->client.stop();
