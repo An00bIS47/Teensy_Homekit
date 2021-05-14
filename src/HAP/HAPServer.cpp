@@ -1002,28 +1002,28 @@ void HAPServer::handle() {
 	for (auto& hapClient : _clients) {
 
 		// Connected
-		if (hapClient.client.connected()) {
+		if (hapClient->client.connected()) {
 
 			// Available
 			unsigned long timeout = 150;
 			unsigned long previousMillis = millis();
 			while ( millis() - previousMillis < timeout) {
 
-				if (hapClient.client.available()) {
-					hapClient.state = HAP_CLIENT_STATE_AVAILABLE;
-					handleClientState(&hapClient);
+				if (hapClient->client.available()) {
+					hapClient->state = HAP_CLIENT_STATE_AVAILABLE;
+					handleClientState(hapClient);
 					break;
 				}
 
 				// Idle
-				hapClient.state = HAP_CLIENT_STATE_IDLE;
+				hapClient->state = HAP_CLIENT_STATE_IDLE;
 			}
 
 
 		} else {
 			// Disconnected
-			hapClient.state = HAP_CLIENT_STATE_DISCONNECTED;
-			handleClientState(&hapClient);
+			hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
+			handleClientState(hapClient);
 		}
 
 		// LogV( "HAPClient state " + hapClient.getClientState(), true );
@@ -1038,13 +1038,13 @@ void HAPServer::handle() {
 #endif
 	if (client) {
 
-		HAPClient hapClient;
+		HAPClient* hapClient = new HAPClient();
 
 		// New client connected
-		hapClient.client = client;
-		hapClient.state = HAP_CLIENT_STATE_CONNECTED;
+		hapClient->client = client;
+		hapClient->state = HAP_CLIENT_STATE_CONNECTED;
 
-		handleClientState(&hapClient);
+		handleClientState(hapClient);
 	}
 
 	// Handle Webserver
@@ -1088,17 +1088,17 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 
 	if (hapClient == nullptr) return;
 
-	std::vector<HAPClient>::iterator position = std::find(_clients.begin(), _clients.end(), *hapClient);
+	std::vector<HAPClient*>::iterator position = std::find(_clients.begin(), _clients.end(), hapClient);
 	if (position != _clients.end()) { // == myVector.end() means the element was not found
 
-		if (position->client.connected() ) {
+		if ((*position)->client.connected() ) {
 
 			LogW("Client disconnecting", true);
-			position->client.stop();
+			(*position)->client.stop();
 		}
 
-		position->request.clear();
-		position->clear();
+		(*position)->request.clear();
+		(*position)->clear();
 
 		_clients.erase(position);
 
@@ -1127,7 +1127,7 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 			Serial.print(hapClient->client.remoteIP());
 			LogD("] connected", true);
 #endif
-			_clients.push_back(*hapClient);
+			_clients.push_back(std::move(hapClient));
 
 			break;
 		case HAP_CLIENT_STATE_AVAILABLE:
@@ -1176,17 +1176,18 @@ void HAPServer::handleAllPairingsRemoved(){
 	LogV( F("<<< Handle all pairings removed ..."), false);
 	for (int i=0; i < _clients.size(); i++){
 
-
+		if (_clients[i]->client.connected()){
 #if defined( ARDUINO_ARCH_ESP32 )
 			LogD("\nClosing connection to client [" + _clients[i].client.remoteIP().toString() + "]", true);
 #elif defined( CORE_TEENSY )
 			LogD("\nClosing connection to client [",false);
-			Serial.print(_clients[i].client.remoteIP());
+			Serial.print(_clients[i]->client.remoteIP());
 			LogD("]", true);
-
 #endif
-		_clients[i].client.stop();
-		_clients[i].state = HAP_CLIENT_STATE_DISCONNECTED;
+			_clients[i]->client.stop();
+		}
+
+		_clients[i]->state = HAP_CLIENT_STATE_DISCONNECTED;
 	}
 	LogV(F("OK"), true);
 }
@@ -2954,6 +2955,14 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	memcpy(hapClient->verifyContext.deviceLTPK, ios_device_curve_key, ED25519_PUBLIC_KEY_LENGTH);
 	LogD( F("OK"), true);
 
+
+#if HAP_DEBUG_HOMEKIT
+	LogD("", true);
+	Serial.printf("hapClient step1: %p\n", hapClient);
+	HAPHelper::array_print("hapClient->verifyContext.secret step 1", hapClient->verifyContext.secret, HKDF_KEY_LEN);
+#endif
+
+
 	LogD( F("Sending response ..."), false);
 	TLV8 response;
 	response.encode(HAP_TLV_STATE, 1, HAP_VERIFY_STATE_M2);
@@ -3013,12 +3022,14 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	HAPHelper::array_print("hapClient->verifyContext.secret", hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH);
+	LogD("", true);
+	Serial.printf("hapClient step2: %p\n", hapClient);
+	HAPHelper::array_print("hapClient->verifyContext.secret step 2", hapClient->verifyContext.secret, HKDF_KEY_LEN);
 #endif
 
 	LogD("\nGenerating decrpytion key ...", false);
 	uint8_t subtlv_key[HKDF_KEY_LEN] = {0,};
-	err_code = hkdf_key_get(HKDF_KEY_TYPE_PAIR_VERIFY_ENCRYPT, hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH, subtlv_key);
+	err_code = hkdf_key_get(HKDF_KEY_TYPE_PAIR_VERIFY_ENCRYPT, hapClient->verifyContext.secret, HKDF_KEY_LEN, subtlv_key);
 	if (err_code != 0) {
 		LogE( F("ERROR: PAIR-VERIFY M3 - hkdf_key_get failed"), true);
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
@@ -3126,7 +3137,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 
 	int ios_device_info_len = 0;
-    uint8_t* ios_device_info = concat3(hapClient->verifyContext.deviceLTPK, HKDF_KEY_LEN,
+    uint8_t* ios_device_info = concat3(hapClient->verifyContext.deviceLTPK, ED25519_PUBLIC_KEY_LENGTH,
             ios_device_pairing_id, ios_device_pairing_id_len,
             hapClient->verifyContext.accessoryLTPK, ED25519_PUBLIC_KEY_LENGTH, &ios_device_info_len);
 
@@ -3901,7 +3912,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 				int iid = evParams[i].iid;
 
 
-				if ( hapClient.isSubscribed(aid, iid) ) {
+				if ( hapClient->isSubscribed(aid, iid) ) {
 					HAPCharacteristicBase* character = _accessorySet->getCharacteristic(aid, iid);
 
 					if (character) {
@@ -3933,7 +3944,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 				serializeJson(root, Serial);
 				Serial.println();
 #endif
-				sendEvent(&hapClient, root);
+				sendEvent(hapClient, root);
 			}
 		}
 
