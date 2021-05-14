@@ -10,7 +10,7 @@
 #define HAPHELPER_HPP_
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
+// #include <ArduinoJson.h>
 // #include "HAPGlobals.hpp"
 
 #if defined( CORE_TEENSY )
@@ -37,18 +37,18 @@ public:
 
 	// static String getValue(String data, char separator, int index) __attribute__ ((deprecated));
 
-	static void binToHex(const unsigned char * in, size_t insz, char * out, size_t outsz);
 
+	static void binToHex(const unsigned char * in, size_t insz, char * out, size_t outsz);
 	static int hexToBin(unsigned char *data, const char* hexstring, size_t len);
 
 	// DEPRECATED functions causing memory leaks
-	static uint8_t* hexToBin(const char* string) __attribute__ ((deprecated));
-	static char* toHex(const unsigned char * in, size_t insz) __attribute__ ((deprecated));
+	// static uint8_t* hexToBin(const char* string) __attribute__ ((deprecated));
+	// static char* toHex(const unsigned char * in, size_t insz) __attribute__ ((deprecated));
 
 	static void prependZeros(char *dest, const char *src, uint8_t width); // __attribute__ ((deprecated));
 
 	static uint8_t numDigits(const size_t n);
-	static void arrayPrint(uint8_t* a, int len);
+	// static void arrayPrint(uint8_t* a, int len);
 
 	static String wrap(String str);
 	static String wrap(const char *str);
@@ -58,8 +58,8 @@ public:
 
 	// static String printUnescaped(String str);
 
-	static bool containsNestedKey(const JsonObject obj, const char* key);
-	static void mergeJson(JsonDocument& dst, const JsonObject& src);
+	// static bool containsNestedKey(const JsonObject obj, const char* key);
+	// static void mergeJson(JsonDocument& dst, const JsonObject& src);
 
 	static void printHex(const char* suffix, const uint8_t *data, size_t length, bool newline = true);
 

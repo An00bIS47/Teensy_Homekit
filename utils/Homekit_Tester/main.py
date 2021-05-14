@@ -1383,7 +1383,7 @@ if __name__ == '__main__':
 
         tester.runTest("pair", tester.pair)
 
-        # tester.runTest("listPairings", tester.listPairings)
+        tester.runTest("listPairings", tester.listPairings)
         # tester.runTest("addRemotePairing", tester.addRemotePairing)
         # tester.runTest("removeRemotePairing", tester.removeRemotePairing)
 

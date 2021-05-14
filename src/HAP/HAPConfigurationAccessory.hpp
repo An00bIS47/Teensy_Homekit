@@ -138,7 +138,7 @@ public:
 
     uint8_t* getKeyForPairingWithId(const uint8_t* id){
         int index = getIndex(id);
-        if (index >= 0) {
+        if (index != -1) {
             // memcpy(outkey, pairings[index]->key, HAP_PAIRINGS_LTPK_LENGTH);
 			return pairings[index]->key;
         }
@@ -147,7 +147,7 @@ public:
 
 	bool removePairing(const uint8_t* id){
 		int index = getIndex(id);
-		if (index >= 0) {
+		if (index != -1) {
 			pairings.erase(pairings.begin() + index);
 			return true;
 		} else {
@@ -178,7 +178,7 @@ public:
             if (memcmp(pairings[index]->key, key, HAP_PAIRINGS_LTPK_LENGTH) == 0) {
                 result = true;
             }
-            pairings[index]->isAdmin = (pairings.size() == 0);
+            pairings[index]->isAdmin = isAdminPairing;
         }
 
         return result;
@@ -188,7 +188,7 @@ public:
 
         int index = getIndex(id);
 
-        if (index >= 0) {
+        if (index != -1) {
             return pairings[index]->isAdmin;
         }
         return false;

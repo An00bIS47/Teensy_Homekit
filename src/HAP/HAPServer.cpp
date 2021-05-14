@@ -3012,7 +3012,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 		return false;
 	}
 
-
+#if HAP_DEBUG_HOMEKIT
+	HAPHelper::array_print("hapClient->verifyContext.secret", hapClient->verifyContext.secret, CURVE25519_SECRET_LENGTH);
+#endif
 
 	LogD("\nGenerating decrpytion key ...", false);
 	uint8_t subtlv_key[HKDF_KEY_LEN] = {0,};
@@ -3115,6 +3117,11 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 #if HAP_DEBUG_HOMEKIT
 	LogD(F("Found Signature: "), true);
 	HAPHelper::array_print("ios_device_signature", ios_device_signature, ios_device_signature_len);
+#endif
+
+#if HAP_DEBUG_HOMEKIT
+	LogD(F("pairingIdIsAdmin: "), false);
+	LogD(_accessorySet->pairingIdIsAdmin(ios_device_pairing_id), true);
 #endif
 
 
