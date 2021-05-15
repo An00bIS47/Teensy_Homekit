@@ -1029,29 +1029,24 @@ void HAPServer::handle() {
 		// LogV( "HAPClient state " + hapClient.getClientState(), true );
 	}
 
-	// unsigned long timeout = 10;
-	// unsigned long previousMillis = millis();
-	// while ( millis() - previousMillis < timeout) {
 
 	// Handle new clients
 #if defined(ARDUINO_ARCH_ESP32)
-		WiFiClient client = _server.available();
+	WiFiClient client = _server.available();
 #elif defined( CORE_TEENSY)
 
-		EthernetClient client = _server.available();
+	EthernetClient client = _server.available();
 #endif
-		if (client) {
+	if (client) {
 
-			HAPClient* hapClient = new HAPClient();
+		HAPClient* hapClient = new HAPClient();
 
-			// New client connected
-			hapClient->client = client;
-			hapClient->state = HAP_CLIENT_STATE_CONNECTED;
+		// New client connected
+		hapClient->client = client;
+		hapClient->state = HAP_CLIENT_STATE_CONNECTED;
 
-			handleClientState(hapClient);
-			// break;
-		}
-	// }
+		handleClientState(hapClient);
+	}
 
 	// Handle Webserver
 #if HAP_ENABLE_WEBSERVER
@@ -1094,22 +1089,33 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 
 	if (hapClient == nullptr) return;
 
-	std::vector<HAPClient*>::iterator position = std::find(_clients.begin(), _clients.end(), hapClient);
-	if (position != _clients.end()) { // == myVector.end() means the element was not found
 
-		if ((*position)->client.connected() ) {
-
-			LogW("Client disconnecting", true);
-			(*position)->client.stop();
+	for ( int i = 0; i < _clients.size(); i++ ) {
+        if (_clients[i] == hapClient ) {
+			delete _clients[i];
+			_clients.erase(_clients.begin() + i);
+			break;
 		}
+		
+    }    
+    
 
-		(*position)->request.clear();
-		(*position)->clear();
+	// std::vector<HAPClient*>::iterator position = std::find(_clients.begin(), _clients.end(), hapClient);
+	// if (position != _clients.end()) { // == myVector.end() means the element was not found
 
-		_clients.erase(position);
+	// 	if ((*position)->client.connected() ) {
 
-		return;
-	}
+	// 		LogW("Client disconnecting", true);
+	// 		(*position)->client.stop();
+	// 	}
+
+	// 	(*position)->request.clear();
+	// 	(*position)->clear();
+
+	// 	_clients.erase(position);
+
+	// 	return;
+	// }
 	//LogE( F( "FAILED"), true );
 }
 
@@ -1132,6 +1138,11 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 		LogD(F("connected"), true);
 		_clients.push_back(std::move(hapClient));
 
+		hapClient->state = HAP_CLIENT_STATE_IDLE;
+	}
+
+	if (hapClient->state == HAP_CLIENT_STATE_IDLE) {
+		LogD(F("idle"), true);
 		if (hapClient->client.available()) {
 			hapClient->state = HAP_CLIENT_STATE_AVAILABLE;
 		}
@@ -1141,8 +1152,6 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 		LogD(F("available: "), false);
 		LogD(hapClient->client.available(), true);
 		handleClientAvailable(hapClient);
-	} else if (hapClient->state == HAP_CLIENT_STATE_IDLE) {
-		LogD(F("idle"), true);
 	} else if (hapClient->state == HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED) {
 		LogD(F("all pairings removed"), true);
 		handleAllPairingsRemoved();

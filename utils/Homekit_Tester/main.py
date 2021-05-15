@@ -1380,7 +1380,7 @@ if __name__ == '__main__':
     tester = HomekitTester(args)
 
     for k in range(0, args.iterations):
-
+        print(k)
         tester.runTest("pair", tester.pair)
 
         tester.runTest("listPairings", tester.listPairings)
@@ -1403,14 +1403,14 @@ if __name__ == '__main__':
 
         tester.runTest("pair", tester.pair)
         for i in range(0, args.iterations):
-            print(i)
+            print(k, i)
             #time.sleep(0.1)
             tester.runTest("getAccessories", tester.getAccessories)
         tester.runTest("removePairing", tester.removePairing)
 
 
         for i in range(0, args.iterations):
-            print(i)
+            print(k, i)
             time.sleep(0.3)
             tester.runTest("pair", tester.pair)
             tester.runTest("getAccessories", tester.getAccessories)
