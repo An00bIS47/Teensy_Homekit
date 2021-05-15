@@ -624,30 +624,30 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
     ver->algorithm 	= session->algorithm;
     ver->ng       	= session->ng;
 
-	if (copy_username){
-		int ulen = strlen(username) + 1;
-		ver->username = (char *) malloc( sizeof(char) * ulen ); // FIXME
-		if (!ver->username) {
-			delete ver;
-			ver = 0;
+// 	if (copy_username){
+// 		int ulen = strlen(username) + 1;
+// 		ver->username = (char *) malloc( sizeof(char) * ulen ); // FIXME
+// 		if (!ver->username) {
+// 			delete ver;
+// 			ver = 0;
 
 
-#if ARDUINO_ARCH_ESP32
-      		ESP_LOGE("SRP", "ver->username is NULL\n");
-#else
-      		Serial.printf("%s - ver->username is NULL\n", "SRP");
-#endif
+// #if ARDUINO_ARCH_ESP32
+//       		ESP_LOGE("SRP", "ver->username is NULL\n");
+// #else
+//       		Serial.printf("%s - ver->username is NULL\n", "SRP");
+// #endif
 
-			mbedtls_mpi_free(&s);
-			mbedtls_mpi_free(&v);
-			mbedtls_mpi_free(&A);
-			mbedtls_mpi_free(&S);
-			mbedtls_mpi_free(&tmp1);
-			mbedtls_mpi_free(&tmp2);
-			return nullptr;
-		}
-		memcpy( (char*)ver->username, username, ulen );
-	}
+// 			mbedtls_mpi_free(&s);
+// 			mbedtls_mpi_free(&v);
+// 			mbedtls_mpi_free(&A);
+// 			mbedtls_mpi_free(&S);
+// 			mbedtls_mpi_free(&tmp1);
+// 			mbedtls_mpi_free(&tmp2);
+// 			return nullptr;
+// 		}
+// 		memcpy( (char*)ver->username, username, ulen );
+// 	}
 
     /* SRP-6a safety check */
     mbedtls_mpi_mod_mpi( &tmp1, &A, &(session->ng->N) );
@@ -722,10 +722,10 @@ int HAPSRP::getVerifierIsAuthenticated( HAPSRP::SRPVerifier* ver )
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
-{
-    return ver->username;
-}
+// const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
+// {
+//     return ver->username;
+// }
 
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM

@@ -94,6 +94,7 @@ protected:
     static uint16_t _koWriteTime;
 #endif
 
+    static time_t getTimeFromCompiling();
 
     // zenith:      Sun's zenith for sunrise/sunset
     // offical      = 90 degrees 50'

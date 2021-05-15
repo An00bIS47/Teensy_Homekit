@@ -1089,34 +1089,13 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 
 	if (hapClient == nullptr) return;
 
-
 	for ( int i = 0; i < _clients.size(); i++ ) {
         if (_clients[i] == hapClient ) {
 			delete _clients[i];
 			_clients.erase(_clients.begin() + i);
 			break;
 		}
-		
-    }    
-    
-
-	// std::vector<HAPClient*>::iterator position = std::find(_clients.begin(), _clients.end(), hapClient);
-	// if (position != _clients.end()) { // == myVector.end() means the element was not found
-
-	// 	if ((*position)->client.connected() ) {
-
-	// 		LogW("Client disconnecting", true);
-	// 		(*position)->client.stop();
-	// 	}
-
-	// 	(*position)->request.clear();
-	// 	(*position)->clear();
-
-	// 	_clients.erase(position);
-
-	// 	return;
-	// }
-	//LogE( F( "FAILED"), true );
+    }
 }
 
 void HAPServer::handleClientState(HAPClient* hapClient) {
@@ -2342,10 +2321,9 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 
 	LogV( "Verifying device proof ...", false);
-
 	if (decodedLen != _hapsrp->length(_hapsrp->data->session) ){
 
-		LogE(F("ERROR: Client SRP proof does not match session hash length"), true);
+		LogE(F("ERROR: Client SRP proof does not match session hash length: ") + String(decodedLen) + "/" + String(_hapsrp->length(_hapsrp->data->session)), true);
 
 		if (_hapsrp) delete _hapsrp;
 		_hapsrp = nullptr;

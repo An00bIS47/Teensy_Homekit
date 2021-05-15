@@ -222,6 +222,17 @@ uint8_t HAPTime::dstOffset(uint8_t dayValue, uint8_t monthValue, unsigned int ye
         return 0;
 }
 
+time_t HAPTime::getTimeFromCompiling(){
+    time_t t = 0;
+    tmElements_t tm;
+    if (getDateFromString(__DATE__, tm) && getTimeFromString(__TIME__, tm)) {
+        t = makeTime(tm);
+        t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+    }
+    Teensy3Clock.get();
+    return t;
+}
+
 /* Alternative SyncProvider that automatically handles Daylight Saving Time (DST) periods,
  * at least in Europe, see above.
  */
@@ -229,10 +240,7 @@ time_t HAPTime::getDstCorrectedTime(){
     time_t t = 0;
 
     if (_callbackGetTime == nullptr){
-        tmElements_t tm;
-        if (getDateFromString(__DATE__, tm) && getTimeFromString(__TIME__, tm)) {
-            t = makeTime(tm);
-        }
+        t = 0;
     } else {
         t = _callbackGetTime();
     }
@@ -241,6 +249,8 @@ time_t HAPTime::getDstCorrectedTime(){
         TimeElements tm;
         breakTime (t, tm);
         t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+    } else {
+        t = getTimeFromCompiling();
     }
 
     return t;
@@ -282,6 +292,9 @@ bool HAPTime::getDateFromString(const char *str, TimeElements& tm){
 
 
 #if HAP_ENABLE_NTP
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 time_t HAPTime::getNTPTime(){
 
 	while (_udp.parsePacket() > 0) ; // discard any previously received packets
@@ -313,6 +326,9 @@ time_t HAPTime::getNTPTime(){
 }
 
 // send an NTP request to the time server at the given address
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPTime::sendNTPpacket(const char* address){
 	// set all bytes in the buffer to 0
 	memset(_packetBuffer, 0, NTP_PACKET_SIZE);

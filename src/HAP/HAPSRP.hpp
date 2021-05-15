@@ -275,7 +275,7 @@ public:
         HAPHashAlgorithm algorithm;
         NGConstant*      ng = NULL;
 
-        const char* username;
+        // const char* username;
         int         authenticated = 0;
 
         uint8_t M           [SHA512_DIGEST_LENGTH] = {0,};
@@ -385,7 +385,7 @@ public:
                                     SRPKeyPair *keys);
 
     int getVerifierIsAuthenticated( SRPVerifier* ver );
-    const char* getVerifierUsername( SRPVerifier* ver );
+    // const char* getVerifierUsername( SRPVerifier* ver );
     const uint8_t* getVerifierSessionKey( SRPVerifier* ver, int* key_length );
     int getSessionKeyLength( SRPSession* ses );
     int getVerifierSessionKeyLength( SRPVerifier* ver );
