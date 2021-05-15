@@ -51,8 +51,6 @@ HAPTime::~HAPTime(){
 
 bool HAPTime::begin(){
 
-    return false;
-
     setSyncProvider(getDstCorrectedTime);
     setSyncInterval(HAP_TIME_SYNC_INTERVAL);
     return true;
@@ -229,7 +227,7 @@ time_t HAPTime::getTimeFromCompiling(){
         t = makeTime(tm);
         t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
     }
-    Teensy3Clock.get();
+    // Teensy3Clock.get();
     return t;
 }
 
@@ -298,29 +296,34 @@ FLASHMEM
 time_t HAPTime::getNTPTime(){
 
 	while (_udp.parsePacket() > 0) ; // discard any previously received packets
-	LogD(F("Transmit NTP Request to "), false);
-	LogD(HAP_NTP_SERVER_URLS[1], false);
-	LogD(F(" ... "), true);
+	LogD(F("Transmit NTP Request to ..."), false);
 
-	sendNTPpacket(HAP_NTP_SERVER_URLS[1]);
-	uint32_t beginWait = millis();
+    for (uint8_t i=0; i < HAP_NTP_SERVER_URLS_SIZE; i++){
+        LogD(F("   * "), false);
+        LogD(HAP_NTP_SERVER_URLS[i], false);
+        LogD(F(" ... "), false);
 
-	while (millis() - beginWait < HAP_NTP_TIMEOUT) {
-		int size = _udp.parsePacket();
-		if (size >= NTP_PACKET_SIZE) {
-			// Serial.println("Receive NTP Response");
-			_udp.read(_packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
-			unsigned long secsSince1900;
-			// convert four bytes starting at location 40 to a long integer
-			secsSince1900 =  (unsigned long)_packetBuffer[40] << 24;
-			secsSince1900 |= (unsigned long)_packetBuffer[41] << 16;
-			secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
-			secsSince1900 |= (unsigned long)_packetBuffer[43];
+        sendNTPpacket(HAP_NTP_SERVER_URLS[i]);
+        uint32_t beginWait = millis();
 
-			LogD(F(" OK"), true);
-			return secsSince1900 - UNIX_OFFSET + (HAP_TIMEZONE * SECS_PER_HOUR);
-		}
-	}
+        while (millis() - beginWait < HAP_NTP_TIMEOUT) {
+            int size = _udp.parsePacket();
+            if (size >= NTP_PACKET_SIZE) {
+                // Serial.println("Receive NTP Response");
+                _udp.read(_packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
+                unsigned long secsSince1900;
+                // convert four bytes starting at location 40 to a long integer
+                secsSince1900 =  (unsigned long)_packetBuffer[40] << 24;
+                secsSince1900 |= (unsigned long)_packetBuffer[41] << 16;
+                secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
+                secsSince1900 |= (unsigned long)_packetBuffer[43];
+
+                LogD(F("OK"), true);
+                return secsSince1900 - UNIX_OFFSET + (HAP_TIMEZONE * SECS_PER_HOUR);
+            }
+        }
+        LogD(F("FAILED\n"), true);
+    }
 	LogE(F("ERROR - No NTP Response :-("), true);
 	return 0; // return 0 if unable to get the time
 }

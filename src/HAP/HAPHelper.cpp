@@ -129,7 +129,9 @@ void HAPHelper::binToHex(const unsigned char * in, size_t insz, char * out, size
 // 	}
 // 	return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 // }
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 uint8_t HAPHelper::numDigits(const size_t n) {
 	if (n < 10) return 1;
 	return 1 + numDigits(n / 10);
@@ -146,7 +148,9 @@ uint8_t HAPHelper::numDigits(const size_t n) {
 // 	}
 // 	printf("\n");
 // }
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPHelper::prependZeros(char *dest, const char *src, uint8_t width) {
 	size_t len = strlen(src);
 	size_t zeros = (len > width) ? 0 : width - len;
@@ -154,9 +158,7 @@ void HAPHelper::prependZeros(char *dest, const char *src, uint8_t width) {
 	strcpy(dest + zeros, src);
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 String HAPHelper::removeBrackets(String str){
 	if (str.length() > 2) {
     	str = str.substring(1, str.length()-1);
@@ -173,9 +175,7 @@ String HAPHelper::wrap(const char *str) {
 	return String("\"" + String(str) + "\"");
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 String HAPHelper::arrayWrap(String *s, unsigned short len) {
 	String result;
 	result = "[";
@@ -190,9 +190,7 @@ String HAPHelper::arrayWrap(String *s, unsigned short len) {
 	return result;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 String HAPHelper::dictionaryWrap(String *key, String *value, unsigned short len) {
 	String result;
 
@@ -379,6 +377,7 @@ bool HAPHelper::isValidFloat(String tString) {
 	return true;
 }
 
+
 bool HAPHelper::isValidNumber(String str){
    bool isNum=false;
    for(uint8_t i=0;i<str.length();i++)
@@ -414,7 +413,6 @@ size_t HAPHelper::base64_enc_len(size_t plainLen) {
 	size_t n = plainLen;
 	return (n + 2 - ((n + 2) % 3)) / 3 * 4;
 }
-
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM

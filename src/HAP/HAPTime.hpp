@@ -16,7 +16,7 @@
 #include "HAPGlobals.hpp"
 
 
-#define HAP_ENABLE_KNX_TIME 1
+#define HAP_ENABLE_KNX_TIME 0
 
 #if HAP_ENABLE_KNX_TIME
 #include <knx.h>

@@ -532,8 +532,8 @@
 #define HAP_NTP_SERVER_URL_FALLBACK	"pool.ntp.org"
 #endif
 
-const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_URL_FALLBACK};
-#define HAP_NTP_SERVER_URLS_SIZE	2
+const char* const HAP_NTP_SERVER_URLS[] = {"fritz.box", HAP_NTP_SERVER_URL, HAP_NTP_SERVER_URL_FALLBACK};
+#define HAP_NTP_SERVER_URLS_SIZE	3
 
 #ifndef HAP_NTP_TIME_FORMAT
 #define HAP_NTP_TIME_FORMAT			"%Y-%m-%d %H:%M:%S"							// strftime format
@@ -561,7 +561,7 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 #define NTP_PACKET_SIZE 48 			// NTP time is in the first 48 bytes of message
 #define UNIX_OFFSET					2208988800UL
 
-#define HAP_NTP_TIMEOUT	5000
+#define HAP_NTP_TIMEOUT	3000
 #define HAP_TIME_SYNC_INTERVAL 600000
 #endif /* ARDUINO_ARCH_ESP32 */
 #endif /* HAP_ENABLE_NTP */

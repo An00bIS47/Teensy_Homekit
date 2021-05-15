@@ -30,7 +30,10 @@ public:
 	static String chipID();		// basically mac reverse
 
 	static String serialNumber(String type, String id);
+
+#if defined(ARDUINO_ARCH_ESP32)
 	static String provisioningID(const char* prefix);
+#endif
 
 private:
 	static uint8_t _deviceID[6];
