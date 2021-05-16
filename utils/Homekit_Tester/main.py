@@ -798,7 +798,8 @@ class HomekitTester(object):
 
         print("Waiting for {} events ...".format(self.args.eventCount))
 
-
+        self.eventCount = 0
+        
         try:
 
             with TimingManager(testname, loggingArray) as tm:
@@ -1394,10 +1395,10 @@ if __name__ == '__main__':
 
         tester.runTest("listenEvents", tester.listenEvents)
 
-        tester.runFakegato()
+        # tester.runFakegato()
 
-        for historyEntry in tester.fakegatoHistories:
-            tester.openInHexFiend(historyEntry)
+        # for historyEntry in tester.fakegatoHistories:
+        #     tester.openInHexFiend(historyEntry)
 
         tester.runTest("removePairing", tester.removePairing)
 
