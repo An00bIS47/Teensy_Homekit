@@ -1820,10 +1820,12 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 
 	HAPCharacteristicT<bool>* c = reinterpret_cast< HAPCharacteristicT<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY));
 
+	WriteBufferingClient bufferedWifiClient{hapClient->client, 256};
+
 	if ( !isPaired() ) {
 		// Send 204
-		hapClient->client.write( HTTP_204 );
-		hapClient->client.write( HTTP_CRLF );
+		bufferedWifiClient.write( HTTP_204 );
+		bufferedWifiClient.write( HTTP_CRLF );
 
 		if (c != NULL){
 			c->setValue(true);
@@ -1831,21 +1833,21 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 
 	} else {
 		// Send 400
-		hapClient->client.write( HTTP_400 );
+		bufferedWifiClient.write( HTTP_400 );
 
-		hapClient->client.write( HTTP_CONTENT_TYPE_HAPJSON );
-		hapClient->client.write( HTTP_CRLF );
+		bufferedWifiClient.write( HTTP_CONTENT_TYPE_HAPJSON );
+		bufferedWifiClient.write( HTTP_CRLF );
 
-		hapClient->client.print( "Content-Length: 21" );
-		hapClient->client.write( HTTP_CRLF );
-		hapClient->client.write( HTTP_CRLF );
+		bufferedWifiClient.print( "Content-Length: 21" );
+		bufferedWifiClient.write( HTTP_CRLF );
+		bufferedWifiClient.write( HTTP_CRLF );
 
-		hapClient->client.print( "{ \"status\" : -70401 }" );
-		hapClient->client.write( HTTP_CRLF );
+		bufferedWifiClient.print( "{ \"status\" : -70401 }" );
+		bufferedWifiClient.write( HTTP_CRLF );
 	}
 
-	hapClient->client.write( HTTP_CRLF );
-
+	bufferedWifiClient.write( HTTP_CRLF );
+	bufferedWifiClient.flush();
 
 	hapClient->clear();
 
@@ -1907,7 +1909,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_
 		eStream.endHeader();
 	}
 
-	if ((httpStatus != HTTP_204) && (length > 0)) {
+	if (length > 0) {
 		// Body start
 		eStream.write(data, length);
 	}
@@ -1993,14 +1995,16 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 
 	// Body start
 	serializeJson(doc, eStream);
-	if ( mode != HAP_ENCRYPTION_MODE_PLAIN ) {
-		eStream.end();
-	} else {
+
+
+	if ( mode == HAP_ENCRYPTION_MODE_PLAIN ) {
 		// end body
 		eStream.print(HTTP_CRLF);
 
 		// end header
 		eStream.print(HTTP_CRLF);
+	} else {
+		eStream.end();
 	}
 
 	if ( ( mode == HAP_ENCRYPTION_MODE_PLAIN ) || (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) ) {
