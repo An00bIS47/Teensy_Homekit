@@ -1313,7 +1313,7 @@ def setup_args_parser():
     parser.add_argument('-f', action='store', required=True, dest='file', help='HomeKit pairing data file')
     parser.add_argument('-a', action='store', required=True, dest='alias', help='alias for the pairing')
     parser.add_argument('-g', action='store', required=False, dest='gitCommit', default=None, help='git commit sha1')
-    parser.add_argument('-H', action='store', required=False, dest='openHexfiend', default=False, help='open fakegato in hex fiend', type=bool)
+    parser.add_argument('-H', action='store_true', required=False, dest='openHexfiend', default=False, help='open fakegato in hex fiend')
     parser.add_argument('-i', action='store', required=False, dest='controllerPairingId',
                         help='this pairing ID identifies the controller who should be REMOVED from accessory')
     parser.add_argument('-o', action='store', dest='output', default='compact', choices=['json', 'compact'],
@@ -1395,10 +1395,10 @@ if __name__ == '__main__':
 
         tester.runTest("listenEvents", tester.listenEvents)
 
-        # tester.runFakegato()
+        tester.runFakegato()
 
-        # for historyEntry in tester.fakegatoHistories:
-        #     tester.openInHexFiend(historyEntry)
+        for historyEntry in tester.fakegatoHistories:
+            tester.openInHexFiend(historyEntry)
 
         tester.runTest("removePairing", tester.removePairing)
 

@@ -1935,84 +1935,167 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		return true;
 	}
 
-	// set timeout to 10 seconds
-	// hapClient->client.setTimeout(10000);
+#if 1
+	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
+		size_t jsonLength = measureJson(doc);
 
-	uint8_t buf[HAP_PRINT_ENCRYPTED_BUFFER_SIZE];
+		String response = "";
+		response += httpStatus;
 
+		// Keep Alive
+		if ( httpStatus != EVENT_200 ) {
+			response += HTTP_KEEP_ALIVE;
+		}
 
-	// decorate the WifiClient
-#if HAP_USE_BUFFERED_SEND
-	WriteBufferingClient bufferedWifiClient{hapClient->client, HAP_PRINT_ENCRYPTED_BUFFER_SIZE};
-	HAPPrintEncrypted eStream(bufferedWifiClient, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
-#else
-	HAPPrintEncrypted eStream(hapClient->client, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
-#endif
+		// Content Type
+		response += F("Content-Type: ");
+		response += contentType;
+		response += HTTP_CRLF;
 
-	eStream.setEncryptCount(hapClient->encryptionContext.encryptCount);
-	eStream.setKey(hapClient->encryptionContext.encryptKey);
-
-	size_t jsonLength = measureJson(doc);
-	// eStream.setPayloadSize(jsonLength);
-
-	eStream.begin();
-
-	eStream.print(httpStatus);
-
-	// Content-Type
-	eStream.print(F("Content-Type: "));
-	eStream.print(contentType);
-	eStream.print(HTTP_CRLF);
-
-
-	// Keep Alive
-	if ( httpStatus != EVENT_200 ) {
-		eStream.print( HTTP_KEEP_ALIVE );
-	}
-
-
-	if ( mode == HAP_ENCRYPTION_MODE_PLAIN ) {
-		eStream.print(F("Content-Length: "));
-		eStream.print(jsonLength);
-		eStream.print(HTTP_CRLF);
+		// Content Length
+		response += F("Content-Length: ");
+		response += String(jsonLength);
+		response += HTTP_CRLF;
 
 		// end header
-		eStream.print(HTTP_CRLF);
+		response += HTTP_CRLF;
 
-	} else if (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) {
-		eStream.print( HTTP_TRANSFER_ENCODING );
-		eStream.print(HTTP_CRLF);
+		// body
+		serializeJson(doc, response);
 
-		// begin chunk
+#if HAP_DEBUG_HOMEKIT
+		//Serial.write(_buffer - l, chunk_size);
+		HAPHelper::array_print("response", response.c_str(), response.length());
+#endif
+
+		uint8_t* encrypted = nullptr;
+		int encryptedLen = 0;
+		encrypted = HAPEncryption::encrypt(response.c_str(), response.length(), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
+		if (encryptedLen == 0) {
+			LogE(F("ERROR: Encrpyting response failed!"), true);
+
+			hapClient->clear();
+			return false;
+		} else {
+			// LogD(F("OK"), true);
+		}
+
+		WriteBufferingClient bufferedWifiClient{hapClient->client, 1360};
+		size_t bytesSend = bufferedWifiClient.write(encrypted, encryptedLen);
+		bufferedWifiClient.flush();  // <- OPTIONAL
+
+		free(encrypted);
+
+	}
+
+	else if (mode == HAP_ENCRYPTION_MODE_ENCRYPT_CHUNKED) {
+#else
+	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT_CHUNKED || mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
+#endif
+		uint8_t buf[HAP_PRINT_ENCRYPTED_BUFFER_SIZE];
+		HAPPrintEncrypted eStream(hapClient->client, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
+
+		eStream.setEncryptCount(hapClient->encryptionContext.encryptCount);
+		eStream.setKey(hapClient->encryptionContext.encryptKey);
+
+		// eStream.setPayloadSize(jsonLength);
+
 		eStream.begin();
-	} else {
+
+		eStream.print(httpStatus);
+
+		// Content-Type
+		eStream.print(F("Content-Type: "));
+		eStream.print(contentType);
+		eStream.print(HTTP_CRLF);
+
+
+		// Keep Alive
+		if ( httpStatus != EVENT_200 ) {
+			eStream.print( HTTP_KEEP_ALIVE );
+		}
+
 		eStream.print( HTTP_TRANSFER_ENCODING );
 		eStream.print(HTTP_CRLF);
 
 		// end header
 		eStream.endHeader();
+
+		// Body start
+		serializeJson(doc, eStream);
+
+		eStream.end();
+		hapClient->encryptionContext.encryptCount = eStream.encryptCount();
 	}
 
-	// Body start
-	serializeJson(doc, eStream);
+#if 0
+	else if (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) {
+		uint8_t buffer[1360];
+		HAPPrintChunked chunk(hapClient->client, buffer, 1360);
 
+		chunk.print(HTTP_200);
 
-	if ( mode == HAP_ENCRYPTION_MODE_PLAIN ) {
-		// end body
-		eStream.print(HTTP_CRLF);
+		// Content-Type
+		chunk.print(F("Content-Type: "));
+		chunk.print(contentType);
+		chunk.print(HTTP_CRLF);
+
+		// Keep Alive
+		if ( httpStatus != EVENT_200 ) {
+			chunk.print( HTTP_KEEP_ALIVE );
+		}
+
+		// Encoding chunked
+		chunk.print( HTTP_TRANSFER_ENCODING );
 
 		// end header
-		eStream.print(HTTP_CRLF);
-	} else {
-		eStream.end();
+		chunk.print(HTTP_CRLF);
+
+
+		// begin 1st chunk
+		chunk.begin();
+
+		// Body start
+		serializeJson(doc, chunk);
+
+		// end last chunk
+		chunk.end();
+
+	} 
+	
+	else if (mode == HAP_ENCRYPTION_MODE_PLAIN){
+		WriteBufferingClient bufferedWifiClient{hapClient->client, 1360};
+
+		size_t jsonLength = measureJson(doc);
+		bufferedWifiClient.print(HTTP_200);
+
+		// Content-Type
+		bufferedWifiClient.print(F("Content-Type: "));
+		bufferedWifiClient.print(contentType);
+		bufferedWifiClient.print(HTTP_CRLF);
+
+		// Keep Alive
+		if ( httpStatus != EVENT_200 ) {
+			bufferedWifiClient.print( HTTP_KEEP_ALIVE );
+		}
+
+		// Encoding chunked
+		bufferedWifiClient.print(F("Content-Length: ") );
+		bufferedWifiClient.print(F(jsonLength));
+
+		// end header
+		bufferedWifiClient.print(HTTP_CRLF);
+
+		serializeJson(doc, bufferedWifiClient);
+		bufferedWifiClient.print(HTTP_CRLF);
+
+		bufferedWifiClient.print(HTTP_CRLF);
+
+		bufferedWifiClient.flush();  // <- OPTIONAL
 	}
+#endif
 
-	if ( ( mode == HAP_ENCRYPTION_MODE_PLAIN ) || (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) ) {
-		return 0;
-	}
-
-	hapClient->encryptionContext.encryptCount = eStream.encryptCount();
-
+	hapClient->clear();
 	return 0;
 }
 
@@ -2024,7 +2107,7 @@ bool HAPServer::send204(HAPClient* hapClient){
 	int encryptedLen = 0;
 	encrypted = HAPEncryption::encrypt((uint8_t*)HTTP_204, strlen(HTTP_204), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
     if (encryptedLen == 0) {
-    	// LogE(F("ERROR: Encrpyting response failed!"), true);
+    	LogE(F("ERROR: Encrpyting response failed!"), true);
 
 		hapClient->clear();
     	return false;
@@ -2927,13 +3010,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LogD( F("OK"), true);
 
 
-#if HAP_DEBUG_HOMEKIT
-	LogD("", true);
-	Serial.printf("hapClient step1: %p\n", hapClient);
-	HAPHelper::array_print("hapClient->verifyContext.secret step 1", hapClient->verifyContext.secret, HKDF_KEY_LEN);
-#endif
-
-
 	LogD( F("Sending response ..."), false);
 	TLV8 response;
 	response.encode(HAP_TLV_STATE, 1, HAP_VERIFY_STATE_M2);
@@ -2946,12 +3022,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	//HAPHelper::arrayPrint(encryptedData, tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH);
 #endif
 
-
-#if HAP_DEBUG_HOMEKIT
-	LogV(F(""), true);
-	Serial.printf("hapClient step1: %p", hapClient);
-	HAPHelper::array_print("hapClient->verifyContext.secret step1", hapClient->verifyContext.secret, HKDF_KEY_LEN);
-#endif
 
 	sendResponse(hapClient, &response);
 	LogD( F("OK"), true);
@@ -2994,16 +3064,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 	if (decodedLen == 0) {
 		LogE(F("ERROR: PAIR-VERIFY M3 - HAP_TLV_ENCRYPTED_DATA failed "), true);
-
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
 		return false;
 	}
-
-#if HAP_DEBUG_HOMEKIT
-	LogD("", true);
-	Serial.printf("hapClient step2: %p\n", hapClient);
-	HAPHelper::array_print("hapClient->verifyContext.secret step 2", hapClient->verifyContext.secret, HKDF_KEY_LEN);
-#endif
 
 	LogD("\nGenerating decrpytion key ...", false);
 	uint8_t subtlv_key[HKDF_KEY_LEN] = {0,};

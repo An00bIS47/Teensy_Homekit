@@ -154,13 +154,12 @@ size_t HAPPrintEncrypted::write(uint8_t b){
 	return 1;
 }
 
-// size_t HAPPrintEncrypted::write(const uint8_t* b, size_t len){
-// 	size_t result = 0;
-// 	for (size_t i = 0; i < len; i++){
-// 		result += write(b[i]);
-// 	}
-// 	return result;
-// }
+size_t HAPPrintEncrypted::write(const uint8_t* buffer, size_t size){
+	if (buffer == nullptr) return 0;
+	size_t count = 0;
+	while (size--) count += write(*buffer++);
+	return count;
+}
 
 
 
