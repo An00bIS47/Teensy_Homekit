@@ -1936,12 +1936,16 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 	// set timeout to 10 seconds
 	// hapClient->client.setTimeout(10000);
 
-	// decorate the WifiClient so it logs its content to Serial
-	// WriteLoggingStream wifiClientWithLog(hapClient->client, Serial);
-
 	uint8_t buf[HAP_PRINT_ENCRYPTED_BUFFER_SIZE];
-	// HAPPrintEncrypted eStream(wifiClientWithLog, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
+
+
+	// decorate the WifiClient
+#if HAP_USE_BUFFERED_SEND
+	WriteBufferingClient bufferedWifiClient{hapClient->client, HAP_PRINT_ENCRYPTED_BUFFER_SIZE};
+	HAPPrintEncrypted eStream(bufferedWifiClient, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
+#else
 	HAPPrintEncrypted eStream(hapClient->client, buf, HAP_PRINT_ENCRYPTED_BUFFER_SIZE);
+#endif
 
 	eStream.setEncryptCount(hapClient->encryptionContext.encryptCount);
 	eStream.setKey(hapClient->encryptionContext.encryptKey);
@@ -1987,13 +1991,17 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		eStream.endHeader();
 	}
 
-	if (httpStatus != HTTP_204){
-		// Body start
-		serializeJson(doc, eStream);
+	// Body start
+	serializeJson(doc, eStream);
+	if ( mode != HAP_ENCRYPTION_MODE_PLAIN ) {
+		eStream.end();
+	} else {
+		// end body
+		eStream.print(HTTP_CRLF);
+
+		// end header
+		eStream.print(HTTP_CRLF);
 	}
-
-
-	eStream.end();
 
 	if ( ( mode == HAP_ENCRYPTION_MODE_PLAIN ) || (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) ) {
 		return 0;
