@@ -255,7 +255,8 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
 #endif
 
     size_t indexLast = _entries.size() - 1;
-    bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, HAPTime::timestamp(), data, length)));
+    _timestampLastEntry = HAPTime::timestamp();
+    bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, _timestampLastEntry, data, length)));
     if (overwritten == true) {
         // ToDo: Add overwritten handling..
         _rolledOver = true;
@@ -615,7 +616,7 @@ String HAPFakegato::callbackGetHistoryInfo(){
     // evetime
     // Time from last update in seconds
     ui32_to_ui8 evetime;
-    evetime.ui32 = (HAPTime::timestamp() - HAPTime::refTime());
+    evetime.ui32 = (_timestampLastEntry - HAPTime::refTime());
     memcpy(data + offset, evetime.ui8, 4);
     offset += 4;    // == 4
 

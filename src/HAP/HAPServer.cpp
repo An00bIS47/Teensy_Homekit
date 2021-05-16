@@ -3546,15 +3546,15 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 	for (const auto &p : hapClient->request.params) {
 
 #if HAP_DEBUG
-    	LogD("param: " + p.first + " - " + p.second, true);
+    	LogD("\nparam: " + p.first + " - " + p.second, true);
 #endif
 		if (p.first == "meta" && p.second == "1"){
 			hasParamMeta = true;
-		}	else if (p.first == "perms" && p.second == "1") {
+		} else if (p.first == "perms" && p.second == "1") {
 			hasParamPerms = true;
-		}	else if (p.first == "ev" && p.second == "1"){
+		} else if (p.first == "ev" && p.second == "1"){
 			hasParamEvent = true;
-		}	else if (p.first == "type" && p.second == "1"){
+		} else if (p.first == "type" && p.second == "1"){
 			hasParamType = true;
 		}
 	}

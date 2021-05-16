@@ -292,6 +292,7 @@ protected:
 
     uint32_t _previousMillis = 0;
     uint32_t _interval = HAP_FAKEGATO_INTERVAL;
+    uint32_t _timestampLastEntry = 0;
 
     bool    _isTimeSource = false;
     bool    _rolledOver = false;
