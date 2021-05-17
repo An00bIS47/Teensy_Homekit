@@ -26,6 +26,7 @@ int HAPTime::_utcOffset = 0;
 float HAPTime::_longitude = 0;
 float HAPTime::_latitude = 0;
 uint32_t HAPTime::_refTime = 0;
+uint32_t HAPTime::_t_offset = 0;
 
 callbackGetTime_t HAPTime::_callbackGetTime = nullptr;
 
@@ -94,6 +95,12 @@ bool HAPTime::setLongitudeLatitude(float longitude, float latitude){
     return true;
 }
 
+
+//const int timeZone = 1;     // Central European Time
+//const int timeZone = -5;  // Eastern Standard Time (USA)
+//const int timeZone = -4;  // Eastern Daylight Time (USA)
+//const int timeZone = -8;  // Pacific Standard Time (USA)
+//const int timeZone = -7;  // Pacific Daylight Time (USA)
 bool HAPTime::setTimeZone(int utcOffset){
     if ((utcOffset < - 720) || (utcOffset > 720))  return false;
     _utcOffset = utcOffset;
@@ -246,7 +253,8 @@ time_t HAPTime::getDstCorrectedTime(){
     if (t > 0) {
         TimeElements tm;
         breakTime (t, tm);
-        t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+        _t_offset = (_utcOffset * dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+        t += _t_offset;
     } else {
         t = getTimeFromCompiling();
     }
@@ -366,7 +374,7 @@ uint32_t HAPTime::timestamp(){
 	return now.tv_sec;
 #elif defined( CORE_TEENSY )
 	if (timeStatus() != timeNotSet) {
-		return (uint32_t) now();	// - UNIX_OFFSET;
+		return (uint32_t) (now() - (2 * _t_offset));	// - UNIX_OFFSET;
 	}
 	return millis();
 #else

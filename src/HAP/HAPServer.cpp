@@ -415,7 +415,9 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 
-	_time.begin();
+	
+	_time.setTimeZone(1);
+
 #if HAP_ENABLE_NTP
 	LogI( "Starting NTP client ...", false);
 	if (_isConnected) {
@@ -426,16 +428,18 @@ bool HAPServer::begin(bool resume) {
 		}
 #if defined( CORE_TEENSY )
 		_time.setCallbackGetTime(HAPTime::getNTPTime);
+		
 #endif
 		LogI( F("OK"), true);
 	}
 #endif /* HAP_ENABLE_NTP */
-
+	_time.begin();
 
 	LogI("Set time to: " + _time.timeString(), true);
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
 	_time.setReftime(_configuration.getPlatformConfig()->refTime());
 	LogI("Current refTime is: " + String(_time.refTime()), true);
+	LogI("Current t_offset is: " + String(_time.getTOffset()), true);
 
 	LogI("Loading pairings ...", false);
 	LogI(" OK", true);
@@ -1935,7 +1939,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		return true;
 	}
 
-#if 1
+#if 0
 	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
 		size_t jsonLength = measureJson(doc);
 

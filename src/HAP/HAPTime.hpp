@@ -69,11 +69,16 @@ public:
         return _refTime;
     }
 
+    static uint32_t getTOffset(){
+        return _t_offset;
+    }
+
 protected:
     static int _utcOffset;      // GMP? offset in minutes
     static float _longitude;
     static float _latitude;
     static uint32_t _refTime;
+    static uint32_t _t_offset;
 
     static callbackGetTime_t _callbackGetTime;
 
