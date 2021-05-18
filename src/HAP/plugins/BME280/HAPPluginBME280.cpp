@@ -171,7 +171,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 #else
     sprintf(hex, "%x", _bme->sensorID());
 #endif
-	String sn = HAPDeviceID::serialNumber("BME", String(hex));
+	String sn = HAPDeviceID::serialNumber("BME", "DY");
 
 	//
 	// Add new accessory
@@ -189,7 +189,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	_accessory->addService(temperatureService);
 	{
 		HAPCharacteristicT<String> *temperatureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-		temperatureServiceName->setValue("BME280 Temperature Sensor");
+		temperatureServiceName->setValue("Temperature Sensor");
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
 
 		_temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
@@ -209,7 +209,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	_accessory->addService(humidityService);
 	{
 		HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-		humServiceName->setValue("BME280 Humidity Sensor");
+		humServiceName->setValue("Humidity Sensor");
 		_accessory->addCharacteristicToService(humidityService, humServiceName);
 
 		_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
@@ -229,7 +229,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	_accessory->addService(pressureService);
 	{
 		HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-		pressureServiceName->setValue("BME280 AirPressure Sensor");
+		pressureServiceName->setValue("AirPressure Sensor");
 		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
 
 		_pressureValue = new HAPCharacteristicT<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);

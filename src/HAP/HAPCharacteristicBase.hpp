@@ -1014,13 +1014,15 @@ template <>
 class HAPCharacteristicT<String> : public HAPCharacteristicBaseValue<String> {
 public:
 
-    HAPCharacteristicT(uint8_t type, uint8_t permissions, size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+    HAPCharacteristicT(uint8_t type, uint8_t permissions, String format = F("string"), size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
         _value = "";
         _maxLen = maxlen;
+        _format = format;
     }
-    HAPCharacteristicT(const char* type, uint8_t permissions, size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+    HAPCharacteristicT(const char* type, uint8_t permissions, String format = F("string"), size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
         _value = "";
         _maxLen = maxlen;
+        _format = format;
     }
 
     void valueToJson(JsonObject& root) override {
@@ -1031,7 +1033,7 @@ public:
 
     void metaToJson(JsonObject& root) override {
         root[F("maxLen")] = _maxLen;
-        root[F("format")] = F("string");
+        root[F("format")] = _format;
     }
 
 #if HAP_USE_STD_STRING
@@ -1053,6 +1055,7 @@ public:
 
 protected:
     size_t _maxLen = 64;
+    String _format;
 };
 
 
@@ -1158,6 +1161,5 @@ public:
 protected:
     size_t _maxLen = 512;
 };
-
 
 #endif /* HAPCHARACTERISTICBASE_HPP_ */

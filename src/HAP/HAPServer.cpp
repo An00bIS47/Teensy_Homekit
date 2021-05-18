@@ -436,9 +436,11 @@ bool HAPServer::begin(bool resume) {
 	_time.begin();
 
 	LogI("Set time to: " + _time.timeString(), true);
-	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
+	//_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
+	_configuration.getPlatformConfig()->setRefTime(1601846922);
 	_time.setReftime(_configuration.getPlatformConfig()->refTime());
 	LogI("Current refTime is: " + String(_time.refTime()), true);
+	LogI("Current refTime is: " + String(HAPTime::refTime()), true);
 	LogI("Current t_offset is: " + String(_time.getTOffset()), true);
 
 	LogI("Loading pairings ...", false);
@@ -1939,7 +1941,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		return true;
 	}
 
-#if 1
+#if 0
 	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
 		size_t jsonLength = measureJson(doc);
 
@@ -3985,7 +3987,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 			if (isSubcribedToAtLeastOne) {
 #if HAP_DEBUG
-				Serial.print(F("response: "));
+				Serial.print(F("Event response: "));
 				serializeJson(root, Serial);
 				Serial.println();
 #endif
@@ -4012,7 +4014,7 @@ bool HAPServer::sendEvent(HAPClient* hapClient, const JsonDocument& response){
 
 	if ( hapClient->client.connected() ){
 		// sendEncrypt(hapClient, EVENT_200, response, true);
-		send(hapClient, EVENT_200, response, HAP_ENCRYPTION_MODE_ENCRYPT);
+		send(hapClient, EVENT_200, response, HAP_ENCRYPTION_MODE_ENCRYPT_CHUNKED);
 		LogD(F("OK"), true);
 		return true;
 	}
