@@ -65,8 +65,6 @@
 #define HAP_PIXEL_INDICATOR_PIN		A0		// PIN of the NeoPixel inidicator pin for wifi connection etc
 #define HAP_PIXEL_INIDICATOR_BRIGHTNESS 75
 
-#define HAP_SEND_BUFFER_SIZE		1024
-
 
 /**
  * Homekit Accessory Protocol
@@ -198,9 +196,6 @@
 
 //#define HAP_SPRINTF_UI32			"%zu"
 
-#ifndef HAP_CONFIG_USE_PREFS_FOR_PAIRINGS
-#define HAP_CONFIG_USE_PREFS_FOR_PAIRINGS 1
-#endif
 
 
 #ifndef HAP_ENABLE_WIFI_BUTTON
@@ -232,9 +227,7 @@
 #define HAP_ENABLE_UPDATE_OTA 		0
 #endif
 
-#ifndef HAP_CONFIG_USE_PREFS_FOR_PAIRINGS
-#define HAP_CONFIG_USE_PREFS_FOR_PAIRINGS 0
-#endif
+
 
 
 #ifndef HAP_ENABLE_WIFI_BUTTON
@@ -250,9 +243,6 @@
 #else	/* END CORE_TEENSY */
 //#define HAP_SPRINTF_UI32			"%lu"
 #endif
-
-#undef HAP_SEND_BUFFER_SIZE
-#define HAP_SEND_BUFFER_SIZE		1024		// Ethernet Client has problems writing large chunks ( > 3KB)
 
 #define HAP_ETHERNET_TIMEOUT		10000
 
@@ -525,15 +515,20 @@
 #if HAP_ENABLE_NTP
 
 #ifndef HAP_NTP_SERVER_URL
-#define HAP_NTP_SERVER_URL			"time.euro.apple.com"						// NTP server url
+#define HAP_NTP_SERVER_URL			"fritz.box"						// NTP server url
+#endif
+
+
+#ifndef HAP_NTP_SERVER_URL_2
+#define HAP_NTP_SERVER_URL_2		"time.euro.apple.com"						// NTP server url
 #endif
 
 #ifndef HAP_NTP_SERVER_URL_FALLBACK
 #define HAP_NTP_SERVER_URL_FALLBACK	"pool.ntp.org"
 #endif
 
-const char* const HAP_NTP_SERVER_URLS[] = {"fritz.box", HAP_NTP_SERVER_URL, HAP_NTP_SERVER_URL_FALLBACK};
-#define HAP_NTP_SERVER_URLS_SIZE	3
+const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_URL_2, HAP_NTP_SERVER_URL_FALLBACK};
+#define HAP_NTP_SERVER_URLS_SIZE 	3
 
 
 
@@ -594,11 +589,11 @@ const char* const HAP_NTP_SERVER_URLS[] = {"fritz.box", HAP_NTP_SERVER_URL, HAP_
 
 
 // ToDo: deprecated !
-#define HAP_EEPROM_OFFSET_PAIRINGS    	HAP_EEPROM_OFFSET
-#define HAP_EEPROM_PAIRINGS_SIZE      	(sizeof(HAPPairing) * HAP_PAIRINGS_MAX)
-#define HAP_EEPROM_PAIRINGS_KEYSIZE 	HAP_PAIRINGS_LTPK_LENGTH + HAP_PAIRINGS_LTSK_LENGTH
-#define HAP_EEPROM_CONFIG_OFFSET    	(HAP_EEPROM_OFFSET + HAP_EEPROM_PAIRINGS_KEYSIZE + HAP_EEPROM_PAIRINGS_SIZE)
-#define HAP_EEPROM_CONFIG_SIZE      	(HAP_EEPROM_SIZE - (HAP_EEPROM_OFFSET + HAP_EEPROM_PAIRINGS_KEYSIZE + HAP_EEPROM_PAIRINGS_SIZE))
+// #define HAP_EEPROM_OFFSET_PAIRINGS    	HAP_EEPROM_OFFSET
+// #define HAP_EEPROM_PAIRINGS_SIZE      	(sizeof(HAPPairing) * HAP_PAIRINGS_MAX)
+// #define HAP_EEPROM_PAIRINGS_KEYSIZE 	HAP_PAIRINGS_LTPK_LENGTH + HAP_PAIRINGS_LTSK_LENGTH
+// #define HAP_EEPROM_CONFIG_OFFSET    	(HAP_EEPROM_OFFSET + HAP_EEPROM_PAIRINGS_KEYSIZE + HAP_EEPROM_PAIRINGS_SIZE)
+// #define HAP_EEPROM_CONFIG_SIZE      	(HAP_EEPROM_SIZE - (HAP_EEPROM_OFFSET + HAP_EEPROM_PAIRINGS_KEYSIZE + HAP_EEPROM_PAIRINGS_SIZE))
 
 
 
@@ -618,33 +613,21 @@ const char* const HAP_NTP_SERVER_URLS[] = {"fritz.box", HAP_NTP_SERVER_URL, HAP_
 #define EVENTMANAGER_EVENT_QUEUE_SIZE 		HAP_EVENTMANAGER_QUEUE_SIZE
 
 
-/**
- * Crypto
- ********************************************************************/
-#define HAP_USE_MBEDTLS_HKDF		1		// Use MBEDTLS HDKF
-											// Default: 1
 
-#define HAP_USE_MBEDTLS_SRP			1		// if 0 then use WolfSSL SRP
-											// Default: 1
-
-#define HAP_USE_MBEDTLS_POLY		1		// if 0 then use WolfSSL ChaCha20 Poly1305
-											// Default: 1
-
-#define HAP_USE_MBEDTLS_CURVE25519 	0		// not working -> use HAP_USE_LIBSODIUM __deprecated__!
-
-#define HAP_USE_LIBSODIUM			0		// use libsodium for decrpytion __deprecated__!
 
 
 
 /**
  * QR Code
  ********************************************************************/
+#ifndef HAP_PRINT_QRCODE
 #define HAP_PRINT_QRCODE			0		// !!! HAP_GENERATE_XHM must be enabled !!!
-											// Print QR code on console
+#endif										// Print QR code on console
 											// Default: 0
 
+#ifndef HAP_PRINT_QRCODE_SVG
 #define HAP_PRINT_QRCODE_SVG		0
-
+#endif
 
 /**
  * Plugins
@@ -771,12 +754,6 @@ STR(HAP_PLUGIN_USE_BME280)
 /**
  * Options - Do not edit !!!
  ********************************************************************/
-#define HAP_BUFFERED_SEND			1		// Only used for TLV8 responses
-											// Send all data via wifi in *one* response
-											// Default: 1
-											// Not yet working without buffered send :(
-
-
 #define HAP_LONG_UUID				0		// Use long uuid as type in accessory json
 											// Default: 0
 
@@ -793,8 +770,9 @@ STR(HAP_PLUGIN_USE_BME280)
  * Limits
  * !! Do not edit !!!
  ********************************************************************/
-#if HAP_BUFFERED_SEND
-#define HAP_BUFFER_SEND_SIZE		3192	// 3192 max ?
+#ifndef HAP_BUFFER_CLIENT_SIZE
+#define HAP_BUFFER_CLIENT_SIZE		HAP_PRINT_ENCRYPTED_BUFFER_SIZE	// StreamUtils bufferClient buffer size
+										// default: 128
 #endif
 
 #define HAP_ARDUINOJSON_BUFFER_SIZE 3192	//(ESP.getMaxAllocHeap() - 4096)
@@ -802,14 +780,12 @@ STR(HAP_PLUGIN_USE_BME280)
 #if defined( ARDUINO_ARCH_ESP32 )
 #define HAP_ENCRYPTION_BUFFER_SIZE 	16384 // (ESP.getMaxAllocHeap() - 4096)	// 16384
 #elif defined( CORE_TEENSY )
-#define HAP_ENCRYPTION_BUFFER_SIZE 	16384
+#define HAP_ENCRYPTION_BUFFER_SIZE 	3192
 #endif
 
 
 #define HAP_PAIRINGS_MAX			16		// Number of available pairings
 											// Default: 16
-
-#define HAP_STRING_LENGTH_MAX		64		// Max length of strings for config validation
 
 #define HAP_HOMEKIT_DEFAULT_STRING_LENGTH	64
 
@@ -823,31 +799,17 @@ STR(HAP_PLUGIN_USE_BME280)
  * SRP
  * !! Do not edit !!!
  ********************************************************************/
-#define SRP_TEST					0		// Test SRP - keep disabled !
+#ifndef SRP_TEST
+#define SRP_TEST 0		// Test SRP - keep disabled !
+#endif
 
 
-
-/**
- * Arduino + EXP32 specific
- * !! Do not edit !!!
- ********************************************************************/
-// #ifndef ARDUINO_ARCH_ESP32
-// #define ARDUINO_ARCH_ESP32			1
-// #endif
-
-// #ifndef ESP32
-// #define ESP32						1
-// #endif
 
 
 /**
  * Keysizes
  * Do not edit!
  ********************************************************************/
-#ifndef CURVE25519_KEY_LENGTH
-#define CURVE25519_KEY_LENGTH       	32
-#endif
-
 #ifndef CURVE25519_SECRET_LENGTH
 #define CURVE25519_SECRET_LENGTH    	32
 #endif

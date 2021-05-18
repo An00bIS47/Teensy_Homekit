@@ -90,9 +90,6 @@ HAPDailyTimer::HAPDailyTimer(bool syncOnPowerup, uint8_t StartHour, uint8_t Star
 // }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 bool HAPDailyTimer::begin() {
   	return sync();
 }
@@ -107,6 +104,7 @@ void HAPDailyTimer::setDaysActive(EventDays days) {
 	}
 	(void)sync();
 }
+
 
 void HAPDailyTimer::setDaysActive(uint8_t activeDays) {
 	onMask = activeDays;

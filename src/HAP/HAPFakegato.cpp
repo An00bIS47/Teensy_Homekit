@@ -21,7 +21,7 @@ extern "C" {
 #endif
 #elif defined(CORE_TEENSY)
 #include <Base64.h>
-#include "mbedtls/base64.h"
+// #include "mbedtls/base64.h"
 #endif
 
 HAPFakegato::HAPFakegato(){
@@ -254,7 +254,8 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
     HAPHelper::array_print("FAKEGATO ENTRY DATA", data, length);
 #endif
 
-    size_t indexLast = _entries.size() - 1;
+    // size_t indexLast = _entries.size() - 1;
+
     _timestampLastEntry = HAPTime::timestamp();
     bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, _timestampLastEntry, data, length)));
     if (overwritten == true) {
@@ -433,7 +434,9 @@ String HAPFakegato::callbackGetHistoryEntries(){
     return String(encodedChr);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
 
 #if HAP_DEBUG_FAKEGATO
@@ -494,12 +497,14 @@ void HAPFakegato::callbackHistorySetTime(String oldValue, String newValue){
     if (_isTimeSource){
 
         // "SPMZIw==" == 588903240
-        size_t outputLength = 0;
-        mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+        // size_t outputLength = 0;
+        // mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+        // uint8_t decoded[outputLength];
+        // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength,(uint8_t*)newValue.c_str(), newValue.length());
+
+        size_t outputLength = base64_dec_len((char*)newValue.c_str(), newValue.length());
         uint8_t decoded[outputLength];
-
-
-        mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength,(uint8_t*)newValue.c_str(), newValue.length());
+        base64_decode((char*)decoded, (char*)newValue.c_str(), newValue.length());
 
 #if HAP_DEBUG_FAKEGATO
         HAPHelper::array_print("History Set Time", decoded, outputLength);
@@ -536,20 +541,24 @@ FLASHMEM
 void HAPFakegato::callbackHistoryRequest(String oldValue, String newValue){
     LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "History Request for iid " + String(_historyRequest->iid()) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
-    size_t outputLength = 0;
-    // Serial.println(newValue);
 
-    mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    // Serial.println(newValue);
+    // size_t outputLength = 0;
+    // mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    // uint8_t decoded[outputLength];
+    // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+
+    size_t outputLength = base64_dec_len((char*)newValue.c_str(), newValue.length());
     uint8_t decoded[outputLength];
-    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    base64_decode((char*)decoded, (char*)newValue.c_str(), newValue.length());
 
 #if HAP_DEBUG_FAKEGATO
     HAPHelper::array_print("History Request", decoded, outputLength);
 #endif
 
     ui32_to_ui8 requestedIndex;
-    int n = 0;
-    for (unsigned idx = 2; idx < 6; idx++) {
+    uint8_t n = 0;
+    for (uint8_t idx = 2; idx < 6; idx++) {
         requestedIndex.ui8[n++] = decoded[idx];
     }
 

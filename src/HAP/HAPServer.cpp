@@ -46,28 +46,13 @@
 #endif
 
 
-#if HAP_USE_MBEDTLS_HKDF
-#include "m_hkdf.h"
-#else
-#include "hkdf.h"
-#endif
 
 #include <mbedtls/version.h>
-// #include <sodium.h>
-
-
-#if HAP_USE_LIBSODIUM
-#else
-#include "mbedtls/entropy_poll.h"
+#include <mbedtls/entropy_poll.h>
 #include "m_X25519.h"
 #include "m_ed25519.h"
-#endif
-
-#if HAP_USE_MBEDTLS_POLY
 #include "m_chacha20_poly1305.h"
-#else
-#include "chacha20_poly1305.h"
-#endif
+#include "m_hkdf.h"
 
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
@@ -243,11 +228,6 @@ bool HAPServer::begin(bool resume) {
 		LogD("   SDK:       " + String(ESP.getSdkVersion()), true);
 #endif
 		LogD("   mbedtls:   " + String(mbedtlsVersion), true);
-#if HAP_USE_LIBSODIUM
-		LogD("   libsodium: " + String(sodium_version_string()), true);
-#endif
-
-
 
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -1986,7 +1966,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 			// LogD(F("OK"), true);
 		}
 
-		WriteBufferingClient bufferedWifiClient{hapClient->client, 1360};
+		WriteBufferingClient bufferedWifiClient{hapClient->client, HAP_BUFFER_CLIENT_SIZE};
 		size_t bytesSend = bufferedWifiClient.write(encrypted, encryptedLen);
 		bufferedWifiClient.flush();  // <- OPTIONAL
 
@@ -2036,8 +2016,8 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 
 #if 0
 	else if (mode == HAP_ENCRYPTION_MODE_PLAIN_CHUNKED) {
-		uint8_t buffer[1360];
-		HAPPrintChunked chunk(hapClient->client, buffer, 1360);
+		uint8_t buffer[HAP_BUFFER_CLIENT_SIZE];
+		HAPPrintChunked chunk(hapClient->client, buffer, HAP_BUFFER_CLIENT_SIZE);
 
 		chunk.print(HTTP_200);
 
@@ -2070,7 +2050,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 	}
 
 	else if (mode == HAP_ENCRYPTION_MODE_PLAIN){
-		WriteBufferingClient bufferedWifiClient{hapClient->client, 1360};
+		WriteBufferingClient bufferedWifiClient{hapClient->client, HAP_BUFFER_CLIENT_SIZE};
 
 		size_t jsonLength = measureJson(doc);
 		bufferedWifiClient.print(HTTP_200);
@@ -2165,8 +2145,8 @@ void HAPServer::sendResponse(HAPClient* hapClient, TLV8* response){
 	// response->decode(tlvdata, &outlen);
 	// send(hapClient, HTTP_200, tlvdata, outlen, HAP_ENCRYPTION_MODE_PLAIN_CHUNKED, "application/pairing+tlv8");
 
-	uint8_t buffer[1360];
-	HAPPrintChunked chunk(hapClient->client, buffer, 1360);
+	uint8_t buffer[HAP_BUFFER_CLIENT_SIZE];
+	HAPPrintChunked chunk(hapClient->client, buffer, HAP_BUFFER_CLIENT_SIZE);
 
 	chunk.print(HTTP_200);
 
@@ -2665,14 +2645,8 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 
     LogV(F("Verifying ED25519 ..."), false);
-#if HAP_USE_LIBSODIUM
-	int verified = crypto_sign_verify_detached(ios_device_signature,
-                                ios_device_info,
-                                ios_device_info_len,
-                                ios_device_ltpk);
-#else
 	int verified = ed25519_verify(ios_device_signature, ios_device_info, ios_device_info_len, ios_device_ltpk);
-#endif
+
 
 
     concat_free(ios_device_info);
@@ -2868,13 +2842,13 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	LogD(F("\nGenerating accessory curve25519 keys ..."), false);
 
-	uint8_t acc_curve_public_key[CURVE25519_KEY_LENGTH] = {0,};		// my_key_public
+	uint8_t acc_curve_public_key[CURVE25519_SECRET_LENGTH] = {0,};		// my_key_public
 
 	// ToDo: Fix this! This will stay constant 0x00
 	// ?? This will stay at 00 ?
 	// What key to use here?
 	// int r = crypto_ed25519_generate(key);
-	// uint8_t acc_curve_private_key[CURVE25519_KEY_LENGTH] = {0,};	// my_key
+	// uint8_t acc_curve_private_key[CURVE25519_SECRET_LENGTH] = {0,};	// my_key
 
 	// Create new public key from accessory's LTSK
 	err_code = X25519_scalarmult_base(acc_curve_public_key, _accessorySet->LTSK());
@@ -2913,7 +2887,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 
-	HAPHelper::array_print("acc_curve_public_key", acc_curve_public_key, CURVE25519_KEY_LENGTH);
+	HAPHelper::array_print("acc_curve_public_key", acc_curve_public_key, CURVE25519_SECRET_LENGTH);
 	HAPHelper::array_print("_accessorySet->LTSK()", _accessorySet->LTSK(), HAP_PAIRINGS_LTSK_LENGTH);
 	HAPHelper::array_print("ios_device_curve_key", ios_device_curve_key, ios_device_curve_key_len);
 
@@ -2934,7 +2908,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	LogD(F("Generating signature ..."), false);
 	int acc_info_len;
-	uint8_t* acc_info = concat3(acc_curve_public_key, CURVE25519_KEY_LENGTH,
+	uint8_t* acc_info = concat3(acc_curve_public_key, CURVE25519_SECRET_LENGTH,
 		(uint8_t*)HAPDeviceID::deviceID().c_str(), 17,
 		ios_device_curve_key, ios_device_curve_key_len,
 		&acc_info_len);
@@ -3019,7 +2993,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LogD( F("Sending response ..."), false);
 	TLV8 response;
 	response.encode(HAP_TLV_STATE, 1, HAP_VERIFY_STATE_M2);
-	response.encode(HAP_TLV_PUBLIC_KEY, CURVE25519_KEY_LENGTH, acc_curve_public_key);
+	response.encode(HAP_TLV_PUBLIC_KEY, CURVE25519_SECRET_LENGTH, acc_curve_public_key);
 	response.encode(HAP_TLV_ENCRYPTED_DATA, tlv8Len + CHACHA20_POLY1305_AUTH_TAG_LENGTH, encryptedData);
 
 
@@ -4241,64 +4215,4 @@ void HAPServer::taskButtonRead(void* pvParameters){
 }
 #endif
 
-#if 0
-#if HAP_ENABLE_NTP && defined(CORE_TEENSY)
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-time_t HAPServer::getNtpTime() {
-	while (_udp.parsePacket() > 0) ; // discard any previously received packets
-	LogD(F("Transmit NTP Request to "), false);
-	LogD(HAP_NTP_SERVER_URLS[1], false);
-	LogD(F(" ... "), true);
-
-	sendNTPpacket(HAP_NTP_SERVER_URLS[1]);
-	uint32_t beginWait = millis();
-
-	while (millis() - beginWait < 1500) {
-		int size = _udp.parsePacket();
-		if (size >= NTP_PACKET_SIZE) {
-			// Serial.println("Receive NTP Response");
-			_udp.read(_packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
-			unsigned long secsSince1900;
-			// convert four bytes starting at location 40 to a long integer
-			secsSince1900 =  (unsigned long)_packetBuffer[40] << 24;
-			secsSince1900 |= (unsigned long)_packetBuffer[41] << 16;
-			secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
-			secsSince1900 |= (unsigned long)_packetBuffer[43];
-
-			LogD(F(" OK"), true);
-			return secsSince1900 - UNIX_OFFSET + (HAP_TIMEZONE * SECS_PER_HOUR);
-		}
-	}
-	LogE(F("ERROR - No NTP Response :-("), true);
-	return 0; // return 0 if unable to get the time
-}
-
-// send an NTP request to the time server at the given address
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPServer::sendNTPpacket(const char* address){
-	// set all bytes in the buffer to 0
-	memset(_packetBuffer, 0, NTP_PACKET_SIZE);
-	// Initialize values needed to form NTP request
-	// (see URL above for details on the packets)
-	_packetBuffer[0] = 0b11100011;   // LI, Version, Mode
-	_packetBuffer[1] = 0;     // Stratum, or type of clock
-	_packetBuffer[2] = 6;     // Polling Interval
-	_packetBuffer[3] = 0xEC;  // Peer Clock Precision
-	// 8 bytes of zero for Root Delay & Root Dispersion
-	_packetBuffer[12]  = 49;
-	_packetBuffer[13]  = 0x4E;
-	_packetBuffer[14]  = 49;
-	_packetBuffer[15]  = 52;
-	// all NTP fields have been given values, now
-	// you can send a packet requesting a timestamp:
-	_udp.beginPacket(address, 123); //NTP requests are to port 123
-	_udp.write(_packetBuffer, NTP_PACKET_SIZE);
-	_udp.endPacket();
-}
-#endif
-#endif
 HAPServer hap;

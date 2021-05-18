@@ -301,7 +301,7 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigAccessory(const
         return result;
     }
     // accessory.hostname - length
-    if (strlen(object["accessory"]["hostname"]) + 1 > HAP_STRING_LENGTH_MAX) {
+    if (strlen(object["accessory"]["hostname"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
         result.reason = "accessory.hostname is too long";
         return result;
     }
@@ -449,7 +449,7 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigWebserver(const
         }
 
         // webserver.admins.count.username - length
-        if (strlen(value["username"]) + 1 > HAP_STRING_LENGTH_MAX) {
+        if (strlen(value["username"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
             result.reason = "webserver.admins." + String(count) + ".username is too long";
             return result;
         }
@@ -462,7 +462,7 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigWebserver(const
         }
 
         // webserver.admins.count.password - length
-        if (strlen(value["password"]) + 1 > HAP_STRING_LENGTH_MAX) {
+        if (strlen(value["password"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
             result.reason = "webserver.admins." + String(count) + ".password is too long";
             return result;
         }
@@ -488,7 +488,7 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigWebserver(const
         }
 
         // webserver.apis.count.username - length
-        if (strlen(value["username"]) + 1 > HAP_STRING_LENGTH_MAX) {
+        if (strlen(value["username"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
             result.reason = "webserver.apis." + String(count) + ".username is too long";
             return result;
         }
@@ -501,7 +501,7 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigWebserver(const
         }
 
         // webserver.apis.count.password - length
-        if (strlen(value["password"]) + 1 > HAP_STRING_LENGTH_MAX) {
+        if (strlen(value["password"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
             result.reason = "webserver.apis." + String(count) + ".password is too long";
             return result;
         }
@@ -569,7 +569,7 @@ HAPConfigurationValidationResult HAPConfiguration::validateConfigUpdate(const Js
     }
 
     // update.ota.password - length
-    if ((object["update"]["ota"].as<JsonObject>().containsKey("password")) && (strlen(object["update"]["ota"]["password"].as<const char*>()) + 1 > HAP_STRING_LENGTH_MAX)) {
+    if ((object["update"]["ota"].as<JsonObject>().containsKey("password")) && (strlen(object["update"]["ota"]["password"].as<const char*>()) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH)) {
         result.reason = "update.ota.password is too long";
         return result;
     }

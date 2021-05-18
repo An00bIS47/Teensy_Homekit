@@ -205,7 +205,7 @@ HAPConfigurationValidationResult HAPPluginRCSwitch::validateConfig(JsonObject ob
 
         // plugin._name.devices.count.name - length
         if (value.containsKey("name")) {
-            if (strlen(value["name"]) + 1 > HAP_STRING_LENGTH_MAX) {
+            if (strlen(value["name"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
                 result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".name is too long";
                 return result;
             }
