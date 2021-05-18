@@ -1395,10 +1395,13 @@ if __name__ == '__main__':
 
         tester.runTest("listenEvents", tester.listenEvents)
 
-        tester.runFakegato()
+        passed, fakegatoHistories = tester.runFakegato()
 
-        for historyEntry in tester.fakegatoHistories:
+        for historyEntry in fakegatoHistories:
             tester.openInHexFiend(historyEntry)
+
+        # for historyEntry in tester.fakegatoHistories:
+        #     tester.openInHexFiend(historyEntry)
 
         tester.runTest("removePairing", tester.removePairing)
 

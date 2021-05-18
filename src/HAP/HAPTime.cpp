@@ -232,7 +232,7 @@ time_t HAPTime::getTimeFromCompiling(){
     tmElements_t tm;
     if (getDateFromString(__DATE__, tm) && getTimeFromString(__TIME__, tm)) {
         t = makeTime(tm);
-        t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+        //t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
     }
     // Teensy3Clock.get();
     return t;
@@ -245,7 +245,7 @@ time_t HAPTime::getDstCorrectedTime(){
     time_t t = 0;
 
     if (_callbackGetTime == nullptr){
-        t = 0;
+        t = getTimeFromCompiling();
     } else {
         t = _callbackGetTime();
     }
@@ -255,8 +255,6 @@ time_t HAPTime::getDstCorrectedTime(){
         breakTime (t, tm);
         _t_offset = (_utcOffset * dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
         t += _t_offset;
-    } else {
-        t = getTimeFromCompiling();
     }
 
     return t;

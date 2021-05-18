@@ -169,7 +169,7 @@ void flexRamInfo(void) {
 #endif
 
 
-LogLevel HAPLogger::_logLevel(LogLevel::INFO);
+LogLevel HAPLogger::_logLevel(LogLevel::DEBUG);
 Stream* HAPLogger::_printer(&Serial);
 
 #if defined(ARDUINO_TEENSY41)

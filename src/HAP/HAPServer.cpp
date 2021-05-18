@@ -415,7 +415,7 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 
-	
+
 	_time.setTimeZone(1);
 
 #if HAP_ENABLE_NTP
@@ -428,7 +428,7 @@ bool HAPServer::begin(bool resume) {
 		}
 #if defined( CORE_TEENSY )
 		_time.setCallbackGetTime(HAPTime::getNTPTime);
-		
+
 #endif
 		LogI( F("OK"), true);
 	}
@@ -1939,7 +1939,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		return true;
 	}
 
-#if 0
+#if 1
 	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
 		size_t jsonLength = measureJson(doc);
 
@@ -2065,8 +2065,8 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		// end last chunk
 		chunk.end();
 
-	} 
-	
+	}
+
 	else if (mode == HAP_ENCRYPTION_MODE_PLAIN){
 		WriteBufferingClient bufferedWifiClient{hapClient->client, 1360};
 
