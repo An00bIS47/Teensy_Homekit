@@ -301,6 +301,8 @@ protected:
 
     bool    _transfer = false;
 
+    bool    _restarted = true;
+
     std::vector< std::unique_ptr<HAPFakegatoCharacteristic> > _signatures;
     CircularBuffer<HAPFakegatoDataEntry*, HAP_FAKEGATO_BUFFER_SIZE> _entries;
 };

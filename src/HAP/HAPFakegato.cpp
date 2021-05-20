@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 HAPFakegato::HAPFakegato(){
-
+    _restarted = true;
 }
 
 
@@ -37,7 +37,6 @@ HAPFakegato::~HAPFakegato(){
 
     if (_configRead != nullptr) delete _configRead;
     if (_configWrite != nullptr) delete _configWrite;
-
 }
 
 #if defined(ARDUINO_TEENSY41)
@@ -326,15 +325,19 @@ String HAPFakegato::callbackGetHistoryEntries(){
         Serial.println(_requestedIndex); Serial.send_now();
 #endif
 
-
     if (_requestedIndex == 0){
-        // ToDo:
-
-    } else if (_requestedIndex == 1){
+        _requestedIndex = 1;
+    }
+    // if (_requestedIndex == 0){
+    //     // ToDo:
+    //     // If set to 0000, asks the accessory the start restart from the beginning of the memory
+    // } else if ( (_restarted = true) || (_requestedIndex == 1) ) {
+    if ( (_restarted = true) || (_requestedIndex == 1) ) {
         getRefTime(data, &offset);
         entryCounter = _requestedIndex + 1;
         _requestedIndex--;
         usedBatch++;
+        _restarted = false;
     } else {
         _requestedIndex--;
         entryCounter = _requestedIndex + 1;
