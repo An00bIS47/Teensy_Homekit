@@ -23,8 +23,6 @@ public:
 
     }
 
-    void begin();
-
     static uint32_t encodeTimerCount(uint8_t timerCount);
     static uint8_t encodeProgramCount(uint8_t programCount);
 
@@ -33,7 +31,8 @@ public:
     void decodePrograms(uint8_t* data);
     void encodePrograms(uint8_t* data, size_t *dataSize);
 
-    String buildScheduleString();
+    String scheduleRead();
+    void scheduleWrite(String oldValue, String newValue);
 
     void setCallbackGetTimestampLastActivity(std::function<uint32_t(void)> callback){
         _callbackGetTimestampLastActivity = callback;

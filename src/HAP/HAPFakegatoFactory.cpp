@@ -27,7 +27,6 @@ void HAPFakegatoFactory::handle(bool forced){
 FLASHMEM
 #endif
 void HAPFakegatoFactory::registerFakeGato(HAPFakegato* fakegato, std::function<bool()> callback, uint32_t interval){
-    fakegato->begin();
     fakegato->setInterval(interval);
     fakegato->registerCallbackAddEntry(callback);
     _fakegatos.push_back(fakegato);

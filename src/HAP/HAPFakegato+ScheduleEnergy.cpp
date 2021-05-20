@@ -7,6 +7,7 @@
 //
 
 #include "HAPFakegato+ScheduleEnergy.hpp"
+#include "HAPLogger.hpp"
 #include "HAPHelper.hpp"
 #include "HAPTLV8.hpp"
 #include "HAPTime.hpp"
@@ -25,9 +26,6 @@ extern "C" {
 #endif
 
 
-void HAPFakegatoScheduleEnergy::begin(){
-
-}
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
@@ -174,6 +172,9 @@ uint8_t HAPFakegatoScheduleEnergy::encodeProgramCount(uint8_t programCount){
  * @param data 			Output for programs
  * @param dataSize 		length of data
  */
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 	// uint8_t programCount = data[1] | data[2] << 8;
 	uint8_t programCount = _programEvents.size();
@@ -257,10 +258,10 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-String HAPFakegatoScheduleEnergy::buildScheduleString(){
+String HAPFakegatoScheduleEnergy::scheduleRead(){
     TLV8 tlv;
 
-    tlv.encode(0x00, {0x24, 0x00});
+    tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DEVICE_TYPE, {(uint8_t)HAP_SCHEDULE_TYPE_ENERGY_EU_3, 0x00});
     tlv.encode(0x03, {0xB8, 0x04});
 
     // Serial Number
@@ -388,6 +389,57 @@ String HAPFakegatoScheduleEnergy::buildScheduleString(){
 	base64_encode(encoded, (char*)out, decodedLen);
 	return String(encoded);
 #endif
+}
 
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
+void HAPFakegatoScheduleEnergy::scheduleWrite(String oldValue, String newValue){
+    LogD(HAPTime::timeString() + " " + "HAPFakegatoScheduleEnergy" + "->" + "scheduleWrite" + " [   ] " + "Schedule Write " + _name + " ..." , true);
+
+    // size_t outputLength = 0;
+    // mbedtls_base64_decode(NULL, 0, &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
+    // uint8_t decoded[outputLength];
+
+    // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
+
+	size_t outputLength = base64_dec_len((char*)newValue.c_str(), newValue.length());
+	uint8_t decoded[outputLength];
+	base64_decode((char*)decoded, (char*)newValue.c_str(), newValue.length());
+
+#if HAP_DEBUG_FAKEGATO_SCHEDULE
+    HAPHelper::array_print("decoded", decoded, outputLength);
+#endif
+
+    TLV8 tlv;
+    tlv.encode(decoded, outputLength);
+
+    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE)){
+        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE);
+        enable(decodeToggleOnOff(tlvEntry->value));
+        _shouldSave = true;
+    }
+
+    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED)){
+        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED);
+        setStatusLED(tlvEntry->value[0]);
+    }
+
+    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS)){
+        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS);
+        decodeDays(tlvEntry->value);
+        _shouldSave = true;
+    }
+
+    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS)){
+        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS);
+        decodePrograms(tlvEntry->value);
+        _shouldSave = true;
+    }
+
+    // _configReadCharacteristics->setValue(_schedule->buildScheduleString(), false);
+	saveConfig();
+
+	LogD("OK", true);
 }

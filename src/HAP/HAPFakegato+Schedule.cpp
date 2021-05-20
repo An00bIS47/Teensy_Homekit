@@ -10,6 +10,35 @@
 #include "HAPTime.hpp"
 #include "HAPLogger.hpp"
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
+HAPService* HAPFakegatoSchedule::registerFakeGatoService(HAPAccessory* accessory, const String& name){
+
+	HAPService* fgService = HAPFakegato::registerFakeGatoService(accessory, name);
+
+	// Config Read
+	_configRead = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+	_configRead->setDescription("EVE Schedule Read");
+	_configRead->setValue((char*)NULL);
+	// auto callbackConfigRead = std::bind(&HAPFakegato::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);
+	// _configRead->setValueChangeCallback(callbackConfigRead);
+	auto callbackGetConfig = std::bind(&HAPFakegatoSchedule::scheduleRead, this);
+	_configRead->setValueGetCallback(callbackGetConfig);
+	accessory->addCharacteristicToService(fgService, _configRead);
+
+
+	// Config Write
+	_configWrite = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE / 2);
+	_configWrite->setDescription("EVE Schedule Write");
+	_configWrite->setValue((char*)NULL);
+	auto callbackConfigWrite = std::bind(&HAPFakegatoSchedule::scheduleWrite, this, std::placeholders::_1, std::placeholders::_2);
+	_configWrite->setValueChangeCallback(callbackConfigWrite);
+	accessory->addCharacteristicToService(fgService, _configWrite);
+
+	return fgService;
+}
+
 
 
 #if defined(ARDUINO_TEENSY41)

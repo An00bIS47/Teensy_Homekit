@@ -118,9 +118,7 @@ public:
     HAPFakegato();
     virtual ~HAPFakegato();
 
-    virtual void begin() {};
-
-    void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
+    virtual HAPService* registerFakeGatoService(HAPAccessory* accessory, const String& name);
 
     void addEntry(uint8_t bitmask);
 
@@ -130,6 +128,9 @@ public:
         return _entries[_entries.size() - 1]->timestamp;
     }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void setInterval(uint32_t interval){
 		_interval = interval;
 	}
@@ -142,11 +143,16 @@ public:
         return _entries.capacity;
     }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void setAsTimeSource(bool mode = true){
         _isTimeSource = mode;
     }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void registerCallbackAddEntry(std::function<bool()> callback){
         _callbackAddEntry = callback;
     }
@@ -155,6 +161,9 @@ public:
 		return _isEnabled;
 	}
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 	void enable(bool mode){
 		_isEnabled = mode;
 	}
@@ -172,7 +181,6 @@ public:
         }
     }
 
-
     uint8_t getBitmaskForAll(){
         uint8_t bitmask = 0;
         for (uint8_t i=0; i < _signatures.size(); i++){
@@ -181,9 +189,11 @@ public:
         return bitmask;
     }
 
+
     uint8_t getMaxEntryValueLength(){
         return getEntryValueLength(getBitmaskForAll());
     }
+
 
     uint8_t getEntryValueLength(uint8_t bitmask){
         uint8_t length = 0;
@@ -207,11 +217,16 @@ public:
         return (_signatures.size() * 2);
     }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void enablePeriodicUpdates(bool mode = true){
         _periodicUpdates = mode;
     }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void addCharacteristic(HAPFakegatoCharacteristic* characteristic){
         _signatures.emplace_back(std::move(characteristic));
     }
@@ -273,14 +288,6 @@ protected:
     HAPCharacteristicT<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
     HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
     HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
-
-    // Schedules
-    HAPCharacteristicT<String>* _configRead     = nullptr;
-    HAPCharacteristicT<String>* _configWrite    = nullptr;
-
-    virtual void scheduleRead(String oldValue, String newValue)     {}
-    virtual void scheduleWrite(String oldValue, String newValue)    {}
-    virtual String buildScheduleString() { return ""; }
 
     std::function<bool()> _callbackAddEntry = nullptr;
 

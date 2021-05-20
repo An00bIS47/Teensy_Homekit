@@ -34,15 +34,12 @@ HAPFakegato::~HAPFakegato(){
     if (_historyEntries != nullptr) delete _historyEntries;
     if (_historyRequest != nullptr) delete _historyRequest;
     if (_historySetTime != nullptr) delete _historySetTime;
-
-    if (_configRead != nullptr) delete _configRead;
-    if (_configWrite != nullptr) delete _configWrite;
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule){
+HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String& name){
     _name = name;
 
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);
@@ -55,7 +52,7 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
     // History Info
     _historyInfo = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historyInfo->setDescription("EVE History Info");
-    _historyInfo->setValue((char*)NULL);
+    _historyInfo->setValue((char*)NULL, false);
     // auto callbackS2R1 = std::bind(&HAPFakeGato::setS2R1Characteristics, this, std::placeholders::_1, std::placeholders::_2);
     // _historyInfo->setValueChangeCallback(callbackS2R1);
     auto callbackGetHistoryInfo = std::bind(&HAPFakegato::callbackGetHistoryInfo, this);
@@ -65,7 +62,7 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
     // History Entries
     _historyEntries = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
     _historyEntries->setDescription("EVE History Entries");
-    _historyEntries->setValue((char*)NULL);
+    _historyEntries->setValue((char*)NULL, false);
     // auto callbackS2R2 = std::bind(&HAPFakeGato::setS2R2Characteristics, this, std::placeholders::_1, std::placeholders::_2);
     // _historyEntries->setValueChangeCallback(callbackS2R2);
     auto callbackGetHistoryEntries = std::bind(&HAPFakegato::callbackGetHistoryEntries, this);
@@ -76,7 +73,7 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
     // History Request
     _historyRequest = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historyRequest->setDescription("EVE History Request");
-    _historyInfo->setValue((char*)NULL);
+    _historyInfo->setValue((char*)NULL, false);
     auto callbackHistoryRequest = std::bind(&HAPFakegato::callbackHistoryRequest, this, std::placeholders::_1, std::placeholders::_2);
     _historyRequest->setValueChangeCallback(callbackHistoryRequest);
     accessory->addCharacteristicToService(fgService, _historyRequest);
@@ -84,36 +81,16 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
     // Set Time
     _historySetTime = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historySetTime->setDescription("EVE SetTime");
-    _historyInfo->setValue((char*)NULL);
+    _historyInfo->setValue((char*)NULL, false);
     auto callbackSetTime = std::bind(&HAPFakegato::callbackHistorySetTime, this, std::placeholders::_1, std::placeholders::_2);
     _historySetTime->setValueChangeCallback(callbackSetTime);
     accessory->addCharacteristicToService(fgService, _historySetTime);
 
-
-    if (withSchedule){
-        // Config Read
-        _configRead = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
-        _configRead->setDescription("EVE Schedule Read");
-        _historyInfo->setValue((char*)NULL);
-        auto callbackConfigRead = std::bind(&HAPFakegato::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);
-        _configRead->setValueChangeCallback(callbackConfigRead);
-        accessory->addCharacteristicToService(fgService, _configRead);
-
-
-        // Config Write
-        _configWrite = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE / 2);
-        _configWrite->setDescription("EVE Schedule Write");
-        _historyInfo->setValue((char*)NULL);
-        auto callbackConfigWrite = std::bind(&HAPFakegato::scheduleWrite, this, std::placeholders::_1, std::placeholders::_2);
-        _configWrite->setValueChangeCallback(callbackConfigWrite);
-        accessory->addCharacteristicToService(fgService, _configWrite);
-    }
-
     accessory->addService(fgService);
 
-    begin();
-
     enable(true);
+
+    return fgService;
 }
 
 
