@@ -181,11 +181,11 @@ public:
     }
 
 
-	void toJson(JsonObject& root, bool type_ = false, bool perms = false, bool event = false, bool meta = false, bool addDesc = false) {
+	void toJson(JsonObject& root, bool type_ = false, bool perms = false, bool event = false, bool meta = false, bool addDesc = false, bool withCallback = true) {
 
         root[F("iid")] = _iid;
 
-        valueToJson(root);
+        valueToJson(root, withCallback);
 
         if (meta){
             metaToJson(root);
@@ -225,7 +225,7 @@ public:
     }
 
 
-    virtual void valueToJson(JsonObject& root) = 0;
+    virtual void valueToJson(JsonObject& root, bool withCallback = true) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
 
     static void unitToJson(JsonObject& root, HAP_UNIT unit) {
@@ -392,7 +392,7 @@ public:
         _value = value;
     }
 
-    virtual void valueToJson(JsonObject& root) = 0;
+    virtual void valueToJson(JsonObject& root, bool withCallback = true) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
 
 #if HAP_USE_STD_STRING
@@ -498,7 +498,7 @@ public:
 
     }
 
-    virtual void valueToJson(JsonObject& root) = 0;
+    virtual void valueToJson(JsonObject& root, bool withCallback = true) = 0;
     virtual void metaToJson(JsonObject& root)  = 0;
 
 #if HAP_USE_STD_STRING
@@ -598,7 +598,7 @@ public:
         *dataLen = _valueLen;
     }
 
-    virtual void valueToJson(JsonObject& root) = 0;
+    virtual void valueToJson(JsonObject& root, bool withCallback = true) = 0;
     virtual void metaToJson(JsonObject& root) = 0;
 
     void setDataGetCallback(std::function<void(T, size_t*)> callback){
@@ -632,7 +632,7 @@ public:
 
 
 
-    virtual void valueToJson(JsonObject& root) = 0;
+    virtual void valueToJson(JsonObject& root, bool withCallback = true) = 0;
     virtual void metaToJson(JsonObject& root)  = 0;
 
 #if HAP_USE_STD_STRING
@@ -666,9 +666,9 @@ public:
         _value = false;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = (uint8_t) value();
+            root[F("value")] = (uint8_t) value(withCallback);
         }
     }
 
@@ -716,9 +716,9 @@ public:
         this->_value = minVal;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = HAPHelper::round2(value());
+            root[F("value")] = HAPHelper::round2(value(withCallback));
         }
     }
 
@@ -791,9 +791,9 @@ public:
         if (_validValues) delete[] _validValues;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = value();
+            root[F("value")] = value(withCallback);
         }
     }
 
@@ -857,9 +857,9 @@ public:
     }
 
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = value();
+            root[F("value")] = value(withCallback);
         }
     }
 
@@ -911,9 +911,9 @@ public:
         this->_value = minVal;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = value();
+            root[F("value")] = value(withCallback);
         }
     }
 
@@ -966,9 +966,9 @@ public:
         this->_value = minVal;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = value();
+            root[F("value")] = value(withCallback);
         }
     }
 
@@ -1025,9 +1025,9 @@ public:
         _format = format;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = value();
+            root[F("value")] = value(withCallback);
         }
     }
 
@@ -1075,9 +1075,9 @@ public:
         _maxLen = maxlen;
     }
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = value();
+            root[F("value")] = value(withCallback);
         }
     }
 
@@ -1133,7 +1133,7 @@ public:
     }
 
 
-    void valueToJson(JsonObject& root) override {
+    void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
             // root[F("value")] = (uint8_t)_value;
         }

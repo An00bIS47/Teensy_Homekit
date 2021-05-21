@@ -1921,7 +1921,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		return true;
 	}
 
-#if 0
+#if 1
 	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
 		size_t jsonLength = measureJson(doc);
 
@@ -3943,7 +3943,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 						JsonObject chr = jsonCharacteristics.createNestedObject();
 						chr["aid"] = aid;
-						character->toJson(chr);
+						character->toJson(chr, false, false, false, false, false, false);
 
 						// Serial.print("event json: ");
 						// serializeJsonPretty(chr, Serial);
@@ -3982,14 +3982,14 @@ bool HAPServer::sendEvent(HAPClient* hapClient, const JsonDocument& response){
 	// LogD(">>> Sending event to client [" + String(hapClient->client.remoteIP()) + "] ...", false);
 	LogV(F("Sending event to client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogI(F("] ..."), false);
+	LogV(F("] ..."), false);
 
 #endif
 
 	if ( hapClient->client.connected() ){
 		// sendEncrypt(hapClient, EVENT_200, response, true);
 		send(hapClient, EVENT_200, response, HAP_ENCRYPTION_MODE_ENCRYPT_CHUNKED);
-		LogD(F("OK"), true);
+		LogV(F("OK"), true);
 		return true;
 	}
 
