@@ -416,8 +416,8 @@ bool HAPServer::begin(bool resume) {
 	_time.begin();
 
 	LogI("Set time to: " + _time.timeString(), true);
-	//_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
-	_configuration.getPlatformConfig()->setRefTime(1601846922);
+	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
+	// _configuration.getPlatformConfig()->setRefTime(1601846922);
 	_time.setReftime(_configuration.getPlatformConfig()->refTime());
 	LogI("Current refTime is: " + String(_time.refTime()), true);
 	LogI("Current refTime is: " + String(HAPTime::refTime()), true);

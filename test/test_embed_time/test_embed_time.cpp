@@ -85,15 +85,15 @@ void test_dst_2021_days_steps(void){
     time_t tStartDst = makeTime(startDST);
     time_t tEndDst = makeTime(endDST);
 
-    TEST_ASSERT_EQUAL_UINT32(1616886000, tStartDst);
-    TEST_ASSERT_EQUAL_UINT32(1635631200, tEndDst);
+    TEST_ASSERT_EQUAL_UINT32(1616900880, tStartDst);
+    TEST_ASSERT_EQUAL_UINT32(1635647132, tEndDst);
 
     // (1616886000 - 978307200) / 86400 = 7.390,9583333333    ==> 7391
     // (1635631200 - 978307200) / 86400 = 7.607,9166666667    ==> 7608
-    
+
     double daysToDSTStart = (tStartDst - HAP_FAKEGATO_EPOCH) / SECS_PER_DAY;
     double daysToDSTEnd = (tEndDst - HAP_FAKEGATO_EPOCH) / SECS_PER_DAY;
-    
+
     size_t roundedDSTStart = ceil(daysToDSTStart);
     size_t roundedDSTEnd = ceil(daysToDSTEnd);
 
