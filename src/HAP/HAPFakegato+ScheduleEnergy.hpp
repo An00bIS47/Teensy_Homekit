@@ -40,6 +40,8 @@ public:
 
 protected:
     std::function<uint32_t(void)> _callbackGetTimestampLastActivity;
+
+    
 };
 
 #endif /* HAPFAKEGATOSCHEDULEENERGY_HPP_ */

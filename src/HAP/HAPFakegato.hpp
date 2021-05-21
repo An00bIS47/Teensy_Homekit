@@ -26,7 +26,10 @@
 #define HAP_FAKEGATO_BATCH_SIZE  16
 #endif
 
+#ifndef HAP_FAKEGATO_EPOCH
 #define HAP_FAKEGATO_EPOCH       978307200
+#endif
+
 
 #ifndef HAP_FAKEGATO_CHUNK_BUFFER_SIZE
 #define HAP_FAKEGATO_CHUNK_BUFFER_SIZE      512     // base64 256 bits = 344

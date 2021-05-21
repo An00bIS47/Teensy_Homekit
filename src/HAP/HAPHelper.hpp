@@ -13,10 +13,10 @@
 // #include <ArduinoJson.h>
 // #include "HAPGlobals.hpp"
 
-#if defined( CORE_TEENSY )
-#include <time.h>
-#include <TimeLib.h>
-#endif
+// #if defined( CORE_TEENSY )
+// #include <time.h>
+// #include <TimeLib.h>
+// #endif
 
 #ifndef byte
 #define byte uint8_t
@@ -92,48 +92,6 @@ public:
 #if defined(ARDUINO_ARCH_ESP32)
 	static void getPartionTableInfo();
 #endif
-
-
-#if defined( CORE_TEENSY )
-	//converts TimeLib's time representations to time.h's representations
-	static void convertToTimeH(tmElements_t &timelib, tm &timeh){
-		time_t t = makeTime(timelib); // - UNIX_OFFSET;
-		localtime_r(&t, &timeh);
-	}
-	static void convertToTimeH(time_t timelib, tm &timeh){
-		time_t t = timelib; // - UNIX_OFFSET;
-		localtime_r(&t, &timeh);
-	}
-
-	static time_t convertToTimeH(tmElements_t &timelib){
-		return makeTime(timelib); // - UNIX_OFFSET;
-	}
-
-	static time_t convertToTimeH(time_t timelib){
-		return timelib; // - UNIX_OFFSET;
-	}
-
-	//converts time.h's time representations to TimeLib's representations
-	static void convertToTimeLib(tm &timeh, tmElements_t &timelib){
-		// breakTime(mktime(&timeh) + UNIX_OFFSET, timelib);
-		breakTime(mktime(&timeh), timelib);
-	}
-
-	static void convertToTimeLib(time_t timeh, tmElements_t &timelib){
-		// breakTime(timeh + UNIX_OFFSET, timelib);
-		breakTime(timeh, timelib);
-	}
-	static time_t convertToTimeLib(tm &timeh){
-		// return mktime(&timeh) + UNIX_OFFSET;
-		return mktime(&timeh); // + UNIX_OFFSET;
-	}
-
-	static time_t convertToTimeLib(time_t timeh){
-		// return timeh + UNIX_OFFSET;
-		return timeh; // + UNIX_OFFSET;
-	}
-#endif
-
 
 	static void mpi_print(const char* tag, const mbedtls_mpi* x);
 	static void array_print(const char* tag, const unsigned char* buf, int len);

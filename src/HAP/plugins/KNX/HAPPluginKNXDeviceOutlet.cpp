@@ -169,7 +169,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
             _fakegato->addCharacteristic(new HAPFakegatoCharacteristicPowerTenth(std::bind(&HAPPluginKNXDeviceOutlet::getAveragedPowerTenth, this)));
             _fakegato->addCharacteristic(new HAPFakegatoCharacteristicPowerOnOff(std::bind(&HAPPluginKNXDeviceOutlet::readStateFromKNX, this)));
 
-            _fakegato->registerFakeGatoService(_accessory, _name);
+            _fakegato->registerFakeGatoService(HAP_SCHEDULE_TYPE_ENERGY_EU_3, _accessory, _name);
 
             if (_enableSchedule) {
                 // Fakegato Schedule

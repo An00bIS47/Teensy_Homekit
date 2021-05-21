@@ -551,19 +551,13 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
 	// #define timeZone -7  // Pacific Daylight Time (USA)
 #endif
 
-#define NTP_PACKET_SIZE 48 			// NTP time is in the first 48 bytes of message
+
 #define UNIX_OFFSET					2208988800UL
 
 
 #endif /* ARDUINO_ARCH_ESP32 */
 #endif /* HAP_ENABLE_NTP */
 
-#ifndef HAP_NTP_TIME_FORMAT
-#define HAP_NTP_TIME_FORMAT			"%Y-%m-%d %H:%M:%S"							// strftime format
-#endif
-
-#define HAP_NTP_TIMEOUT	3000
-#define HAP_TIME_SYNC_INTERVAL 600000
 
 
 /**

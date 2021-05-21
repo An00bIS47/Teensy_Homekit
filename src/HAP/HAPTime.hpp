@@ -13,10 +13,37 @@
 #include <TimeLib.h>
 #include <math.h>
 #include <functional>
+#include <time.h>
+
 #include "HAPGlobals.hpp"
 
-
+#ifndef HAP_ENABLE_KNX_TIME
 #define HAP_ENABLE_KNX_TIME 0
+#endif
+
+#ifndef HAP_ENABLE_NTP
+#define HAP_ENABLE_NTP 0
+#endif
+
+#ifndef NTP_PACKET_SIZE
+#define NTP_PACKET_SIZE 48
+#endif
+
+#ifndef HAP_NTP_TIME_FORMAT
+#define HAP_NTP_TIME_FORMAT	"%Y-%m-%d %H:%M:%S"	    // strftime format
+#endif
+
+#ifndef HAP_NTP_TIMEOUT
+#define HAP_NTP_TIMEOUT	3000
+#endif
+
+#ifndef HAP_TIME_SYNC_INTERVAL
+#define HAP_TIME_SYNC_INTERVAL 600000
+#endif
+
+#ifndef HAP_FAKEGATO_EPOCH
+#define HAP_FAKEGATO_EPOCH       978307200
+#endif
 
 #if HAP_ENABLE_KNX_TIME
 #include <knx.h>
@@ -72,6 +99,52 @@ public:
     static uint32_t getTOffset(){
         return _t_offset;
     }
+
+
+    static uint16_t getDaysToDST(const unsigned int year, const uint8_t month);
+
+    static uint8_t getDstStartDay(unsigned int yearValue);
+    static uint8_t getDstEndDay(unsigned int yearValue);
+
+#if defined( CORE_TEENSY )
+	//converts TimeLib's time representations to time.h's representations
+	static void convertToTimeH(tmElements_t &timelib, tm &timeh){
+		time_t t = makeTime(timelib); // - UNIX_OFFSET;
+		localtime_r(&t, &timeh);
+	}
+	static void convertToTimeH(time_t timelib, tm &timeh){
+		time_t t = timelib; // - UNIX_OFFSET;
+		localtime_r(&t, &timeh);
+	}
+
+	static time_t convertToTimeH(tmElements_t &timelib){
+		return makeTime(timelib); // - UNIX_OFFSET;
+	}
+
+	static time_t convertToTimeH(time_t timelib){
+		return timelib; // - UNIX_OFFSET;
+	}
+
+	//converts time.h's time representations to TimeLib's representations
+	static void convertToTimeLib(tm &timeh, tmElements_t &timelib){
+		// breakTime(mktime(&timeh) + UNIX_OFFSET, timelib);
+		breakTime(mktime(&timeh), timelib);
+	}
+
+	static void convertToTimeLib(time_t timeh, tmElements_t &timelib){
+		// breakTime(timeh + UNIX_OFFSET, timelib);
+		breakTime(timeh, timelib);
+	}
+	static time_t convertToTimeLib(tm &timeh){
+		// return mktime(&timeh) + UNIX_OFFSET;
+		return mktime(&timeh); // + UNIX_OFFSET;
+	}
+
+	static time_t convertToTimeLib(time_t timeh){
+		// return timeh + UNIX_OFFSET;
+		return timeh; // + UNIX_OFFSET;
+	}
+#endif
 
 protected:
     static int _utcOffset;      // GMP? offset in minutes

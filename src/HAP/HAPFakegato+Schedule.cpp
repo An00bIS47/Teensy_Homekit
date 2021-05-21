@@ -13,7 +13,7 @@
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-HAPService* HAPFakegatoSchedule::registerFakeGatoService(HAPAccessory* accessory, const String& name){
+HAPService* HAPFakegatoSchedule::registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const String& name){
 
 	HAPService* fgService = HAPFakegato::registerFakeGatoService(accessory, name);
 

@@ -150,7 +150,7 @@ public:
         _timers.clear();
     }
 
-    HAPService* registerFakeGatoService(HAPAccessory* accessory, const String& name) override;
+    HAPService* registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const String& name);
 
     bool isEnabled(){
         return _timers.isEnabled();
@@ -195,6 +195,10 @@ public:
         _callbackSaveConfig = callback;
     }
 
+    void setDeviceType(enum HAP_SCHEDULE_DEVICE_TYPE deviceType){
+        _deviceType = (uint8_t)deviceType;
+    }
+
 
 
 protected:
@@ -234,6 +238,8 @@ protected:
     std::function<void(uint16_t)> _callbackTimerEnd = nullptr;
 
     std::function<void(void)> _callbackSaveConfig = nullptr;
+
+    uint8_t _deviceType;
 };
 
 #endif /* HAPFAKEGATOSCHEDULE_HPP_ */

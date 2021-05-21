@@ -7,10 +7,9 @@
 //
 
 #include "HAPTime.hpp"
-#include "HAPLogger.hpp"
-#include "HAPHelper.hpp"
+// #include "HAPLogger.hpp"
+// #include "HAPHelper.hpp"
 
-#include <time.h>
 
 const char *monthName[12] PROGMEM = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -227,6 +226,39 @@ uint8_t HAPTime::dstOffset(uint8_t dayValue, uint8_t monthValue, unsigned int ye
         return 0;
 }
 
+
+uint16_t HAPTime::getDaysToDST(const unsigned int year, const uint8_t month){
+    tmElements_t dstDate;
+
+    dstDate.Year = CalendarYrToTm(year);
+    dstDate.Month = month;
+    if (month == 3) {
+        dstDate.Day = getDstStartDay(year);
+        dstDate.Hour = 1;
+    } else if ( month == 10 ) {
+        dstDate.Day = getDstEndDay(year);
+        dstDate.Hour = 2;
+    }
+
+    time_t dstTime = makeTime(dstDate);
+    double daysToDST = (dstTime - HAP_FAKEGATO_EPOCH) / SECS_PER_DAY;
+
+    return (uint16_t) ceil(daysToDST);
+}
+
+
+uint8_t HAPTime::getDstStartDay(unsigned int yearValue){
+    // Day in March that DST starts on, at 1 am
+    uint8_t dstOn = (31 - (5 * yearValue / 4 + 4) % 7);
+    return dstOn;
+}
+
+uint8_t HAPTime::getDstEndDay(unsigned int yearValue){
+    // Day in October that DST ends  on, at 2 am
+    uint8_t dstOff = (31 - (5 * yearValue / 4 + 1) % 7);
+    return dstOff;
+}
+
 time_t HAPTime::getTimeFromCompiling(){
     time_t t = 0;
     tmElements_t tm;
@@ -302,12 +334,12 @@ FLASHMEM
 time_t HAPTime::getNTPTime(){
 
 	while (_udp.parsePacket() > 0) ; // discard any previously received packets
-	LogD(F("Transmit NTP Request to ..."), false);
+	// LogD(F("Transmit NTP Request to ..."), false);
 
     for (uint8_t i=0; i < HAP_NTP_SERVER_URLS_SIZE; i++){
-        LogD(F("   * "), false);
-        LogD(HAP_NTP_SERVER_URLS[i], false);
-        LogD(F(" ... "), false);
+        // LogD(F("   * "), false);
+        // LogD(HAP_NTP_SERVER_URLS[i], false);
+        // LogD(F(" ... "), false);
 
         sendNTPpacket(HAP_NTP_SERVER_URLS[i]);
         uint32_t beginWait = millis();
@@ -324,13 +356,13 @@ time_t HAPTime::getNTPTime(){
                 secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
                 secsSince1900 |= (unsigned long)_packetBuffer[43];
 
-                LogD(F("OK"), true);
+                // LogD(F("OK"), true);
                 return secsSince1900 - UNIX_OFFSET + (HAP_TIMEZONE * SECS_PER_HOUR);
             }
         }
-        LogD(F("FAILED\n"), true);
+        // LogD(F("FAILED\n"), true);
     }
-	LogE(F("ERROR - No NTP Response :-("), true);
+	// LogE(F("ERROR - No NTP Response :-("), true);
 	return 0; // return 0 if unable to get the time
 }
 
@@ -410,7 +442,7 @@ String HAPTime::timeString(){
 	if (timeStatus() != timeNotSet) {
 
 		struct tm curTtime;
-		HAPHelper::convertToTimeH(now(), curTtime);
+		convertToTimeH(now(), curTtime);
 		strftime(buffer, 30, HAP_NTP_TIME_FORMAT, &curTtime);
 
         return String(buffer);
