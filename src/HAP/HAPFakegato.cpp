@@ -309,7 +309,7 @@ String HAPFakegato::callbackGetHistoryEntries(){
     //     // ToDo:
     //     // If set to 0000, asks the accessory the start restart from the beginning of the memory
     // } else if ( (_restarted = true) || (_requestedIndex == 1) ) {
-    if ( (_restarted = true) || (_requestedIndex == 1) ) {
+    if ( (_restarted == true) || (_requestedIndex == 1) ) {
         getRefTime(data, &offset);
         entryCounter = _requestedIndex + 1;
         _requestedIndex--;

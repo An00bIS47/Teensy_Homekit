@@ -441,9 +441,8 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 #endif
 
 	//
-    // ending bytes?
+    // end mark
 	//
-    // tlv.encode(0xD2, {});
     uint8_t endBytes[2] = {HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK, 0x00};
 
     size_t decodedLen = 0;
