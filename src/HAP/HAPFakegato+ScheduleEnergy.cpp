@@ -261,21 +261,32 @@ FLASHMEM
 String HAPFakegatoScheduleEnergy::scheduleRead(){
     TLV8 tlv;
 
+	//
+	// Device Type
+	//
     tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DEVICE_TYPE, {_deviceType, 0x00});
+
+
     tlv.encode(0x03, {0xB8, 0x04});
 
+
+	//
     // Serial Number
+	//
     // tlv.encode(0x04, {0x42, 0x56, 0x31, 0x32, 0x4A, 0x31, 0x41, 0x30, 0x37, 0x32, 0x31, 0x32});
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_SERIALNUMBER, _serialNumber.length(), (uint8_t*)_serialNumber.c_str());
 
+	//
 	// Number of history entries
+	//
     // tlv.encode(0x06, {0xFB, 0x0A});
 	ui16_to_ui8 memoryUsed;
     memoryUsed.ui16 = _entries.size();
-
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY, 2, memoryUsed.ui8);
 
+	//
 	// Number of rolled over index
+	//
     // tlv.encode(0x07, {0x0C, 0x10, 0x00, 0x00});
 	ui32_to_ui8 rolledOverIndex;
 	if (_entries.size() == _entries.capacity) {
@@ -293,7 +304,9 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
     tlv.encode(0x14, {0x03});
     tlv.encode(0x0F, {0x00, 0x00, 0x00, 0x00});
 
+	//
     // Programs
+	//
     //tlv.encode(0x45, {0x05, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x01, 0x01, 0x3C, 0x05, 0x96});
 	size_t dataSize = 0;
 	encodePrograms(nullptr, &dataSize);
@@ -301,7 +314,9 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 	encodePrograms(data, &dataSize);
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS, dataSize, data);
 
+	//
     // Days
+	//
     // tlv.encode(0x46, {0x05, 0x15, 0x1C, 0x2C, 0x9F, 0x24, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
 	uint8_t daysHex[84];
 	memset(daysHex, 0, 84);
@@ -318,11 +333,11 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS, 84, daysHex);
 
+	//
     // Commands
     // tlv.encode(0x44, {0x05, 0x0C, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
 	// 						    |
 	//						    +-> 0x0C = OFF -- 0xOD = ON
-
 	// ToDo:
 	// Logitude and Latitude calcualtion
 	if (_timers.isEnabled()) {
@@ -331,21 +346,74 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 		tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE, {0x05, 0x0C, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
 	}
 
-	// ToDo: DST
+
+	//
     // DST
-    tlv.encode(0x47, {0x05, 0x73, 0x1B, 0x45, 0x1C, 0xDF, 0x1C, 0xB8, 0x1D, 0xB4, 0x00, 0x00, 0x00, 0x3C, 0x00, 0x00, 0x00});
-	
+	//
+    // tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DST, {0x05, 0x73, 0x1B, 0x45, 0x1C, 0xDF, 0x1C, 0xB8, 0x1D, 0xB4, 0x00, 0x00, 0x00, 0x3C, 0x00, 0x00, 0x00});
+	uint8_t offsetDST = 0;
+	uint8_t DST[19];
+
+	// first 0x05
+	DST[0] = 0x05;
+	offsetDST += 1;
+
+	tmElements_t curTime;
+	breakTime(now(), curTime);
+
+	// current year DST begin
+	ui16_to_ui8 dstBeginCurYear;
+	dstBeginCurYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970), 3);
+	memcpy(DST + offsetDST, dstBeginCurYear.ui8, 2);
+	offsetDST += 2;
+
+	// current year DST end
+	ui16_to_ui8 dstEndCurYear;
+	dstEndCurYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970), 10);
+	memcpy(DST + offsetDST, dstEndCurYear.ui8, 2);
+	offsetDST += 2;
+
+	// next year DST begin
+	ui16_to_ui8 dstBeginNextYear;
+	dstBeginNextYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970 + 1), 3);
+	memcpy(DST + offsetDST, dstBeginNextYear.ui8, 2);
+	offsetDST += 2;
+
+	// next year DST end
+	ui16_to_ui8 dstEndNextYear;
+	dstEndNextYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970 + 1), 10);
+	memcpy(DST + offsetDST, dstEndNextYear.ui8, 2);
+	offsetDST += 2;
+
+	// time when changing clock
+	// 0x00000078 = 120 = 02:00 time
+	ui32_to_ui8 clockChangeTime;
+	clockChangeTime.ui32 = (HAPTime::getUTCOffset() * 60) + 60;
+	memcpy(DST + offsetDST, clockChangeTime.ui8, 4);
+	offsetDST += 4;
+
+	ui32_to_ui8 clockOffset;
+	clockOffset.ui32 = 60;
+	memcpy(DST + offsetDST, clockOffset.ui8, 4);
+	offsetDST += 4;
+
+	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DST, offsetDST, DST);
+
 
 	// ??
 	tlv.encode(0x48, {0x05, 0x00, 0x00, 0x00, 0x00, 0x00});
     tlv.encode(0x4A, {0x05, 0x00, 0x00, 0x00, 0x00, 0x00});
     tlv.encode(0x1A, {0x00, 0x00, 0x00, 0x00});
 
+	//
     // Status LED
+	//
     // tlv.encode(0x60, {0x64});
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED, 1, _statusLED);
 
+	//
     // last activity On switch ?
+	//
     // tlv.encode(0xD0, {0x99, 0x6C, 0x21, 0x00});
 	ui32_to_ui8 secsLastAct;
 	if ((_callbackGetTimestampLastActivity != nullptr)) {
@@ -353,25 +421,29 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 	} else {
 		secsLastAct.ui32 = 0;
 	}
-	tlv.encode(0xD0, 4, secsLastAct.ui8); // offset ?
+	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_LAST_ACTIVITY, 4, secsLastAct.ui8); // offset ?
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 	// HAPHelper::array_print("secsLastAct", secsLastAct.ui8, 4);
 #endif
 
+	//
     //  EVE Time
+	//
 	//tlv.encode(0x9B, {0xFB, 0x2C, 0x19, 0x00}); // offset ?
 	ui32_to_ui8 secs;
     secs.ui32 = (timestampLastEntry() - HAPTime::refTime());
-	tlv.encode(0x9B, 4, secs.ui8); // offset ?
+	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_EVE_TIME, 4, secs.ui8); // offset ?
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
 	// HAPHelper::array_print("secs", secs.ui8, 4);
 #endif
 
+	//
     // ending bytes?
+	//
     // tlv.encode(0xD2, {});
-    uint8_t endBytes[2] = {0xD2, 0x00};
+    uint8_t endBytes[2] = {HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK, 0x00};
 
     size_t decodedLen = 0;
 	uint8_t out[tlv.size() + 2];
@@ -381,6 +453,8 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
     // attach endingBytes
     memcpy(out + decodedLen, endBytes, 2);
     decodedLen = decodedLen + 2;
+
+	tlv.clear();
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
     HAPHelper::array_print("tlv", out, decodedLen);
@@ -449,4 +523,6 @@ void HAPFakegatoScheduleEnergy::scheduleWrite(String oldValue, String newValue){
 	saveConfig();
 
 	LogD("OK", true);
+
+	tlv.clear();
 }

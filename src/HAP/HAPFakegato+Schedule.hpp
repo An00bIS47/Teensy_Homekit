@@ -60,8 +60,13 @@ enum HAP_SCHEDULE_DEVICE_TYPE {
 #define HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED       0x20
 #define HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS                 0x45
 #define HAP_FAKEGATO_SCHEDULE_TYPE_DAYS                     0x46
+#define HAP_FAKEGATO_SCHEDULE_TYPE_DST                      0x47
 #define HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED               0x60
+#define HAP_FAKEGATO_SCHEDULE_TYPE_LAST_ACTIVITY            0xD0
 
+#define HAP_FAKEGATO_SCHEDULE_TYPE_EVE_TIME                 0x9B
+
+#define HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK                 0xD2
 
 typedef enum {
     TIME = 0,

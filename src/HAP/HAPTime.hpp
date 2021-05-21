@@ -100,6 +100,10 @@ public:
         return _t_offset;
     }
 
+    static int getUTCOffset(){
+        return _utcOffset;
+    }
+
 
     static uint16_t getDaysToDST(const unsigned int year, const uint8_t month);
 

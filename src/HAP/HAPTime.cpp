@@ -234,10 +234,10 @@ uint16_t HAPTime::getDaysToDST(const unsigned int year, const uint8_t month){
     dstDate.Month = month;
     if (month == 3) {
         dstDate.Day = getDstStartDay(year);
-        dstDate.Hour = 1;
+        dstDate.Hour = 1;           // 1:00 UTC     == 2:00 MEZ
     } else if ( month == 10 ) {
         dstDate.Day = getDstEndDay(year);
-        dstDate.Hour = 2;
+        dstDate.Hour = 2;           // 2:00 UTC     == 3:00 MESZ
     }
 
     time_t dstTime = makeTime(dstDate);
