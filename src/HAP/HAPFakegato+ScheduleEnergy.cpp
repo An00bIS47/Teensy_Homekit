@@ -392,6 +392,7 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 	memcpy(DST + offsetDST, clockChangeTime.ui8, 4);
 	offsetDST += 4;
 
+	// time changing offset => hardcoded to 60
 	ui32_to_ui8 clockOffset;
 	clockOffset.ui32 = 60;
 	memcpy(DST + offsetDST, clockOffset.ui8, 4);

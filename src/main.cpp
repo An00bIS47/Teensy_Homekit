@@ -42,9 +42,9 @@
 
 //     while( true ){
 //         _webserver->handle();
-//         delay(1);		
+//         delay(1);
 //     }
- 
+
 //     // Serial.println("Ending task 1");
 //     // vTaskDelete( NULL );
 // }
@@ -56,7 +56,7 @@
 
 
 #if defined(ARDUINO_TEENSY41)
-FLASHMEM 
+FLASHMEM
 #endif
 void setup() {
 
@@ -64,7 +64,7 @@ void setup() {
 
 #if defined(TEENSY_DEBUG)
 	debug.begin(SerialUSB1);
-#endif    
+#endif
 	while(!Serial){
 		;
 	}
@@ -86,7 +86,7 @@ void setup() {
 	hap.begin();
 
 
-	
+
 
 // #if HAP_ENABLE_WEBSERVER_CORE_0
 // 	xTaskCreatePinnedToCore(
@@ -99,10 +99,10 @@ void setup() {
 //                     0);  		/* Core where the task should run */
 // #endif
 
-	
+
 
 }
 
 void loop(){
-	hap.handle();	
+	hap.handle();
 }
