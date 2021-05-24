@@ -1956,7 +1956,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 
 		uint8_t* encrypted = nullptr;
 		int encryptedLen = 0;
-		encrypted = HAPEncryption::encrypt(response.c_str(), response.length(), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
+		encrypted = HAPEncryption::encrypt((uint8_t*)response.c_str(), response.length(), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
 		if (encryptedLen == 0) {
 			LogE(F("ERROR: Encrpyting response failed!"), true);
 
@@ -1972,6 +1972,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 
 		free(encrypted);
 
+		if (bytesSend == encryptedLen) return true;
 	}
 
 	else if (mode == HAP_ENCRYPTION_MODE_ENCRYPT_CHUNKED) {
