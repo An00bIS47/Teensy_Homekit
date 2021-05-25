@@ -270,7 +270,7 @@
                 "HAP_PRINT_QRCODE=0",
                 "HAP_DEBUG=1",
                 "HAP_DEBUG_PAIRINGS=0",
-                "HAP_DEBUG_HOMEKIT=0",
+                "HAP_DEBUG_HOMEKIT=1",
                 "HAP_DEBUG_FAKEGATO=0",
                 "HAP_DEBUG_HOMEKIT_REQUEST=0",
                 "HAP_DEBUG_TLV8=0",
