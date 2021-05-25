@@ -1921,7 +1921,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		return true;
 	}
 
-#if 1
+#if 0
 	if (mode == HAP_ENCRYPTION_MODE_ENCRYPT) {
 		size_t jsonLength = measureJson(doc);
 
