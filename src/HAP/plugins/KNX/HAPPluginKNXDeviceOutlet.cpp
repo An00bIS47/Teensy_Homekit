@@ -55,7 +55,11 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
     String sn = HAPDeviceID::serialNumber("knx-2", String(_id));
 
     // Create accessory if not already created
+    
     _accessory = new HAPAccessory();
+
+
+
     //HAPAccessory::addInfoServiceToAccessory(_accessory, "Builtin LED", "ACME", "LED", "123123123", &identify);
     auto callbackIdentify = std::bind(&HAPPluginKNXDevice::identify, this, std::placeholders::_1, std::placeholders::_2);
     _accessory->addInfoService(String(_name), "KNX", "KNX Outlet", sn, callbackIdentify, HAP_KNX_OUTLET_VERSION);

@@ -16,7 +16,7 @@
 #include "HAPWebServerFiles.hpp"
 #endif
 
-#include <knx.h>
+
 #include <EEPROM.h>         // can be removed once knx loads porperly...
 
 #define VERSION_MAJOR       0
