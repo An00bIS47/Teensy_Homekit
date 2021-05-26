@@ -7,16 +7,6 @@
 //
 
 #include "HAPPlugins.hpp"
-#include "HAPCallbackTemplate.hpp"
-
-
-//namespace HAPPluginSystem {
-
-// HAPAccessory* HAPPlugin::_accessory = nullptr;
-// String HAPPlugin::_name;
-// bool HAPPlugin::_isEnabled;
-// unsigned long HAPPlugin::_interval;
-
 
 HAPPluginFactory& HAPPluginFactory::Instance() {
 	static HAPPluginFactory instance;
@@ -40,9 +30,4 @@ std::vector<String> HAPPluginFactory::names(){
 	}
 	return v;
 }
-
-
-
-
-//}
 

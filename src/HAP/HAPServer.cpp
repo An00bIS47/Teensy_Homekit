@@ -3584,11 +3584,12 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 	bool hasParamPerms = false;
 	bool hasParamEvent = false;
 	bool hasParamType = false;
+	LogD(F(""), true);
 
 	for (const auto &p : hapClient->request.params) {
 
 #if HAP_DEBUG
-    	LogD(F("\nparam: ") + p.first + F(" - ") + p.second, true);
+    	LogD(F("param: ") + p.first + F(" - ") + p.second, true);
 #endif
 		if (p.first == "meta" && p.second == "1"){
 			hasParamMeta = true;
