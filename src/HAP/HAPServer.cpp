@@ -1147,7 +1147,7 @@ void HAPServer::handleAllPairingsRemoved(){
 }
 
 void HAPServer::handleClientAvailable(HAPClient* hapClient) {
-	_curLine = "";
+	String curLine = "";
 
 	LogD(F("<<< Handle client available [enrypted:") + String(hapClient->isEncrypted()) + "]" , true);
 
@@ -1156,12 +1156,12 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 	if (hapClient->isEncrypted()) {
 		processIncomingEncryptedRequest( hapClient, &bufferedClient );
 	} else {
-		processIncomingRequest( hapClient, &bufferedClient );
+		processIncomingRequest( hapClient, &bufferedClient, curLine );
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	if (_curLine != "")
-		LogD(_curLine, true);
+	if (curLine != "")
+		LogD(curLine, true);
 #endif
 
 	// clear request
@@ -1436,7 +1436,7 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 }
 
 
-void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
+void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient, String& curLine){
 
 	while (bufferedClient->available()){
 
@@ -1445,7 +1445,7 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 		if ( (char) b == '\n' ) {
 			// if the current line is blank, you got two newline characters in a row.
 			// that's the end of the client HTTP request, so send a response:
-			if (_curLine.length() == 0) {
+			if (curLine.length() == 0) {
 
 
 #if HAP_DEBUG_HOMEKIT
@@ -1553,19 +1553,17 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 					}
 				}
 
-				_curLine = "";
+				curLine = "";
 
 
 				return;
 			} else {  // if you got a newline, then clear currentLine:
-
-
 				// Handle lines
-				processIncomingLine(hapClient, _curLine);
-				_curLine = "";
+				processIncomingLine(hapClient, curLine);
+				curLine = "";
 			}
 		} else if ( (char) b != '\r') {  	// if you got anything else but a carriage return character,
-			_curLine += (char) b;      		// add it to the end of the currentLine
+			curLine += (char) b;      		// add it to the end of the currentLine
 		}
 
 	}
@@ -2193,12 +2191,12 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 1/4 ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + F("] -> /pair-setup Step 1/4 ..."), false);
 #elif defined( CORE_TEENSY )
-	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> /pair-setup Step 1/4 ...", false);
-	LogV( "<<< Handle client [", false);
+	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> /pair-setup Step 1/4 ...", false);
+	LogV( F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pair-setup Step 1/4 ...", false);
+	LogV( F("] -> /pair-setup Step 1/4 ..."), false);
 #endif
 
 
@@ -2340,11 +2338,11 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogD( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 2/4 ...", false);
+	LogD( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 2/4 ...", false);
 #elif defined( CORE_TEENSY )
-	LogD( "<<< Handle client [", false);
+	LogD( F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pair-setup Step 2/4 ...", false);
+	LogV(F("] -> /pair-setup Step 2/4 ..."), false);
 #endif
 
 	_eventManager.queueEvent(EventManager::kEventPairingStep3, HAPEvent());
@@ -2485,7 +2483,7 @@ FLASHMEM
 bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 3/4 ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 3/4 ...", false);
 #elif defined( CORE_TEENSY )
 	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
@@ -2669,9 +2667,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	Heap(_clients.size(), _eventManager.getNumEventsInQueue());
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
 #elif defined( CORE_TEENSY )
-	LogV(F("<<< Handle client ["), false);
+	LogV(F(F("<<< Handle client [")), false);
 	Serial.print(hapClient->client.remoteIP());
 	LogV(F("] -> /pair-setup Step 4/4 ..."), false);
 #endif
@@ -2819,7 +2817,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 1/2 ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 1/2 ...", false);
 #elif defined( CORE_TEENSY )
 	LogV( F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
@@ -3023,7 +3021,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 2/2 ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 2/2 ...", false);
 #elif defined( CORE_TEENSY )
 	LogV(F("Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
@@ -3313,12 +3311,12 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> POST /pairings list ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> POST /pairings list ...", false);
 #elif defined( CORE_TEENSY )
-	//LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings list ...", false);
-	LogV("Handle client [", false);
+	//LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings list ...", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pairings list ...", false);
+	LogV(F("] -> /pairings list ..."), false);
 #endif
 
 	if (hapClient->isAdmin() == false){
@@ -3376,10 +3374,10 @@ FLASHMEM
 void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifier, const uint8_t* publicKey, bool isAdmin){
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> POST /pairings add ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> POST /pairings add ...", false);
 #elif defined( CORE_TEENSY )
-	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings add ...", false);
-	LogV(F("Handle client ["), false);
+	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings add ...", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
 	LogV(F("] -> /pairings add ..."), false);
 #endif
@@ -3428,10 +3426,10 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> POST /pairings remove ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> POST /pairings remove ...", false);
 #elif defined( CORE_TEENSY )
-	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings remove ...", false);
-	LogV(F("Handle client ["), false);
+	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings remove ...", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
 	LogV(F("] -> /pairings remove ..."), false);
 #endif
@@ -3524,12 +3522,12 @@ void HAPServer::handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> POST /pairings ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> POST /pairings ...", false);
 #elif defined( CORE_TEENSY )
-	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> POST /pairings ...", false);
-	LogV("Handle client [", false);
+	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings ...", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
-	LogV("] -> /pairings ...", false);
+	LogV(F("] -> /pairings ..."), false);
 #endif
 
 
@@ -3571,10 +3569,10 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] -> GET /characteristics ...", false);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> GET /characteristics ...", false);
 #elif defined( CORE_TEENSY )
-	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] -> GET /characteristics ...", false);
-	LogV(F("Handle client ["), false);
+	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> GET /characteristics ...", false);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
 	LogV(F("] -> GET /characteristics ..."), false);
 #endif
@@ -3691,10 +3689,10 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
-	LogV( "<<< Handle client [" + hapClient->client.remoteIP().toString() + "] ->  PUT /characteristics ...", true);
+	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] ->  PUT /characteristics ...", true);
 #elif defined( CORE_TEENSY )
-	// LogV( "<<< Handle client [" + String(hapClient->client.remoteIP()) + "] ->  PUT /characteristics ...", true);
-	LogV(F("Handle client ["), false);
+	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] ->  PUT /characteristics ...", true);
+	LogV(F("<<< Handle client ["), false);
 	Serial.print(hapClient->client.remoteIP());
 	LogV(F("] -> PUT /characteristics ..."), false);
 #endif

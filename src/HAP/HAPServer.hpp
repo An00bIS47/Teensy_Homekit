@@ -363,7 +363,7 @@ private:
 
 	uint8_t _homekitFailedLoginAttempts;
 
-	String _curLine;
+	// String _curLine;
 	uint16_t _port;
 
 #if HAP_DEBUG
@@ -388,7 +388,7 @@ private:
 	//
 
 	// parsing
-	void processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
+	void processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient, String& curLine);
 	void processIncomingEncryptedRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
 
 	void processIncomingLine(HAPClient* hapClient, String& line);
