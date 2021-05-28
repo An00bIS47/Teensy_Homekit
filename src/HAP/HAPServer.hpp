@@ -343,12 +343,6 @@ protected:
 	void handleIdentify(HAPClient* hapClient);
 
 
-	//
-	// Plugin handling
-	// ToDo: currently unused
-	//
-	void stopPlugins(bool value);
-	bool startPlugin(std::unique_ptr<HAPPlugin> plugin);
 
 	// Callbacks
 	void handleAllPairingsRemoved();
@@ -375,7 +369,6 @@ private:
 	char _brand[MAX_BRAND_LENGTH];
 
 	bool _stopEvents;
-	bool _stopPlugins;
 
 	//
 	// Bonjour

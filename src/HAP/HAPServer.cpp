@@ -97,7 +97,6 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 #endif
 
 	_stopEvents = false;
-	_stopPlugins = false;
 
 	_hapsrp = nullptr;
 
@@ -1049,13 +1048,13 @@ void HAPServer::handle() {
 #endif
 
 	// Handle plugins
-	if (!_stopPlugins){
+	// if (!_stopPlugins){
 		for (auto& plugin : _plugins) {
 			if (plugin->isEnabled()) {
 				plugin->handle();
 			}
 		}
-	}
+	// }
 
 	//
 	// Handle fakeGatos
@@ -4014,15 +4013,6 @@ bool HAPServer::isPaired(){
 	return _accessorySet->isPaired();
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPServer::stopPlugins(bool value){
-	if (value)
-		_stopPlugins = false;
-	else
-		_stopPlugins = true;
-}
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
