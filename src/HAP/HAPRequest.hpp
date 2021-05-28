@@ -37,8 +37,9 @@ public:
 
 	void clear();
 
+#if HAP_DEBUG_HOMEKIT
 	String toString() const;
-
+#endif
 private:
 
 };

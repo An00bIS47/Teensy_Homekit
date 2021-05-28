@@ -427,3 +427,19 @@ size_t HAPHelper::base64_dec_len(char * input, size_t inputLen) {
 	return ((6 * inputLen) / 8) - numEq;
 }
 
+
+int HAPHelper::indexOf(const char* array, int arr_size, char to_find, int startPos){
+    int pos = -1;
+    for(int i = startPos; i < arr_size; ++i) {
+        if(array[i] == to_find) {
+            pos = i;
+            break;
+        }
+    }
+    return pos;
+}
+
+
+bool HAPHelper::startsWith(const char *str, const char *pre){
+    return strncmp(str, pre, strlen(pre)) == 0;
+}

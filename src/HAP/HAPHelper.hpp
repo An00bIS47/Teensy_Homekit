@@ -108,6 +108,9 @@ public:
    		return (int)(value * 100 + 0.5) / 100.0;
 	}
 
+	static int indexOf(const char* array, int arr_size, char to_find, int startPos = 0);
+	static bool startsWith(const char *str, const char *pre);
+
 };
 
 // template<typename T>
