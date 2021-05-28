@@ -1327,7 +1327,7 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 			// char bodyDataStr[bodyDataLen + 1];
 			// strncpy(bodyDataStr, (char*)bodyData, bodyDataLen);
 
-			handleCharacteristicsPut( hapClient, String((char*)bodyData) );
+			handleCharacteristicsPut( hapClient, bodyData, bodyDataLen );
 		}
 
 	} else if ( hapClient->request.path == "/pairings" ) {
@@ -3698,7 +3698,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 
 }
 
-void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
+void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
@@ -3711,7 +3711,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 #endif
 
 	DynamicJsonDocument root(2048);
-	DeserializationError error = deserializeJson(root, body);
+	DeserializationError error = deserializeJson(root, bodyData, bodyDataLen);
 
 	if (error) {
     	LogE(F("ERROR: Parsing put characteristics request failed!"), true);

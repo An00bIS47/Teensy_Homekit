@@ -331,7 +331,7 @@ protected:
 
 	// /characteristics
 	void handleCharacteristicsGet(HAPClient* hapClient);
-	void handleCharacteristicsPut(HAPClient* hapClient, String body);
+	void handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen);
 
 	// pairings
 	void handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen);
