@@ -10,7 +10,7 @@
 
 #define HAP_PLUGIN_LED_INTERVAL 1000
 
-#if 0
+#if defined (CORE_TEENSY)
 #ifndef BUILTIN_LED
 #define BUILTIN_LED 13
 #endif
@@ -148,26 +148,26 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
 
 
-    //
-    // Outlet Service / Switch Service
-    //
-    HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
-    _accessory->addService(switchService);
+    // //
+    // // Outlet Service / Switch Service
+    // //
+    // HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
+    // _accessory->addService(switchService);
 
-    HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-    plugServiceName->setValue("LED");
-    _accessory->addCharacteristicToService(switchService, plugServiceName);
+    // HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+    // plugServiceName->setValue("LED");
+    // _accessory->addCharacteristicToService(switchService, plugServiceName);
 
-    _enabledState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
-    _enabledState->setDescription("Enabled");
-    _enabledState->setValue(_blinkingEnabled);
+    // _enabledState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+    // _enabledState->setDescription("Enabled");
+    // _enabledState->setValue(_blinkingEnabled);
 
-    auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);
-    _enabledState->setValueChangeCallback(callbackEnabledState);
-    _accessory->addCharacteristicToService(switchService, _enabledState);
+    // auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);
+    // _enabledState->setValueChangeCallback(callbackEnabledState);
+    // _accessory->addCharacteristicToService(switchService, _enabledState);
 
-    // Link switchService to _service
-    _service->addLinkedServiceId(switchService->aid());
+    // // Link switchService to _service
+    // _service->addLinkedServiceId(switchService->aid());
 
 	LogD("OK", true);
 

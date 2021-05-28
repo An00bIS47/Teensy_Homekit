@@ -31,6 +31,7 @@ void HAPDailyTimerFactory::handle() {
 	}
 }
 
+
 bool HAPDailyTimerFactory::isActive(uint8_t index){
     return HAPDailyTimer::isActive(&_timers[index]);
 }

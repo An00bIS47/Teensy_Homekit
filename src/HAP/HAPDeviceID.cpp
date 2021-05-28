@@ -12,7 +12,9 @@
 
 uint8_t HAPDeviceID::_deviceID[] = {'\0'};
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 uint8_t* HAPDeviceID::generateID() {
 
     if (_deviceID[0] == '\0')
@@ -33,31 +35,45 @@ const char* HAPDeviceID::deviceID(){
 }
 */
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 String HAPDeviceID::deviceID(){
     char baseMacChr[18];
     sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
     return String(baseMacChr);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPDeviceID::deviceID(char baseMacChr[18]){
     sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
     baseMacChr[18] = '\0';
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 String HAPDeviceID::chipID(){
     char baseMacChr[18];
     sprintf(baseMacChr, "%02X%02X%02X%02X%02X%02X", _deviceID[5], _deviceID[4], _deviceID[3], _deviceID[2], _deviceID[1], _deviceID[0]);
     return String(baseMacChr);
 }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 String HAPDeviceID::serialNumber(String type, String id){
     char serialNumber[6 + 2 + type.length() + id.length()];
     sprintf(serialNumber, "%02X%02X%02X-%s-%s", _deviceID[3], _deviceID[4], _deviceID[5], type.c_str(), id.c_str());
     return String(serialNumber);
 }
 
+#if defined(ARDUINO_ARCH_ESP32)
 String HAPDeviceID::provisioningID(const char* prefix){
     char provId[6 + 1 + strlen(prefix)];
     sprintf(provId, "%s%02X%02X%02X", prefix, _deviceID[3], _deviceID[4], _deviceID[5]);
     return String(provId);
 }
+#endif

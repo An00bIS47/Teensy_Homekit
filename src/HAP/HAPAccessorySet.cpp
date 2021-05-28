@@ -15,7 +15,12 @@
 #include <WString.h>
 
 #include <mbedtls/sha512.h>
+#if defined ( ARDUINO_ARCH_ESP32)
 #include <mbedtls/base64.h>
+#elif defined (CORE_TEENSY)
+#include <Base64.h>
+#endif
+
 #include <mbedtls/bignum.h>
 
 #include "base36.h"
@@ -166,11 +171,18 @@ void HAPAccessorySet::computeSetupHash(){
 	// Doesn't work :(
 	//_setupHash = base64::encode(sliced);
 
+
+#if defined ( ARDUINO_ARCH_ESP32)
 	size_t olen;
 	if (mbedtls_base64_encode((uint8_t*)_setupHash, 9, &olen, sliced, 4)) {
 		LogE("[computeSetupHash] ERROR: mbedtls_base64_encode failed!", true);
 	}
-	// setupHash[9] = '\0';
+#elif defined (CORE_TEENSY)
+
+	base64_encode(_setupHash, (char*)sliced, 4);
+#endif
+
+	//setupHash[9] = '\0';
 }
 
 
@@ -274,9 +286,6 @@ uint8_t HAPAccessorySet::numberOfAccessories() {
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 HAPAccessory* HAPAccessorySet::accessoryWithAID(uint8_t aid) {
 	for (uint8_t i=0; i < _accessories.size(); i++){
 		if (_accessories[i]->aid() == aid){
@@ -298,9 +307,6 @@ void HAPAccessorySet::addAccessory(HAPAccessory *accessory) {
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
 	for (int i=0; i < _accessories.size(); i++){
 		if (_accessories[i]->aid() == accessory->aid()){

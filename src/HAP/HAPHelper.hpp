@@ -10,13 +10,13 @@
 #define HAPHELPER_HPP_
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
+// #include <ArduinoJson.h>
 // #include "HAPGlobals.hpp"
 
-#if defined( CORE_TEENSY )
-#include <time.h>
-#include <TimeLib.h>
-#endif
+// #if defined( CORE_TEENSY )
+// #include <time.h>
+// #include <TimeLib.h>
+// #endif
 
 #ifndef byte
 #define byte uint8_t
@@ -37,18 +37,18 @@ public:
 
 	// static String getValue(String data, char separator, int index) __attribute__ ((deprecated));
 
-	static void binToHex(const unsigned char * in, size_t insz, char * out, size_t outsz);
 
+	static void binToHex(const unsigned char * in, size_t insz, char * out, size_t outsz);
 	static int hexToBin(unsigned char *data, const char* hexstring, size_t len);
 
 	// DEPRECATED functions causing memory leaks
-	static uint8_t* hexToBin(const char* string) __attribute__ ((deprecated));
-	static char* toHex(const unsigned char * in, size_t insz) __attribute__ ((deprecated));
+	// static uint8_t* hexToBin(const char* string) __attribute__ ((deprecated));
+	// static char* toHex(const unsigned char * in, size_t insz) __attribute__ ((deprecated));
 
 	static void prependZeros(char *dest, const char *src, uint8_t width); // __attribute__ ((deprecated));
 
 	static uint8_t numDigits(const size_t n);
-	static void arrayPrint(uint8_t* a, int len);
+	// static void arrayPrint(uint8_t* a, int len);
 
 	static String wrap(String str);
 	static String wrap(const char *str);
@@ -58,8 +58,8 @@ public:
 
 	// static String printUnescaped(String str);
 
-	static bool containsNestedKey(const JsonObject obj, const char* key);
-	static void mergeJson(JsonDocument& dst, const JsonObject& src);
+	// static bool containsNestedKey(const JsonObject obj, const char* key);
+	// static void mergeJson(JsonDocument& dst, const JsonObject& src);
 
 	static void printHex(const char* suffix, const uint8_t *data, size_t length, bool newline = true);
 
@@ -93,48 +93,6 @@ public:
 	static void getPartionTableInfo();
 #endif
 
-
-#if defined( CORE_TEENSY )
-	//converts TimeLib's time representations to time.h's representations
-	static void convertToTimeH(tmElements_t &timelib, tm &timeh){
-		time_t t = makeTime(timelib); // - UNIX_OFFSET;
-		localtime_r(&t, &timeh);
-	}
-	static void convertToTimeH(time_t timelib, tm &timeh){
-		time_t t = timelib; // - UNIX_OFFSET;
-		localtime_r(&t, &timeh);
-	}
-
-	static time_t convertToTimeH(tmElements_t &timelib){
-		return makeTime(timelib); // - UNIX_OFFSET;
-	}
-
-	static time_t convertToTimeH(time_t timelib){
-		return timelib; // - UNIX_OFFSET;
-	}
-
-	//converts time.h's time representations to TimeLib's representations
-	static void convertToTimeLib(tm &timeh, tmElements_t &timelib){
-		// breakTime(mktime(&timeh) + UNIX_OFFSET, timelib);
-		breakTime(mktime(&timeh), timelib);
-	}
-
-	static void convertToTimeLib(time_t timeh, tmElements_t &timelib){
-		// breakTime(timeh + UNIX_OFFSET, timelib);
-		breakTime(timeh, timelib);
-	}
-	static time_t convertToTimeLib(tm &timeh){
-		// return mktime(&timeh) + UNIX_OFFSET;
-		return mktime(&timeh); // + UNIX_OFFSET;
-	}
-
-	static time_t convertToTimeLib(time_t timeh){
-		// return timeh + UNIX_OFFSET;
-		return timeh; // + UNIX_OFFSET;
-	}
-#endif
-
-
 	static void mpi_print(const char* tag, const mbedtls_mpi* x);
 	static void array_print(const char* tag, const unsigned char* buf, int len);
 
@@ -149,6 +107,9 @@ public:
 	static double round2(double value) {
    		return (int)(value * 100 + 0.5) / 100.0;
 	}
+
+	static int indexOf(const char* array, int arr_size, char to_find, int startPos = 0);
+	static bool startsWith(const char *str, const char *pre);
 
 };
 

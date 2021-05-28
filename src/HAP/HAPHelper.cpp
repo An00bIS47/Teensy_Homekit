@@ -23,58 +23,65 @@
 //returns 0 on success, -1 on error
 //data is a buffer of at least len bytes
 //hexstring is upper or lower case hexadecimal, NOT prepended with "0x"
-uint8_t* HAPHelper::hexToBin(const char* string)
-{
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM
+// #endif
+// uint8_t* HAPHelper::hexToBin(const char* string)
+// {
 
-	if(string == nullptr)
-	{
-	   return nullptr;
-	}
+// 	if(string == nullptr)
+// 	{
+// 	   return nullptr;
+// 	}
 
-	size_t slength = strlen(string);
+// 	size_t slength = strlen(string);
 
-	if(slength % 2 != 0) // must be even
-	{
-	   return nullptr;
-	}
-	size_t dlength = slength / 2;
+// 	if(slength % 2 != 0) // must be even
+// 	{
+// 	   return nullptr;
+// 	}
+// 	size_t dlength = slength / 2;
 
-	unsigned char* data = (unsigned char*) malloc(sizeof(unsigned char) * dlength);
-	memset(data, 0, dlength);
+// 	unsigned char* data = (unsigned char*) malloc(sizeof(unsigned char) * dlength);
+// 	memset(data, 0, dlength);
 
-	size_t index = 0;
+// 	size_t index = 0;
 
-	while (index < slength)
-	{
-		char c = string[index];
+// 	while (index < slength)
+// 	{
+// 		char c = string[index];
 
-		int value = 0;
-		if(c >= '0' && c <= '9')
-		{
-			value = (c - '0');
-		}
-		else if (c >= 'A' && c <= 'F')
-		{
-			value = (10 + (c - 'A'));
-		}
-		else if (c >= 'a' && c <= 'f')
-		{
-			 value = (10 + (c - 'a'));
-		}
-		else
-		{
-			free(data);
-			return nullptr;
-		}
+// 		int value = 0;
+// 		if(c >= '0' && c <= '9')
+// 		{
+// 			value = (c - '0');
+// 		}
+// 		else if (c >= 'A' && c <= 'F')
+// 		{
+// 			value = (10 + (c - 'A'));
+// 		}
+// 		else if (c >= 'a' && c <= 'f')
+// 		{
+// 			 value = (10 + (c - 'a'));
+// 		}
+// 		else
+// 		{
+// 			free(data);
+// 			return nullptr;
+// 		}
 
-		data[(index/2)] += value << (((index + 1) % 2) * 4);
+// 		data[(index/2)] += value << (((index + 1) % 2) * 4);
 
-		index++;
-	}
+// 		index++;
+// 	}
 
-	return data;
-}
+// 	return data;
+// }
 
+
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPHelper::binToHex(const unsigned char * in, size_t insz, char * out, size_t outsz)
 {
 	unsigned char * pin = (unsigned char *)in;
@@ -94,13 +101,16 @@ void HAPHelper::binToHex(const unsigned char * in, size_t insz, char * out, size
 	pout[0] = 0;
 }
 
-char* HAPHelper::toHex(const unsigned char* in, size_t insz) {
-	char *out;
-	out = (char*)malloc(sizeof(char) * (insz * 2) + 1);
+// #if defined(ARDUINO_TEENSY41)
+// FLASHMEM
+// #endif
+// char* HAPHelper::toHex(const unsigned char* in, size_t insz) {
+// 	char *out;
+// 	out = (char*)malloc(sizeof(char) * (insz * 2) + 1);
 
-	HAPHelper::binToHex(in, insz, out, (insz * 2) + 1);
-	return out;
-}
+// 	HAPHelper::binToHex(in, insz, out, (insz * 2) + 1);
+// 	return out;
+// }
 
 // This Chunk of code takes a string and separates it based on a given character
 // and returns The item between the separating character
@@ -119,30 +129,35 @@ char* HAPHelper::toHex(const unsigned char* in, size_t insz) {
 // 	}
 // 	return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 // }
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 uint8_t HAPHelper::numDigits(const size_t n) {
 	if (n < 10) return 1;
 	return 1 + numDigits(n / 10);
 }
 
 
-void HAPHelper::arrayPrint(uint8_t* a, int len)
-{
-	for (int i=0; i<len; i++) {
-		if (i != 0 && (i % 0x10) == 0) {
-			printf("\n");
-		}
-		printf("%02X ", a[i]);
-	}
-	printf("\n");
-}
-
+// void HAPHelper::arrayPrint(uint8_t* a, int len)
+// {
+// 	for (int i=0; i<len; i++) {
+// 		if (i != 0 && (i % 0x10) == 0) {
+// 			printf("\n");
+// 		}
+// 		printf("%02X ", a[i]);
+// 	}
+// 	printf("\n");
+// }
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPHelper::prependZeros(char *dest, const char *src, uint8_t width) {
 	size_t len = strlen(src);
 	size_t zeros = (len > width) ? 0 : width - len;
 	memset(dest, '0', zeros);
 	strcpy(dest + zeros, src);
 }
+
 
 String HAPHelper::removeBrackets(String str){
 	if (str.length() > 2) {
@@ -159,6 +174,7 @@ String HAPHelper::wrap(String str) {
 String HAPHelper::wrap(const char *str) {
 	return String("\"" + String(str) + "\"");
 }
+
 
 String HAPHelper::arrayWrap(String *s, unsigned short len) {
 	String result;
@@ -195,6 +211,9 @@ String HAPHelper::dictionaryWrap(String *key, String *value, unsigned short len)
 //returns 0 on success, -1 on error
 //data is a buffer of at least len bytes
 //hexstring is upper or lower case hexadecimal, NOT prepended with "0x"
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 int HAPHelper::hexToBin(unsigned char *data, const char* hexstring, size_t len)
 {
     unsigned const char *pos = (unsigned const char*)hexstring;
@@ -267,29 +286,29 @@ void HAPHelper::mpi_print(const char* tag, const mbedtls_mpi* x)
 
 
 
-bool HAPHelper::containsNestedKey(const JsonObject obj, const char* key) {
-	for (const JsonPair pair : obj) {
-		if (!strcmp(pair.key().c_str(), key))
-			return true;
+// bool HAPHelper::containsNestedKey(const JsonObject obj, const char* key) {
+// 	for (const JsonPair pair : obj) {
+// 		if (!strcmp(pair.key().c_str(), key))
+// 			return true;
 
-		if (containsNestedKey(pair.value().as<JsonObject>(), key))
-			return true;
-	}
+// 		if (containsNestedKey(pair.value().as<JsonObject>(), key))
+// 			return true;
+// 	}
 
-	return false;
-}
+// 	return false;
+// }
 
 
-void HAPHelper::mergeJson(JsonDocument& dst, const JsonObject& src) {
+// void HAPHelper::mergeJson(JsonDocument& dst, const JsonObject& src) {
 
-	for (auto p : src) {
-        dst[p.key()] = p.value();
-    }
+// 	for (auto p : src) {
+//         dst[p.key()] = p.value();
+//     }
 
-// #if HAP_DEBUG_CONFIG
-//     serializeJson(dst, Serial);
-// #endif
-}
+// // #if HAP_DEBUG_CONFIG
+// //     serializeJson(dst, Serial);
+// // #endif
+// }
 
 #if defined (ARDUINO_ARCH_ESP32)
 void HAPHelper::getPartionTableInfo()
@@ -358,6 +377,7 @@ bool HAPHelper::isValidFloat(String tString) {
 	return true;
 }
 
+
 bool HAPHelper::isValidNumber(String str){
    bool isNum=false;
    for(uint8_t i=0;i<str.length();i++)
@@ -394,7 +414,6 @@ size_t HAPHelper::base64_enc_len(size_t plainLen) {
 	return (n + 2 - ((n + 2) % 3)) / 3 * 4;
 }
 
-
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
@@ -408,3 +427,19 @@ size_t HAPHelper::base64_dec_len(char * input, size_t inputLen) {
 	return ((6 * inputLen) / 8) - numEq;
 }
 
+
+int HAPHelper::indexOf(const char* array, int arr_size, char to_find, int startPos){
+    int pos = -1;
+    for(int i = startPos; i < arr_size; ++i) {
+        if(array[i] == to_find) {
+            pos = i;
+            break;
+        }
+    }
+    return pos;
+}
+
+
+bool HAPHelper::startsWith(const char *str, const char *pre){
+    return strncmp(str, pre, strlen(pre)) == 0;
+}

@@ -1,8 +1,9 @@
 Import("env")
 
+import time
+
 def after_upload(source, target, env):
     print("Delay while uploading...")
-    import time
     time.sleep(1)
     print("Done!")
 

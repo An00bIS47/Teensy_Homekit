@@ -375,10 +375,17 @@ dmypy.json
 # homekitstorage.json
 homekitStorage.json
 
+# gitlab.ini
+gitlab.ini
+
 # TestReports* 
 reports*
 
 # buildnumber in root
 buildnumber
+
+
+# vscode counter
+.VSCodeCounter
 
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,macos,python,platformio,cmake,node

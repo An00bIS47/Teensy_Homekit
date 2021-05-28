@@ -16,7 +16,7 @@
 #include "HAPWebServerFiles.hpp"
 #endif
 
-#include <knx.h>
+
 #include <EEPROM.h>         // can be removed once knx loads porperly...
 
 #define VERSION_MAJOR       0
@@ -367,7 +367,7 @@ HAPConfigurationValidationResult HAPPluginKNX::validateConfig(JsonObject object)
 
         // plugin._name.devices.count.name - length
         if (value.containsKey("name")) {
-            if (strlen(value["name"]) + 1 > HAP_STRING_LENGTH_MAX) {
+            if (strlen(value["name"]) + 1 > HAP_HOMEKIT_DEFAULT_STRING_LENGTH) {
                 result.reason = "plugins." + String(_config->name) + ".devices." + String(count) + ".name is too long";
                 return result;
             }

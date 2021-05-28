@@ -21,11 +21,11 @@ extern "C" {
 #endif
 #elif defined(CORE_TEENSY)
 #include <Base64.h>
-#include "mbedtls/base64.h"
+// #include "mbedtls/base64.h"
 #endif
 
 HAPFakegato::HAPFakegato(){
-
+    _restarted = true;
 }
 
 
@@ -34,16 +34,12 @@ HAPFakegato::~HAPFakegato(){
     if (_historyEntries != nullptr) delete _historyEntries;
     if (_historyRequest != nullptr) delete _historyRequest;
     if (_historySetTime != nullptr) delete _historySetTime;
-
-    if (_configRead != nullptr) delete _configRead;
-    if (_configWrite != nullptr) delete _configWrite;
-
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule){
+HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String& name){
     _name = name;
 
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);
@@ -54,9 +50,9 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
 
 
     // History Info
-    _historyInfo = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 128);
+    _historyInfo = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historyInfo->setDescription("EVE History Info");
-    _historyInfo->setValue((char*)NULL);
+    _historyInfo->setValue((char*)NULL, false);
     // auto callbackS2R1 = std::bind(&HAPFakeGato::setS2R1Characteristics, this, std::placeholders::_1, std::placeholders::_2);
     // _historyInfo->setValueChangeCallback(callbackS2R1);
     auto callbackGetHistoryInfo = std::bind(&HAPFakegato::callbackGetHistoryInfo, this);
@@ -64,9 +60,9 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
     accessory->addCharacteristicToService(fgService, _historyInfo);
 
     // History Entries
-    _historyEntries = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+    _historyEntries = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
     _historyEntries->setDescription("EVE History Entries");
-    _historyEntries->setValue((char*)NULL);
+    _historyEntries->setValue((char*)NULL, false);
     // auto callbackS2R2 = std::bind(&HAPFakeGato::setS2R2Characteristics, this, std::placeholders::_1, std::placeholders::_2);
     // _historyEntries->setValueChangeCallback(callbackS2R2);
     auto callbackGetHistoryEntries = std::bind(&HAPFakegato::callbackGetHistoryEntries, this);
@@ -75,46 +71,26 @@ void HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String&
     accessory->addCharacteristicToService(fgService, _historyEntries);
 
     // History Request
-    _historyRequest = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE, 128);
+    _historyRequest = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historyRequest->setDescription("EVE History Request");
-    _historyInfo->setValue((char*)NULL);
+    _historyInfo->setValue((char*)NULL, false);
     auto callbackHistoryRequest = std::bind(&HAPFakegato::callbackHistoryRequest, this, std::placeholders::_1, std::placeholders::_2);
     _historyRequest->setValueChangeCallback(callbackHistoryRequest);
     accessory->addCharacteristicToService(fgService, _historyRequest);
 
     // Set Time
-    _historySetTime = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE, 128);
+    _historySetTime = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historySetTime->setDescription("EVE SetTime");
-    _historyInfo->setValue((char*)NULL);
+    _historyInfo->setValue((char*)NULL, false);
     auto callbackSetTime = std::bind(&HAPFakegato::callbackHistorySetTime, this, std::placeholders::_1, std::placeholders::_2);
     _historySetTime->setValueChangeCallback(callbackSetTime);
     accessory->addCharacteristicToService(fgService, _historySetTime);
 
-
-    if (withSchedule){
-        // Config Read
-        _configRead = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
-        _configRead->setDescription("EVE Schedule Read");
-        _historyInfo->setValue((char*)NULL);
-        auto callbackConfigRead = std::bind(&HAPFakegato::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);
-        _configRead->setValueChangeCallback(callbackConfigRead);
-        accessory->addCharacteristicToService(fgService, _configRead);
-
-
-        // Config Write
-        _configWrite = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE, 256);
-        _configWrite->setDescription("EVE Schedule Write");
-        _historyInfo->setValue((char*)NULL);
-        auto callbackConfigWrite = std::bind(&HAPFakegato::scheduleWrite, this, std::placeholders::_1, std::placeholders::_2);
-        _configWrite->setValueChangeCallback(callbackConfigWrite);
-        accessory->addCharacteristicToService(fgService, _configWrite);
-    }
-
     accessory->addService(fgService);
 
-    begin();
-
     enable(true);
+
+    return fgService;
 }
 
 
@@ -254,8 +230,10 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
     HAPHelper::array_print("FAKEGATO ENTRY DATA", data, length);
 #endif
 
-    size_t indexLast = _entries.size() - 1;
-    bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, HAPTime::timestamp(), data, length)));
+    // size_t indexLast = _entries.size() - 1;
+
+    _timestampLastEntry = HAPTime::timestamp();
+    bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, _timestampLastEntry, data, length)));
     if (overwritten == true) {
         // ToDo: Add overwritten handling..
         _rolledOver = true;
@@ -324,15 +302,19 @@ String HAPFakegato::callbackGetHistoryEntries(){
         Serial.println(_requestedIndex); Serial.send_now();
 #endif
 
-
     if (_requestedIndex == 0){
-        // ToDo:
-
-    } else if (_requestedIndex == 1){
+        _requestedIndex = 1;
+    }
+    // if (_requestedIndex == 0){
+    //     // ToDo:
+    //     // If set to 0000, asks the accessory the start restart from the beginning of the memory
+    // } else if ( (_restarted == true) || (_requestedIndex == 1) ) {
+    if ( (_restarted == true) || (_requestedIndex == 1) ) {
         getRefTime(data, &offset);
         entryCounter = _requestedIndex + 1;
         _requestedIndex--;
         usedBatch++;
+        _restarted = false;
     } else {
         _requestedIndex--;
         entryCounter = _requestedIndex + 1;
@@ -432,7 +414,9 @@ String HAPFakegato::callbackGetHistoryEntries(){
     return String(encodedChr);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
 
 #if HAP_DEBUG_FAKEGATO
@@ -493,12 +477,14 @@ void HAPFakegato::callbackHistorySetTime(String oldValue, String newValue){
     if (_isTimeSource){
 
         // "SPMZIw==" == 588903240
-        size_t outputLength = 0;
-        mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+        // size_t outputLength = 0;
+        // mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+        // uint8_t decoded[outputLength];
+        // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength,(uint8_t*)newValue.c_str(), newValue.length());
+
+        size_t outputLength = base64_dec_len((char*)newValue.c_str(), newValue.length());
         uint8_t decoded[outputLength];
-
-
-        mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength,(uint8_t*)newValue.c_str(), newValue.length());
+        base64_decode((char*)decoded, (char*)newValue.c_str(), newValue.length());
 
 #if HAP_DEBUG_FAKEGATO
         HAPHelper::array_print("History Set Time", decoded, outputLength);
@@ -535,20 +521,24 @@ FLASHMEM
 void HAPFakegato::callbackHistoryRequest(String oldValue, String newValue){
     LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "History Request for iid " + String(_historyRequest->iid()) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
 
-    size_t outputLength = 0;
-    // Serial.println(newValue);
 
-    mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    // Serial.println(newValue);
+    // size_t outputLength = 0;
+    // mbedtls_base64_decode(NULL, 0, &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    // uint8_t decoded[outputLength];
+    // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+
+    size_t outputLength = base64_dec_len((char*)newValue.c_str(), newValue.length());
     uint8_t decoded[outputLength];
-    mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (uint8_t*)newValue.c_str(), newValue.length());
+    base64_decode((char*)decoded, (char*)newValue.c_str(), newValue.length());
 
 #if HAP_DEBUG_FAKEGATO
     HAPHelper::array_print("History Request", decoded, outputLength);
 #endif
 
     ui32_to_ui8 requestedIndex;
-    int n = 0;
-    for (unsigned idx = 2; idx < 6; idx++) {
+    uint8_t n = 0;
+    for (uint8_t idx = 2; idx < 6; idx++) {
         requestedIndex.ui8[n++] = decoded[idx];
     }
 
@@ -615,7 +605,7 @@ String HAPFakegato::callbackGetHistoryInfo(){
     // evetime
     // Time from last update in seconds
     ui32_to_ui8 evetime;
-    evetime.ui32 = (HAPTime::timestamp() - HAPTime::refTime());
+    evetime.ui32 = (_timestampLastEntry - HAPTime::refTime());
     memcpy(data + offset, evetime.ui8, 4);
     offset += 4;    // == 4
 

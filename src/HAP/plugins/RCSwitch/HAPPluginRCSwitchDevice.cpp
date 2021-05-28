@@ -89,7 +89,7 @@ HAPAccessory* HAPPluginRCSwitchDevice::initAccessory(){
     // HAPService* outletService = new HAPService(HAP_SERVICE_SWITCH);
     // _accessory->addService(outletService);
 
-    // stringCharacteristics *plugServiceName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, HAP_STRING_LENGTH_MAX);
+    // stringCharacteristics *plugServiceName = new stringCharacteristics(HAP_CHARACTERISTIC_NAME, permission_read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     // plugServiceName->setValue(name);
     // _accessory->addCharacteristicToService(outletService, plugServiceName);
 

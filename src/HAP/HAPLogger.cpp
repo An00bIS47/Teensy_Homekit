@@ -46,6 +46,7 @@
 // 	return (0x20280000 - heapTop);
 // }
 
+
 unsigned memfree(void) {
 	extern unsigned long _ebss;
 	extern unsigned long _sdata;
@@ -168,7 +169,7 @@ void flexRamInfo(void) {
 #endif
 
 
-LogLevel HAPLogger::_logLevel(LogLevel::INFO);
+LogLevel HAPLogger::_logLevel(LogLevel::DEBUG);
 Stream* HAPLogger::_printer(&Serial);
 
 #if defined(ARDUINO_TEENSY41)
@@ -294,9 +295,7 @@ void HAPLogger::colorPrint(const char* color, const char* text, bool newLine) {
 #endif
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 void HAPLogger::checkErrorOK(int err_code) {
 	if (err_code != 0) {
 		colorPrint(COLOR_ERROR, " ERROR: ", false);
@@ -307,9 +306,7 @@ void HAPLogger::checkErrorOK(int err_code) {
 	//	Serial.print("Free Heap: "); Serial.println(ESP.getFreeHeap());
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 void HAPLogger::checkError(int err_code) {
 	if (err_code != 0) {
 		colorPrint(COLOR_ERROR, " ERROR: ", false);
@@ -338,9 +335,7 @@ LogLevel HAPLogger::getLogLevel(){
 	return _logLevel;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 void HAPLogger::logOK(const char* color) {
 	colorPrint(color, "OK", true);
 }

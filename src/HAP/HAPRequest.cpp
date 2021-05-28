@@ -22,6 +22,10 @@ HAPRequest::~HAPRequest() {
 	clear();
 }
 
+#if HAP_DEBUG_HOMEKIT
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 String HAPRequest::toString() const {
 	String result = F("method: ");
 	result += method;
@@ -37,6 +41,7 @@ String HAPRequest::toString() const {
 
 	return result;
 }
+#endif
 
 void HAPRequest::clear(){
 	path = "";

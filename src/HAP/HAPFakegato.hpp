@@ -26,7 +26,10 @@
 #define HAP_FAKEGATO_BATCH_SIZE  16
 #endif
 
+#ifndef HAP_FAKEGATO_EPOCH
 #define HAP_FAKEGATO_EPOCH       978307200
+#endif
+
 
 #ifndef HAP_FAKEGATO_CHUNK_BUFFER_SIZE
 #define HAP_FAKEGATO_CHUNK_BUFFER_SIZE      512     // base64 256 bits = 344
@@ -118,9 +121,7 @@ public:
     HAPFakegato();
     virtual ~HAPFakegato();
 
-    virtual void begin() {};
-
-    void registerFakeGatoService(HAPAccessory* accessory, const String& name, bool withSchedule = false);
+    virtual HAPService* registerFakeGatoService(HAPAccessory* accessory, const String& name);
 
     void addEntry(uint8_t bitmask);
 
@@ -130,6 +131,9 @@ public:
         return _entries[_entries.size() - 1]->timestamp;
     }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void setInterval(uint32_t interval){
 		_interval = interval;
 	}
@@ -142,11 +146,16 @@ public:
         return _entries.capacity;
     }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void setAsTimeSource(bool mode = true){
         _isTimeSource = mode;
     }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void registerCallbackAddEntry(std::function<bool()> callback){
         _callbackAddEntry = callback;
     }
@@ -155,6 +164,9 @@ public:
 		return _isEnabled;
 	}
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 	void enable(bool mode){
 		_isEnabled = mode;
 	}
@@ -172,7 +184,6 @@ public:
         }
     }
 
-
     uint8_t getBitmaskForAll(){
         uint8_t bitmask = 0;
         for (uint8_t i=0; i < _signatures.size(); i++){
@@ -181,9 +192,11 @@ public:
         return bitmask;
     }
 
+
     uint8_t getMaxEntryValueLength(){
         return getEntryValueLength(getBitmaskForAll());
     }
+
 
     uint8_t getEntryValueLength(uint8_t bitmask){
         uint8_t length = 0;
@@ -207,11 +220,16 @@ public:
         return (_signatures.size() * 2);
     }
 
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void enablePeriodicUpdates(bool mode = true){
         _periodicUpdates = mode;
     }
 
-
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
     void addCharacteristic(HAPFakegatoCharacteristic* characteristic){
         _signatures.emplace_back(std::move(characteristic));
     }
@@ -274,14 +292,6 @@ protected:
     HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
     HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
 
-    // Schedules
-    HAPCharacteristicT<String>* _configRead     = nullptr;
-    HAPCharacteristicT<String>* _configWrite    = nullptr;
-
-    virtual void scheduleRead(String oldValue, String newValue)     {}
-    virtual void scheduleWrite(String oldValue, String newValue)    {}
-    virtual String buildScheduleString() { return ""; }
-
     std::function<bool()> _callbackAddEntry = nullptr;
 
     String  _name;
@@ -292,6 +302,7 @@ protected:
 
     uint32_t _previousMillis = 0;
     uint32_t _interval = HAP_FAKEGATO_INTERVAL;
+    uint32_t _timestampLastEntry = 0;
 
     bool    _isTimeSource = false;
     bool    _rolledOver = false;
@@ -299,6 +310,8 @@ protected:
     bool    _periodicUpdates = true;
 
     bool    _transfer = false;
+
+    bool    _restarted = true;
 
     std::vector< std::unique_ptr<HAPFakegatoCharacteristic> > _signatures;
     CircularBuffer<HAPFakegatoDataEntry*, HAP_FAKEGATO_BUFFER_SIZE> _entries;

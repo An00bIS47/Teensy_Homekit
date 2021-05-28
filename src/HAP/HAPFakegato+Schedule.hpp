@@ -17,6 +17,40 @@
 #include "HAPDailyTimerFactory.hpp"
 
 // ToDo: define or enum ?
+
+enum HAP_SCHEDULE_DEVICE_TYPE {
+    HAP_SCHEDULE_TYPE_WEATHER           = 0x01,
+    HAP_SCHEDULE_TYPE_ROOM              = 0x02,
+    HAP_SCHEDULE_TYPE_DOOR_WINDOW       = 0x03,
+    HAP_SCHEDULE_TYPE_ENERGY_EU         = 0x04,
+    HAP_SCHEDULE_TYPE_LIGHT_SWITCH      = 0x0B,
+    HAP_SCHEDULE_TYPE_THERMO            = 0x0C,
+    HAP_SCHEDULE_TYPE_ENERGY_US         = 0x0D,
+    HAP_SCHEDULE_TYPE_MOTION            = 0x11,
+    HAP_SCHEDULE_TYPE_ENERGY_UK         = 0x12,
+    HAP_SCHEDULE_TYPE_ENERGY_EU_2       = 0x14,
+    HAP_SCHEDULE_TYPE_ENERGY_AU         = 0x1A,
+    HAP_SCHEDULE_TYPE_LIGHT_SWITCH_2    = 0x22,
+    HAP_SCHEDULE_TYPE_AQUA              = 0x23,
+    HAP_SCHEDULE_TYPE_ENERGY_EU_3       = 0x24,
+    HAP_SCHEDULE_TYPE_MOTION_2          = 0x25,
+    HAP_SCHEDULE_TYPE_DOOR_WINDOW_2     = 0x26,
+    HAP_SCHEDULE_TYPE_ROOM_2            = 0x27,
+    HAP_SCHEDULE_TYPE_ENERGY_UK_2       = 0x28,
+    HAP_SCHEDULE_TYPE_ENERGY_AU_2       = 0x29,
+    HAP_SCHEDULE_TYPE_THERMO_2          = 0x2C,
+    HAP_SCHEDULE_TYPE_BUTTON            = 0x31,
+    HAP_SCHEDULE_TYPE_FLARE             = 0x33,
+    HAP_SCHEDULE_TYPE_LIGHT_STRIP       = 0x36,
+    HAP_SCHEDULE_TYPE_ENERGY_STRIP_EU   = 0x37,
+    HAP_SCHEDULE_TYPE_ENERGY_STRIP_US   = 0x38,
+    HAP_SCHEDULE_TYPE_LIGHT_SWITCH_3    = 0x39,
+    HAP_SCHEDULE_TYPE_EXTEND            = 0x3B,
+    HAP_SCHEDULE_TYPE_THERMO_3          = 0x47,
+};
+
+// ToDo: define or enum ?
+#define HAP_FAKEGATO_SCHEDULE_TYPE_DEVICE_TYPE              0x00
 #define HAP_FAKEGATO_SCHEDULE_TYPE_SERIALNUMBER             0x04
 
 #define HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY              0x06
@@ -26,8 +60,13 @@
 #define HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED       0x20
 #define HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS                 0x45
 #define HAP_FAKEGATO_SCHEDULE_TYPE_DAYS                     0x46
+#define HAP_FAKEGATO_SCHEDULE_TYPE_DST                      0x47
 #define HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED               0x60
+#define HAP_FAKEGATO_SCHEDULE_TYPE_LAST_ACTIVITY            0xD0
 
+#define HAP_FAKEGATO_SCHEDULE_TYPE_EVE_TIME                 0x9B
+
+#define HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK                 0xD2
 
 typedef enum {
     TIME = 0,
@@ -116,14 +155,7 @@ public:
         _timers.clear();
     }
 
-    virtual void begin() = 0;
-    virtual bool decodeToggleOnOff(uint8_t* data) = 0;
-    virtual void decodeDays(uint8_t *data) = 0;
-    virtual void decodePrograms(uint8_t* data) = 0;
-    virtual void encodePrograms(uint8_t* data, size_t *dataSize) = 0;
-
-    virtual String buildScheduleString() = 0;
-
+    HAPService* registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const String& name);
 
     bool isEnabled(){
         return _timers.isEnabled();
@@ -147,6 +179,7 @@ public:
 
     void clear();
 
+
     void setCallbackTimerStart(std::function<void(uint16_t)> callback){
         _callbackTimerStart = callback;
     }
@@ -160,8 +193,6 @@ public:
         _timers.handle();
     }
 
-    void callbackTimerStart(uint16_t state);
-    void callbackTimerEnd(uint16_t state);
 
     void programTimers();
 
@@ -169,9 +200,40 @@ public:
         _callbackSaveConfig = callback;
     }
 
+    void setDeviceType(enum HAP_SCHEDULE_DEVICE_TYPE deviceType){
+        _deviceType = (uint8_t)deviceType;
+    }
+
+
+
 protected:
+
+    // Schedules
+    HAPCharacteristicT<String>* _configRead     = nullptr;
+    HAPCharacteristicT<String>* _configWrite    = nullptr;
+
+    virtual String scheduleRead() = 0;
+    virtual void scheduleWrite(String oldValue, String newValue) = 0;
+
+    void callbackTimerStart(uint16_t state);
+    void callbackTimerEnd(uint16_t state);
+
+    virtual bool decodeToggleOnOff(uint8_t* data) = 0;
+    virtual void decodeDays(uint8_t *data) = 0;
+    virtual void decodePrograms(uint8_t* data) = 0;
+    virtual void encodePrograms(uint8_t* data, size_t *dataSize) = 0;
+
+
+    void saveConfig(){
+        if (_shouldSave){
+            if (_callbackSaveConfig != nullptr) _callbackSaveConfig();
+        }
+    }
+
     String  _serialNumber;
     uint8_t _statusLED;
+
+    bool    _shouldSave = false;
 
     std::vector<HAPFakeGatoScheduleProgramEvent> _programEvents; // 7
     HAPFakeGatoScheduleDays _days;
@@ -181,6 +243,8 @@ protected:
     std::function<void(uint16_t)> _callbackTimerEnd = nullptr;
 
     std::function<void(void)> _callbackSaveConfig = nullptr;
+
+    uint8_t _deviceType;
 };
 
 #endif /* HAPFAKEGATOSCHEDULE_HPP_ */

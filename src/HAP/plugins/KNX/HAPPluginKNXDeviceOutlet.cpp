@@ -55,7 +55,11 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
     String sn = HAPDeviceID::serialNumber("knx-2", String(_id));
 
     // Create accessory if not already created
+    
     _accessory = new HAPAccessory();
+
+
+
     //HAPAccessory::addInfoServiceToAccessory(_accessory, "Builtin LED", "ACME", "LED", "123123123", &identify);
     auto callbackIdentify = std::bind(&HAPPluginKNXDevice::identify, this, std::placeholders::_1, std::placeholders::_2);
     _accessory->addInfoService(String(_name), "KNX", "KNX Outlet", sn, callbackIdentify, HAP_KNX_OUTLET_VERSION);
@@ -74,7 +78,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         HAPService* outletService = new HAPService(HAP_SERVICE_OUTLET);
         _accessory->addService(outletService);
 
-        HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
+        HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         plugServiceName->setValue(_name);
         _accessory->addCharacteristicToService(outletService, plugServiceName);
 
@@ -169,7 +173,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
             _fakegato->addCharacteristic(new HAPFakegatoCharacteristicPowerTenth(std::bind(&HAPPluginKNXDeviceOutlet::getAveragedPowerTenth, this)));
             _fakegato->addCharacteristic(new HAPFakegatoCharacteristicPowerOnOff(std::bind(&HAPPluginKNXDeviceOutlet::readStateFromKNX, this)));
 
-            _fakegato->registerFakeGatoService(_accessory, _name, true);
+            _fakegato->registerFakeGatoService(HAP_SCHEDULE_TYPE_ENERGY_EU_3, _accessory, _name);
 
             if (_enableSchedule) {
                 // Fakegato Schedule

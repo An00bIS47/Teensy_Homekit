@@ -84,7 +84,7 @@ void tutils_array_print(const char* tag, const unsigned char* buf, int len){
 
 void tutils_mpi_print(const char* tag, const mbedtls_mpi* x){
     int len_x = mbedtls_mpi_size(x);
-    unsigned char* num = malloc(len_x);
+    uint8_t* num = (uint8_t*)malloc(len_x);
     mbedtls_mpi_write_binary(x, num, len_x);
 	tutils_array_print(tag, num, len_x);
     free(num);
@@ -323,7 +323,7 @@ void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mp
 	hash.clear();
 
 #ifdef SRP_TEST_DBG_VER
-	tutils_array_print("VER:username",username, strlen(username));
+	tutils_array_print("VER:username",(const unsigned char*)username, strlen(username));
 	tutils_array_print("VAR:password",password, password_len);
 	tutils_mpi_print("VAR:salt",salt);
 	tutils_array_print("VAR:ucp_hash",ucp_hash, hash.digestLength());
@@ -624,30 +624,30 @@ HAPSRP::SRPVerifier* HAPSRP::newVerifier1( SRPSession *session,
     ver->algorithm 	= session->algorithm;
     ver->ng       	= session->ng;
 
-	if (copy_username){
-		int ulen = strlen(username) + 1;
-		ver->username = (char *) malloc( sizeof(char) * ulen ); // FIXME
-		if (!ver->username) {
-			delete ver;
-			ver = 0;
+// 	if (copy_username){
+// 		int ulen = strlen(username) + 1;
+// 		ver->username = (char *) malloc( sizeof(char) * ulen ); // FIXME
+// 		if (!ver->username) {
+// 			delete ver;
+// 			ver = 0;
 
 
-#if ARDUINO_ARCH_ESP32
-      		ESP_LOGE("SRP", "ver->username is NULL\n");
-#else
-      		Serial.printf("%s - ver->username is NULL\n", "SRP");
-#endif
+// #if ARDUINO_ARCH_ESP32
+//       		ESP_LOGE("SRP", "ver->username is NULL\n");
+// #else
+//       		Serial.printf("%s - ver->username is NULL\n", "SRP");
+// #endif
 
-			mbedtls_mpi_free(&s);
-			mbedtls_mpi_free(&v);
-			mbedtls_mpi_free(&A);
-			mbedtls_mpi_free(&S);
-			mbedtls_mpi_free(&tmp1);
-			mbedtls_mpi_free(&tmp2);
-			return nullptr;
-		}
-		memcpy( (char*)ver->username, username, ulen );
-	}
+// 			mbedtls_mpi_free(&s);
+// 			mbedtls_mpi_free(&v);
+// 			mbedtls_mpi_free(&A);
+// 			mbedtls_mpi_free(&S);
+// 			mbedtls_mpi_free(&tmp1);
+// 			mbedtls_mpi_free(&tmp2);
+// 			return nullptr;
+// 		}
+// 		memcpy( (char*)ver->username, username, ulen );
+// 	}
 
     /* SRP-6a safety check */
     mbedtls_mpi_mod_mpi( &tmp1, &A, &(session->ng->N) );
@@ -722,10 +722,10 @@ int HAPSRP::getVerifierIsAuthenticated( HAPSRP::SRPVerifier* ver )
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
-{
-    return ver->username;
-}
+// const char* HAPSRP::getVerifierUsername( HAPSRP::SRPVerifier* ver )
+// {
+//     return ver->username;
+// }
 
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM

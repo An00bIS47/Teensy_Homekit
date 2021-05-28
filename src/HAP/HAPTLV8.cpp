@@ -330,6 +330,7 @@ void TLV8::insertNode( TLV8Entry *ptr ) {
 	}
 }
 
+
 TLV8Entry* TLV8::searchType(TLV8Entry* ptr, uint8_t type) {
 	while( type != ptr->type ) {
 		ptr = ptr->next;
@@ -340,9 +341,6 @@ TLV8Entry* TLV8::searchType(TLV8Entry* ptr, uint8_t type) {
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 TLV8Entry* TLV8::searchId(TLV8Entry* ptr, uint8_t id) {
 	while( id != ptr->id ) {
 		ptr = ptr->next;

@@ -70,7 +70,7 @@ HAPAccessory* HAPPluginKNXDeviceSwitch::initAccessory(){
         HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
         _accessory->addService(switchService);
 
-        HAPCharacteristicT<String> *plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
+        HAPCharacteristicT<String> *plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         plugServiceName->setValue(_name);
         _accessory->addCharacteristicToService(switchService, plugServiceName);
 

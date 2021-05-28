@@ -7,10 +7,9 @@
 //
 
 #include "HAPTime.hpp"
-#include "HAPLogger.hpp"
-#include "HAPHelper.hpp"
+// #include "HAPLogger.hpp"
+// #include "HAPHelper.hpp"
 
-#include <time.h>
 
 const char *monthName[12] PROGMEM = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -26,6 +25,7 @@ int HAPTime::_utcOffset = 0;
 float HAPTime::_longitude = 0;
 float HAPTime::_latitude = 0;
 uint32_t HAPTime::_refTime = 0;
+uint32_t HAPTime::_t_offset = 0;
 
 callbackGetTime_t HAPTime::_callbackGetTime = nullptr;
 
@@ -50,8 +50,6 @@ HAPTime::~HAPTime(){
 
 
 bool HAPTime::begin(){
-
-    return false;
 
     setSyncProvider(getDstCorrectedTime);
     setSyncInterval(HAP_TIME_SYNC_INTERVAL);
@@ -96,6 +94,12 @@ bool HAPTime::setLongitudeLatitude(float longitude, float latitude){
     return true;
 }
 
+
+//const int timeZone = 1;     // Central European Time
+//const int timeZone = -5;  // Eastern Standard Time (USA)
+//const int timeZone = -4;  // Eastern Daylight Time (USA)
+//const int timeZone = -8;  // Pacific Standard Time (USA)
+//const int timeZone = -7;  // Pacific Daylight Time (USA)
 bool HAPTime::setTimeZone(int utcOffset){
     if ((utcOffset < - 720) || (utcOffset > 720))  return false;
     _utcOffset = utcOffset;
@@ -222,6 +226,50 @@ uint8_t HAPTime::dstOffset(uint8_t dayValue, uint8_t monthValue, unsigned int ye
         return 0;
 }
 
+
+uint16_t HAPTime::getDaysToDST(const unsigned int year, const uint8_t month){
+    tmElements_t dstDate;
+
+    dstDate.Year = CalendarYrToTm(year);
+    dstDate.Month = month;
+    if (month == 3) {
+        dstDate.Day = getDstStartDay(year);
+        dstDate.Hour = 1;           // 1:00 UTC     == 2:00 MEZ
+    } else if ( month == 10 ) {
+        dstDate.Day = getDstEndDay(year);
+        dstDate.Hour = 2;           // 2:00 UTC     == 3:00 MESZ
+    }
+
+    time_t dstTime = makeTime(dstDate);
+    double daysToDST = (dstTime - HAP_FAKEGATO_EPOCH) / SECS_PER_DAY;
+
+    return (uint16_t) ceil(daysToDST);
+}
+
+
+uint8_t HAPTime::getDstStartDay(unsigned int yearValue){
+    // Day in March that DST starts on, at 1 am
+    uint8_t dstOn = (31 - (5 * yearValue / 4 + 4) % 7);
+    return dstOn;
+}
+
+uint8_t HAPTime::getDstEndDay(unsigned int yearValue){
+    // Day in October that DST ends  on, at 2 am
+    uint8_t dstOff = (31 - (5 * yearValue / 4 + 1) % 7);
+    return dstOff;
+}
+
+time_t HAPTime::getTimeFromCompiling(){
+    time_t t = 0;
+    tmElements_t tm;
+    if (getDateFromString(__DATE__, tm) && getTimeFromString(__TIME__, tm)) {
+        t = makeTime(tm);
+        //t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+    }
+    // Teensy3Clock.get();
+    return t;
+}
+
 /* Alternative SyncProvider that automatically handles Daylight Saving Time (DST) periods,
  * at least in Europe, see above.
  */
@@ -229,10 +277,7 @@ time_t HAPTime::getDstCorrectedTime(){
     time_t t = 0;
 
     if (_callbackGetTime == nullptr){
-        tmElements_t tm;
-        if (getDateFromString(__DATE__, tm) && getTimeFromString(__TIME__, tm)) {
-            t = makeTime(tm);
-        }
+        t = getTimeFromCompiling();
     } else {
         t = _callbackGetTime();
     }
@@ -240,7 +285,8 @@ time_t HAPTime::getDstCorrectedTime(){
     if (t > 0) {
         TimeElements tm;
         breakTime (t, tm);
-        t += (_utcOffset + dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+        _t_offset = (_utcOffset * dstOffset(tm.Day, tm.Month, tm.Year + 1970, tm.Hour)) * SECS_PER_HOUR;
+        t += _t_offset;
     }
 
     return t;
@@ -282,37 +328,48 @@ bool HAPTime::getDateFromString(const char *str, TimeElements& tm){
 
 
 #if HAP_ENABLE_NTP
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 time_t HAPTime::getNTPTime(){
 
 	while (_udp.parsePacket() > 0) ; // discard any previously received packets
-	LogD(F("Transmit NTP Request to "), false);
-	LogD(HAP_NTP_SERVER_URLS[1], false);
-	LogD(F(" ... "), true);
+	// LogD(F("Transmit NTP Request to ..."), false);
 
-	sendNTPpacket(HAP_NTP_SERVER_URLS[1]);
-	uint32_t beginWait = millis();
+    for (uint8_t i=0; i < HAP_NTP_SERVER_URLS_SIZE; i++){
+        // LogD(F("   * "), false);
+        // LogD(HAP_NTP_SERVER_URLS[i], false);
+        // LogD(F(" ... "), false);
 
-	while (millis() - beginWait < HAP_NTP_TIMEOUT) {
-		int size = _udp.parsePacket();
-		if (size >= NTP_PACKET_SIZE) {
-			// Serial.println("Receive NTP Response");
-			_udp.read(_packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
-			unsigned long secsSince1900;
-			// convert four bytes starting at location 40 to a long integer
-			secsSince1900 =  (unsigned long)_packetBuffer[40] << 24;
-			secsSince1900 |= (unsigned long)_packetBuffer[41] << 16;
-			secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
-			secsSince1900 |= (unsigned long)_packetBuffer[43];
+        sendNTPpacket(HAP_NTP_SERVER_URLS[i]);
+        uint32_t beginWait = millis();
 
-			LogD(F(" OK"), true);
-			return secsSince1900 - UNIX_OFFSET + (HAP_TIMEZONE * SECS_PER_HOUR);
-		}
-	}
-	LogE(F("ERROR - No NTP Response :-("), true);
+        while (millis() - beginWait < HAP_NTP_TIMEOUT) {
+            int size = _udp.parsePacket();
+            if (size >= NTP_PACKET_SIZE) {
+                // Serial.println("Receive NTP Response");
+                _udp.read(_packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
+                unsigned long secsSince1900;
+                // convert four bytes starting at location 40 to a long integer
+                secsSince1900 =  (unsigned long)_packetBuffer[40] << 24;
+                secsSince1900 |= (unsigned long)_packetBuffer[41] << 16;
+                secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
+                secsSince1900 |= (unsigned long)_packetBuffer[43];
+
+                // LogD(F("OK"), true);
+                return secsSince1900 - UNIX_OFFSET + (HAP_TIMEZONE * SECS_PER_HOUR);
+            }
+        }
+        // LogD(F("FAILED\n"), true);
+    }
+	// LogE(F("ERROR - No NTP Response :-("), true);
 	return 0; // return 0 if unable to get the time
 }
 
 // send an NTP request to the time server at the given address
+#if defined(ARDUINO_TEENSY41)
+FLASHMEM
+#endif
 void HAPTime::sendNTPpacket(const char* address){
 	// set all bytes in the buffer to 0
 	memset(_packetBuffer, 0, NTP_PACKET_SIZE);
@@ -347,7 +404,7 @@ uint32_t HAPTime::timestamp(){
 	return now.tv_sec;
 #elif defined( CORE_TEENSY )
 	if (timeStatus() != timeNotSet) {
-		return (uint32_t) now();	// - UNIX_OFFSET;
+		return (uint32_t) (now() - (2 * _t_offset));	// - UNIX_OFFSET;
 	}
 	return millis();
 #else
@@ -385,7 +442,7 @@ String HAPTime::timeString(){
 	if (timeStatus() != timeNotSet) {
 
 		struct tm curTtime;
-		HAPHelper::convertToTimeH(now(), curTtime);
+		convertToTimeH(now(), curTtime);
 		strftime(buffer, 30, HAP_NTP_TIME_FORMAT, &curTtime);
 
         return String(buffer);

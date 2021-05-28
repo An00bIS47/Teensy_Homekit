@@ -74,7 +74,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPService* temperatureService = new HAPService(HAP_SERVICE_TEMPERATURE_SENSOR);
         _accessory->addService(temperatureService);
 
-        HAPCharacteristicT<String> *tempServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
+        HAPCharacteristicT<String> *tempServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         tempServiceName->setValue("Temperature Sensor " + String(_id));
 
         _accessory->addCharacteristicToService(temperatureService, tempServiceName);
@@ -103,7 +103,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
         _accessory->addService(humidityService);
 
-        HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
+        HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         humServiceName->setValue("Humidity Sensor " + String(_id));
         _accessory->addCharacteristicToService(humidityService, humServiceName);
 
@@ -133,7 +133,7 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPService* pressureService = new HAPService(HAP_SERVICE_FAKEGATO_AIR_PRESSURE_SENSOR);
         _accessory->addService(pressureService);
 
-        HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_STRING_LENGTH_MAX);
+        HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         pressureServiceName->setValue("Pressure Sensor " + String(_id));
         _accessory->addCharacteristicToService(pressureService, pressureServiceName);
 

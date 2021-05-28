@@ -79,10 +79,6 @@ void HAPAccessory::addCharacteristicToService(HAPService *service, HAPCharacteri
 	HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
 }
 
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 bool HAPAccessory::removeService(HAPService *service) {
 	for (int i=0; i < _services.size(); i++){
 		if (_services[i]->aid() == service->aid()){
@@ -94,9 +90,7 @@ bool HAPAccessory::removeService(HAPService *service) {
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 bool HAPAccessory::removeCharacteristicFromService(HAPService *service, HAPCharacteristicBase* characteristic) {
 	for (int i=0; i < service->_characteristics.size(); i++){
 		if (service->_characteristics[i]->iid() == characteristic->iid()){
@@ -135,10 +129,6 @@ HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
 }
 
 
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 HAPCharacteristicBase* HAPAccessory::characteristicsOfType(int type) {
 	for (auto it = _services.begin(); it != _services.end(); it++) {
 		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {

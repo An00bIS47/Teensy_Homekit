@@ -138,7 +138,7 @@ public:
 
     uint8_t* getKeyForPairingWithId(const uint8_t* id){
         int index = getIndex(id);
-        if (index >= 0) {
+        if (index != -1) {
             // memcpy(outkey, pairings[index]->key, HAP_PAIRINGS_LTPK_LENGTH);
 			return pairings[index]->key;
         }
@@ -147,7 +147,7 @@ public:
 
 	bool removePairing(const uint8_t* id){
 		int index = getIndex(id);
-		if (index >= 0) {
+		if (index != -1) {
 			pairings.erase(pairings.begin() + index);
 			return true;
 		} else {
@@ -157,18 +157,19 @@ public:
 		}
 	}
 
-    bool addPairing(const uint8_t* id, const uint8_t* key){
+    bool addPairing(const uint8_t* id, const uint8_t* key, bool isAdminPairing){
         bool result = false;
         int index = getIndex(id);
         if (index == -1) {
             struct HAPConfigurationPairingEntry* item = new HAPConfigurationPairingEntry();
             memcpy(item->id, id, HAP_PAIRINGS_ID_LENGTH);
             memcpy(item->key, key, HAP_PAIRINGS_LTPK_LENGTH);
-            item->isAdmin = (pairings.size() == 0);
+            item->isAdmin = isAdminPairing;
 
 #if HAP_DEBUG_PAIRINGS
             HAPHelper::array_print("ID:", item->id, HAP_PAIRINGS_ID_LENGTH);
             HAPHelper::array_print("Key:", item->key, HAP_PAIRINGS_LTPK_LENGTH);
+			LogD(F("isAdmin: ") + String(item->isAdmin));
 #endif
 
             pairings.push_back(item);
@@ -177,7 +178,7 @@ public:
             if (memcmp(pairings[index]->key, key, HAP_PAIRINGS_LTPK_LENGTH) == 0) {
                 result = true;
             }
-            pairings[index]->isAdmin = (pairings.size() == 0);
+            pairings[index]->isAdmin = isAdminPairing;
         }
 
         return result;
@@ -187,7 +188,7 @@ public:
 
         int index = getIndex(id);
 
-        if (index >= 0) {
+        if (index != -1) {
             return pairings[index]->isAdmin;
         }
         return false;
