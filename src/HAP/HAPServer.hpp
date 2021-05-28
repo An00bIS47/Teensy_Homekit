@@ -415,9 +415,7 @@ private:
 	}
 
 	void sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error);
-
 	bool sendEvent(HAPClient* hapClient, const JsonDocument& response);
-	
 	bool send204(HAPClient* hapClient);
 
 #if HAP_ENABLE_PIXEL_INDICATOR
