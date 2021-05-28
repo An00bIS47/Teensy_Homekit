@@ -388,10 +388,10 @@ private:
 	//
 
 	// parsing
-	void processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient, String& curLine);
+	void processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
 	void processIncomingEncryptedRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient);
 
-	void processIncomingLine(HAPClient* hapClient, String& line);
+	void processIncomingLine(HAPClient* hapClient, const char* line, size_t lineLength);
 	void processPathParameters(HAPClient* hapClient, const char* line, size_t lineLength, int curPos);
 
 	void parseRequest(HAPClient* hapClient, const char* msg, size_t msg_len, uint8_t** out, int* outLen);

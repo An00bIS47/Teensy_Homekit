@@ -1147,7 +1147,7 @@ void HAPServer::handleAllPairingsRemoved(){
 }
 
 void HAPServer::handleClientAvailable(HAPClient* hapClient) {
-	String curLine = "";
+	
 
 	LogD(F("<<< Handle client available [enrypted:") + String(hapClient->isEncrypted()) + "]" , true);
 
@@ -1156,16 +1156,10 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 	if (hapClient->isEncrypted()) {
 		processIncomingEncryptedRequest( hapClient, &bufferedClient );
 	} else {
-		processIncomingRequest( hapClient, &bufferedClient, curLine );
+		processIncomingRequest( hapClient, &bufferedClient );
 	}
 
-#if HAP_DEBUG_HOMEKIT
-	if (curLine != "")
-		LogD(curLine, true);
-#endif
-
 	// clear request
-
 	hapClient->clear();
 
 	if ( !hapClient->client.connected() ) {
@@ -1364,8 +1358,6 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 		return false;
 	}
 
-	// Moved to handle functions
-	//hapClient->state = CLIENT_STATE_IDLE;
 	return true;
 }
 
@@ -1373,12 +1365,17 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_len, uint8_t** out, int* outLen){
 
 	int curPos = 0;
+
 	for (int i = 0; i < msg_len; i++) {
-    		//Serial.print(decrypted[i]);
+    		//Serial.print(msg[i]);
 		if ( msg[i] == '\r' && msg[i + 1] == '\n' ) {
 
-			String curLine = String(msg).substring(curPos, i);
-			processIncomingLine(hapClient, curLine);
+			char cLine[i - curPos + 1];
+			memcpy(cLine, msg + curPos, i - curPos);
+			cLine[i - curPos] = '\0';
+
+			processIncomingLine(hapClient, cLine, i - curPos);
+
 			i++;
 
 			if (i - curPos == 2) {
@@ -1436,7 +1433,11 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 }
 
 
-void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient, String& curLine){
+void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
+
+	size_t curLineBufferSize = 2048;
+	char curLine[curLineBufferSize];
+	size_t curLineCount = 0;
 
 	while (bufferedClient->available()){
 
@@ -1445,7 +1446,7 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 		if ( (char) b == '\n' ) {
 			// if the current line is blank, you got two newline characters in a row.
 			// that's the end of the client HTTP request, so send a response:
-			if (curLine.length() == 0) {
+			if (curLineCount == 0) {
 
 
 #if HAP_DEBUG_HOMEKIT
@@ -1553,17 +1554,21 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 					}
 				}
 
-				curLine = "";
+				// curLine = "";
+				memset(curLine, 0, curLineBufferSize);
+				curLineCount = 0;
 
 
 				return;
 			} else {  // if you got a newline, then clear currentLine:
 				// Handle lines
-				processIncomingLine(hapClient, curLine);
-				curLine = "";
+				processIncomingLine(hapClient, curLine, curLineCount);
+				// curLine = "";
+				memset(curLine, 0, curLineBufferSize);
+				curLineCount = 0;
 			}
 		} else if ( (char) b != '\r') {  	// if you got anything else but a carriage return character,
-			curLine += (char) b;      		// add it to the end of the currentLine
+			curLine[curLineCount++] = (char) b;      		// add it to the end of the currentLine
 		}
 
 	}
@@ -1576,14 +1581,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 
 void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, size_t lineLength, int curPos){
 
-	
-	
-	// Serial.print("constLine: ");
-	// Serial.println(constLine);
-	// Serial.print("curPos: ");
-	// Serial.println(curPos);
-
-
 	//int index = line.indexOf("?", curPos);
 	int index = HAPHelper::indexOf(line, lineLength, '?', curPos);
 
@@ -1595,11 +1592,6 @@ void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, si
 		char requestPath[ len + 1 - curPos];
 		memcpy( requestPath, &line[curPos], len - curPos);
 		requestPath[len - curPos] = '\0';
-
-		// Serial.println("len: " + String(len));
-		// Serial.println("REFERENCE len: " + String(line.indexOf(" ", curPos)));
-		// Serial.println("requestPath: " + String(requestPath));
-		// Serial.println("REFERENCE requestPath: " + line.substring(curPos, line.indexOf(" ", curPos)));
 
 		hapClient->request.path = requestPath; // line.substring(curPos, line.indexOf(" ", curPos));
 		hapClient->request.params = std::map<String, String>();
@@ -1620,12 +1612,6 @@ void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, si
 		memcpy( paramString, &line[curPos], len - curPos);
 		paramString[len - curPos] = '\0';
 
-		// Serial.println("paramString size: " + String(len - curPos + 1));
-		// Serial.println("len: " + String(len));
-		// Serial.println("REFERENCE len: " + String(line.indexOf(" ", curPos)));
-		// Serial.println("paramString: " + String(paramString));
-		// Serial.println("strlen(paramString): " + String(strlen(paramString)));
-		// Serial.println("REFERENCE paramString: " + paramStr);
 
 		char* tokens = paramString;
 		char *p = paramString;
@@ -1638,105 +1624,90 @@ void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, si
 				hapClient->request.params[key] = value;
 			}
 		}
-
-
-
-
-		// do {
-		// 	curPos = 0;
-		// 	int endIndex = paramStr.indexOf("&");
-		// 	if (endIndex == -1){
-		// 		endIndex = paramStr.length();
-		// 	}
-
-		// 	String keyPair = paramStr.substring(curPos, endIndex);
-		// 	// Serial.printf("tmp: %s\n", keyPair.c_str());
-
-		// 	int equalIndex = keyPair.indexOf("=");
-
-		// 	// Serial.print("key: ");
-		// 	// Serial.print(keyPair.substring(0, equalIndex));
-		// 	// Serial.print(" - value: ");
-		// 	// Serial.println(keyPair.substring(equalIndex + 1));
-		// 	// Serial.send_now();
-
-
-		// 	hapClient->request.params[keyPair.substring(0, equalIndex)] = keyPair.substring(equalIndex + 1);
-
-		// 	if (endIndex < paramStr.length()) {
-		// 		paramStr = paramStr.substring(endIndex + 1);
-		// 	} else {
-		// 		break;
-		// 	}
-
-		// } while ( paramStr.length() > 0 );
 	}
 }
 
 
-void HAPServer::processIncomingLine(HAPClient* hapClient, String& line){
+void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size_t lineLength){
 
 	// Print Line
 #if HAP_DEBUG_HOMEKIT_REQUEST
-	if (line != "") Serial.println(line);
+	if (lineLength > 0) Serial.println(line);
 #endif
 
 	int curPos = 0;
 
 	// Method
-	if ( line.startsWith("POST ") ) {
+	if ( HAPHelper::startsWith(line, "POST ") ) {
 		hapClient->request.method = METHOD_POST;
 		curPos = 5;
 		// Path
-		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
+		processPathParameters( hapClient, line, lineLength, curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
-	} else if ( line.startsWith("GET ") ) {
+	} else if ( HAPHelper::startsWith(line, "GET ") ) {
 		hapClient->request.method = METHOD_GET;
 		curPos = 4;
 		// Path
-		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
+		processPathParameters( hapClient, line, lineLength, curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
-	} else if ( line.startsWith("PUT ") ) {
+	} else if ( HAPHelper::startsWith(line, "PUT ") ) {
 		hapClient->request.method = METHOD_PUT;
 		curPos = 4;
 		// Path
-		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
+		processPathParameters( hapClient, line, lineLength, curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
-	} else if ( line.startsWith("DELETE ") ) {
+	} else if ( HAPHelper::startsWith(line, "DELETE ") ) {
 		hapClient->request.method = METHOD_DELETE;
 		curPos = 7;
 		// Path
-		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
+		processPathParameters( hapClient, line, lineLength, curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
 	}
 
-	if (line.length() == 0) {
+	if (lineLength == 0) {
 		//Serial.println("END OF HEADERS!!!");
 
 
 
 	} else {
 
-		String orgLine = line;
-		line.toLowerCase();
+		char lowLine[16];
+		for (int i =0; i < 16; i++){
+			lowLine[i] = tolower(line[i]);
+		}
+		lowLine[15] = '\0';
+
+		// Serial.println("lowLine:" + String(lowLine));
 
 		// Content Type
-		if ( line.startsWith("content-type:") ) {
+		if (HAPHelper::startsWith(lowLine, "content-type:")){
 			curPos = 13;
-			String strValue = orgLine.substring(curPos);
-			strValue.trim();
-			hapClient->request.contentType = strValue;
+			if (line[curPos] == ' '){
+				curPos++;
+			}
+
+			char contentType[ strlen(line) - curPos + 1];
+			memcpy( contentType, &line[curPos], strlen(line) - curPos);
+			contentType[strlen(line) - curPos] = '\0';
+
+			// Serial.println("content-type:*" + String(contentType) + "*");
+			hapClient->request.contentType = contentType;
 		}
 
 		// Content Length
-		else if ( line.startsWith("content-length:") ) {
+		else if (HAPHelper::startsWith(lowLine, "content-length:")){
 			curPos = 15;
-			String strValue = orgLine.substring(curPos);
-			strValue.trim();
-			hapClient->request.contentLength = strValue.toInt();
+			if (line[curPos] == ' '){
+				curPos++;
+			}
+
+			char contentLength[ strlen(line) - curPos + 1];
+			memcpy( contentLength, &line[curPos], strlen(line) - curPos);
+			contentLength[strlen(line) - curPos] = '\0';
+
+			// Serial.println("content-type:*" + String(contentType) + "*");
+			hapClient->request.contentLength = atoi(contentLength);
 		}
-
-
 	}
 }
 
