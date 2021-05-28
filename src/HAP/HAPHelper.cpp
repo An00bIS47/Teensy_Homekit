@@ -438,3 +438,8 @@ int HAPHelper::indexOf(const char* array, int arr_size, char to_find, int startP
     }
     return pos;
 }
+
+
+bool HAPHelper::startsWith(const char *str, const char *pre){
+    return strncmp(str, pre, strlen(pre)) == 0;
+}
