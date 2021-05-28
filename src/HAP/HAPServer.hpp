@@ -284,9 +284,6 @@ protected:
 	void handleEventConfigReset(int eventCode, struct HAPEvent eventParam);
 	void handleEventDeleteAllPairings(int eventCode, struct HAPEvent eventParam);
 
-	bool stopEvents();
-	void stopEvents(bool value);
-
 
 	// HAPEventManager	_evtMgr;
 
@@ -331,10 +328,10 @@ protected:
 
 	// /characteristics
 	void handleCharacteristicsGet(HAPClient* hapClient);
-	void handleCharacteristicsPut(HAPClient* hapClient, String body);
+	void handleCharacteristicsPut(HAPClient* hapClient, const uint8_t* body, const size_t bodyLen);
 
 	// pairings
-	void handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen);
+	void handlePairingsPost(HAPClient* hapClient, const uint8_t* bodyData, const size_t bodyDataLen);
 	void handlePairingsRemove(HAPClient* hapClient, const uint8_t* identifier);
 	void handlePairingsList(HAPClient* hapClient);
 	void handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifier, const uint8_t* publicKey, bool isAdmin);
@@ -342,13 +339,6 @@ protected:
 	// Identify
 	void handleIdentify(HAPClient* hapClient);
 
-
-	//
-	// Plugin handling
-	// ToDo: currently unused
-	//
-	void stopPlugins(bool value);
-	bool startPlugin(std::unique_ptr<HAPPlugin> plugin);
 
 	// Callbacks
 	void handleAllPairingsRemoved();
@@ -374,8 +364,6 @@ private:
 
 	char _brand[MAX_BRAND_LENGTH];
 
-	bool _stopEvents;
-	bool _stopPlugins;
 
 	//
 	// Bonjour
@@ -415,9 +403,7 @@ private:
 	}
 
 	void sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error);
-
 	bool sendEvent(HAPClient* hapClient, const JsonDocument& response);
-	
 	bool send204(HAPClient* hapClient);
 
 #if HAP_ENABLE_PIXEL_INDICATOR

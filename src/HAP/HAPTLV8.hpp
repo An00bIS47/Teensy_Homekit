@@ -37,22 +37,22 @@ public:
 
 	void addSeperator();
 
-	TLV8Entry* searchType(uint8_t type){
+	TLV8Entry* searchType(const uint8_t type){
 		return searchType(_head, type);
 	};
 
-	TLV8Entry* searchType(TLV8Entry* ptr, uint8_t type);
+	TLV8Entry* searchType(TLV8Entry* ptr, const uint8_t type);
 
-	TLV8Entry* searchId(TLV8Entry* ptr, uint8_t id);
+	TLV8Entry* searchId(TLV8Entry* ptr, const uint8_t id);
 
-	TLV8Entry* getType(uint8_t type);
-	bool hasType(uint8_t type);
+	TLV8Entry* getType(const uint8_t type);
+	bool hasType(const uint8_t type);
 
-	bool encode(uint8_t type, size_t length, const uint8_t data);
-	bool encode(uint8_t type, size_t length, const uint8_t* rawData);
-	bool encode(uint8_t* rawData, size_t dataLen);
+	bool encode(const uint8_t type, const size_t length, const uint8_t data);
+	bool encode(const uint8_t type, const size_t length, const uint8_t* rawData);
+	bool encode(const uint8_t* rawData, const size_t dataLen);
 
-	bool encode(uint8_t type, const std::initializer_list<uint8_t> data);
+	bool encode(const uint8_t type, const std::initializer_list<uint8_t> data);
 
 	void decode(uint8_t* out, size_t *outSize = nullptr);
 	void decode(const uint8_t type, uint8_t* out, size_t *outSize = nullptr);

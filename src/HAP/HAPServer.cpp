@@ -96,9 +96,6 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 	_webserver->setAccessorySet(_accessorySet);
 #endif
 
-	_stopEvents = false;
-	_stopPlugins = false;
-
 	_hapsrp = nullptr;
 
 
@@ -817,9 +814,6 @@ bool HAPServer::begin(bool resume) {
 
 #endif
 
-
-	stopEvents(false);
-
 	// queue event
 	_eventManager.queueEvent(EventManager::kEventHomekitStarted, HAPEvent());
 
@@ -1049,13 +1043,12 @@ void HAPServer::handle() {
 #endif
 
 	// Handle plugins
-	if (!_stopPlugins){
-		for (auto& plugin : _plugins) {
-			if (plugin->isEnabled()) {
-				plugin->handle();
-			}
+	for (auto& plugin : _plugins) {
+		if (plugin->isEnabled()) {
+			plugin->handle();
 		}
 	}
+
 
 	//
 	// Handle fakeGatos
@@ -1285,25 +1278,6 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 	}
 }
 
-
-bool HAPServer::stopEvents(){
-	return _stopEvents;
-}
-
-
-void HAPServer::stopEvents(bool value) {
-
-#if HAP_DEBUG
-	if (value) {
-		LogD(F("<<< Stopping Events"), true);
-	} else {
-		LogD(F(">>> Starting Events"), true);
-	}
-#endif
-	_stopEvents = value;
-}
-
-
 bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen){
 
 	bool validPath = false;
@@ -1327,7 +1301,7 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 			// char bodyDataStr[bodyDataLen + 1];
 			// strncpy(bodyDataStr, (char*)bodyData, bodyDataLen);
 
-			handleCharacteristicsPut( hapClient, String((char*)bodyData) );
+			handleCharacteristicsPut( hapClient, bodyData,  bodyDataLen );
 		}
 
 	} else if ( hapClient->request.path == "/pairings" ) {
@@ -1428,8 +1402,6 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 	hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 
 	_eventManager.queueEvent(EventManager::kEventErrorOccurred, HAPEvent());
-
-	stopEvents(false);
 }
 
 
@@ -1500,7 +1472,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 									LogE( F("ERROR: Pair-setup failed at M1!"), true);
 									hapClient->clear();
 									hapClient->client.stop();
-									stopEvents(false);
 									hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 								}
 #if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0
@@ -1515,7 +1486,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1526,7 +1496,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1537,7 +1506,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1548,7 +1516,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 					}
@@ -2816,8 +2783,6 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	hapClient->clear();
 
-	//stopEvents(false);
-
 	Heap(_clients.size(), _eventManager.getNumEventsInQueue());
 
     return true;
@@ -3529,7 +3494,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-void HAPServer::handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen){
+void HAPServer::handlePairingsPost(HAPClient* hapClient, const uint8_t* bodyData, const size_t bodyDataLen){
 
 
 
@@ -3698,7 +3663,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 
 }
 
-void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
+void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, const uint8_t* body, const size_t bodyLen){
 
 
 #if defined( ARDUINO_ARCH_ESP32 )
@@ -3711,7 +3676,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, String body){
 #endif
 
 	DynamicJsonDocument root(2048);
-	DeserializationError error = deserializeJson(root, body);
+	DeserializationError error = deserializeJson(root, (char*)body);
 
 	if (error) {
     	LogE(F("ERROR: Parsing put characteristics request failed!"), true);
@@ -3887,13 +3852,7 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 }
 
 
-void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
-{
-
-	// Stopping events
-	if (stopEvents() == true) {
-		return;
-	}
+void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam ){
 
 	if (_clients.size() > 0){
 		int count = 0;
@@ -4014,15 +3973,6 @@ bool HAPServer::isPaired(){
 	return _accessorySet->isPaired();
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPServer::stopPlugins(bool value){
-	if (value)
-		_stopPlugins = false;
-	else
-		_stopPlugins = true;
-}
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM

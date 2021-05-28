@@ -35,11 +35,11 @@ TLV8::~TLV8() {
 	delete current;
 }
 
-bool TLV8::hasType(uint8_t type){
+bool TLV8::hasType(const uint8_t type){
 	return searchType(_head, type) != NULL;
 }
 
-TLV8Entry* TLV8::getType(uint8_t type){
+TLV8Entry* TLV8::getType(const uint8_t type){
 	return searchType(_head, type);
 }
 
@@ -152,7 +152,7 @@ void TLV8::addSeperator() {
 	}
 }
 
-bool TLV8::encode(uint8_t type, size_t length, const uint8_t data) {
+bool TLV8::encode(const uint8_t type, const size_t length, const uint8_t data) {
 
 	if (length != 1) return false;
 
@@ -165,7 +165,7 @@ bool TLV8::encode(uint8_t type, size_t length, const uint8_t data) {
 	return true;
 }
 
-bool TLV8::encode(uint8_t* rawData, size_t dataLen){
+bool TLV8::encode(const uint8_t* rawData, const size_t dataLen){
 
 	size_t encoded = 0;
 	while (encoded < dataLen) {
@@ -196,32 +196,33 @@ bool TLV8::encode(uint8_t* rawData, size_t dataLen){
 }
 
 
-bool TLV8::encode(uint8_t type, size_t length, const uint8_t* rawData) {
+bool TLV8::encode(const uint8_t type, const size_t length, const uint8_t* rawData) {
 
 	if (length == 0) return false;
 
+	size_t pLength = length;
 
 	size_t bdone = 0;
 
-	if (length > 255) {
-		while (length > 0) {
+	if (pLength > 255) {
+		while (pLength > 0) {
 			unsigned char tmp[255];
-			size_t l =  (length > 255) ? 255 : length;
+			size_t l =  (pLength > 255) ? 255 : pLength;
 			memcpy(tmp, rawData + bdone, l);
 			bdone += l;
-			length -= l;
+			pLength -= l;
 
 			TLV8Entry *ptr = initNode(type, l, tmp);
 			addNode(ptr);
 		}
 
 	} else {
-		bdone = length;
-		TLV8Entry *ptr = initNode(type, length, rawData);
+		bdone = pLength;
+		TLV8Entry *ptr = initNode(type, pLength, rawData);
 		addNode(ptr);
 	}
 
-	return (bdone == length) ? true : false;
+	return (bdone == pLength) ? true : false;
 }
 
 bool TLV8::encode(uint8_t type, const std::initializer_list<uint8_t> data){
@@ -331,7 +332,7 @@ void TLV8::insertNode( TLV8Entry *ptr ) {
 }
 
 
-TLV8Entry* TLV8::searchType(TLV8Entry* ptr, uint8_t type) {
+TLV8Entry* TLV8::searchType(TLV8Entry* ptr, const uint8_t type) {
 	while( type != ptr->type ) {
 		ptr = ptr->next;
 		if( ptr == NULL )
@@ -341,7 +342,7 @@ TLV8Entry* TLV8::searchType(TLV8Entry* ptr, uint8_t type) {
 }
 
 
-TLV8Entry* TLV8::searchId(TLV8Entry* ptr, uint8_t id) {
+TLV8Entry* TLV8::searchId(TLV8Entry* ptr, const uint8_t id) {
 	while( id != ptr->id ) {
 		ptr = ptr->next;
 		if( ptr == NULL )
