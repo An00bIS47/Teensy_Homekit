@@ -1574,57 +1574,102 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 }
 
 
-void HAPServer::processPathParameters(HAPClient* hapClient, String& line, int curPos){
+void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, size_t lineLength, int curPos){
 
-	int index = line.indexOf("?", curPos);
+	
+	
+	// Serial.print("constLine: ");
+	// Serial.println(constLine);
+	// Serial.print("curPos: ");
+	// Serial.println(curPos);
+
+
+	//int index = line.indexOf("?", curPos);
+	int index = HAPHelper::indexOf(line, lineLength, '?', curPos);
 
 	if ( index == -1) {
 		// no ? in request
-		hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
+		int len = HAPHelper::indexOf(line, lineLength, ' ', curPos); //line.indexOf(" ", curPos)
+
+		// line.substring(curPos, line.indexOf(" ", curPos));
+		char requestPath[ len + 1 - curPos];
+		memcpy( requestPath, &line[curPos], len - curPos);
+		requestPath[len - curPos] = '\0';
+
+		// Serial.println("len: " + String(len));
+		// Serial.println("REFERENCE len: " + String(line.indexOf(" ", curPos)));
+		// Serial.println("requestPath: " + String(requestPath));
+		// Serial.println("REFERENCE requestPath: " + line.substring(curPos, line.indexOf(" ", curPos)));
+
+		hapClient->request.path = requestPath; // line.substring(curPos, line.indexOf(" ", curPos));
 		hapClient->request.params = std::map<String, String>();
 	} else {
-		hapClient->request.path = line.substring(curPos, index);
+		// hapClient->request.path = line.substring(curPos, index);
+		char requestPath[ index - curPos ];
+		memcpy( requestPath, &line[curPos], index);
+		requestPath[index - curPos] = '\0';
 
-		// Serial.print("path: ");
-		// Serial.println(hapClient->request.path);
-		// Serial.send_now();
+		hapClient->request.path = requestPath;
 
 		curPos = index + 1;
-		String paramStr = line.substring(curPos, line.indexOf(" ", curPos));
 
+		// String paramStr = line.substring(curPos, line.indexOf(" ", curPos));
 
-		// Serial.println("paramStr:");
-		// Serial.println(paramStr);
-		// Serial.send_now();
+		int len = HAPHelper::indexOf(line, lineLength, ' ', curPos); //line.indexOf(" ", curPos)
+		char paramString[ len - curPos + 1 ];
+		memcpy( paramString, &line[curPos], len - curPos);
+		paramString[len - curPos] = '\0';
 
-		do {
-			curPos = 0;
-			int endIndex = paramStr.indexOf("&");
-			if (endIndex == -1){
-				endIndex = paramStr.length();
+		// Serial.println("paramString size: " + String(len - curPos + 1));
+		// Serial.println("len: " + String(len));
+		// Serial.println("REFERENCE len: " + String(line.indexOf(" ", curPos)));
+		// Serial.println("paramString: " + String(paramString));
+		// Serial.println("strlen(paramString): " + String(strlen(paramString)));
+		// Serial.println("REFERENCE paramString: " + paramStr);
+
+		char* tokens = paramString;
+		char *p = paramString;
+
+		while ((p = strsep (&tokens, "&\n"))) {
+			char *key = strtok (p, "=");
+			char *value = NULL;
+			if (key && (value = strtok (NULL, "="))){
+
+				hapClient->request.params[key] = value;
 			}
-
-			String keyPair = paramStr.substring(curPos, endIndex);
-			// Serial.printf("tmp: %s\n", keyPair.c_str());
-
-			int equalIndex = keyPair.indexOf("=");
-
-			// Serial.print("key: ");
-			// Serial.print(keyPair.substring(0, equalIndex));
-			// Serial.print(" - value: ");
-			// Serial.println(keyPair.substring(equalIndex + 1));
-			// Serial.send_now();
+		}
 
 
-			hapClient->request.params[keyPair.substring(0, equalIndex)] = keyPair.substring(equalIndex + 1);
 
-			if (endIndex < paramStr.length())
-				paramStr = paramStr.substring(endIndex + 1);
-			else {
-				break;
-			}
 
-		} while ( paramStr.length() > 0 );
+		// do {
+		// 	curPos = 0;
+		// 	int endIndex = paramStr.indexOf("&");
+		// 	if (endIndex == -1){
+		// 		endIndex = paramStr.length();
+		// 	}
+
+		// 	String keyPair = paramStr.substring(curPos, endIndex);
+		// 	// Serial.printf("tmp: %s\n", keyPair.c_str());
+
+		// 	int equalIndex = keyPair.indexOf("=");
+
+		// 	// Serial.print("key: ");
+		// 	// Serial.print(keyPair.substring(0, equalIndex));
+		// 	// Serial.print(" - value: ");
+		// 	// Serial.println(keyPair.substring(equalIndex + 1));
+		// 	// Serial.send_now();
+
+
+		// 	hapClient->request.params[keyPair.substring(0, equalIndex)] = keyPair.substring(equalIndex + 1);
+
+		// 	if (endIndex < paramStr.length()) {
+		// 		paramStr = paramStr.substring(endIndex + 1);
+		// 	} else {
+		// 		break;
+		// 	}
+
+		// } while ( paramStr.length() > 0 );
 	}
 }
 
@@ -1633,11 +1678,7 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, String& line){
 
 	// Print Line
 #if HAP_DEBUG_HOMEKIT_REQUEST
-
 	if (line != "") Serial.println(line);
-#if defined( CORE_TEENSY )
-	Serial.send_now();
-#endif
 #endif
 
 	int curPos = 0;
@@ -1647,25 +1688,25 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, String& line){
 		hapClient->request.method = METHOD_POST;
 		curPos = 5;
 		// Path
-		processPathParameters( hapClient, line, curPos);
+		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
 	} else if ( line.startsWith("GET ") ) {
 		hapClient->request.method = METHOD_GET;
 		curPos = 4;
 		// Path
-		processPathParameters( hapClient, line, curPos);
+		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
 	} else if ( line.startsWith("PUT ") ) {
 		hapClient->request.method = METHOD_PUT;
 		curPos = 4;
 		// Path
-		processPathParameters( hapClient, line, curPos);
+		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
 	} else if ( line.startsWith("DELETE ") ) {
 		hapClient->request.method = METHOD_DELETE;
 		curPos = 7;
 		// Path
-		processPathParameters( hapClient, line, curPos);
+		processPathParameters( hapClient, line.c_str(), line.length(), curPos);
 		//hapClient->request.path = line.substring(curPos, line.indexOf(" ", curPos));
 	}
 
