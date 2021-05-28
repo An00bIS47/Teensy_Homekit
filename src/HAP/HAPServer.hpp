@@ -408,9 +408,9 @@ private:
 	//
 	void sendResponse(HAPClient* hapClient, TLV8* response);
 
-	bool send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const String httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
+	bool send(HAPClient* hapClient, const String& httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const String& httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const String& httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
 		return send(hapClient, httpStatus, (const uint8_t*)data, length, mode, contentType);
 	}
 

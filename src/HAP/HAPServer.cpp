@@ -1843,7 +1843,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
+bool HAPServer::send(HAPClient* hapClient, const String& httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 
 	if (httpStatus == HTTP_204) {
 		send204(hapClient);
@@ -1911,7 +1911,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_
 
 }
 
-bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
+bool HAPServer::send(HAPClient* hapClient, const String& httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 
 
 	if (httpStatus == HTTP_204) {
