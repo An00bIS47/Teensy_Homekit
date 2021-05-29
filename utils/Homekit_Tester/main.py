@@ -205,7 +205,7 @@ class TestReport(object):
         result += tabulate(table, headers=["Name", "Passed", "Duration in ms", "Comment"], tablefmt="github")
         result += "\n"
 
-        
+
         if accessoryJson != None:
             result += "\n"
             result += "## Accessory Details" + "\n"
@@ -808,7 +808,7 @@ class HomekitTester(object):
         print("Waiting for {} events ...".format(self.args.eventCount))
 
         self.eventCount = 0
-        
+
         try:
 
             with TimingManager(testname, loggingArray) as tm:
@@ -878,7 +878,7 @@ class HomekitTester(object):
             self.report.addStep(testname, False, loggingArray,"{a}".format(a=e))
             logging.debug(e, exc_info=True)
             return 0, None
-        
+
         return 1, None
 
     @measure
@@ -908,8 +908,8 @@ class HomekitTester(object):
             self.report.addStep(testname, False, loggingArray,"{a}".format(a=e))
             logging.debug(e, exc_info=True)
             return 0, None
-        
-        return 1, None        
+
+        return 1, None
 
     @measure
     def listPairings(self, testname):
@@ -954,7 +954,7 @@ class HomekitTester(object):
         alias = self.args.alias + "+add"
         print("")
         try:
-            
+
             with TimingManager(testname, loggingArray) as tm:
                 pairings = self.controller.get_pairings()
                 if alias in pairings:
@@ -1067,7 +1067,7 @@ class HomekitTester(object):
             cprint('"{a}" is no known alias'.format(a=alias), "red")
             self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=alias))
             return -1, None
-        
+
         print("")
         try:
             with TimingManager(testname, loggingArray) as tm:
@@ -1287,26 +1287,26 @@ class HomekitTester(object):
             historyData = bytearray()
 
             allPassed = True
-            while self.requestedEntry < info["size"]:
+            if int(info["size"] > 0):
+                while self.requestedEntry < info["size"]:
 
-                if self.args.quiet == False:
-                    print("requestedEntry: " + str(self.requestedEntry))
+                    if self.args.quiet == False:
+                        print("requestedEntry: " + str(self.requestedEntry))
 
-                self.putHistoryAddress(self.requestedEntry + 1)
-                passed, data = self.getHistoryEntry()
-                if passed == True:
-                    base64_bytes = base64.b64decode(data[(2, 19)]["value"])
+                    self.putHistoryAddress(self.requestedEntry + 1)
+                    passed, data = self.getHistoryEntry()
+                    if passed == True:
+                        base64_bytes = base64.b64decode(data[(2, 19)]["value"])
 
-                    hexdata = "".join(map(lambda b: format(b, "02x"), base64_bytes))
-                    historyData.extend(bytearray.fromhex(hexdata))
-                else:
-                    allPassed = False
+                        hexdata = "".join(map(lambda b: format(b, "02x"), base64_bytes))
+                        historyData.extend(bytearray.fromhex(hexdata))
+                    else:
+                        allPassed = False
 
-                self.requestedEntry += 16
+                    self.requestedEntry += 16
 
-                if self.requestedEntry > info["used"] or data[(2,19)]["value"] == "AA==":
-                    break
-
+                    if self.requestedEntry > info["used"] or data[(2,19)]["value"] == "AA==":
+                        break
 
             self.fakegatoHistories.append(historyData)
 
