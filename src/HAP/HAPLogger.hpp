@@ -42,8 +42,22 @@
 #define LogW(Y, Z) HAPLogger::logWarning(Y,Z)
 #define LogD(Y, Z) HAPLogger::logDebug(Y,Z)
 #define LogFlush() HAPLogger::flush()
+
+#elif HAP_DEBUG_HEAP
+
+#define Heap(X, Y)		HAPLogger::logFreeHeap(X, Y)
+#define Log(X, Y, Z) 	(0)
+
+#define LogOK(X)		(0)
+
+#define LogI(Y, Z) 		(0)
+#define LogE(Y, Z) 		(0)
+#define LogV(Y, Z) 		(0)
+#define LogW(Y, Z) 		(0)
+#define LogD(Y, Z) 		(0)
+
 #else
-#define Heap(X, Y) 		(0)
+#define Heap(X, Y)		(0)
 #define Log(X, Y, Z) 	(0)
 
 #define LogOK(X)		(0)

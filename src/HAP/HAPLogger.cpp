@@ -376,4 +376,3 @@ void HAPLogger::printTeensyInfo(){
 	progInfo();
 	flexRamInfo();
 }
-

@@ -96,10 +96,7 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 	_webserver->setAccessorySet(_accessorySet);
 #endif
 
-	_stopEvents = false;
-
 	_hapsrp = nullptr;
-
 
 	_isInPairingMode = false;
 	_homekitFailedLoginAttempts = 0;
@@ -816,9 +813,6 @@ bool HAPServer::begin(bool resume) {
 
 #endif
 
-
-	stopEvents(false);
-
 	// queue event
 	_eventManager.queueEvent(EventManager::kEventHomekitStarted, HAPEvent());
 
@@ -951,7 +945,7 @@ void HAPServer::handle() {
 #endif
 
 
-#if HAP_DEBUG
+#if HAP_DEBUG || HAP_DEBUG_HEAP
 	// Free Heap every interval ms
 	if ( millis() - _previousMillisHeap >= 1000) {
 	    // save the last time you blinked the LED
@@ -1094,7 +1088,9 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 	LogD( ">>> client [" + hapClient->client.remoteIP().toString() + "] connected", true );
 #elif defined( CORE_TEENSY )
 	LogD( F(">>> client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogD(F("] "), false);
 #endif
 
@@ -1285,24 +1281,6 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 }
 
 
-bool HAPServer::stopEvents(){
-	return _stopEvents;
-}
-
-
-void HAPServer::stopEvents(bool value) {
-
-#if HAP_DEBUG
-	if (value) {
-		LogD(F("<<< Stopping Events"), true);
-	} else {
-		LogD(F(">>> Starting Events"), true);
-	}
-#endif
-	_stopEvents = value;
-}
-
-
 bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen){
 
 	bool validPath = false;
@@ -1345,7 +1323,9 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 		LogE(F("Not yet implemented! >>> client [") + hapClient->client.remoteIP().toString() + "] ", false);
 #elif defined( CORE_TEENSY )
 		LogE(F("Not yet implemented! >>> client ["), false);
-		Serial.print(hapClient->client.remoteIP());
+#if HAP_DEBUG
+	Serial.print(hapClient->client.remoteIP());
+#endif
 		LogE(F("]"), true);
 #endif
 		LogE(F(" - method: ") + String(hapClient->request.method), true);
@@ -1427,8 +1407,6 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 	hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 
 	_eventManager.queueEvent(EventManager::kEventErrorOccurred, HAPEvent());
-
-	stopEvents(false);
 }
 
 
@@ -1499,7 +1477,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 									LogE( F("ERROR: Pair-setup failed at M1!"), true);
 									hapClient->clear();
 									hapClient->client.stop();
-									stopEvents(false);
 									hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 								}
 #if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0
@@ -1514,7 +1491,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1525,7 +1501,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1536,7 +1511,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1547,7 +1521,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 					}
@@ -2206,7 +2179,9 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 #elif defined( CORE_TEENSY )
 	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> /pair-setup Step 1/4 ...", false);
 	LogV( F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV( F("] -> /pair-setup Step 1/4 ..."), false);
 #endif
 
@@ -2352,7 +2327,9 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	LogD( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 2/4 ...", false);
 #elif defined( CORE_TEENSY )
 	LogD( F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pair-setup Step 2/4 ..."), false);
 #endif
 
@@ -2497,7 +2474,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 3/4 ...", false);
 #elif defined( CORE_TEENSY )
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pair-setup Step 3/4 ..."), false);
 #endif
 
@@ -2681,7 +2660,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
 #elif defined( CORE_TEENSY )
 	LogV(F(F("<<< Handle client [")), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pair-setup Step 4/4 ..."), false);
 #endif
 
@@ -2803,7 +2784,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	LogI(">>> Pairing with client [" + hapClient->client.remoteIP().toString() + "] complete!", true);
 #elif defined( CORE_TEENSY )
 	LogI(F(">>> Pairing with client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogI(F("] -> complete!"), true);
 #endif
 
@@ -2812,10 +2795,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	_eventManager.queueEvent(EventManager::kEventPairingComplete, HAPEvent());
 
-
 	hapClient->clear();
-
-	//stopEvents(false);
 
 	Heap(_clients.size(), _eventManager.getNumEventsInQueue());
 
@@ -2831,7 +2811,9 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 1/2 ...", false);
 #elif defined( CORE_TEENSY )
 	LogV( F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pair-verify Step 1/2 ..."), false);
 #endif
 
@@ -3035,7 +3017,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-verify Step 2/2 ...", false);
 #elif defined( CORE_TEENSY )
 	LogV(F("Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pair-verify Step 2/2 ..."), false);
 #endif
 
@@ -3237,7 +3221,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LogI(">>> Verification with client [" + hapClient->client.remoteIP().toString() + "] complete!", true);
 #elif defined( CORE_TEENSY )
 	LogI(F("Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogI(F("] -> Pair verify complete!"), true);
 #endif
 
@@ -3326,7 +3312,9 @@ void HAPServer::handlePairingsList(HAPClient* hapClient){
 #elif defined( CORE_TEENSY )
 	//LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings list ...", false);
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pairings list ..."), false);
 #endif
 
@@ -3389,7 +3377,9 @@ void HAPServer::handlePairingsAdd(HAPClient* hapClient, const uint8_t* identifie
 #elif defined( CORE_TEENSY )
 	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings add ...", false);
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pairings add ..."), false);
 #endif
 
@@ -3441,7 +3431,9 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 #elif defined( CORE_TEENSY )
 	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings remove ...", false);
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pairings remove ..."), false);
 #endif
 
@@ -3537,7 +3529,9 @@ void HAPServer::handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size
 #elif defined( CORE_TEENSY )
 	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> POST /pairings ...", false);
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> /pairings ..."), false);
 #endif
 
@@ -3584,7 +3578,9 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 #elif defined( CORE_TEENSY )
 	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] -> GET /characteristics ...", false);
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> GET /characteristics ..."), false);
 #endif
 
@@ -3705,7 +3701,9 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 #elif defined( CORE_TEENSY )
 	// LogV( F("<<< Handle client [") + String(hapClient->client.remoteIP()) + "] ->  PUT /characteristics ...", true);
 	LogV(F("<<< Handle client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] -> PUT /characteristics ..."), false);
 #endif
 
@@ -3889,11 +3887,6 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 {
 
-	// Stopping events
-	if (stopEvents() == true) {
-		return;
-	}
-
 	if (_clients.size() > 0){
 		int count = 0;
 		int totalEvents = _eventManager.getNumEventsInQueue();
@@ -3992,7 +3985,9 @@ bool HAPServer::sendEvent(HAPClient* hapClient, const JsonDocument& response){
 #elif defined( CORE_TEENSY )
 	// LogD(">>> Sending event to client [" + String(hapClient->client.remoteIP()) + "] ...", false);
 	LogV(F("Sending event to client ["), false);
+#if HAP_DEBUG
 	Serial.print(hapClient->client.remoteIP());
+#endif
 	LogV(F("] ..."), false);
 
 #endif

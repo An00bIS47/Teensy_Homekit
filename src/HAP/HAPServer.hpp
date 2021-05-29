@@ -284,10 +284,6 @@ protected:
 	void handleEventConfigReset(int eventCode, struct HAPEvent eventParam);
 	void handleEventDeleteAllPairings(int eventCode, struct HAPEvent eventParam);
 
-	bool stopEvents();
-	void stopEvents(bool value);
-
-
 	// HAPEventManager	_evtMgr;
 
 	//
@@ -356,19 +352,15 @@ private:
 	bool _isInPairingMode;
 
 	uint8_t _homekitFailedLoginAttempts;
-
-	// String _curLine;
 	uint16_t _port;
 
-#if HAP_DEBUG
+#if HAP_DEBUG || HAP_DEBUG_HEAP
 	unsigned long _previousMillisHeap;
 #endif
 
 	HAPSRP* _hapsrp;
 
 	char _brand[MAX_BRAND_LENGTH];
-
-	bool _stopEvents;
 
 	//
 	// Bonjour
