@@ -205,7 +205,7 @@ class TestReport(object):
         result += tabulate(table, headers=["Name", "Passed", "Duration in ms", "Comment"], tablefmt="github")
         result += "\n"
 
-
+        
         if accessoryJson != None:
             result += "\n"
             result += "## Accessory Details" + "\n"
@@ -218,13 +218,15 @@ class TestReport(object):
 
 
         result += "\n"
-        result += "## Report Details" + "\n"
-        result += "<details>" + "\n"
-        result += "<summary>Click this to collapse/fold.</summary>" + "\n"
-        result += "<pre><code>" + "\n"
-        result += json.dumps(self.toJson(), indent=4) + "\n"
-        result += "</code></pre>" + "\n"
-        result += "</details>" + "\n"
+
+        if self.iterations <= 10:
+            result += "## Report Details" + "\n"
+            result += "<details>" + "\n"
+            result += "<summary>Click this to collapse/fold.</summary>" + "\n"
+            result += "<pre><code>" + "\n"
+            result += json.dumps(self.toJson(), indent=4) + "\n"
+            result += "</code></pre>" + "\n"
+            result += "</details>" + "\n"
 
         return result
 
@@ -375,7 +377,7 @@ class HomekitTester(object):
     def uploadReportToGitlab(self, section = 'synologynas', configFile = './gitlab.ini', projectName = "Teensy_Homekit"):
         gl = gitlab.Gitlab.from_config(section, [configFile])
 
-        cprint('"Uploading to gitlab {a}"'.format(a=gl.url()), "green")
+        cprint('"Uploading to gitlab {a}"'.format(a=gl.url), "green")
 
         # list all the projects
         projects = gl.projects.list()
