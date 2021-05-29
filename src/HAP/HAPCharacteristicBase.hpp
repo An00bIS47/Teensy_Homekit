@@ -35,7 +35,7 @@ typedef enum {
 	HAP_UNIT_NONE = 0,          // none
 	HAP_UNIT_CELSIUS,           // °C
 	HAP_UNIT_PERCENTAGE,        // %
-	HAP_UNIT_ARC_DEGREE,         // °
+	HAP_UNIT_ARC_DEGREE,        // °
 	HAP_UNIT_LUX,               // lux
 	HAP_UNIT_SECONDS,           // sec
 
@@ -333,8 +333,6 @@ public:
     virtual void valueFromString(const char* value) = 0;
 
 protected:
-
-
 
     uint32_t  _iid;
 	const uint8_t   _type;
