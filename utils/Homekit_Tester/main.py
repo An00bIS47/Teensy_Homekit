@@ -35,12 +35,13 @@ class TestReport(object):
 
     """docstring for ClassName"""
 
-    def __init__(self, desc=None, args=None, gitCommit=None):
+    def __init__(self, desc=None, args=None, gitCommit=None, iterations=None):
         super(TestReport, self).__init__()
 
         self.args = args
         self.desc = desc
         self.gitCommit = gitCommit
+        self.iterations = iterations
         self.passed = True
         self.steps = []
         self.startTime = dt.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -106,6 +107,7 @@ class TestReport(object):
             ["Git Commit", self.gitCommit],
             ["Date", self.startTime],
             ["Passed", self.passed],
+            ["Iterations", self.iterations],
             ["Steps", self.stepsCount()],
             ["Duration", str(self.getTotalDuration()) + " ms"]
         ]
@@ -145,6 +147,7 @@ class TestReport(object):
         data["git"] = self.gitCommit
         data["date"] = self.startTime
         data["passed"] = self.passed
+        data["iterations"] = self.iterations
         data["steps"] = []
 
 
@@ -169,6 +172,7 @@ class TestReport(object):
                     ["Git Commit", self.gitCommit],
                     ["Date", self.startTime],
                     ["Passed", ":white_check_mark:" if self.passed == True else ":red_circle:"  ],
+                    ["Iterations", self.iterations],
                     ["Steps", self.stepsCount()],
                     ["Duration", str(self.getTotalDuration()) + " ms"]
                 ]
@@ -326,7 +330,7 @@ class HomekitTester(object):
 
         self.createStorageFile()
 
-        self.report = TestReport(args=' '.join(sys.argv[0:]), gitCommit=self.args.gitCommit)
+        self.report = TestReport(args=' '.join(sys.argv[0:]), gitCommit=self.args.gitCommit, iterations=self.args.iterations)
 
         self.requestedEntry = 0
 
@@ -371,6 +375,8 @@ class HomekitTester(object):
     def uploadReportToGitlab(self, section = 'synologynas', configFile = './gitlab.ini', projectName = "Teensy_Homekit"):
         gl = gitlab.Gitlab.from_config(section, [configFile])
 
+        cprint('"Uploading to gitlab {a}"'.format(a=gl.url()), "green")
+
         # list all the projects
         projects = gl.projects.list()
         for project in projects:
@@ -380,15 +386,16 @@ class HomekitTester(object):
                 date_time = now.strftime("%Y-%m-%d")
                 #print("date and time:",date_time)
 
-                project.wikis.create({'title': 'Testreports/Testreport ' + date_time,
+                project.wikis.create({'title': 'Testreports/Testreport ' + date_time + ' ' + str(self.args.iterations),
                                     'content': self.report.toMarkDown(self.accessoryData)})
 
                 # Add to Testreport Overview
                 page = project.wikis.get('Testreport-Overview')
                 addLine = "| " + date_time
+                addLine += " | " + str(self.args.iterations)
                 addLine += " | :white_check_mark:" if self.report.passed == True else " | :red_circle:"
                 addLine += " | " + self.report.gitCommit
-                addLine += " | " + "[report](Testreports/Testreport " + date_time + ")"
+                addLine += " | " + "[report](Testreports/Testreport " + date_time + " " + str(self.args.iterations) + ")"
                 addLine += " |\n"
 
                 page.content = page.content + addLine
@@ -1415,7 +1422,7 @@ if __name__ == '__main__':
 
         for i in range(0, args.iterations):
             print(k, i)
-            time.sleep(0.3)
+            time.sleep(0.1)
             tester.runTest("pair", tester.pair)
             tester.runTest("getAccessories", tester.getAccessories)
             tester.runTest("removePairing", tester.removePairing)
