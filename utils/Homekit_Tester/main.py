@@ -219,7 +219,7 @@ class TestReport(object):
 
         result += "\n"
 
-        if self.iterations <= 10:
+        if self.iterations <= 100:
             result += "## Report Details" + "\n"
             result += "<details>" + "\n"
             result += "<summary>Click this to collapse/fold.</summary>" + "\n"
@@ -1287,7 +1287,7 @@ class HomekitTester(object):
             historyData = bytearray()
 
             allPassed = True
-            if int(info["size"] > 0):
+            if int(info["used"] > 0):
                 while self.requestedEntry < info["size"]:
 
                     if self.args.quiet == False:
@@ -1406,8 +1406,9 @@ if __name__ == '__main__':
 
         passed, fakegatoHistories = tester.runFakegato()
 
-        for historyEntry in fakegatoHistories:
-            tester.openInHexFiend(historyEntry)
+        if fakegatoHistories != None:
+            for historyEntry in fakegatoHistories:
+                tester.openInHexFiend(historyEntry)
 
         # for historyEntry in tester.fakegatoHistories:
         #     tester.openInHexFiend(historyEntry)
