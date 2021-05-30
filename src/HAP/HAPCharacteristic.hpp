@@ -636,17 +636,10 @@ public:
 
         if (_dataGetFunctionCall && withCallback){
 
-            uint8_t* bufferCallback;
-
+            uint8_t bufferCallback[_maxDataLen] = {0,};
             size_t valueLenCallback = 0;
-            _dataGetFunctionCall(nullptr, &valueLenCallback);
-
-            bufferCallback = (uint8_t*) malloc(sizeof(uint8_t) * valueLenCallback);
-
             _dataGetFunctionCall(bufferCallback, &valueLenCallback);
-
             setValueRaw(bufferCallback, valueLenCallback);
-            free(bufferCallback);
         }
 
         if (output){
