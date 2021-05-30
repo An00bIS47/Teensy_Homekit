@@ -74,13 +74,13 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPService* temperatureService = new HAPService(HAP_SERVICE_TEMPERATURE_SENSOR);
         _accessory->addService(temperatureService);
 
-        HAPCharacteristicT<String> *tempServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        HAPCharacteristic<String> *tempServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         tempServiceName->setValue("Temperature Sensor " + String(_id));
 
         _accessory->addCharacteristicToService(temperatureService, tempServiceName);
 
         //HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
-        _temperatureValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
+        _temperatureValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
         _temperatureValue->setValue(0.0F);
 
         _temperatureValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceWeather::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
@@ -103,11 +103,11 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
         _accessory->addService(humidityService);
 
-        HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        HAPCharacteristic<String> *humServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         humServiceName->setValue("Humidity Sensor " + String(_id));
         _accessory->addCharacteristicToService(humidityService, humServiceName);
 
-        _humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
+        _humidityValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
         _humidityValue->setValue(0.0);
 
         _humidityValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceWeather::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));
@@ -133,11 +133,11 @@ HAPAccessory* HAPPluginKNXDeviceWeather::initAccessory(){
         HAPService* pressureService = new HAPService(HAP_SERVICE_FAKEGATO_AIR_PRESSURE_SENSOR);
         _accessory->addService(pressureService);
 
-        HAPCharacteristicT<String> *pressureServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        HAPCharacteristic<String> *pressureServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         pressureServiceName->setValue("Pressure Sensor " + String(_id));
         _accessory->addCharacteristicToService(pressureService, pressureServiceName);
 
-        _pressureValue = new HAPCharacteristicT<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
+        _pressureValue = new HAPCharacteristic<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
         _pressureValue->setValue(320);
 
         _pressureValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceWeather::changedPressure, this, std::placeholders::_1, std::placeholders::_2));

@@ -105,7 +105,7 @@ public:
 	// rounds a number to 2 decimal places
 	// example: round(3.14159) -> 3.14
 	static double round2(double value) {
-   		return (int)(value * 100 + 0.5) / 100.0;
+   		return (int)(value * 100) / 100.0;
 	}
 
 	static int indexOf(const char* array, int arr_size, char to_find, int startPos = 0);

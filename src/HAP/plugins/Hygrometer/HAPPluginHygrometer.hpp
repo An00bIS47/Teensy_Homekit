@@ -50,7 +50,7 @@ public:
 private:
 
 
-	HAPCharacteristicT<float>*		_humidityValue;
+	HAPCharacteristic<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
 // #if HAP_HYGROMETER_LEAK_SENSOR_ENABLED

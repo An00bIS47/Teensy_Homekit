@@ -287,10 +287,10 @@ protected:
 
     // FIXME: Change to uint8_t* data characteristic with base64 encoding inside of the charactersitic
     //        Add this to a new file specific for data chars ?
-    HAPCharacteristicT<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics;
-    HAPCharacteristicT<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
-    HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
-    HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
+    HAPCharacteristic<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics;
+    HAPCharacteristic<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
+    HAPCharacteristic<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
+    HAPCharacteristic<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
 
     std::function<bool()> _callbackAddEntry = nullptr;
 

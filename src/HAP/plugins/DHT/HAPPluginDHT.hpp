@@ -94,10 +94,10 @@ public:
 
 private:
 
-	HAPCharacteristicT<float>*		_humidityValue;
+	HAPCharacteristic<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
-	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPCharacteristic<float>*		_temperatureValue;
 	HAPFakegatoAverage<float>		_temperatureAverage;
 
 #if HAP_PLUGIN_DHT_USE_DUMMY

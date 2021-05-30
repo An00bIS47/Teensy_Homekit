@@ -13,7 +13,7 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 #include "EventManager.h"
 
 #include "HAPFakegato.hpp"
@@ -72,16 +72,16 @@ protected:
 
     uint32_t                _timestampLastActivity;
 
-    HAPCharacteristicT<bool>*    _inUseState;
-    HAPCharacteristicT<bool>*    _parentalLock;
+    HAPCharacteristic<bool>*    _inUseState;
+    HAPCharacteristic<bool>*    _parentalLock;
 
-    HAPCharacteristicT<bool>*    _stateValue;
+    HAPCharacteristic<bool>*    _stateValue;
 
 
-    HAPCharacteristicT<float>*   _curPowerValue;
+    HAPCharacteristic<float>*   _curPowerValue;
     HAPFakegatoAverage<float>	 _curPowerAverage;
 
-    HAPCharacteristicT<float>*   _ttlPowerValue;
+    HAPCharacteristic<float>*   _ttlPowerValue;
     HAPFakegatoAverage<float>	 _ttlPowerAverage;
 
     // HAPCharacteristicString* 	_lastUpdate;

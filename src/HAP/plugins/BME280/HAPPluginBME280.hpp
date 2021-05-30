@@ -110,14 +110,14 @@ protected:
 
  	struct HAPPluginBME280Config* _configInternal;
 
-	HAPCharacteristicT<float>*		_humidityValue;
+	HAPCharacteristic<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
-	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPCharacteristic<float>*		_temperatureValue;
 	HAPFakegatoAverage<float>		_temperatureAverage;
 
 
-	HAPCharacteristicT<uint16_t>*	_pressureValue;
+	HAPCharacteristic<uint16_t>*	_pressureValue;
 	HAPFakegatoAverage<uint16_t>	_pressureAverage;
 
 

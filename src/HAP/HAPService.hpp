@@ -12,7 +12,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <memory>
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 
 class HAPService {
 public:

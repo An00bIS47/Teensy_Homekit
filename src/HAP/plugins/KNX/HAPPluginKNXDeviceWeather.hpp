@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 #include "EventManager.h"
 
 #include "HAPFakegato.hpp"
@@ -61,14 +61,14 @@ protected:
 
     bool                    _useHumdityDPT9;
 
-    HAPCharacteristicT<float>*		_humidityValue;
+    HAPCharacteristic<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
-	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPCharacteristic<float>*		_temperatureValue;
 	HAPFakegatoAverage<float>		_temperatureAverage;
 
 
-	HAPCharacteristicT<uint16_t>*	_pressureValue;
+	HAPCharacteristic<uint16_t>*	_pressureValue;
 	HAPFakegatoAverage<uint16_t>	_pressureAverage;
 
 

@@ -19,7 +19,7 @@
 #include "HAPFakegatoAverage.hpp"
 #include "HAPFakegatoFactory.hpp"
 
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 #include "EventManager.h"
 
 
@@ -100,11 +100,11 @@ protected:
     EventManager*			_eventManager;
     HAPFakegatoFactory*     _fakegatoFactory;
 
-    HAPCharacteristicT<bool>*    _stateValue;
-    HAPCharacteristicT<bool>*    _inUseState;
-    HAPCharacteristicT<bool>*    _parentalLock;
-    HAPCharacteristicT<float>*   _curPowerValue;
-    HAPCharacteristicT<float>*   _ttlPowerValue;
+    HAPCharacteristic<bool>*    _stateValue;
+    HAPCharacteristic<bool>*    _inUseState;
+    HAPCharacteristic<bool>*    _parentalLock;
+    HAPCharacteristic<float>*   _curPowerValue;
+    HAPCharacteristic<float>*   _ttlPowerValue;
 
 
     uint32_t                _timestampLastActivity;

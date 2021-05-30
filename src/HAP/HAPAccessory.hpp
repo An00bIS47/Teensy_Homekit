@@ -16,7 +16,7 @@
 
 #include "HAPService.hpp"
 #include "HAPCharacteristics.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 
 
 // typedef void (*identifyFunction)(bool oldValue, bool newValue);
@@ -67,12 +67,12 @@ protected:
 	std::vector<std::unique_ptr<HAPService>> _services;
 
 	HAPService*	_infoService;
-	HAPCharacteristicT<bool>* 	_identify;
-	HAPCharacteristicT<String>* _accessoryName;
-	HAPCharacteristicT<String>* _firmware;
-	HAPCharacteristicT<String>* _manufacturer;
-	HAPCharacteristicT<String>* _modelName;
-	HAPCharacteristicT<String>* _serialNumber;
+	HAPCharacteristic<bool>* 	_identify;
+	HAPCharacteristic<String>* _accessoryName;
+	HAPCharacteristic<String>* _firmware;
+	HAPCharacteristic<String>* _manufacturer;
+	HAPCharacteristic<String>* _modelName;
+	HAPCharacteristic<String>* _serialNumber;
 };
 
 

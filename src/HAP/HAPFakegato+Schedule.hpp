@@ -209,8 +209,8 @@ public:
 protected:
 
     // Schedules
-    HAPCharacteristicT<String>* _configRead     = nullptr;
-    HAPCharacteristicT<String>* _configWrite    = nullptr;
+    HAPCharacteristic<String>* _configRead     = nullptr;
+    HAPCharacteristic<String>* _configWrite    = nullptr;
 
     virtual String scheduleRead() = 0;
     virtual void scheduleWrite(String oldValue, String newValue) = 0;

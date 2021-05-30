@@ -10,7 +10,7 @@
 #include "HAPServer.hpp"
 #include "EventManager.h"
 #include "HAPCharacteristics.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 #include "HAPServices.hpp"
 
 
@@ -224,28 +224,28 @@ HAPService* HAPAccessory::addInfoService(const String& accessoryName, const Stri
 
 
 	if (_accessoryName == nullptr) {
-		_accessoryName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		_accessoryName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
 
 	if (_manufacturer == nullptr) {
-		_manufacturer = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MANUFACTURER, (uint8_t)1);
+		_manufacturer = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_MANUFACTURER, (uint8_t)1);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);
 
 
 	if (_modelName == nullptr) {
-		_modelName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_MODEL, (uint8_t)1);
+		_modelName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_MODEL, (uint8_t)1);
 		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);
 
 
 	if (_serialNumber == nullptr) {
-		_serialNumber = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, (uint8_t)1);
+		_serialNumber = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, (uint8_t)1);
 		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);
@@ -275,7 +275,7 @@ FLASHMEM
 void HAPAccessory::setFirmware(const String& firmwareRev){
 	initInfoService();
 	if (_firmware == nullptr) {
-		_firmware = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ);
+		_firmware = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ);
 		addCharacteristicToService(_infoService, _firmware);
 	}
 	_firmware->setValue(firmwareRev, false);
@@ -287,7 +287,7 @@ FLASHMEM
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
 	initInfoService();
 	if (_identify == nullptr) {
-		_identify = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_IDENTIFY, HAP_PERMISSION_WRITE);
+		_identify = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_IDENTIFY, HAP_PERMISSION_WRITE);
 		addCharacteristicToService(_infoService, _identify);
 	}
 	_identify->setValueChangeCallback(callback);

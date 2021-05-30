@@ -1,0 +1,1 @@
+../../../src/HAP/HAPCharacteristic.hpp
