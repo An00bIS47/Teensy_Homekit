@@ -117,23 +117,27 @@ uint16_t HAPPluginBME280::readPressure(){
 
 void HAPPluginBME280::changedTemperature(float oldValue, float newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change temperature from " + String(oldValue) + " to " + String(newValue), true);
-	Serial.println("[" + String(_config->name) + "] Changed temperature " + String(oldValue) + " >>> " + String(newValue));
-
+	Serial.printf("[%s] Changed temperature: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginBME280::changedHumidity(float oldValue, float newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change humidity from " + String(oldValue) + " to " + String(newValue), true);
-	Serial.println("[" + String(_config->name) + "] Changed humidity " + String(oldValue) + " >>> " + String(newValue));
+	Serial.printf("[%s] Changed humidity: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginBME280::changedPressure(uint16_t oldValue, uint16_t newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change pressure from " + String(oldValue) + " to " + String(newValue), true);
-	Serial.println("[" + String(_config->name) + "] Changed pressure " + String(oldValue) + " >>> " + String(newValue));
+	Serial.printf("[%s] Changed air pressure: %i >>> %i\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginBME280::handleImpl(bool forced){
 	// if (shouldHandle() || forced) {
-	LogV(HAPTime::timeString() + " " + _config->name + "->" + "handleImpl" + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+	LogV(HAPTime::timeString(), false);
+	LogV(F(" "), false);
+	LogV(_config->name, false);
+	LogV(F("->handleImpl [   ] Handle plguin ["), false);
+	LogV(_config->interval, false);
+	LogV(F("]"), true);
 
 	if (_accessory->aid() == 0){
 		return;

@@ -10,19 +10,6 @@
 #include "HAPLogger.hpp"
 #include "HAPTime.hpp"
 
-#if defined ( ARDUINO_ARCH_ESP32 )
-#if ESP_IDF_VERSION_MAJOR == 4
-#include "mbedtls/base64.h"
-#else
-extern "C" {
-    #include "crypto/base64.h"
-}
-
-#endif
-#elif defined(CORE_TEENSY)
-#include <Base64.h>
-// #include "mbedtls/base64.h"
-#endif
 
 HAPFakegato::HAPFakegato(){
     _restarted = true;
@@ -73,22 +60,22 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
 
 
 
-    // History Request
+    // History Set Address
     _historyRequest = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
-    _historyRequest->setDescription("EVE History Request");
-    
-    auto callbackHistoryRequest = std::bind(&HAPFakegato::callbackHistoryRequest, this, std::placeholders::_1, std::placeholders::_2);
+    _historyRequest->setDescription("EVE History Address");
+
+    auto callbackHistoryRequest = std::bind(&HAPFakegato::callbackSetHistoryAddress, this, std::placeholders::_1, std::placeholders::_2);
     _historyRequest->setDataChangeCallback(callbackHistoryRequest);
 
     accessory->addCharacteristicToService(fgService, _historyRequest);
 
 
 
-    // Set Time
+    // History Set Time
     _historySetTime = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historySetTime->setDescription("EVE History Time");
-    
-    auto callbackSetTime = std::bind(&HAPFakegato::callbackHistorySetTime, this, std::placeholders::_1, std::placeholders::_2);
+
+    auto callbackSetTime = std::bind(&HAPFakegato::callbackSetHistoryTime, this, std::placeholders::_1, std::placeholders::_2);
     _historySetTime->setDataChangeCallback(callbackSetTime);
 
     accessory->addCharacteristicToService(fgService, _historySetTime);
@@ -161,7 +148,14 @@ FLASHMEM
 #endif
 void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
 
-    LogD(HAPTime::timeString() + " HAPFakegato->addDataToBuffer [   ] " + "Adding entry for " + _name + " [size=" + String(_entries.size()) + " bitmask=" + String(bitmask) + "]", true);
+    LogD(HAPTime::timeString(), false);
+    LogD(F(" HAPFakegato->addDataToBuffer [   ] Adding entry for "), false);
+    LogD(_name, false);
+    LogD(F(" [size="), false);
+    LogD(_entries.size(), false);
+    LogD(F(" bitmask="), false);
+    LogD(bitmask, false);
+    LogD(F("]"), true);
 
 
     // Entry will be overwritten ...
@@ -214,7 +208,7 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
  *
  *
  *  !! Keep buffersize of "output" at 512 (or define!)
- * 
+ *
  * @param output history entries as uint8_t*
  * @param len length of output
  */
@@ -404,7 +398,7 @@ void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
  * @param decoded
  * @param len
  **/
-void HAPFakegato::callbackHistorySetTime(const uint8_t* decoded, const size_t len){
+void HAPFakegato::callbackSetHistoryTime(const uint8_t* decoded, const size_t len){
 
     if (_isTimeSource){
 
@@ -445,7 +439,7 @@ void HAPFakegato::callbackHistorySetTime(const uint8_t* decoded, const size_t le
  * @param decoded
  * @param len
  **/
-void HAPFakegato::callbackHistoryRequest(const uint8_t* decoded, const size_t len){
+void HAPFakegato::callbackSetHistoryAddress(const uint8_t* decoded, const size_t len){
 
 #if HAP_DEBUG_FAKEGATO
     HAPHelper::array_print("History Request", decoded, len);
@@ -499,15 +493,13 @@ void HAPFakegato::callbackHistoryRequest(const uint8_t* decoded, const size_t le
  *  example of full data
  *   "58020000 00000000 cd8f0220 04 0102 0202 0702 0f03 0300 c00f 00000000 00000000 0101"
  *
- *  // ToDo: Rewrite as READ callback for characteristic
- *           Check for base64 encoding - better use mbedtls if possible
  **/
 void HAPFakegato::callbackGetHistoryInfo(uint8_t* output, size_t* len){
 
     uint8_t sigLength = signatureLength();
     uint8_t buffersize = (13 + sigLength + 14);
 
-    *len = base64_enc_len(buffersize);
+    *len = buffersize;
 
     if (!output) return;
 

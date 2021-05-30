@@ -17,24 +17,28 @@ HAPService* HAPFakegatoSchedule::registerFakeGatoService(enum HAP_SCHEDULE_DEVIC
 
 	HAPService* fgService = HAPFakegato::registerFakeGatoService(accessory, name);
 
+	uint8_t zeroValue[1] = {0x00};
+
 	// Config Read
-	_configRead = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
-	_configRead->setDescription("EVE Schedule Read");
-	_configRead->setValue((char*)NULL);
+	_scheduleRead = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+	_scheduleRead->setDescription("EVE Schedule Read");
+	_scheduleRead->setValue(zeroValue, 1, false);
 	// auto callbackConfigRead = std::bind(&HAPFakegato::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);
 	// _configRead->setValueChangeCallback(callbackConfigRead);
-	auto callbackGetConfig = std::bind(&HAPFakegatoSchedule::scheduleRead, this);
-	_configRead->setValueGetCallback(callbackGetConfig);
-	accessory->addCharacteristicToService(fgService, _configRead);
+
+	auto callbackGetConfig = std::bind(&HAPFakegatoSchedule::callbackGetSchedule, this, std::placeholders::_1, std::placeholders::_2);
+	_scheduleRead->setDataGetCallback(callbackGetConfig);
+
+	accessory->addCharacteristicToService(fgService, _scheduleRead);
 
 
 	// Config Write
-	_configWrite = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, "data", HAP_FAKEGATO_CHUNK_BUFFER_SIZE / 2);
-	_configWrite->setDescription("EVE Schedule Write");
-	_configWrite->setValue((char*)NULL);
-	auto callbackConfigWrite = std::bind(&HAPFakegatoSchedule::scheduleWrite, this, std::placeholders::_1, std::placeholders::_2);
-	_configWrite->setValueChangeCallback(callbackConfigWrite);
-	accessory->addCharacteristicToService(fgService, _configWrite);
+	_scheduleWrite = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, HAP_FAKEGATO_CHUNK_BUFFER_SIZE / 2);
+	_scheduleWrite->setDescription("EVE Schedule Write");
+
+	auto callbackConfigWrite = std::bind(&HAPFakegatoSchedule::callbackSetSchedule, this, std::placeholders::_1, std::placeholders::_2);
+	_scheduleWrite->setDataChangeCallback(callbackConfigWrite);
+	accessory->addCharacteristicToService(fgService, _scheduleWrite);
 
 	return fgService;
 }

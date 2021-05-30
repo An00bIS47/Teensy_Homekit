@@ -147,8 +147,8 @@ public:
 
 
     virtual ~HAPFakegatoSchedule() {
-        if (_configRead) delete _configRead;
-        if (_configWrite) delete _configWrite;
+        if (_scheduleRead) delete _scheduleRead;
+        if (_scheduleWrite) delete _scheduleWrite;
 
         _programEvents.clear();
         _timers.enable(false);
@@ -209,11 +209,15 @@ public:
 protected:
 
     // Schedules
-    HAPCharacteristic<String>* _configRead     = nullptr;
-    HAPCharacteristic<String>* _configWrite    = nullptr;
+    HAPCharacteristicData* _scheduleRead     = nullptr;
+    HAPCharacteristicData* _scheduleWrite    = nullptr;
 
-    virtual String scheduleRead() = 0;
-    virtual void scheduleWrite(String oldValue, String newValue) = 0;
+    // Get data
+    virtual void callbackGetSchedule(uint8_t* output, size_t* len) = 0;
+
+    // Set data
+    virtual void callbackSetSchedule(const uint8_t* decoded, const size_t len) = 0;
+
 
     void callbackTimerStart(uint16_t state);
     void callbackTimerEnd(uint16_t state);

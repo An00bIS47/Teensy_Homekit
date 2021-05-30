@@ -275,7 +275,6 @@ protected:
 
     virtual void addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length);
 
-    // virtual void callbackHistorySetTime(String oldValue, String newValue);
     
     // Get Data
     void callbackGetHistoryInfo(uint8_t* output, size_t* len);
@@ -283,8 +282,8 @@ protected:
     void getRefTime(uint8_t* data, uint16_t* length);
     
     // Set Data
-    void callbackHistorySetTime(const uint8_t* decoded, const size_t len);
-    void callbackHistoryRequest(const uint8_t* decoded, const size_t len);
+    void callbackSetHistoryTime(const uint8_t* decoded, const size_t len);
+    void callbackSetHistoryAddress(const uint8_t* decoded, const size_t len);
 
 
     // Get Data
