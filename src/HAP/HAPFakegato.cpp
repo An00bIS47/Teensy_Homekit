@@ -7,7 +7,7 @@
 //
 
 #include "HAPFakegato.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPTime.hpp"
 
 
@@ -101,7 +101,7 @@ void HAPFakegato::handle(bool forced){
 
                 // ToDo: Persist history ??
                 if (overwritten) {
-                    LogW("A fakegato history entry was overwritten!", true);
+                    LOG_W("A fakegato history entry was overwritten!\n");
                 }
             }
         }
@@ -148,14 +148,16 @@ FLASHMEM
 #endif
 void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
 
-    LogD(HAPTime::timeString(), false);
-    LogD(F(" HAPFakegato->addDataToBuffer [   ] Adding entry for "), false);
-    LogD(_name, false);
-    LogD(F(" [size="), false);
-    LogD(_entries.size(), false);
-    LogD(F(" bitmask="), false);
-    LogD(bitmask, false);
-    LogD(F("]"), true);
+    // LogD(HAPTime::timeString(), false);
+    // LogD(F(" HAPFakegato->addDataToBuffer [   ] Adding entry for "), false);
+    // LogD(_name, false);
+    // LogD(F(" [size="), false);
+    // LogD(_entries.size(), false);
+    // LogD(F(" bitmask="), false);
+    // LogD(bitmask, false);
+    // LogD(F("]"), true);
+
+    LOG_D("Adding entry for %s [size=%d bitmask=%d]\n", _name.c_str(), _entries.size(), bitmask);
 
 
     // Entry will be overwritten ...
@@ -163,13 +165,13 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
         // ToDo: Add a dispatcher for overwritten objects?
         //       Probably first just a LOG message ?
         //       Therefore a reference to the aid and iid would be needed ...
-        LogW("WARNING: Fakegato entry will be overwritten!", true);
+        LOG_W("WARNING: Fakegato entry will be overwritten!\n");
         delete _entries.shift();
     }
 
 #if HAP_DEBUG_FAKEGATO
-    Serial.print("bitmask: "); Serial.println(bitmask);
-    HAPHelper::array_print("FAKEGATO ENTRY DATA", data, length);
+    *LOGDEVICE->print("bitmask: "); *LOGDEVICE->println(bitmask);
+    HEXDUMP_D("FAKEGATO ENTRY DATA", data, length);
 #endif
 
     // size_t indexLast = _entries.size() - 1;
@@ -243,8 +245,8 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
     uint8_t usedBatch = 0;
 
 #if HAP_DEBUG_FAKEGATO
-        Serial.print(">>>> _requestedIndex: ");
-        Serial.println(_requestedIndex); Serial.send_now();
+    *LOGDEVICE->print(">>>> _requestedIndex: ");
+    *LOGDEVICE->print(_requestedIndex);
 #endif
 
     // ToDo:
@@ -268,8 +270,8 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
 
 
 #if HAP_DEBUG_FAKEGATO
-        Serial.print(">>>> _requestedIndex: ");
-        Serial.println(_requestedIndex); Serial.send_now();
+        *LOGDEVICE->print(">>>> _requestedIndex: ");
+        *LOGDEVICE->println(_requestedIndex);
 #endif
 
     for (uint8_t i=0; i < (HAP_FAKEGATO_BATCH_SIZE - usedBatch); i++) {
@@ -277,7 +279,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
         if (_requestedIndex > _entries.size() - 1 ) {
             //|| _entries[_requestedIndex]->length == 0
             // _requestedIndex is greater than _entries.size()!
-            Serial.println("_requestedIndex is greater than _entries.size() or length = 0! BREAK");
+            LOG_D("_requestedIndex is greater than _entries.size() or length = 0! BREAK\n");
 
             _transfer = false;
             break;
@@ -285,8 +287,8 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
 
 
 #if HAP_DEBUG_FAKEGATO
-        Serial.print(">>>> _requestedIndex: ");
-        Serial.println(_requestedIndex); Serial.send_now();
+        *LOGDEVICE->print(">>>> _requestedIndex: ");
+        *LOGDEVICE->println(_requestedIndex);
 #endif
 
         uint8_t currentOffset = 0;
@@ -329,7 +331,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
     }
 
 #if HAP_DEBUG_FAKEGATO
-    HAPHelper::array_print("History Entries", data, offset);
+    HEXDUMP_D("History Entries", data, offset);
 #endif
 
     *len = offset;
@@ -346,7 +348,7 @@ FLASHMEM
 void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
 
 #if HAP_DEBUG_FAKEGATO
-    LogD(HAPTime::timeString() + " " + "HAPFakeGato" + "->" + String(__FUNCTION__) + " [   ] " + "Get ref time entry", true);
+    LOG_D("Get refTime entry\n");
 #endif
 
     uint8_t offset = 0;
@@ -375,7 +377,7 @@ void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
     offset += 4;
 
 #if HAP_DEBUG_FAKEGATO
-    LogD(">>>>> Fakegato RefTime: " + String( refTime.ui32 ), true);
+    LOG_D(">>>>> Fakegato RefTime: %d\n", refTime.ui32);
 #endif
     memset(data + offset, 0x00, 7);
     offset += 7;
@@ -414,9 +416,7 @@ void HAPFakegato::callbackSetHistoryTime(const uint8_t* decoded, const size_t le
 
         uint32_t timestamp = HAPHelper::u8_to_u32(decoded) + HAP_FAKEGATO_EPOCH;
 
-        LogD(HAPTime::timeString(), false);
-        LogD(F(" HAPFakegato->callbackHistorySetTime [   ] Setting Time to "), false);
-        LogD(timestamp, true);
+        LOG_D("Setting Time to %d \n", timestamp);
 
         // 978307200 + 588903240 = 1567210440
         HAPTime::setTimeFromTimestamp(timestamp);
@@ -442,7 +442,7 @@ void HAPFakegato::callbackSetHistoryTime(const uint8_t* decoded, const size_t le
 void HAPFakegato::callbackSetHistoryAddress(const uint8_t* decoded, const size_t len){
 
 #if HAP_DEBUG_FAKEGATO
-    HAPHelper::array_print("History Request", decoded, len);
+    HEXDUMP_D("History Request", decoded, len);
 #endif
 
     ui32_to_ui8 requestedIndex;
@@ -454,7 +454,7 @@ void HAPFakegato::callbackSetHistoryAddress(const uint8_t* decoded, const size_t
 #if HAP_DEBUG_FAKEGATO
     ui32_to_ui8 address;
     address.ui32 = __builtin_bswap32(requestedIndex.ui32);
-    HAPHelper::array_print("History Request address",  address.ui8, 4);
+    HEXDUMP_D("History Request address",  address.ui8, 4);
 #endif
 
     _requestedIndex = requestedIndex.ui32;
@@ -591,7 +591,7 @@ void HAPFakegato::callbackGetHistoryInfo(uint8_t* output, size_t* len){
     memcpy(output, data, offset);
 
 #if HAP_DEBUG_FAKEGATO
-    HAPHelper::array_print("output", output, offset);
+    HEXDUMP_D("output", output, offset);
 #endif
 
     *len = offset;

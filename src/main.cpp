@@ -8,7 +8,8 @@
 //
 #include <Arduino.h>
 
-#include "HAP/HAPLogger.hpp"
+// #include "HAP/HAPLogger.hpp"
+#include "HAP/HAPLogging.hpp"
 #include "HAP/HAPServer.hpp"
 #include "HAP/HAPGlobals.hpp"
 
@@ -73,10 +74,15 @@ void setup() {
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);
 	Homekit_setBrand(HAP_MANUFACTURER);
 
-	LogI( F("Starting Homekit "), false);
-	LogI( hap.versionString() + String( " ..."), true);
-	LogI( F("Log level: "), false);
-	LogI( String(HAPLogger::getLogLevel() ), true);
+	// LogI( F("Starting Homekit "), false);
+	// LogI( hap.versionString() + String( " ..."), true);
+	// LogI( F("Log level: "), false);
+	// LogI( String(HAPLogger::getLogLevel() ), true);
+
+	LOG_N("Starting Homekit v%s\n", hap.versionString().c_str());
+	LOG_N("Loglevel: %d\n", LOG_LEVEL);
+	
+	LOG_DESC();
 
 #if defined(TEENSY_DEBUG)
 	// halt();

@@ -115,6 +115,8 @@ public:
 
 	static void logOK(const char* color);
 
+	static size_t print(const __FlashStringHelper *ifsh);
+
 	static void flush();
 	static void checkError(int err_code);
 	static void checkErrorOK(int err_code);

@@ -22,6 +22,7 @@
 #include "HAPAccessory.hpp"
 #include "HAPAccessorySet.hpp"
 #include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPVersion.hpp"
 #include "HAPHelper.hpp"
 

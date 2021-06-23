@@ -26,6 +26,7 @@
 #include <algorithm>
 #include "HAPServer.hpp"
 #include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPHelper.hpp"
 
 #include "HAPDeviceID.hpp"
@@ -147,7 +148,8 @@ bool HAPServer::begin(bool resume) {
 		//
 		// Configuration
 		//
-		LogI(F("Loading configuration ..."), false);
+		// LogI(F("Loading configuration ..."), false);
+		LOG_I("Loading configuration ...");
 		auto callback = std::bind(&HAPServer::updateConfig, this);
 		// _config.registerCallbackUpdate(callback);
 		// _config.begin();
@@ -168,18 +170,20 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 		if (_configuration.load() == false){
-			LogE(F("ERROR: Could not load configuration! -> Setting defaults ..."), true);
-
+			// LogE(F("ERROR: Could not load configuration! -> Setting defaults ..."), true);
+			LOG_E("ERROR: Could not load configuration! -> Setting defaults\n");
 			// _configuration.formatFlash();
 
 			_configuration.setDefaults();
 			_configuration.save();
 		} else {
-			LogI(F("OK"), true);
+			// LogI(F("OK"), true);
+			LOG_I("OK\n");
 		}
 
 #if HAP_DEBUG
-		_configuration.toJson(Serial);
+		_configuration.toJson(*LOGDEVICE);
+		LOGDEVICE->println();
 #endif
 
 
@@ -210,23 +214,50 @@ bool HAPServer::begin(bool resume) {
 
 #if HAP_DEBUG
 
-		HAPLogger::printInfo();
+		// HAPLogger::printInfo();
 
-		LogD(F("\nDevice Information"), true);
-		LogD(F("==================================================="), true);
-		LogD(F("Device ID:    ") + HAPDeviceID::deviceID(), true);
-		LogD(F("Chip ID:      ") + HAPDeviceID::chipID(), true);
+		LOG_D("Device Information:\n");
+		LOG_D("   %-14s: %s\n", "Device ID", HAPDeviceID::deviceID().c_str());
+		LOG_D("   %-14s: %s\n", "Chip ID", HAPDeviceID::chipID().c_str());
+		LOG_D("   %-14s: %s\n", "Endian", IS_BIG_ENDIAN ? "BIG" : "little" );
 
+
+		LOG_D("Versions:\n");
+		LOG_D("   %-14s: %.2f\n", "Teensyduino", TEENSYDUINO / 100.0f);
 
 		char mbedtlsVersion[32];
 		mbedtls_version_get_string_full(mbedtlsVersion);
+		LOG_D("   %-14s: %s\n", "mbedTLS", mbedtlsVersion);
+
+		LOG_D("Fakegato:\n");
+		LOG_D("   %-14s: %d\n", "Interval", HAP_FAKEGATO_INTERVAL );
+		LOG_D("   %-14s: %d\n", "Size", HAP_FAKEGATO_BUFFER_SIZE );
+
+		LOG_D("Storage:\n");
+#if HAP_USE_EEPROM
+		LOG_D("   %-14s: %s\n", "Type", "EEPROM" );
+#elif HAP_USE_PREFERENCES
+		LOG_D("   %-14s: %s\n", "Type", "Preferences" );
+#elif HAP_USE_SPIFFS_CONFIGURATION
+		LOG_D("   %-14s: %s\n", "Type", "SPIFFS (External Flash)" );
+#endif
+
+
+		// LogD(F("\nDevice Information"), true);
+		// LogD(F("==================================================="), true);
+		// LogD(F("Device ID:    ") + HAPDeviceID::deviceID(), true);
+		// LogD(F("Chip ID:      ") + HAPDeviceID::chipID(), true);
+
+
+		// char mbedtlsVersion[32];
+		// mbedtls_version_get_string_full(mbedtlsVersion);
 
 		// LogD("", true);
-		LogD(F("Versions:"), true);
-#if defined(ARDUINO_ARCH_ESP32)
-		LogD("   SDK:       " + String(ESP.getSdkVersion()), true);
-#endif
-		LogD(F("   mbedtls:   ") + String(mbedtlsVersion), true);
+// 		LogD(F("Versions:"), true);
+// #if defined(ARDUINO_ARCH_ESP32)
+// 		LogD("   SDK:       " + String(ESP.getSdkVersion()), true);
+// #endif
+// 		LogD(F("   mbedtls:   ") + String(mbedtlsVersion), true);
 
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -253,32 +284,32 @@ bool HAPServer::begin(bool resume) {
 		LogD(String(CONFIG_MAIN_TASK_STACK_SIZE), true);
 #endif
 
-		LogD(F(""), true);
-		LogD(F("Endian:       "), false);
-		LogD(IS_BIG_ENDIAN ? F("BIG") : F("little"), true);
-		LogD(F(""), true);
+// 		LogD(F(""), true);
+// 		LogD(F("Endian:       "), false);
+// 		LogD(IS_BIG_ENDIAN ? F("BIG") : F("little"), true);
+// 		LogD(F(""), true);
 
-		LogD(F("Storage:"), true);
-		LogD(F("   type:      "), false);
-#if HAP_USE_EEPROM
-		LogD(F("EEPROM"), true);
-#elif HAP_USE_PREFERENCES
-		LogD(F("Preferences"), true);
-#elif HAP_USE_SPIFFS_CONFIGURATION
-		LogD(F("SPIFFS (External Flash)"), true);
-#endif
-		LogD(F(""), true);
+// 		LogD(F("Storage:"), true);
+// 		LogD(F("   type:      "), false);
+// #if HAP_USE_EEPROM
+// 		LogD(F("EEPROM"), true);
+// #elif HAP_USE_PREFERENCES
+// 		LogD(F("Preferences"), true);
+// #elif HAP_USE_SPIFFS_CONFIGURATION
+// 		LogD(F("SPIFFS (External Flash)"), true);
+// #endif
+// 		LogD(F(""), true);
 
-		LogD(F("Fakegato:"), true);
-		LogD(F("   interval:  "), false);
-		LogD(String(HAP_FAKEGATO_INTERVAL), true);
-		LogD(F("   size:      "), false);
-		LogD(String(HAP_FAKEGATO_BUFFER_SIZE), true);
+// 		LogD(F("Fakegato:"), true);
+// 		LogD(F("   interval:  "), false);
+// 		LogD(String(HAP_FAKEGATO_INTERVAL), true);
+// 		LogD(F("   size:      "), false);
+// 		LogD(String(HAP_FAKEGATO_BUFFER_SIZE), true);
 
-#if defined (CORE_TEENSY)
-		HAPLogger::printTeensyInfo();
-#endif
-		LogD(F("==================================================="), true);
+// #if defined (CORE_TEENSY)
+// 		HAPLogger::printTeensyInfo();
+// #endif
+		// LogD(F("==================================================="), true);
 
 #if defined(ARDUINO_ARCH_ESP32)
 		HAPHelper::getPartionTableInfo();
@@ -344,25 +375,31 @@ bool HAPServer::begin(bool resume) {
 
 #if defined(CORE_TEENSY)
 	// start the Ethernet connection:
-	LogI(F("Initialize Ethernet with DHCP ..."), false);
+	// LogI(F("Initialize Ethernet with DHCP ..."), false);
+	LOG_I("Initialize Ethernet with DHCP ...");
 	if (Ethernet.begin(baseMac, HAP_ETHERNET_TIMEOUT) == 0) {
-		LogE(F("ERROR - Failed to configure Ethernet using DHCP"), true);
+		// LogE(F("ERROR - Failed to configure Ethernet using DHCP"), true);
+		LOGRAW_E("ERROR - Failed to configure Ethernet using DHCP\n");
 		// Check for Ethernet hardware present
 		if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-			LogE(F("ERROR - Ethernet shield was not found.  Sorry, can't run without hardware. :("), true);
+			// LogE(F("ERROR - Ethernet shield was not found.  Sorry, can't run without hardware. :("), true);
+			LOGRAW_E("ERROR - Ethernet shield was not found.  Sorry, can't run without hardware. :(\n");
 			while (true) {
 				delay(1); // do nothing, no point running without Ethernet hardware
 			}
 		}
 		if (Ethernet.linkStatus() == LinkOFF) {
-			LogE(F("ERROR - Ethernet cable is not connected."), true);
+			// LogE(F("ERROR - Ethernet cable is not connected."), true);
+			LOGRAW_E("ERROR - Ethernet cable is not connected!\n");
 		}
 		// try to congifure using IP address instead of DHCP:
 		// Ethernet.begin(mac, ip, myDns);
 	} else {
-		LogI(F("  DHCP assigned IP: "), false);
+		// LogI(F("  DHCP assigned IP: "), false);
+		LOGRAW_I("OK\n");
 		// LogI(Ethernet.localIP(), true);
-		Serial.println(Ethernet.localIP());
+		LOG_I("Assigned IP: ");
+		LOGDEVICE->println(Ethernet.localIP());
 		_isConnected = true;
 	}
 #endif
@@ -393,98 +430,64 @@ bool HAPServer::begin(bool resume) {
 	_pixelIndicator.off();
 #endif
 
-
-
+	//
+	// Timesettings
+	//
+	// ToDo: Timezone to config
 	_time.setTimeZone(1);
 
 #if HAP_ENABLE_NTP
-	LogI( F("Starting NTP client ..."), false);
+	LOG_I("Starting NTP client ...");
 	if (_isConnected) {
 		if (_time.beginNTP()){
-			LogI( F("OK"), true);
+			LOGRAW_I("OK\n");
 		} else {
-			LogE( F("ERROR - Setting time from NTP failed!"), true);
+			LOG_E( "ERROR - Setting time from NTP failed!\n");
 		}
 #if defined( CORE_TEENSY )
 		_time.setCallbackGetTime(HAPTime::getNTPTime);
 
 #endif
-		LogI( F("OK"), true);
 	}
 #endif /* HAP_ENABLE_NTP */
 	_time.begin();
+	LOG_I("Set time to: %s\n", _time.timeString().c_str());
+	LOG_I("Set reftime to: %lu\n", _time.refTime());
+	LOG_I("Set t_offset to: %lu\n", _time.getTOffset());
 
-	LogI(F("Set time to: ") + _time.timeString(), true);
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
 	// _configuration.getPlatformConfig()->setRefTime(1601846922);
 	_time.setReftime(_configuration.getPlatformConfig()->refTime());
-	LogI(F("Current refTime is: ") + String(_time.refTime()), true);
-	LogI(F("Current refTime is: ") + String(HAPTime::refTime()), true);
-	LogI(F("Current t_offset is: ") + String(_time.getTOffset()), true);
 
-	LogI(F("Loading pairings ..."), false);
-	LogI(F("OK"), true);
-	LogI(F("Loaded ") + String(_accessorySet->numberOfPairings()) + F(" pairings from EEPROM"), true);
 
-#if HAP_DEBUG
-	// _accessorySet->getPairings()->print();
+	//
+	// Pairings
+	//
+	LOG_I("Loading pairings ...OK\n");
+	LOG_I("Loaded %d pairings from storage\n", _accessorySet->numberOfPairings());
+
+#if HAP_DEBUG_HOMEKIT
+	_accessorySet->getPairings()->print();
 #endif
 
 
-// 	if ( isPaired() ){
-// 		LogD("Loading long term keys ...", false);
-// 		_longTermContext = (struct HAPLongTermContext*) calloc(1, sizeof(struct HAPLongTermContext));
-// 		if (_longTermContext == NULL) {
-// 			LogE( F("[ERROR] Initializing struct _longTermContext failed!"), true);
-// 			free(hostname);
-// 			return false;
-// 		}
-
-// 		_longTermContext->publicKey = (uint8_t*) malloc(sizeof(uint8_t) * ED25519_PUBLIC_KEY_LENGTH);
-// 		_longTermContext->publicKeyLength = ED25519_PUBLIC_KEY_LENGTH;
-
-// 		// _longTermContext->privateKey = (uint8_t*) malloc(sizeof(uint8_t) * ED25519_PRIVATE_KEY_LENGTH);
-// 		// _longTermContext->privateKeyLength = ED25519_PRIVATE_KEY_LENGTH;
-
-// 		_longTermContext->LTSK = (uint8_t*) malloc(sizeof(uint8_t) * ED25519_BYTES);
-// 		_longTermContext->LTSKLength = ED25519_BYTES;
-
-
-// 	 	_accessorySet->getPairings()->loadKeys(_longTermContext->publicKey, _longTermContext->LTSK);
-
-
-// // #if HAP_DEBUG
-// //  		Serial.println("_longTermContext->publicKey: ");
-// //  		HAPHelper::arrayPrint(_longTermContext->publicKey, ED25519_PUBLIC_KEY_LENGTH);
-
-// //  		Serial.println("_longTermContext->LTSK: ");
-// //  		HAPHelper::arrayPrint(_longTermContext->LTSK, ED25519_PRIVATE_KEY_LENGTH);
-// // #endif
-
-
-// 		LogD(F("OK"), true);
-// 	}
-
-	LogI( F("Setup accessory ..."), false);
+	LOG_I("Setup accessory ...");
 	_accessorySet->setModelName(hostname);
 	_accessorySet->setAccessoryType(HAP_ACCESSORY_TYPE_BRIDGE);
 	_accessorySet->setPinCode(HAP_PIN_CODE);
 	_accessorySet->begin();
-	LogI(F("OK"), true);
+	LOGRAW_I("OK\n");
 
 
 	//
 	// Event Manager
 	//
-	LogI( F("Adding listener to event manager ..."), false);
-	// Incoming
+	LOG_I( "Adding listener to event manager ...");
+
+	// Notifications
   	listenerNotificaton.mObj = this;
   	listenerNotificaton.mf = &HAPServer::handleEvents;
 	_eventManager.addListener( EventManager::kEventNotifyController, &listenerNotificaton );
-
-
-	// _evtMgr.addListener( );
-
 
 	// UpdateConfigNumber
 	listenerUpdateConfigNumber.mObj = this;
@@ -513,19 +516,14 @@ bool HAPServer::begin(bool resume) {
   	listenerDeleteAllPairings.mf = &HAPServer::handleEventDeleteAllPairings;
 	_eventManager.addListener( EventManager::kEventRemoveAllPairings, &listenerDeleteAllPairings );
 
+	LOGRAW_I("OK\n");
 
-
-	LogI( F("OK"), true);
-
-	/*
-	 * Generate setupID and xmi uri
-	 */
+	//
+	// Generate setupID and xmi uri
+	//
 	_accessorySet->generateSetupID();
-
-
-	LogD(F("Homekit X-HM URI: ") + String(_accessorySet->xhm()), true);
-	LogD(F("Homekit setup hash: ") + String(_accessorySet->setupHash()), true);
-
+	LOG_D("Homekit X-HM URI: %s\n", _accessorySet->xhm());
+	LOG_D("Homekit setup hash: %s\n", _accessorySet->setupHash());
 
 	//
 	// QR Code generation
@@ -543,20 +541,20 @@ bool HAPServer::begin(bool resume) {
 #if HAP_PRINT_QRCODE
 	for (uint8_t y = 0; y < qrCode.size; y++) {
 		// Left quiet zone
-		Serial.print("        ");
+		LOGDEVICE->print("        ");
 		// Each horizontal module
 		for (uint8_t x = 0; x < qrCode.size; x++) {
             // Print each module (UTF-8 \u2588 is a solid block)
-			Serial.print(qrcode_getModule(&qrCode, x, y) ? "\u2588\u2588": "  ");
+			LOGDEVICE->print(qrcode_getModule(&qrCode, x, y) ? "\u2588\u2588": "  ");
 		}
-		Serial.println("");
+		LOGDEVICE->println("");
 	}
 #endif
 
 #if HAP_DEBUG_QRCODE_SVG
-	Serial.println("SVG:");
-	HAPSVG::drawQRCode(&Serial, &qrCode);
-	Serial.println("");
+	LOGDEVICE->println("SVG:");
+	HAPSVG::drawQRCode(LOGDEVICE, &qrCode);
+	LOGDEVICE->println("");
 #endif
 
 
@@ -626,32 +624,20 @@ bool HAPServer::begin(bool resume) {
 	}
 #endif
 
-
-  	//
-  	// Loading fakegato factory
-  	//
-	// Setting Reference Time to FakeGato
-	// LogI( "Setting EVE reference time ...", false);
-	// _fakeGatoFactory.setRefTime(_configuration.getPlatformConfig()->refTime());
-	// LogI(" OK", true);
-
-
   	//
   	// Loading plugins
   	//
-  	LogI( F("Loading plugins ..."), true);
+  	LOG_I( "Loading plugins ...\n");
 
 	auto &factory = HAPPluginFactory::Instance();
     std::vector<String> names = factory.names();
 
     for(std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
     	//Serial.println(*it);
-		Heap(0, 0);
+		LOG_HEAP("", 0,0);
     	auto plugin = factory.getPlugin(*it);
 
-		LogI(F("   - ") + plugin->name(), false);
-		LogD(F(" (v") + String(plugin->version()) + ")", false);
-		LogD(F(" of type: ") + String(plugin->type()), false);
+		LOG_I("   - %s [v%s] of type %d", plugin->name().c_str(), plugin->version().c_str(), plugin->type());
 
 		plugin->setAccessorySet(_accessorySet);
 		plugin->setFakeGatoFactory(&_fakeGatoFactory);
@@ -669,9 +655,12 @@ bool HAPServer::begin(bool resume) {
 
 
 		if ( plugin->isEnabled()) {
-			LogI(F(": ENABLED"), true);
+			LOGRAW_I(": ENABLED\n");
 
-			plugin->configToJson(Serial);
+#if HAP_DEBUG
+			plugin->configToJson(*LOGDEVICE);
+			LOGDEVICE->println();
+#endif
 
 			if (plugin->begin()) {
 
@@ -695,24 +684,24 @@ bool HAPServer::begin(bool resume) {
 				_plugins.push_back(std::move(plugin));
 
 			} else {
-				LogE(F(": DISABLED"), true);
+				LOGRAW_E(": DISABLED\n");
 			}
 
     	} else {
-    		LogE(F(": DISABLED"), true);
+    		LOGRAW_E(": DISABLED\n");
     	}
 	}
 
 	//
 	// Starting HAP server
 	//
-	LogI(F("Starting HAP server ..."), false);
+	LOG_I("Starting HAP server ...");
 	_server.begin();
 
 #if defined(ARDUINO_ARCH_ESP32)
 	_server.setNoDelay(true);
 #endif
-	LogI(F("OK"), true);
+	LOGRAW_I("OK\n");
 
 	//
 	// Bonjour
@@ -722,7 +711,7 @@ bool HAPServer::begin(bool resume) {
 	//   the fully-qualified domain name is "esp8266.local"
 	// - second argument is the IP address to advertise
 	//   we send our IP address on the WiFi network
-	LogI(F("Advertising bonjour service ..."), false);
+	LOG_I("Advertising bonjour service ...");
 #if defined( ARDUINO_ARCH_ESP32)
 	if (!mDNSExt.begin(_accessorySet->modelName())) {
 		LogE( "ERROR; Starting mDNS responder failed!", true);
@@ -746,7 +735,7 @@ bool HAPServer::begin(bool resume) {
 	MDNS.addService("_hap._tcp", _port, HomekitTXTRecord);
 #endif
 
-	LogI( F("OK"), true);
+	LOGRAW_I("OK\n");
 
 
 #if HAP_ENABLE_UPDATE_OTA
@@ -754,22 +743,22 @@ bool HAPServer::begin(bool resume) {
 		//
 		// Starting Arduino OTA
 		//
-		LogI( "Starting Arduino OTA ...", false);
+		LOG_I( "Starting Arduino OTA ...");
 		_updater.setConfig(_configuration.getOTAConfig());
 		_updater.begin(hostname);
-		LogI( F("OK"), true);
+		LOGRAW_I("OK\n");
 	}
 #endif
 
 
 #if defined( ARDUINO_ARCH_ESP32)
 	if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
-		LogE( "ERROR: Updating HAP service txt failed!", true);
+		LOGRAW_E( "ERROR: Updating HAP service txt failed!\n");
 		return false;
 	}
 #else
 	if ( !updateServiceTxt() ){
-		LogE( F("ERROR: Advertising HAP service failed!"), true);
+		LOGRAW_E("ERROR: Advertising HAP service failed!\n");
 		return false;
 	}
 #endif
@@ -779,40 +768,15 @@ bool HAPServer::begin(bool resume) {
 
 	{
 		uint8_t buffer[1024];
-		HAPPrintBuffered bufferedPrint(Serial, buffer, 1024);
+		HAPPrintBuffered bufferedPrint(*LOGDEVICE, buffer, 1024);
 		// serializeJson(doc, eStream);
 		_accessorySet->printTo(bufferedPrint);
 		bufferedPrint.flush();
 
-		Serial.println();
+		LOGDEVICE->println();
 	}
 
-	Heap(0, 0);
-
-	// {
-	// 	HAPPrintBase64Encoded b64Stream(Serial);
-	// 	_accessorySet->printTo(b64Stream);
-	// 	b64Stream.flush();
-
-	// 	Serial.println();
-	// 	Heap(0, 0);
-	// }
-
-	// {
-	// 	char buffer[1031];
-	// 	HAPPrintChunked chunkedStream(Serial, buffer, 1031);
-	// 	chunkedStream.begin();
-
-	// 	HAPPrintBase64Encoded b64Stream(chunkedStream);
-	// 	_accessorySet->printTo(b64Stream);
-	// 	b64Stream.flush();
-
-	// 	chunkedStream.end();
-
-	// 	Serial.println();
-	// 	Heap(0, 0);
-	// }
-
+	LOG_HEAP("", 0, 0);
 
 #endif
 
@@ -825,17 +789,15 @@ bool HAPServer::begin(bool resume) {
 	//
 	// Show event listerners
 	//
-  	LogD( F("Number of event listeners:  "), false );
-  	LogD( String(_eventManager.numListeners()), true );
+  	LOG_D("Number of event listeners: %d\n", _eventManager.numListeners());
 
 
 	//
 	// Startup completed
 	//
-	LogI(F("Homekit has started successfully!"), true);
+	LOG_I("Homekit has started successfully!\n");
 	if (!_accessorySet->isPaired()) {
-		LogI(F("Homekit pin code: "), false);
-		LogI(_accessorySet->pinCode(), true);
+		LOG_I("Homekit pin code: %s\n", _accessorySet->pinCode());
 	}
 
 #if HAP_ENABLE_WEBSERVER
@@ -956,7 +918,7 @@ void HAPServer::handle() {
 	if ( millis() - _previousMillisHeap >= 1000) {
 	    // save the last time you blinked the LED
 	    _previousMillisHeap = millis();
-	    Heap(_clients.size(), _eventManager.getNumEventsInQueue());
+		LOG_HEAP(HAPTime::timeString().c_str(), _clients.size(), _eventManager.getNumEventsInQueue());
 
 		// ToDo: remove
 		// Serial.print("Task Button Handle: ");
@@ -1146,7 +1108,7 @@ void HAPServer::handleAllPairingsRemoved(){
 }
 
 void HAPServer::handleClientAvailable(HAPClient* hapClient) {
-	
+
 
 	LogD(F("<<< Handle client available [enrypted:") + String(hapClient->isEncrypted()) + "]" , true);
 
@@ -2675,7 +2637,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	encTLV.clear();
 
-	Heap(_clients.size(), _eventManager.getNumEventsInQueue());
+	LOG_HEAP(HAPTime::timeString().c_str(), _clients.size(), _eventManager.getNumEventsInQueue());
 
 #if defined( ARDUINO_ARCH_ESP32 )
 	LogV( F("<<< Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
@@ -2817,7 +2779,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	//stopEvents(false);
 
-	Heap(_clients.size(), _eventManager.getNumEventsInQueue());
+	LOG_HEAP(HAPTime::timeString().c_str(), _clients.size(), _eventManager.getNumEventsInQueue());
 
     return true;
 }

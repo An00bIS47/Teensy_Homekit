@@ -67,7 +67,7 @@ HAPPluginBME280::~HAPPluginBME280(){
 FLASHMEM
 #endif
 void HAPPluginBME280::identify(bool oldValue, bool newValue) {
-	Serial.printf("Start Identify %s\n", _config->name);
+	LOG_I("Start Identify %s\n", _config->name);
 }
 
 
@@ -117,27 +117,21 @@ uint16_t HAPPluginBME280::readPressure(){
 
 void HAPPluginBME280::changedTemperature(float oldValue, float newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change temperature from " + String(oldValue) + " to " + String(newValue), true);
-	Serial.printf("[%s] Changed temperature: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
+	LOG_I("[%s] Changed temperature: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginBME280::changedHumidity(float oldValue, float newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change humidity from " + String(oldValue) + " to " + String(newValue), true);
-	Serial.printf("[%s] Changed humidity: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
+	LOG_I("[%s] Changed humidity: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginBME280::changedPressure(uint16_t oldValue, uint16_t newValue) {
 	// LogI(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Change pressure from " + String(oldValue) + " to " + String(newValue), true);
-	Serial.printf("[%s] Changed air pressure: %i >>> %i\n", _config->name, oldValue, newValue);
+	LOG_I("[%s] Changed air pressure: %i >>> %i\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginBME280::handleImpl(bool forced){
-	// if (shouldHandle() || forced) {
-	LogV(HAPTime::timeString(), false);
-	LogV(F(" "), false);
-	LogV(_config->name, false);
-	LogV(F("->handleImpl [   ] Handle plguin ["), false);
-	LogV(_config->interval, false);
-	LogV(F("]"), true);
+	LOG_V("Handle plguin %s [%d]\n", (const char*)_config->name, _config->interval);
 
 	if (_accessory->aid() == 0){
 		return;
@@ -164,7 +158,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 FLASHMEM
 #endif
 HAPAccessory* HAPPluginBME280::initAccessory(){
-	LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
+	LOG_V("\nInitializing accessory for plugin: %s ...\n", _config->name);
 
 	//
 	// Unique serial number !!!
@@ -314,7 +308,7 @@ bool HAPPluginBME280::begin(){
 
 #if HAP_PLUGIN_BME280_USE_DUMMY
 
-	LogW("   - Using BME280 dummy!", true);
+	LOG_I("   - Using BME280 dummy!\n");
 	_config->interval = HAP_PLUGIN_BME280_INTERVAL;
 #else
 
