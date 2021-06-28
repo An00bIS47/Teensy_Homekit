@@ -149,7 +149,7 @@ bool HAPServer::begin(bool resume) {
 
 
 #if HAP_RESET_CONFIGURATION
-		
+
 		LOG_I("Reseting configuration ...");
 		_configuration.reset();
 		_configuration.getAccessoryConfig()->save();
@@ -178,6 +178,9 @@ bool HAPServer::begin(bool resume) {
 		_configuration.toJson(*LOGDEVICE);
 		LOGDEVICE->println();
 #endif
+
+		_accessorySet->setConfiguration(_configuration.getAccessoryConfig());
+
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 		// ToDo: Pixel Indicator
@@ -435,9 +438,9 @@ bool HAPServer::begin(bool resume) {
 	LOG_I("Set time to: %s\n", _time.timeString());
 
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
-	_time.setReftime(_configuration.getPlatformConfig()->refTime());	
+	_time.setReftime(_configuration.getPlatformConfig()->refTime());
 	// _configuration.getPlatformConfig()->setRefTime(1601846922);
-	
+
 	LOG_D("Set reftime to: %lu\n", _time.refTime());
 	LOG_D("Set t_offset to: %lu\n", _time.getTOffset());
 
