@@ -558,7 +558,7 @@ bool HAPServer::begin(bool resume) {
 	//
 #if HAP_SERVER_USE_INTEGRATED_KNX
 
-	LogI("Starting integrated knx ...", false);
+	LOG_I("Starting integrated knx ...");
     // Transmitter is connected to Arduino Pin #10
     ArduinoPlatform::SerialDebug = &Serial;
 	randomSeed(millis());
@@ -570,9 +570,8 @@ bool HAPServer::begin(bool resume) {
 	printHex("knx configuration ", knx.paramData(0), ((ETS_HK_CHANNEL_PARAMETER_SIZE * HAP_PLUGIN_KNX_MAX_DEVICES) + 1 ));
 #endif
 
-	LogI(" OK", true);
-    LogI("KNX is configured: ", false);
-    LogI((uint8_t)knx.configured(), true);
+	LOGRAW_I("OK\n");
+    LOG_I("KNX is configured: %d\n", knx.configured());
 
     // is the led active on HIGH or low? Default is LOW
     knx.ledPinActiveOn(HIGH);
@@ -589,7 +588,7 @@ bool HAPServer::begin(bool resume) {
 	// Starting Webserver
 	//
 #if HAP_ENABLE_WEBSERVER
-	LogI("Starting webserver ...", false);
+	LOG_I("Starting webserver ...");
 	if (_configuration.getWebServerConfig()->enabled){
 
 
@@ -610,9 +609,9 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 		_webserver->begin();
-		LogI(" OK", true);
+		LOGRAW_I("OK\n");
 	} else {
-		LogI(" DISABLED", true);
+		LOGRAW_W("DISABLED\n");
 	}
 #endif
 
@@ -706,7 +705,7 @@ bool HAPServer::begin(bool resume) {
 	LOG_I("Advertising bonjour service ...");
 #if defined( ARDUINO_ARCH_ESP32)
 	if (!mDNSExt.begin(_accessorySet->modelName())) {
-		LogE( "ERROR; Starting mDNS responder failed!", true);
+		LOG_E( "ERROR; Starting mDNS responder failed!\n");
 		return false;
 	}
 
@@ -745,7 +744,7 @@ bool HAPServer::begin(bool resume) {
 
 #if defined( ARDUINO_ARCH_ESP32)
 	if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
-		LOGRAW_E( "ERROR: Updating HAP service txt failed!\n");
+		LOG_E( "ERROR: Updating HAP service txt failed!\n");
 		return false;
 	}
 #else
