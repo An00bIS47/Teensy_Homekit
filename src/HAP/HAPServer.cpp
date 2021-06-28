@@ -168,7 +168,7 @@ bool HAPServer::begin(bool resume) {
 		_configuration.getAccessoryConfig()->save();
 #endif
 
-		if (_configuration.load() == false){			
+		if (_configuration.load() == false){
 			LOG_E("ERROR: Could not load configuration! -> Setting defaults\n");
 			// _configuration.formatFlash();
 
@@ -373,10 +373,10 @@ bool HAPServer::begin(bool resume) {
 #if defined(CORE_TEENSY)
 	// start the Ethernet connection:
 	LOG_I("Initialize Ethernet with DHCP ...");
-	if (Ethernet.begin(baseMac, HAP_ETHERNET_TIMEOUT) == 0) {		
+	if (Ethernet.begin(baseMac, HAP_ETHERNET_TIMEOUT) == 0) {
 		LOGRAW_E("ERROR - Failed to configure Ethernet using DHCP\n");
 		// Check for Ethernet hardware present
-		if (Ethernet.hardwareStatus() == EthernetNoHardware) {			
+		if (Ethernet.hardwareStatus() == EthernetNoHardware) {
 			LOGRAW_E("ERROR - Ethernet shield was not found.  Sorry, can't run without hardware. :(\n");
 			while (true) {
 				delay(1); // do nothing, no point running without Ethernet hardware
@@ -443,12 +443,13 @@ bool HAPServer::begin(bool resume) {
 #endif /* HAP_ENABLE_NTP */
 	_time.begin();
 	LOG_I("Set time to: %s\n", _time.timeString());
-	LOG_I("Set reftime to: %lu\n", _time.refTime());
-	LOG_I("Set t_offset to: %lu\n", _time.getTOffset());
 
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
+	_time.setReftime(_configuration.getPlatformConfig()->refTime());	
 	// _configuration.getPlatformConfig()->setRefTime(1601846922);
-	_time.setReftime(_configuration.getPlatformConfig()->refTime());
+	
+	LOG_I("Set reftime to: %lu\n", _time.refTime());
+	LOG_I("Set t_offset to: %lu\n", _time.getTOffset());
 
 
 	//
@@ -2204,7 +2205,7 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 		ed25519_key_generate(_accessorySet->LTPK(), _accessorySet->LTSK());
 
-		
+
 
 
 #if HAP_DEBUG_HOMEKIT
@@ -2638,7 +2639,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 #elif defined( CORE_TEENSY )
 	LOG_D("Handle client [");
 	LOGDEVICE->print(hapClient->client.remoteIP());
-	LOGRAW_D("] -> /pair-setup Step 4/4 ...");	
+	LOGRAW_D("] -> /pair-setup Step 4/4 ...");
 #endif
 
 	_eventManager.queueEvent(EventManager::kEventPairingStep4, HAPEvent());
