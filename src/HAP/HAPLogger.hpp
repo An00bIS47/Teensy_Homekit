@@ -9,6 +9,10 @@
 #ifndef HAPLOGGER_HPP_
 #define HAPLOGGER_HPP_
 
+
+#if 0
+
+
 #include <Arduino.h>
 #include <string>
 
@@ -127,3 +131,5 @@ private:
 };
 
 #endif /* HAPLOGGER_HPP_ */
+
+#endif

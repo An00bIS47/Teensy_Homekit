@@ -21,7 +21,6 @@
 
 #include "HAPAccessory.hpp"
 #include "HAPAccessorySet.hpp"
-#include "HAPLogger.hpp"
 #include "HAPLogging.hpp"
 #include "HAPVersion.hpp"
 #include "HAPHelper.hpp"
@@ -113,7 +112,7 @@ public:
 
 
 	virtual void identify(bool oldValue, bool newValue) {
-		LogE(F("Handle identify from plugins"), true);
+		LOG_I("Handle identify from plugins\n");
 	}
 
 	void handle(bool forced = false) {

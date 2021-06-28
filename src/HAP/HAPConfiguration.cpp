@@ -7,9 +7,8 @@
 //
 
 #include "HAPConfiguration.hpp"
-#include "HAPLogger.hpp"
 #include "HAPPlugins.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
@@ -651,72 +650,72 @@ FLASHMEM
 #endif
 bool HAPConfiguration::load() {
 
-    LogD(F("   >>> Validation ..."), false);
+    LOG_D(" Validating config ...");
 	bool result = validConfig();
 	if (result == false) {
-		LogE(F("ERROR: Invalid configuration!"), true);
+		LOG_E("ERROR: Invalid configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
-    LogD(F("   >>> Platform ..."), false);
+    LOG_D("Loading platform configuration ...");
 	result = loadPlatformConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to load platform configuration!"), true);
+		LOG_E("ERROR: Failed to load configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
-    LogD(F("   >>> Accessory ..."), false);
+    LOG_D("Loading accessory configuration ...");
 	result = loadAccessoryConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to load accessory configuration!"), true);
+		LOG_E("ERROR: Failed to load configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
 
 #if HAP_ENABLE_WIFI
-    LogD(F("   >>> WiFi ..."), false);
+    LOG_D("Loading WiFi configuration ...");
 	result = loadWiFiConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to load wifi configuration!"), true);
+		LOG_E("ERROR: Failed to load WiFi configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 
 #if HAP_ENABLE_KEYSTORE
-    LogD(F("   >>> Keystore ..."), false);
+    LOG_D("Loading keystore configuration ...");
 	result = loadKeystoreConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to load keystore configuration!"), true);
+		LOG_E("ERROR: Failed to load keystore configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 
 #if HAP_ENABLE_WEBSERVER
-    LogD(F("   >>> WebServer ..."), false);
+    LOG_D("Loading webserver configuration ...");
 	result = loadWebServerConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to load webserver configuration!"), true);
+		LOG_E("ERROR: Failed to load webserver configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 
 #if HAP_ENABLE_UPDATE_OTA
-    LogD(F("   >>> OTA ..."), false);
+    LOG_D("Loading OTA configuration ...");
 	result = loadOTAConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to load ota configuration!"), true);
+		LOG_E("ERROR: Failed to load OTA configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 	return result;
@@ -729,76 +728,76 @@ bool HAPConfiguration::save() {
 
 	bool result = true;
 
-    LogD(F("   <<< Platform ..."), false);
+    LOG_D("Saving platform configuration ...");
 	result = savePlatformConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save platform configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
 
-    LogD(F("   <<< Accessory ..."), false);
+    LOG_D("Saving accessory configuration ...");
 	result = saveAccessoryConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save accessory configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
 #if HAP_ENABLE_WIFI
-    LogD(F("   <<< WiFi ..."), false);
+    LOG_D("Saving WiFi configuration ...");
 	result = saveWiFiConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save wifi configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 #if HAP_ENABLE_KEYSTORE
-    LogD(F("   <<< Keystore ..."), false);
+    LOG_D("Saving keystore configuration ...");
 	result = saveKeystoreConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save keystore configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 #if HAP_ENABLE_WEBSERVER
-    LogD(F("   <<< WebServer ..."), false);
+    LOG_D("Saving webserver configuration ...");
 	result = saveWebServerConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save webserver configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
 #if HAP_ENABLE_UPDATE_OTA
-    LogD(F("   <<< OTA ..."), false);
+    LOG_D("Saving OTA configuration ...");
 	result = saveOTAConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save ota configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 #endif
 
-    LogD(F("   <<< Plugins ..."), false);
+    LOG_D("Saving plugin configuration ...");
     result = savePluginConfig();
 	if (result == false) {
-		LogE(F("ERROR: Failed to save plugin configuration!"), true);
+		LOG_E("ERROR: Failed to save configuration!\n");
 		return false;
 	}
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
 
 
-    LogD(F("   <<< Validation ..."), false);
+    LOG_D("Validate configuration ...");
     validateConfig();
-    LogD(F(" OK"), true);
+    LOGRAW_D("OK\n");
 
 	return result;
 }
@@ -866,12 +865,12 @@ bool HAPConfiguration::saveOTAConfig(){
     offset += HAP_OTA_PASSWORD_LENGTH;
 
     if (offset < bufferSize){
-        LogE("ERROR: OTA offset < buffersize!", true);
+        LOG_E("ERROR: OTA offset < buffersize!\n");
     }
 
 
 #if HAP_DEBUG_CONFIGURATION
-    HAPHelper::array_print("SAVE OTA", (uint8_t*)buffer, bufferSize);
+    HEXDUMP_D("SAVE OTA", (uint8_t*)buffer, bufferSize);
 #endif
 
 	size_t written = writeBytes("cOTA", (uint8_t*)buffer, bufferSize);
@@ -891,7 +890,7 @@ bool HAPConfiguration::loadOTAConfig(){
 	readBytes("cOTA", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("LOAD OTA", buffer, bufferSize);
+	HEXDUMP_D("LOAD OTA", buffer, bufferSize);
 #endif
 
 	_otaConfig->enabled = buffer[0];
@@ -919,7 +918,7 @@ bool HAPConfiguration::saveKeystoreConfig(){
     offset += HAP_KEYSTORE_LABEL_LENGTH;
 
 #if HAP_DEBUG_CONFIGURATION
-    HAPHelper::array_print("SAVE KEYSTORE", (uint8_t*)buffer, offset);
+    HEXDUMP_D("SAVE KEYSTORE", (uint8_t*)buffer, offset);
 #endif
 
 	size_t written = writeBytes("cKeySt", (uint8_t*)buffer, bufferSize);
@@ -939,7 +938,7 @@ bool HAPConfiguration::loadKeystoreConfig(){
 	readBytes("cKeySt", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("LOAD KEYSTORE", buffer, bufferSize);
+	HEXDUMP_D("LOAD KEYSTORE", buffer, bufferSize);
 #endif
 
     memcpy(_keystoreConfig->keystore, buffer + offset, HAP_KEYSTORE_LABEL_LENGTH);
@@ -978,7 +977,7 @@ bool HAPConfiguration::saveWebServerConfig(){
 	}
 
 #if HAP_DEBUG_CONFIGURATION
-    HAPHelper::array_print("SAVE WEBSERVER", (uint8_t*)buffer, offset);
+    HEXDUMP_D("SAVE WEBSERVER", (uint8_t*)buffer, offset);
 #endif
 
 	size_t written = writeBytes("cWebSvr", buffer, bufferSize);
@@ -999,7 +998,7 @@ bool HAPConfiguration::loadWebServerConfig(){
 	readBytes("cWebSvr", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("LOAD WEBSERVER", buffer, bufferSize);
+	HEXDUMP_D("LOAD WEBSERVER", buffer, bufferSize);
 #endif
 
 
@@ -1054,7 +1053,7 @@ bool HAPConfiguration::saveWiFiConfig(){
 	}
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("SAVE WIFI", buffer, bufferSize);
+	HEXDUMP_D("SAVE WIFI", buffer, bufferSize);
 #endif
 
 
@@ -1078,7 +1077,7 @@ bool HAPConfiguration::loadWiFiConfig(){
     }
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("LOAD WIFI", buffer, bufferSize);
+	HEXDUMP_D("LOAD WIFI", buffer, bufferSize);
 #endif
 
 	_wifiConfig->enabled = buffer[offset++];
@@ -1113,13 +1112,13 @@ bool HAPConfiguration::savePlatformConfig(){
 	uint8_t buffer[bufferSize];
 	size_t offset = 0;
 
-    buffer[offset++] = (uint8_t)_platformConfig->_logLevel;
+    // buffer[offset++] = (uint8_t)_platformConfig->_logLevel;
     HAPHelper::u32_to_u8(_platformConfig->_refTime, buffer + offset);
     offset += 4;
 
 
 #if HAP_DEBUG_CONFIGURATION
-    HAPHelper::array_print("SAVE PLATFORM", (uint8_t*)buffer, offset);
+    HEXDUMP_D("SAVE PLATFORM", (uint8_t*)buffer, offset);
 #endif
 
     size_t written = writeBytes("cPltfrm", (uint8_t*)buffer, bufferSize);
@@ -1144,10 +1143,10 @@ bool HAPConfiguration::loadPlatformConfig(){
 	readBytes("cPltfrm", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("LOAD PLATFORM", buffer, bufferSize);
+	HEXDUMP_D("LOAD PLATFORM", buffer, bufferSize);
 #endif
 
-	_platformConfig->_logLevel = (enum LogLevel)buffer[0];
+	// _platformConfig->_logLevel = (enum LogLevel)buffer[0];
 	offset++;
 	_platformConfig->_refTime = HAPHelper::u8_to_u32(buffer + offset);
 
@@ -1203,7 +1202,7 @@ bool HAPConfiguration::saveAccessoryConfig(){
 	}
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("SAVE ACCESSORY", buffer, bufferSize);
+	HEXDUMP_D("SAVE ACCESSORY", buffer, bufferSize);
 #endif
 
 
@@ -1232,7 +1231,7 @@ bool HAPConfiguration::loadAccessoryConfig(){
     }
 
 #if HAP_DEBUG_CONFIGURATION
-	HAPHelper::array_print("LOAD ACCESSORY", buffer, read);
+	HEXDUMP_D("LOAD ACCESSORY", buffer, read);
 #endif
 
 	size_t offset = 0;

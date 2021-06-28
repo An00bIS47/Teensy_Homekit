@@ -58,7 +58,7 @@ extern int HAPLoglevel;
     LOG_W("%s - This is a %s!\n", "WARNING", "warning"); \
     LOG_I("%s - This is an %s.\n", "INFO", "information"); \
     LOG_D("%s - This is a %s message.\n", "DEBUG", "debug"); \
-    LOG_V("%s - This is a %s message!\n", "VERBOSE", "verbose");
+    LOG_V("%s - This is a %s message.\n", "VERBOSE", "verbose");
 
 // #if LOGGING_HAS_HAPTIME
 // //                        [H]    1968 | main.cpp             [   22] setup |

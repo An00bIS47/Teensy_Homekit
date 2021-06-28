@@ -6,6 +6,8 @@
 //      Author: michael
 //
 
+#if 0
+
 #include "HAPLogger.hpp"
 //#include "HAPServer.hpp"
 #include "HAPTime.hpp"
@@ -411,3 +413,5 @@ size_t HAPLogger::print(const __FlashStringHelper *ifsh) {
     return n;
 
 }
+
+#endif

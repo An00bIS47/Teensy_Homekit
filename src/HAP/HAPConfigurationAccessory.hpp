@@ -13,7 +13,7 @@
 #include <vector>
 #include <functional>
 #include "HAPGlobals.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPHelper.hpp"
 #include "HAPConfigurationItem.hpp"
 
@@ -91,7 +91,7 @@ public:
 
 	void setPincode(const char* pin){
 		if (strlen(pin) > 11) {
-			LogE(F("ERROR: PIN CODE is too long!"), true);
+			LOG_E("ERROR: PIN CODE is too long!\n");
 			return;
 		}
 		strncpy(pincode, pin, 11);
@@ -100,7 +100,7 @@ public:
 
 	void setSetupId(const char* setupId_){
 		if (strlen(setupId_) > 5) {
-			LogE(F("ERROR: SETUP ID is too long!"), true);
+			LOG_E("ERROR: SETUP ID is too long!\n");
 			return;
 		}
 		strncpy(setupId, setupId_, 5);
@@ -109,7 +109,7 @@ public:
 
 	void setModelName(const char* modelName_){
 		if (strlen(modelName_) > 33) {
-			LogE(F("ERROR: MODEL NAME is too long!"), true);
+			LOG_E("ERROR: MODEL NAME is too long!\n");
 			return;
 		}
 		strncpy(modelname, modelName_, 33);
@@ -151,8 +151,8 @@ public:
 			pairings.erase(pairings.begin() + index);
 			return true;
 		} else {
-			LogE("ERROR: Pairing id not found!", true);
-			HAPHelper::array_print("id", id, HAP_PAIRINGS_ID_LENGTH);
+			LOG_E("ERROR: Pairing id not found!\n");
+			HEXDUMP_D("id", id, HAP_PAIRINGS_ID_LENGTH);
 			return false;
 		}
 	}
@@ -167,9 +167,9 @@ public:
             item->isAdmin = isAdminPairing;
 
 #if HAP_DEBUG_PAIRINGS
-            HAPHelper::array_print("ID:", item->id, HAP_PAIRINGS_ID_LENGTH);
-            HAPHelper::array_print("Key:", item->key, HAP_PAIRINGS_LTPK_LENGTH);
-			LogD(F("isAdmin: ") + String(item->isAdmin));
+            HEXDUMP_D("ID", item->id, HAP_PAIRINGS_ID_LENGTH);
+            HEXDUMP_D("Key", item->key, HAP_PAIRINGS_LTPK_LENGTH);
+			LOG_D("isAdmin: %d\n", item->isAdmin);
 #endif
 
             pairings.push_back(item);

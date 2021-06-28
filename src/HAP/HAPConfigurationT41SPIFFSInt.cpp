@@ -7,7 +7,7 @@
 //
 #include "HAPConfigurationT41SPIFFSInt.hpp"
 #include "HAPHelper.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 
 
 #define HAP_DEBUG_SPIFFS 1
@@ -136,9 +136,9 @@ s32_t HAPConfigurationT41SPIFFSInt::write(u32_t addr, u32_t size, u8_t *src) {
     flash_write((void *)addr, (const void *)src, size);
 
 #if HAP_DEBUG_SPIFFS
-    Serial.printf("write %0X len %d : ", addr, size);
-    for (unsigned ii = 0; ii < size; ii++) Serial.printf("%0x ",src[ii]);
-    Serial.println();
+    LOG_D("write %0X len %d : ", addr, size);
+    for (unsigned ii = 0; ii < size; ii++) LOG_D("%0x ",src[ii]);
+    LOGRAW_D("\n");
 #endif
 
     return SPIFFS_OK;
@@ -152,7 +152,7 @@ s32_t HAPConfigurationT41SPIFFSInt::erase(u32_t addr, u32_t size) {
         s -= 4096;
     }
 #if HAP_DEBUG_SPIFFS
-    Serial.printf("erase %0X len %d\n", addr, size);
+    LOG_D("Erase %0X len %d\n", addr, size);
 #endif
     return SPIFFS_OK;
 }
@@ -183,8 +183,7 @@ bool HAPConfigurationT41SPIFFSInt::mount() {
                             sizeof(spiffs_cache_buf),
                             0);
 #if HAP_DEBUG_SPIFFS
-    LogD("SPIFFS mount result: " + String(res), true);
-    Serial.printf("mount address 0x%X res: %i\n", cfg.phys_addr, res);
+    LOG_D("Mount address 0x%X res: %i\n", cfg.phys_addr, res);
 #endif
     return (res == 0);
 }
@@ -202,14 +201,14 @@ size_t HAPConfigurationT41SPIFFSInt::readBytes(const char* label, uint8_t* outpu
     spiffs_file  fd = SPIFFS_open(&_fs, label, SPIFFS_RDWR, 0);
     if (fd < 0) {
         // Serial.printf("errno %i\n", SPIFFS_errno(&_fs));
-        LogE("ERROR: Failed to read SPIFFS file " + String(label) + ": Reason: " + String(SPIFFS_errno(&_fs)), true);
+        LOG_E("ERROR: Failed to read SPIFFS file %s - Reason: %d\n", label, SPIFFS_errno(&_fs));
         SPIFFS_close(&_fs, fd);
         return 0;
     }
 
     size_t read = SPIFFS_read(&_fs, fd, (u8_t *)output, expectedDataLen);
     if (read < 0) {
-        LogE("ERROR: Failed to read from SPIFFS file " + String(label) + ": Reason: " + String(SPIFFS_errno(&_fs)), true);
+        LOG_E("ERROR: Failed to read SPIFFS file %s - Reason: %d\n", label, SPIFFS_errno(&_fs));
         read = 0;
     }
 
@@ -219,29 +218,20 @@ size_t HAPConfigurationT41SPIFFSInt::readBytes(const char* label, uint8_t* outpu
 
 size_t HAPConfigurationT41SPIFFSInt::writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen){
 
-    Serial.println("1");
-    Serial.send_now();
-
     spiffs_file fd = SPIFFS_open(&_fs, label, SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-    Serial.println("2");
-    Serial.send_now();
 
     if (fd < 0) {
         // Serial.printf("errno %i\n", SPIFFS_errno(&_fs));
-        LogE("ERROR: Failed to open SPIFFS file " + String(label) + ": Reason: " + String(SPIFFS_errno(&_fs)), true);
+        LOG_E("ERROR: Failed to read SPIFFS file %s - Reason: %d\n", label, SPIFFS_errno(&_fs));
         return 0;
     }
     size_t written = SPIFFS_write(&_fs, fd, (u8_t *)input, expectedDataLen);
     if (written < 0) {
-        LogE("ERROR: Failed to write to SPIFFS file " + String(label) + ": Reason: " + String(SPIFFS_errno(&_fs)), true);
+        LOG_E("ERROR: Failed to read SPIFFS file %s - Reason: %d\n", label, SPIFFS_errno(&_fs));
         written = 0;
     }
 
-    Serial.println("3");
-    Serial.send_now();
     SPIFFS_close(&_fs, fd);
-    Serial.println("4");
-    Serial.send_now();
     SPIFFS_fflush(&_fs, fd);
 
     return written;

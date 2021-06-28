@@ -25,7 +25,6 @@
 #include <WString.h>
 #include <algorithm>
 #include "HAPServer.hpp"
-#include "HAPLogger.hpp"
 #include "HAPLogging.hpp"
 #include "HAPHelper.hpp"
 
@@ -97,8 +96,6 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 	_webserver->setAccessorySet(_accessorySet);
 #endif
 
-	_stopEvents = false;
-
 	_hapsrp = nullptr;
 
 
@@ -139,35 +136,34 @@ bool HAPServer::begin(bool resume) {
 	if (resume == false){
 
 		//
-		// Logging
-		//
-		HAPLogger::setPrinter(&Serial);
-		HAPLogger::setLogLevel(HAP_LOGLEVEL);
-
-
-		//
 		// Configuration
 		//
-		LOG_I("Loading configuration ...");
+		LOG_I("Setup configuration ...");
 		auto callback = std::bind(&HAPServer::updateConfig, this);
 		// _config.registerCallbackUpdate(callback);
 		// _config.begin();
 
 		_configuration.registerCallbackUpdate(callback);
 		_configuration.begin();
-
+		LOGRAW_I("OK\n");
 
 
 #if HAP_RESET_CONFIGURATION
+		
+		LOG_I("Reseting configuration ...");
 		_configuration.reset();
 		_configuration.getAccessoryConfig()->save();
+		LOGRAW_I("OK\n");
 #endif
 
 #if HAP_RESET_PAIRINGS
+		LOG_I("Reseting pairings ...");
 		_configuration.getAccessoryConfig()->clearPairings();
 		_configuration.getAccessoryConfig()->save();
+		LOGRAW_I("OK\n");
 #endif
 
+		LOG_I("Loading configuration ...");
 		if (_configuration.load() == false){
 			LOG_E("ERROR: Could not load configuration! -> Setting defaults\n");
 			// _configuration.formatFlash();
@@ -183,16 +179,12 @@ bool HAPServer::begin(bool resume) {
 		LOGDEVICE->println();
 #endif
 
-
-		HAPLogger::setLogLevel(_configuration.getPlatformConfig()->logLevel());
-		_accessorySet->setConfiguration(_configuration.getAccessoryConfig());
-
 #if HAP_ENABLE_PIXEL_INDICATOR
 		// ToDo: Pixel Indicator
 		_pixelIndicator.begin();
 		// // show pixel indicator color
-		// Serial.print("WIFI MODE: ");
-		// Serial.println(_config.config()["wifi"]["mode"].as<uint8_t>());
+		// LOGDEVICE->print("WIFI MODE: ");
+		// LOGDEVICE->println(_config.config()["wifi"]["mode"].as<uint8_t>());
 		_pixelIndicator.setColor(_wifi.getColorForMode((enum HAP_WIFI_MODE)_configuration.getWiFiConfig()->mode));
 #endif
 
@@ -210,8 +202,6 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 #if HAP_DEBUG
-
-		// HAPLogger::printInfo();
 
 		LOG_D("Device Information:\n");
 		LOG_D("   %-14s: %s\n", "Device ID", HAPDeviceID::deviceID().c_str());
@@ -281,10 +271,10 @@ bool HAPServer::begin(bool resume) {
 		LogD(String(CONFIG_MAIN_TASK_STACK_SIZE), true);
 #endif
 
-// 		LogD(F(""), true);
+// 		LOGRAW_D("OK\n");
 // 		LogD(F("Endian:       "), false);
 // 		LogD(IS_BIG_ENDIAN ? F("BIG") : F("little"), true);
-// 		LogD(F(""), true);
+// 		LOGRAW_D("OK\n");
 
 // 		LogD(F("Storage:"), true);
 // 		LogD(F("   type:      "), false);
@@ -295,7 +285,7 @@ bool HAPServer::begin(bool resume) {
 // #elif HAP_USE_SPIFFS_CONFIGURATION
 // 		LogD(F("SPIFFS (External Flash)"), true);
 // #endif
-// 		LogD(F(""), true);
+// 		LOGRAW_D("OK\n");
 
 // 		LogD(F("Fakegato:"), true);
 // 		LogD(F("   interval:  "), false);
@@ -315,15 +305,15 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 #if HAP_RESET_EEPROM
-		LogW(F("Reset EEPROM - Delete pairings ..."), false);
+		LOG_I("Reset EEPROM - Delete pairings ...");
 		_accessorySet->getPairings()->resetEEPROM();
-		LogW(F("OK"), true);
+		LOGRAW_I("OK\n");
 #endif
 
 #if HAP_WEBSERVER_USE_SPIFFS
 		SPIFFS.begin();
 #if HAP_DEBUG
-    	LogD(F("Listing files of SPIFFS:"), true);
+    	LOG_D("Listing files of SPIFFS:");
     	HAPServer::listDir(SPIFFS, "/", 0);
 #endif
 #endif
@@ -624,7 +614,7 @@ bool HAPServer::begin(bool resume) {
     std::vector<String> names = factory.names();
 
     for(std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
-    	//Serial.println(*it);
+    	//LOGDEVICE->println(*it);
 		LOG_HEAP("", 0,0);
     	auto plugin = factory.getPlugin(*it);
 
@@ -771,9 +761,6 @@ bool HAPServer::begin(bool resume) {
 
 #endif
 
-
-	stopEvents(false);
-
 	// queue event
 	_eventManager.queueEvent(EventManager::kEventHomekitStarted, HAPEvent());
 
@@ -912,11 +899,11 @@ void HAPServer::handle() {
 		LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
 
 		// ToDo: remove
-		// Serial.print("Task Button Handle: ");
-		// Serial.println(_taskButtonHandle == NULL ? "NULL" : "not NULL");
+		// LOGDEVICE->print("Task Button Handle: ");
+		// LOGDEVICE->println(_taskButtonHandle == NULL ? "NULL" : "not NULL");
 		// if (_taskButtonHandle != NULL){
-		// 	Serial.print("Task State: ");
-		// 	Serial.println(eTaskGetState(_taskButtonHandle));
+		// 	LOGDEVICE->print("Task State: ");
+		// 	LOGDEVICE->println(eTaskGetState(_taskButtonHandle));
 		// }
 
 	}
@@ -1154,8 +1141,8 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 
 		uint16_t trueLength = ((uint16_t)AAD[1] << 8) | AAD[0];
 
-		// Serial.printf("AAD: %02X%02X - %d\n", AAD[0], AAD[1], trueLength);
-		// Serial.printf("availableSize: %d\n", availableSize);
+		// LOGDEVICE->printf("AAD: %02X%02X - %d\n", AAD[0], AAD[1], trueLength);
+		// LOGDEVICE->printf("availableSize: %d\n", availableSize);
 		int availableSize = bufferedClient->available() - HAP_ENCRYPTION_HMAC_SIZE;	// 16 is the size of the HMAC
 		// LogD("\nNeed " + String(trueLength) + " bytes and have " + String(availableSize) + " bytes", true);
 
@@ -1172,8 +1159,8 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 		uint8_t cipherText[trueLength];
 		bufferedClient->readBytes(cipherText, trueLength);
 
-		// Serial.print("trueLength: ");
-		// Serial.println(trueLength);
+		// LOGDEVICE->print("trueLength: ");
+		// LOGDEVICE->println(trueLength);
 		// HAPHelper::arrayPrint(cipherText, trueLength);
 
 		//
@@ -1234,24 +1221,6 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 			free(bodyData);
 		}
 	}
-}
-
-
-bool HAPServer::stopEvents(){
-	return _stopEvents;
-}
-
-
-void HAPServer::stopEvents(bool value) {
-
-#if HAP_DEBUG
-	if (value) {
-		LOG_D("Stopping Events\n");
-	} else {
-		LOG_D("Starting Events\n");
-	}
-#endif
-	_stopEvents = value;
 }
 
 
@@ -1317,7 +1286,7 @@ void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_l
 	int curPos = 0;
 
 	for (int i = 0; i < msg_len; i++) {
-    		//Serial.print(msg[i]);
+    		//LOGDEVICE->print(msg[i]);
 		if ( msg[i] == '\r' && msg[i + 1] == '\n' ) {
 
 			char cLine[i - curPos + 1];
@@ -1337,7 +1306,7 @@ void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_l
 
 	}
 
-	//Serial.printf(">>> curPos: %d\n", curPos);
+	//LOGDEVICE->printf(">>> curPos: %d\n", curPos);
 
 	if (curPos + hapClient->request.contentLength == msg_len) {
 		//bodyData += String(msg).substring(curPos);
@@ -1378,8 +1347,6 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 	hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 
 	_eventManager.queueEvent(EventManager::kEventErrorOccurred, HAPEvent());
-
-	stopEvents(false);
 }
 
 
@@ -1449,7 +1416,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 									LOG_E("ERROR: Pair-setup failed at M1!\n");
 									hapClient->clear();
 									hapClient->client.stop();
-									stopEvents(false);
 									hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
 								}
 #if HAP_ALLOW_PAIRING_WHILE_PAIRED == 0
@@ -1464,7 +1430,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1475,7 +1440,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1486,7 +1450,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 
@@ -1497,7 +1460,6 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 								hapClient->clear();
 								hapClient->client.stop();
 								hapClient->state = HAP_CLIENT_STATE_DISCONNECTED;
-								stopEvents(false);
 							}
 						}
 					}
@@ -1581,7 +1543,7 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size
 
 	// Print Line
 #if HAP_DEBUG_HOMEKIT_REQUEST
-	if (lineLength > 0) Serial.println(line);
+	if (lineLength > 0) LOGDEVICE->println(line);
 #endif
 
 	int curPos = 0;
@@ -1614,7 +1576,7 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size
 	}
 
 	if (lineLength == 0) {
-		//Serial.println("END OF HEADERS!!!");
+		//LOGDEVICE->println("END OF HEADERS!!!");
 
 
 
@@ -1626,7 +1588,7 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size
 		}
 		lowLine[15] = '\0';
 
-		// Serial.println("lowLine:" + String(lowLine));
+		// LOGDEVICE->println("lowLine:" + String(lowLine));
 
 		// Content Type
 		if (HAPHelper::startsWith(lowLine, "content-type:")){
@@ -1639,7 +1601,7 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size
 			memcpy( contentType, &line[curPos], strlen(line) - curPos);
 			contentType[strlen(line) - curPos] = '\0';
 
-			// Serial.println("content-type:*" + String(contentType) + "*");
+			// LOGDEVICE->println("content-type:*" + String(contentType) + "*");
 			hapClient->request.contentType = contentType;
 		}
 
@@ -1654,7 +1616,7 @@ void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size
 			memcpy( contentLength, &line[curPos], strlen(line) - curPos);
 			contentLength[strlen(line) - curPos] = '\0';
 
-			// Serial.println("content-type:*" + String(contentType) + "*");
+			// LOGDEVICE->println("content-type:*" + String(contentType) + "*");
 			hapClient->request.contentLength = atoi(contentLength);
 		}
 	}
@@ -1680,11 +1642,11 @@ bool HAPServer::encode(HAPClient* hapClient, ReadBufferingClient* bufferedClient
 	// Method not supported :(
 	if ( bufferedClient->peek() == 0x00) {
 		bufferedClient->read();
-//		Serial.println(c, HEX);
+//		LOGDEVICE->println(c, HEX);
 		bufferedClient->read();
-//		Serial.println(c, HEX);
+//		LOGDEVICE->println(c, HEX);
 		bufferedClient->read();
-//		Serial.println(c, HEX);
+//		LOGDEVICE->println(c, HEX);
 		hapClient->request.contentLength = hapClient->request.contentLength - 3;
 	}
 
@@ -1911,7 +1873,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 		serializeJson(doc, response);
 
 #if HAP_DEBUG_HOMEKIT
-		//Serial.write(_buffer - l, chunk_size);
+		//LOGDEVICE->write(_buffer - l, chunk_size);
 		HAPHelper::array_print("response", response.c_str(), response.length());
 #endif
 
@@ -2067,7 +2029,7 @@ bool HAPServer::send204(HAPClient* hapClient){
 // 	LogD("\n>>> Sending " + String(encryptedLen) + " bytes encrypted response to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
 // #elif defined( CORE_TEENSY )
 // 	LogD(F("\n>>> Sending ") + String(encryptedLen) + F(" bytes encrypted response to client ["), false);
-// 	Serial.print(hapClient->client.remoteIP());
+// 	LOGDEVICE->print(hapClient->client.remoteIP());
 // 	LogD("] ...", false);
 // #endif
 
@@ -2746,7 +2708,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	LOGRAW_V("OK\n");
 
 
-	LogV( F("Updating mDNS ..."), false);
+	LOG_V( "Updating mDNS ...");
 #if defined (ARDUINO_ARCH_ESP32)
 	mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber);
 	LOGRAW_V("OK\n");
@@ -2770,8 +2732,6 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 
 	hapClient->clear();
-
-	//stopEvents(false);
 
 	LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
 
@@ -3029,8 +2989,8 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	size_t decryptedLen = encryptedDataLen - CHACHA20_POLY1305_AUTH_TAG_LENGTH;
 	uint8_t subtlvData[decryptedLen] = {0,};
 
-	// Serial.println("chacha20_poly1305_decrypt");
-	// Serial.send_now();
+	// LOGDEVICE->println("chacha20_poly1305_decrypt");
+	// LOGDEVICE->send_now();
 
 #if HAP_DEBUG_HOMEKIT
 	HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
@@ -3550,7 +3510,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 	bool hasParamPerms = false;
 	bool hasParamEvent = false;
 	bool hasParamType = false;
-	LogD(F(""), true);
+	LOGRAW_D("OK\n");
 
 	for (const auto &p : hapClient->request.params) {
 
@@ -3627,7 +3587,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 	// serializeJson(responseRoot, response);
 
 #if HAP_DEBUG_HOMEKIT
-	serializeJson(responseRoot, Serial);
+	serializeJson(responseRoot, *LOGDEVICE);
 #endif
 
 	if (errorCode == -1){
@@ -3674,8 +3634,8 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
   	}
 
 #if HAP_DEBUG
-	serializeJson(root, Serial);
-	Serial.println();
+	serializeJson(root, *LOGDEVICE);
+	LOGDEVICE->println();
 #endif
 
 	int s = root[F("characteristics")].as<JsonArray>().size();
@@ -3726,9 +3686,9 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 			} else {
 
 				if (character->writable() ) {
-					character->valueFromString(jc["value"].as<String>());
+					character->valueFromString(jc["value"].as<const char*>());
 					// Add to jsonCharacteristics array
-					character->toJson(jsonNewChr);
+					character->toJson(jsonNewChr, false, false, false, false, false);
 				} else {
 					LOG_W("WARNING: Resource not writable for characteristic %d.%d\n", aid, iid);
 					jsonNewChr[F("iid")] = iid;
@@ -3736,7 +3696,6 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 					errorOccured = true;
 				}
 			}
-
 
 		} else {
 			LOG_E("ERROR: Resource not found for characteristic %d.%d\n", aid, iid);
@@ -3844,11 +3803,6 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 {
 
-	// Stopping events
-	if (stopEvents() == true) {
-		return;
-	}
-
 	if (_clients.size() > 0){
 		int count = 0;
 		int totalEvents = _eventManager.getNumEventsInQueue();
@@ -3910,9 +3864,9 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 						chr["aid"] = aid;
 						character->toJson(chr, false, false, false, false, false, false);
 
-						// Serial.print("event json: ");
+						// LOGDEVICE->print("event json: ");
 						// serializeJsonPretty(chr, Serial);
-						// Serial.println();
+						// LOGDEVICE->println();
 
 						isSubcribedToAtLeastOne = true;
 					} else {
@@ -4010,8 +3964,6 @@ void HAPServer::updateConfig(){
 	// ToDo: Rewrite config update handling
 	LOG_D("Updating configuration ...");
 
-	HAPLogger::setLogLevel(_configuration.getPlatformConfig()->logLevel());
-
 	// ToDo: Update plugins and reinit
 	// for (auto& plugin : _plugins) {
     // 	plugin->setConfig(_config.config()["plugins"][plugin->name()]);
@@ -4033,7 +3985,7 @@ void HAPServer::handleEventUpdatedConfig(int eventCode, struct HAPEvent eventPar
 
 #if HAP_DEBUG_CONFIG
 	LOGDEVICE->println("before merging:");
-	_configuration.toJson(Serial);
+	_configuration.toJson(*LOGDEVICE);
 #endif
 
 	LOGRAW_D("OK\n");
@@ -4052,7 +4004,7 @@ void HAPServer::handleEventUpdatedConfig(int eventCode, struct HAPEvent eventPar
 // 	_config.setConfig(doc);
 
 // #if HAP_DEBUG_CONFIG
-// 	Serial.println("after merging:");
+// 	LOGDEVICE->println("after merging:");
 // 	_config.prettyPrintTo(Serial);
 // #endif
 
@@ -4101,9 +4053,9 @@ void HAPServer::listDir(FS &fs, const char * dirname, uint8_t levels) {
 
 #if HAP_ENABLE_WIFI_BUTTON
 void HAPServer::callbackClick(){
-	Serial.print("CALLBACK CLICK! - ");
-	Serial.print("current wifi mode: ");
-	Serial.println((uint8_t)_wifi.getNextMode());
+	LOGDEVICE->print("CALLBACK CLICK! - ");
+	LOGDEVICE->print("current wifi mode: ");
+	LOGDEVICE->println((uint8_t)_wifi.getNextMode());
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 	CRGB col = _wifi.getColorForMode(_wifi.getNextMode());
@@ -4118,9 +4070,9 @@ void HAPServer::callbackClick(){
 }
 
 void HAPServer::callbackDoubleClick(){
-	Serial.print("CALLBACK DOUBLE CLICK! - ");
-	Serial.print("Set default wifi mode: ");
-	Serial.println(HAP_WIFI_MODE_DEFAULT);
+	LOGDEVICE->print("CALLBACK DOUBLE CLICK! - ");
+	LOGDEVICE->print("Set default wifi mode: ");
+	LOGDEVICE->println(HAP_WIFI_MODE_DEFAULT);
 
 	_configuration.getWiFiConfig()->setWifiMode((uint8_t)HAP_WIFI_MODE_DEFAULT);
 	_eventManager.queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
@@ -4133,15 +4085,15 @@ void HAPServer::callbackDoubleClick(){
 }
 
 void HAPServer::callbackHold(){
-	Serial.print("CALLBACK HOLD! - ");
-	Serial.println("Delete config");
+	LOGDEVICE->print("CALLBACK HOLD! - ");
+	LOGDEVICE->println("Delete config");
 
 	_eventManager.queueEvent( EventManager::kEventConfigReset, HAPEvent());
 }
 
 void HAPServer::callbackLongHold(){
-	Serial.print("CALLBACK LONG HOLD! - ");
-	Serial.println("Delete all pairings");
+	LOGDEVICE->print("CALLBACK LONG HOLD! - ");
+	LOGDEVICE->println("Delete all pairings");
 
 	_eventManager.queueEvent( EventManager::kEventRemoveAllPairings, HAPEvent());
 }

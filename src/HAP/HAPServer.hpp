@@ -110,9 +110,6 @@ hap.__setBrand(__FLAGGED_BRAND);
 #endif
 
 
-
-
-
 #define SRP_SALT_LENGTH         16
 #define SRP_PUBLIC_KEY_LENGTH   384
 #define SRP_PROOF_LENGTH        64
@@ -284,8 +281,6 @@ protected:
 	void handleEventConfigReset(int eventCode, struct HAPEvent eventParam);
 	void handleEventDeleteAllPairings(int eventCode, struct HAPEvent eventParam);
 
-	bool stopEvents();
-	void stopEvents(bool value);
 
 
 	// HAPEventManager	_evtMgr;
@@ -367,8 +362,6 @@ private:
 	HAPSRP* _hapsrp;
 
 	char _brand[MAX_BRAND_LENGTH];
-
-	bool _stopEvents;
 
 	//
 	// Bonjour
