@@ -56,10 +56,14 @@ struct HAPEvent {
 	HAPClient *hapClient;
 	uint8_t aid;
 	uint8_t iid;
-	String  value;
 
-	HAPEvent(){};
-	HAPEvent(HAPClient *hapClient_, uint8_t aid_, uint8_t iid_, String  value_) : hapClient(hapClient_), aid(aid_), iid(iid_), value(value_){};
+	HAPEvent(){
+		hapClient = nullptr;
+		aid = 0;
+		iid = 0;
+	};
+
+	HAPEvent(HAPClient *hapClient_, uint8_t aid_, uint8_t iid_) : hapClient(hapClient_), aid(aid_), iid(iid_){};
 };
 
 

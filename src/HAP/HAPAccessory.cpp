@@ -75,7 +75,7 @@ void HAPAccessory::addCharacteristicToService(HAPService *service, HAPCharacteri
 	service->_characteristics.emplace_back(std::move(characteristic));
 
 	// ToDo: Refactor Eventmanager
-	struct HAPEvent event = HAPEvent(NULL, _aid, characteristic->iid(), "");
+	struct HAPEvent event = HAPEvent(NULL, _aid, characteristic->iid());
 	HAPServer::_eventManager.queueEvent( EventManager::kEventIncrementConfigNumber, event);
 }
 

@@ -1402,7 +1402,7 @@ if __name__ == '__main__':
         #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
         tester.runTest("getAccessories", tester.getAccessories)
 
-        tester.runTest("listenEvents", tester.listenEvents)
+        #tester.runTest("listenEvents", tester.listenEvents)
 
         passed, fakegatoHistories = tester.runFakegato()
 
@@ -1430,6 +1430,9 @@ if __name__ == '__main__':
             tester.runTest("getAccessories", tester.getAccessories)
             tester.runTest("removePairing", tester.removePairing)
 
+    tester.runTest("pair", tester.pair)
+    tester.runTest("listenEvents", tester.listenEvents)
+    tester.runTest("removePairing", tester.removePairing)
 
     if args.summary == True:
         tester.printSummary()

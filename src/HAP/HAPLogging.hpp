@@ -64,7 +64,7 @@ extern int HAPLoglevel;
 // //                        [H]    1968 | main.cpp             [   22] setup |
 // #define LOG_HEADER(x) "[" #x "] %-16s | %-20s [%5d] %s | "
 // #else
-#define LOG_HEADER(x) "[" #x "] %8lu | %-20s [%5d] %s | "
+#define LOG_HEADER(x) "[" #x "] %8lu | %-20s [%4d] %s | "
 // #endif
 
 constexpr const char* str_end(const char *str) {

@@ -279,14 +279,14 @@ public:
 	}
 
 
-	void queueNotifyEvent(uint32_t iid, String value){
-		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid, value);
+	void queueNotifyEvent(uint32_t iid){
+		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid);
 		_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 	}
 
 	void queueNotifyEvent(HAPCharacteristicBase* characteristic){
 		if (characteristic->notifiable()){
-			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());
+			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid());
 			_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 		}
 	}

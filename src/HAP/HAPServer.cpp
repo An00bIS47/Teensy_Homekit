@@ -448,8 +448,8 @@ bool HAPServer::begin(bool resume) {
 	_time.setReftime(_configuration.getPlatformConfig()->refTime());	
 	// _configuration.getPlatformConfig()->setRefTime(1601846922);
 	
-	LOG_I("Set reftime to: %lu\n", _time.refTime());
-	LOG_I("Set t_offset to: %lu\n", _time.getTOffset());
+	LOG_D("Set reftime to: %lu\n", _time.refTime());
+	LOG_D("Set t_offset to: %lu\n", _time.getTOffset());
 
 
 	//
@@ -3712,7 +3712,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 					hapClient->subscribe(aid, iid, jc[F("ev")].as<bool>());
 
 					if (jc[F("ev")].as<bool>()) {
-						struct HAPEvent event = HAPEvent(hapClient, aid, iid, character->valueString());
+						struct HAPEvent event = HAPEvent(hapClient, aid, iid);
 						_eventManager.queueEvent( EventManager::kEventNotifyController, event);
 					}
 
@@ -3904,7 +3904,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 					if (character) {
 
-						LOG_D("Handle event %d for accessory %d.%d with value %s\n", eventCode, aid, iid, evParams[i].value.c_str());
+						LOG_D("Handle event %d for accessory %d.%d\n", eventCode, aid, iid);
 
 						JsonObject chr = jsonCharacteristics.createNestedObject();
 						chr["aid"] = aid;
@@ -3916,7 +3916,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 						isSubcribedToAtLeastOne = true;
 					} else {
-						LOG_W("WARNING: Not notifiable event %d for accessory %d.%d with value %s\n", eventCode, aid, iid, evParams[i].value.c_str());
+						LOG_W("WARNING: Not notifiable event %d for accessory %d.%d\n", eventCode, aid, iid);
 					}
 				}
 			}
@@ -3925,9 +3925,9 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 			if (isSubcribedToAtLeastOne) {
 #if HAP_DEBUG
-				LOGDEVICE->print("Event response: ");
+				LOG_D("Event response: ");
 				serializeJson(root, *LOGDEVICE);
-				LOGDEVICE->println();
+				LOGRAW_D("\n");
 #endif
 				sendEvent(hapClient, root);
 			}
