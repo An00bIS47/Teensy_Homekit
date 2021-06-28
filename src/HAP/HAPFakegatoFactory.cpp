@@ -7,8 +7,7 @@
 //
 
 #include "HAPFakegatoFactory.hpp"
-#include "HAPLogger.hpp"
-#include "HAPTime.hpp"
+#include "HAPLogging.hpp"
 
 void HAPFakegatoFactory::handle(bool forced){
     for (auto & gato : _fakegatos) {
@@ -30,5 +29,5 @@ void HAPFakegatoFactory::registerFakeGato(HAPFakegato* fakegato, std::function<b
     fakegato->setInterval(interval);
     fakegato->registerCallbackAddEntry(callback);
     _fakegatos.push_back(fakegato);
-    LogD(HAPTime::timeString() + " " + "HAPFakegatoFactory" + "->" + String(__FUNCTION__) + " [   ] " + "Registered fakegato for: " + fakegato->name() + " (" + String(_fakegatos.size()) + ")", true);
+    LOG_I("Registered Fakegato for %s with size %d\n", fakegato->name().c_str(), _fakegatos.size());
 }

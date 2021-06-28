@@ -284,7 +284,7 @@
                 "ARDUINOJSON_USE_LONG_LONG=1",
                 "FNET_CFG_TLS=0",
                 "HAP_RESET_EEPROM=0",
-                "HAP_FAKEGATO_INTERVAL=10000",
+                "HAP_FAKEGATO_INTERVAL=300000",
                 "HAP_RESET_CONFIGURATION=0",
                 "HAP_RESET_PAIRINGS=0",
                 "HAP_USE_SPIFFS_CONFIGURATION=1",

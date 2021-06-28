@@ -8,7 +8,7 @@
 
 #include "HAPAccessorySet.hpp"
 #include "HAPHelper.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPGlobals.hpp"
 #include "HAPServer.hpp"
 
@@ -221,7 +221,7 @@ void HAPAccessorySet::generateXMI(){
 
 	int error_code = mbedtls_mpi_lset(&bignumLow, lowValue);
 	if (error_code != 0){
-		Serial.println("ERROR 1!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_lset\n");
 	}
 
 
@@ -232,7 +232,7 @@ void HAPAccessorySet::generateXMI(){
 	int dstLowLen = olenLow;
 	error_code = mbedtls_mpi_write_string(&bignumLow, 16, dstLow, dstLowLen, &olenLow);
 	if (error_code != 0){
-		Serial.println("ERROR 2!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_write_string\n");
 	}
 
 
@@ -243,7 +243,7 @@ void HAPAccessorySet::generateXMI(){
 
 	error_code = mbedtls_mpi_read_string(&bignumHigh, 16, dst2);
 	if (error_code != 0){
-		Serial.println("ERROR 3!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_read_string\n");
 	}
 
 
@@ -254,7 +254,7 @@ void HAPAccessorySet::generateXMI(){
 	int dstlen3 = olen2;
 	error_code = mbedtls_mpi_write_string(&bignumHigh, 16, dst3, dstlen3, &olen2);
 	if (error_code != 0){
-		Serial.println("ERROR 4!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_write_string\n");
 	}
 
 	char dest[9];
@@ -367,12 +367,7 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 	HAPAccessory* accessory = accessoryWithAID(aid);
 
 	if (accessory == nullptr) {
-
-		LogE("[ERROR] Accessory with aid: ", false);
-		LogE(String(aid), false);
-		LogE(" not found! - ErrorCode: ", false);
-		LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
-
+		LOG_E("ERROR: Accessory with aid: %d not found - Error Code %d\n", aid, HAP_STATUS_RESOURCE_NOT_FOUND);
 		//error_code = HAP_STATUS_RESOURCE_NOT_FOUND;
 		//errorOccured = true;
 		return nullptr;
@@ -381,12 +376,7 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 		HAPCharacteristicBase* chr = accessory->characteristicWithIID(iid);
 
 		if (chr == nullptr) {
-			LogE("[ERROR] Characteristics with aid: ", false);
-			LogE(String(aid), false);
-			LogE(" - iid: ", false);
-			LogE(String(iid), false);
-			LogE(" not found! - ErrorCode: ", false);
-			LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
+			LOG_E("ERROR: Characteristics %d.%d not found - Error Code %d\n", aid, iid, HAP_STATUS_RESOURCE_NOT_FOUND);
 			return nullptr;
 		} else {
 			return chr;

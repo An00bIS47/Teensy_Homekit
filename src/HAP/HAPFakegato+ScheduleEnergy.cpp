@@ -7,7 +7,7 @@
 //
 
 #include "HAPFakegato+ScheduleEnergy.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPHelper.hpp"
 #include "HAPTLV8.hpp"
 #include "HAPTime.hpp"
@@ -29,8 +29,8 @@ void HAPFakegatoScheduleEnergy::decodeDays(uint8_t *data){
 	_days = HAPFakeGatoScheduleDays(daysnumber);
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-	Serial.printf("M T W T F S S \n");
-	Serial.printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
+	LOGDEVICE->printf("M T W T F S S \n");
+	LOGDEVICE->printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
 #endif
 }
 
@@ -89,7 +89,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 				tEvent.offset = ((timer >> 5) * 60);
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-				Serial.printf("hour: %d, min: %d, offset: %d state: %d type: %d \n", tEvent.hour, tEvent.minute, tEvent.offset, tEvent.state, tEvent.type);
+				LOGDEVICE->printf("hour: %d, min: %d, offset: %d state: %d type: %d \n", tEvent.hour, tEvent.minute, tEvent.offset, tEvent.state, tEvent.type);
 #endif
 			} else if ((timer & 0x1F) == 7 || (timer & 0x1F) == 3) {
 				tEvent.sunrise = static_cast<HAPFakeGatoScheduleSunriseType>(((timer >> 5) & 0x01));    // 1 = sunrise, 0 = sunset
@@ -97,7 +97,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 				tEvent.offset  = ((timer >> 6) & 0x01 ? ~((timer >> 7) * 60) + 1 : (timer >> 7) * 60);   // offset from sunrise/sunset (plus/minus value)
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-				Serial.printf("sunrise: %d, offset: %d state: %d type: %d \n", tEvent.sunrise, tEvent.offset, tEvent.state, tEvent.type);
+				LOGDEVICE->printf("sunrise: %d, offset: %d state: %d type: %d \n", tEvent.sunrise, tEvent.offset, tEvent.state, tEvent.type);
 #endif
 			}
 

@@ -302,8 +302,8 @@ HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject obje
 FLASHMEM
 #endif
 bool HAPPluginBME280::begin(){
-	LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
-
+	// LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
+	// LOG_V("Begin plugin %s\n", _config->name);
 	_bme = new Adafruit_BME280();
 
 #if HAP_PLUGIN_BME280_USE_DUMMY
@@ -319,13 +319,13 @@ bool HAPPluginBME280::begin(){
     sprintf(hex, "%x", _bme->sensorID());
 
     if (!status) {
-        LogE("\nCould not find a valid BME280 sensor, check wiring, address, sensor ID!", true);
-        LogE("SensorID was: 0x" + String(hex), true);
-        LogE("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085", true);
-        LogE("   ID of 0x56-0x58 represents a BMP 280", true);
-        LogE("        ID of 0x60 represents a BME 280", true);
-        LogE("        ID of 0x61 represents a BME 680", true);
-        LogE("Disabling BME280 Sensor Plugin", true);
+        LOG_E("Could not find a valid BME280 sensor, check wiring, address, sensor ID!\n");
+        LOG_E("SensorID was: 0x%s\n", hex);
+        LOG_E("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+        LOG_E("   ID of 0x56-0x58 represents a BMP 280\n");
+        LOG_E("        ID of 0x60 represents a BME 280\n");
+        LOG_E("        ID of 0x61 represents a BME 680\n");
+        LOG_E("Disabling BME280 Sensor Plugin\n");
 		_config->enabled = false;
 
 		_eventManager->removeListener(&_listenerMemberFunctionPlugin);

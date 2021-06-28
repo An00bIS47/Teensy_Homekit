@@ -8,7 +8,7 @@
 
 #include "HAPFakegato+Schedule.hpp"
 #include "HAPTime.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
@@ -50,7 +50,8 @@ FLASHMEM
 #endif
 void HAPFakegatoSchedule::callbackTimerStart(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-	LogI(HAPTime::timeString() + " " + "HAPFakegatoSchedule" + "->" + "callbackTimerStart" + " [   ] " + "Timed action: START", true);
+	// LogI(HAPTime::timeString() + " " + "HAPFakegatoSchedule" + "->" + "callbackTimerStart" + " [   ] " + "Timed action: START", true);
+	LOG_I("Timed action: START\n");
 #endif
 	if (_callbackTimerStart) _callbackTimerStart(state);
 }
@@ -60,7 +61,8 @@ FLASHMEM
 #endif
 void HAPFakegatoSchedule::callbackTimerEnd(uint16_t state){
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-	LogI(HAPTime::timeString() + " " + "HAPFakegatoSchedule" + "->" + "callbackTimerStart" + " [   ] " + "Timed action: END", true);
+	// LogI(HAPTime::timeString() + " " + "HAPFakegatoSchedule" + "->" + "callbackTimerStart" + " [   ] " + "Timed action: END", true);
+	LOG_I("Timed action: END\n");
 #endif
 	if (_callbackTimerEnd)  _callbackTimerEnd(state);
 }
