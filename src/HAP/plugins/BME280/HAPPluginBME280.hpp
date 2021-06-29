@@ -88,15 +88,15 @@ public:
 
 #endif
 
-	inline float getAveragedTemperatureValue(){
+	float getAveragedTemperatureValue(){
 		return _temperatureAverage.getAverage();
 	}
 
-	inline float getAveragedHumidityValue(){
+	float getAveragedHumidityValue(){
 		return _humidityAverage.getAverage();
 	}
 
-	inline uint16_t getAveragedPressureValue(){
+	uint16_t getAveragedPressureValue(){
 		return _pressureAverage.getAverage();
 	}
 
@@ -120,16 +120,10 @@ protected:
 	HAPCharacteristic<uint16_t>*	_pressureValue;
 	HAPFakegatoAverage<uint16_t>	_pressureAverage;
 
-
-	// HAPCharacteristicFloat*		_humidityValue;
-	// HAPCharacteristicFloat*		_temperatureValue;
-	// HAPCharacteristicUInt16*	_pressureValue;
-
 	Adafruit_BME280* _bme;
 	uint32_t _timestampLastRead;
 
 	bool fakeGatoCallback();
-	// HAPFakeGatoWeather _fakegato;
 	HAPFakegato _fakegato;
 };
 

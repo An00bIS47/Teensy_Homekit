@@ -16,7 +16,7 @@
 #include "HAP/HAPHelper.hpp"
 #include "HAP/HAPVersion.hpp"
 
-#if defined(TEENSY_DEBUG)
+#if TEENSY_DEBUG
 #include "TeensyDebug.h"
 #pragma GCC optimize ("O0")
 #endif
@@ -65,7 +65,7 @@ void setup() {
 
 
 
-#if defined(TEENSY_DEBUG)
+#if TEENSY_DEBUG
 	debug.begin(SerialUSB1);
 #endif
 	while(!Serial){
@@ -83,14 +83,9 @@ void setup() {
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);
 	Homekit_setBrand(HAP_MANUFACTURER);
 
-	// LogI( F("Starting Homekit "), false);
-	// LogI( hap.versionString() + String( " ..."), true);
-	// LogI( F("Log level: "), false);
-	// LogI( String(HAPLogger::getLogLevel() ), true);
-
 	LOG_N("Starting Homekit v%s\n", hap.versionString().c_str());
 	LOG_N("Loglevel: %d\n", LOG_LEVEL);
-	
+
 	LOG_DESC();
 
 #if defined(TEENSY_DEBUG)
