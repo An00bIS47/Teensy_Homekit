@@ -140,9 +140,6 @@ bool HAPServer::begin(bool resume) {
 		//
 		LOG_I("Setup configuration ...");
 		auto callback = std::bind(&HAPServer::updateConfig, this);
-		// _config.registerCallbackUpdate(callback);
-		// _config.begin();
-
 		_configuration.registerCallbackUpdate(callback);
 		_configuration.begin();
 		LOGRAW_I("OK\n");

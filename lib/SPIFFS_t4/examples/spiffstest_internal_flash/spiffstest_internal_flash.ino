@@ -161,8 +161,7 @@ void my_spiffs_mount() {
                          spiffs_cache_buf,
                          sizeof(spiffs_cache_buf),
                          0);
-                         
-  Serial.printf("mount address 0x%X res: %i\n", cfg.phys_addr, res);
+  Serial.printf("mount res: %i\n", res);
 }
 
 

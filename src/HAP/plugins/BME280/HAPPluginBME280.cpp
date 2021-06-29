@@ -138,17 +138,17 @@ void HAPPluginBME280::handleImpl(bool forced){
 	}
 
 	float temperature 		= readTemperature();
-	_temperatureValue->setValue(temperature, false);
+	_temperatureValue->setValue(temperature, true);
 	_temperatureAverage.addValue(temperature);
 	queueNotifyEvent(_temperatureValue);
 
 	float relative_humidity = readHumidity();
-	_humidityValue->setValue(relative_humidity, false);
+	_humidityValue->setValue(relative_humidity, true);
 	_humidityAverage.addValue(relative_humidity);
 	queueNotifyEvent(_humidityValue);
 
 	uint16_t pressure 		= readPressure();
-	_pressureValue->setValue(pressure, false);
+	_pressureValue->setValue(pressure, true);
 	_pressureAverage.addValue(pressure);
 	queueNotifyEvent(_pressureValue);
 }

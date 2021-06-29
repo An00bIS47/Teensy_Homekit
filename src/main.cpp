@@ -63,12 +63,21 @@ void setup() {
 
 	Serial.begin(115200);
 
+
+
 #if defined(TEENSY_DEBUG)
 	debug.begin(SerialUSB1);
 #endif
 	while(!Serial){
 		;
 	}
+
+#if HAP_DEBUG
+	if ( Serial && CrashReport ) { // Make sure Serial is alive and there is a CrashReport stored.
+    	Serial.print(CrashReport); // Once called any crash data is cleared
+    	// In this case USB Serial is used - but any Stream capable output will work : SD Card or other UART Serial
+  	}
+#endif
 
 	// Imprint infos to firmware
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);

@@ -42,8 +42,12 @@ FLASHMEM
 #endif
 bool HAPConfigurationT41SPIFFSExt::mount(){
     int8_t result = _eRAM.begin(_config);
+
+    Serial.printf("result: %d\n", result);
+
     if (result == 0){
         _eRAM.fs_mount();
+        
         return true;
     } else {
         return false;

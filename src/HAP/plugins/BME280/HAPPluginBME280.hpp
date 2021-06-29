@@ -27,7 +27,7 @@
 
 #include <Arduino.h>
 #include "HAPPlugins.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
 #include "HAPFakegato.hpp"

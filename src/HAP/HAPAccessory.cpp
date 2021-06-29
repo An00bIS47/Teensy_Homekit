@@ -18,8 +18,6 @@
 FLASHMEM
 #endif
 HAPAccessory::HAPAccessory() {
-	_aid = 0;
-
 	_infoService    = nullptr;
 	_accessoryName  = nullptr;
 	_manufacturer   = nullptr;
