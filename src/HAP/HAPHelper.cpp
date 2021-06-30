@@ -446,7 +446,7 @@ bool HAPHelper::startsWith(const char *str, const char *pre){
 
 int HAPHelper::indexOf(std::string str, const char* ch){
 	std::string::size_type loc = str.find( ch, 0 );
-	if( loc != std::string::npos ) {
+	if( loc == std::string::npos ) {
 		return -1;
 	} else {
 		return (int)loc;

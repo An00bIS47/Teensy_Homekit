@@ -3556,7 +3556,6 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		uint8_t aid = atoi(keyPair.substr(0, equalIndex).c_str());
 		uint8_t iid = atoi(keyPair.substr(equalIndex + 1).c_str());
 
-
 		JsonObject jsonCharacteristic = jsonCharacteristics.createNestedObject();
 		jsonCharacteristic["aid"] = aid;
 
