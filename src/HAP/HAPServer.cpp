@@ -22,6 +22,7 @@
 #include <Entropy.h>
 #endif
 
+#include <string>
 #include <WString.h>
 #include <algorithm>
 #include "HAPServer.hpp"
@@ -1505,7 +1506,7 @@ void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, si
 		requestPath[len - curPos] = '\0';
 
 		hapClient->request.path = requestPath; // line.substring(curPos, line.indexOf(" ", curPos));
-		hapClient->request.params = std::map<String, String>();
+		hapClient->request.params = std::map<std::string, std::string>();
 	} else {
 		// hapClient->request.path = line.substring(curPos, index);
 		char requestPath[ index - curPos ];
@@ -3504,7 +3505,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 	LOGRAW_D("] -> GET /characteristics ...");
 #endif
 
-	String idStr = hapClient->request.params["id"];
+	std::string idStr = hapClient->request.params["id"];
 
 	bool hasParamMeta = false;
 	bool hasParamPerms = false;
@@ -3538,17 +3539,22 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 
 	do {
 		int curPos = 0;
-		int endIndex = idStr.indexOf(",");
+		// int endIndex = idStr.indexOf(",");
+
+		int endIndex = HAPHelper::indexOf(idStr, ",");
+
+
 		if (endIndex == -1){
 			endIndex = idStr.length();
 		}
 
-		String keyPair = idStr.substring(curPos, endIndex);
+		std::string keyPair = idStr.substr(curPos, endIndex);
 
-		uint16_t equalIndex = keyPair.indexOf(".");
+		// int equalIndex = keyPair.indexOf(".");
+		int equalIndex = HAPHelper::indexOf(keyPair, ".");
 
-		uint8_t aid = keyPair.substring(0, equalIndex).toInt();
-		uint8_t iid = keyPair.substring(equalIndex + 1).toInt();
+		uint8_t aid = atoi(keyPair.substr(0, equalIndex).c_str());
+		uint8_t iid = atoi(keyPair.substr(equalIndex + 1).c_str());
 
 
 		JsonObject jsonCharacteristic = jsonCharacteristics.createNestedObject();
@@ -3576,7 +3582,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 		}
 
 		if (endIndex < idStr.length()) {
-			idStr = idStr.substring(endIndex + 1);
+			idStr = idStr.substr(endIndex + 1);
 		} else {
 			break;
 		}

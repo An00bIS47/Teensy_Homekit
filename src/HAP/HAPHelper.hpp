@@ -10,6 +10,7 @@
 #define HAPHELPER_HPP_
 
 #include <Arduino.h>
+#include <string>
 // #include <ArduinoJson.h>
 // #include "HAPGlobals.hpp"
 
@@ -111,6 +112,8 @@ public:
 	static int indexOf(const char* array, int arr_size, char to_find, int startPos = 0);
 	static bool startsWith(const char *str, const char *pre);
 
+
+	static int indexOf(std::string str, const char* ch);
 };
 
 // template<typename T>

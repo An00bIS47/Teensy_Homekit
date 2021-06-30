@@ -33,7 +33,8 @@ public:
 	String 						contentType;
 	uint16_t 					contentLength;
 	TLV8						tlv;
-	std::map<String, String> 	params;
+
+	std::map<std::string, std::string> params;
 
 	void clear();
 
