@@ -256,7 +256,12 @@ protected:
         }
 
         ~HAPFakegatoDataEntry(){
-            if (data) free(data);
+            clear();
+        }
+
+        void clear(){
+            if (data != nullptr) free(data);
+            data = nullptr;
         }
 
 #if HAP_DEBUG_FAKEGATO

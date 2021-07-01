@@ -10,7 +10,10 @@
 #include "HAPServer.hpp"
 
 #define BME280_BASE_ADDRESS        	0x76
+
+#ifndef HAP_PLUGIN_BME280_INTERVAL
 #define HAP_PLUGIN_BME280_INTERVAL	5000
+#endif
 
 #define SDA_PIN				SDA
 #define SCL_PIN				SCL

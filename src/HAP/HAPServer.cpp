@@ -57,13 +57,18 @@
 
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
+
+#ifndef HAP_HEAP_LOG_INTERVAL
+#define HAP_HEAP_LOG_INTERVAL 1000
+#endif
+
+
 #if HAP_PRINT_QRCODE
 #include "qrcode.h"
 #include "HAPSVG.hpp"
 #endif
 
-// ToDo: Remove #include <StreamUtils.h> ?
-// #include <StreamUtils.h>
+
 #include "HAPPrint.hpp"
 
 //
@@ -135,6 +140,12 @@ bool HAPServer::begin(bool resume) {
 	uint8_t *baseMac = HAPDeviceID::generateID();
 
 	if (resume == false){
+
+#if defined(CORE_TEENSY)
+		LOG_I("Initialize entropy ...");
+		Entropy.Initialize();
+		LOGRAW_I("OK\n");
+#endif
 
 		//
 		// Configuration
@@ -894,7 +905,7 @@ void HAPServer::handle() {
 
 #if HAP_DEBUG
 	// Free Heap every interval ms
-	if ( millis() - _previousMillisHeap >= 1000) {
+	if ( millis() - _previousMillisHeap >= HAP_HEAP_LOG_INTERVAL) {
 	    // save the last time you blinked the LED
 	    _previousMillisHeap = millis();
 		LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
@@ -913,6 +924,7 @@ void HAPServer::handle() {
 
 
 #if HAP_ENABLE_PIXEL_INDICATOR
+	LOG_V("Handle pixel indicator\n");
 	_pixelIndicator.handle();
 #endif
 
@@ -925,6 +937,7 @@ void HAPServer::handle() {
 #endif
 
 	// Handle existing clients
+	// LOG_V("Handle existing clients\n");
 	for (auto& hapClient : _clients) {
 
 		// Connected
@@ -964,6 +977,7 @@ void HAPServer::handle() {
 	EthernetClient client = _server.available();
 #endif
 	if (client) {
+		// LOG_V("Handle new clients\n");
 
 		HAPClient* hapClient = new HAPClient();
 
@@ -977,6 +991,7 @@ void HAPServer::handle() {
 	// Handle Webserver
 #if HAP_ENABLE_WEBSERVER
 	if (_configuration.getWebServerConfig()->enabled){
+		// LOG_V("Handle webserver\n");
 		_webserver->handle();
 	}
 #endif
@@ -984,12 +999,14 @@ void HAPServer::handle() {
 	// Handle Arduino OTA
 #if HAP_ENABLE_UPDATE_WEB || HAP_ENABLE_UPDATE_OTA
 	if (_configuration.getOTAConfig()->enabled){
+		// LOG_V("Handle OTA\n");
 		_updater.handle();
 	}
 #endif
 
 	// Handle plugins
 	// if (!_stopPlugins){
+		// LOG_V("Handle plugins\n");
 		for (auto& plugin : _plugins) {
 			if (plugin->isEnabled()) {
 				plugin->handle();
@@ -999,9 +1016,11 @@ void HAPServer::handle() {
 
 	//
 	// Handle fakeGatos
+	// LOG_V("Handle fakegato\n");
 	_fakeGatoFactory.handle();
 
 	// Handle any events that are in the queue
+	// LOG_V("Handle event manager\n");
 	_eventManager.processEvent();
 }
 
@@ -2149,10 +2168,17 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 
 #if defined( CORE_TEENSY )
-		Entropy.Initialize();
 
 		for (int i = 0; i < ED25519_BYTES; i++){
-			_accessorySet->LTSK()[i] = Entropy.randomByte();
+			_accessorySet->LTSK()[i] = (uint8_t)Entropy.random(255);
+
+			// uint32_t u32 = Entropy.random();
+
+			// _accessorySet->LTSK()[i + 3] = (uint8_t)u32;
+    		// _accessorySet->LTSK()[i + 2] = (uint8_t)(u32 >>= 8);
+    		// _accessorySet->LTSK()[i + 1] = (uint8_t)(u32 >>= 8);
+    		// _accessorySet->LTSK()[i + 0] = (uint8_t)(u32 >>= 8);
+			// i = i + 3;
 		}
 #else
 		esp_fill_random(_accessorySet->LTSK(), ED25519_BYTES);

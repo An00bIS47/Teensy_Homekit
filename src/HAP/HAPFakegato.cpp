@@ -157,8 +157,12 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
     // LogD(bitmask, false);
     // LogD(F("]"), true);
 
-    LOG_D("Adding entry for %s [size=%d bitmask=%d]\n", _name.c_str(), _entries.size(), bitmask);
+    LOG_D("Adding entry for %s [size=%d bitmask=%d] - data length: %d\n", _name.c_str(), _entries.size(), bitmask, length);
 
+#if HAP_DEBUG_FAKEGATO
+    LOG_V("Size of data entry: %d + %d = %d\n", sizeof(HAPFakegatoDataEntry), length, (sizeof(HAPFakegatoDataEntry) + length));
+    HEXDUMP_V("data entry", data, length);
+#endif    
 
     // Entry will be overwritten ...
     if (_entries.capacity - _entries.size() < 1) {
@@ -166,7 +170,9 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
         //       Probably first just a LOG message ?
         //       Therefore a reference to the aid and iid would be needed ...
         LOG_W("WARNING: Fakegato entry will be overwritten!\n");
-        delete _entries.shift();
+        HAPFakegatoDataEntry* entry = _entries.shift();
+        entry->clear();
+        delete entry;
     }
 
 #if HAP_DEBUG_FAKEGATO
@@ -177,14 +183,13 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
     // size_t indexLast = _entries.size() - 1;
 
     _timestampLastEntry = HAPTime::timestamp();
-    bool overwritten = !_entries.push(std::move(new HAPFakegatoDataEntry(bitmask, _timestampLastEntry, data, length)));
+    HAPFakegatoDataEntry* entry = new HAPFakegatoDataEntry(bitmask, _timestampLastEntry, data, length);
+
+    bool overwritten = !_entries.push(entry);
     if (overwritten == true) {
         // ToDo: Add overwritten handling..
         _rolledOver = true;
     }
-
-    // ToDo: Update History Info Characteristic with new size
-    //       Required ?? should be getting the update via the read callback ?!
 }
 
 /**
