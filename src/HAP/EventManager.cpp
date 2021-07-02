@@ -151,27 +151,27 @@ namespace
 	private:
 
 		uint32_t    mSavedInterruptState;
-	};  
+	};
 #else
 	class SuppressInterrupts
 	{
 	public:
-		
+
 		//Reference: https://www.pjrc.com/teensy/interrupts.html
 		//Backup the interrupt enable state and restore it
-		SuppressInterrupts() 
+		SuppressInterrupts()
 		{
 			mSregBackup = SREG;     /* save interrupt enable/disable state */
 			cli();                  /* disable the global interrupt */
 		}
-		
-		~SuppressInterrupts() 
+
+		~SuppressInterrupts()
 		{
 			SREG = mSregBackup;     /* restore interrupt state */
 		}
-		
+
 	private:
-		
+
 		uint8_t mSregBackup;
 	};
 #endif
@@ -201,7 +201,7 @@ namespace
 	private:
 
 		uint32_t    mSavedInterruptState;
-	};    
+	};
 #else
 
 #error "Unknown microcontroller:  Need to implement class SuppressInterrupts for this microcontroller."
@@ -223,13 +223,24 @@ namespace
 #define EVTMGR_DEBUG_PRINTLN_PTR( x )
 #endif
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
 EventManager::EventManager()
 {
 }
 
+
+int EventManager::processEvent(int eventCode, struct HAPEvent param){
+	int handledCount = 0;
+	handledCount = mListeners.sendEvent( eventCode, param );
+
+	EVTMGR_DEBUG_PRINT( "processEvent() hi-pri event " )
+	EVTMGR_DEBUG_PRINT( eventCode )
+	// EVTMGR_DEBUG_PRINT( ", " )
+	// EVTMGR_DEBUG_PRINT( param )
+	EVTMGR_DEBUG_PRINT( " sent to " )
+	EVTMGR_DEBUG_PRINTLN( handledCount )
+
+	return handledCount;
+}
 
 int EventManager::processEvent()
 {
@@ -322,9 +333,6 @@ int EventManager::numListeners()
 	return mListeners.numListeners();
 };
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
 boolean EventManager::ListenerList::addListener( int eventCode, EventListener* listener )
 {
 	EVTMGR_DEBUG_PRINT( "addListener() enter " )
@@ -355,9 +363,6 @@ boolean EventManager::ListenerList::addListener( int eventCode, EventListener* l
 	return true;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
 boolean EventManager::ListenerList::removeListener( int eventCode, EventListener* listener )
 {
 	EVTMGR_DEBUG_PRINT( "removeListener() enter " )
@@ -391,9 +396,6 @@ boolean EventManager::ListenerList::removeListener( int eventCode, EventListener
 	return true;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
 int EventManager::ListenerList::removeListener( EventListener* listener )
 {
 	EVTMGR_DEBUG_PRINT( "removeListener() enter " )
@@ -481,7 +483,7 @@ int EventManager::ListenerList::sendEvent( int eventCode, struct HAPEvent param 
 
 	int handlerCount = 0;
 	for ( int i = 0; i < mNumListeners; i++ )
-	{        
+	{
 		if ( ( mListeners[ i ].callback != 0 ) && ( mListeners[ i ].eventCode == eventCode ) && mListeners[ i ].enabled )
 		{
 			handlerCount++;
@@ -529,9 +531,7 @@ boolean EventManager::ListenerList::setDefaultListener( EventListener* listener 
 	return true;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM 
-#endif
+
 void EventManager::ListenerList::removeDefaultListener()
 {
 	mDefaultCallback = 0;
@@ -705,7 +705,7 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, struct HAPEvent* eve
 
 
 int EventManager::EventQueue::getNumEventCodeInQueue(int eventCode)
-{   
+{
 	int count = 0;
 	for (int i=0; i < kEventQueueSize; i++){
 		if (mEventQueue[i].code == eventCode){

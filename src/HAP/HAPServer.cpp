@@ -478,10 +478,10 @@ bool HAPServer::begin(bool resume) {
 	//
 	LOG_I( "Adding listener to event manager ...");
 
-	// Notifications
-  	listenerNotificaton.mObj = this;
-  	listenerNotificaton.mf = &HAPServer::handleEvents;
-	_eventManager.addListener( EventManager::kEventNotifyController, &listenerNotificaton );
+	// // Notifications
+  	// listenerNotificaton.mObj = this;
+  	// listenerNotificaton.mf = &HAPServer::handleEvents;
+	// _eventManager.addListener( EventManager::kEventNotifyController, &listenerNotificaton );
 
 	// UpdateConfigNumber
 	listenerUpdateConfigNumber.mObj = this;
@@ -822,7 +822,7 @@ bool HAPServer::begin(bool resume) {
 #endif
 
 	// Handle any events that are in the queue
-	_eventManager.processEvent();
+	_eventManager.processAllEvents();
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 	_pixelIndicator.confirmWithColor(HAPColorGreen);
@@ -1021,7 +1021,9 @@ void HAPServer::handle() {
 
 	// Handle any events that are in the queue
 	// LOG_V("Handle event manager\n");
-	_eventManager.processEvent();
+	processEvents();
+	// _eventManager.processAllEvents();
+
 }
 
 
@@ -3835,55 +3837,38 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 #endif
 }
 
+void HAPServer::processEvents(){
 
-void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
-{
-	LOG_V("Handle events\n");
-	if (_clients.size() > 0){
+	uint16_t noOfEvents = _eventManager.getNumEventCodeInQueue(EventManager::kEventNotifyController, EventManager::kHighPriority) + _eventManager.getNumEventCodeInQueue(EventManager::kEventNotifyController, EventManager::kLowPriority);
+	uint16_t noOfEventsToSend = 0;
 
-		LOG_V("Number of connected clients: %d\n", _clients.size());
-		// int count = 0;
-		// int totalEvents = _eventManager.getNumEventsInQueue();
-		int noOfEvents = _eventManager.getNumEventCodeInQueue(eventCode);
-		struct HAPEvent evParams[noOfEvents + 1];
-		int addedToHomekitEvent = 0;
+	struct HAPEvent evParams[noOfEvents];
 
-		// add
-		if (eventCode == EventManager::kEventNotifyController) {
-			evParams[addedToHomekitEvent++] = eventParam;
-		}
-
-		for (uint16_t i=0; i < _eventManager.getNumEventsInQueue(); i++){
-			struct HAPEvent evParam;
-			int evCode = 0;
-
-			if (_eventManager.eventAtIndex(i, &evParam, &evCode)){
-				if (evCode == EventManager::kEventNotifyController) {
-					evParams[addedToHomekitEvent++] = evParam;
-				}
+	while (!_eventManager.isEventQueueEmpty(EventManager::kHighPriority)){
+		int evCode;
+		struct HAPEvent evParam;
+		if (_eventManager.popEvent(&evCode, &evParam, EventManager::kHighPriority)){
+			if (evCode == EventManager::kEventNotifyController) {
+				evParams[noOfEventsToSend++] = evParam;
 			}
+			_eventManager.processEvent(evCode, evParam);
 		}
-		// while (!_eventManager.isEventQueueEmpty()){
+	}
 
-		// 	int evCode;
-		// 	struct HAPEvent evParam;
-		// 	if (_eventManager.popEvent(&evCode, &evParam)){
+	while (!_eventManager.isEventQueueEmpty(EventManager::kLowPriority)){
+		int evCode;
+		struct HAPEvent evParam;
+		if (_eventManager.popEvent(&evCode, &evParam, EventManager::kLowPriority)){
+			if (evCode == EventManager::kEventNotifyController) {
+				evParams[noOfEventsToSend++] = evParam;
+			}
+			_eventManager.processEvent(evCode, evParam);
+		}
+	}
 
-		// 		if (evCode == EventManager::kEventNotifyController) {
-
-
-		// 			evParams[addedToHomekitEvent++] = evParam;
-		// 		} else {
-		// 			// Add again to queue
-		// 			_eventManager.queueEvent(evCode, evParam);
-		// 		}
-		// 		count++;
-
-		// 		if (count == totalEvents + 1){
-		// 			break;
-		// 		}
-		// 	}
-		// }
+	if (_clients.size() > 0 && noOfEventsToSend > 0){
+		LOG_V("Number of connected clients: %d\n", _clients.size());
+		LOG_V("Number of notification events: %d\n", noOfEvents);
 
 		for (auto& hapClient : _clients) {
 
@@ -3894,7 +3879,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 			bool isSubcribedToAtLeastOne = false;
 
-			for (int i=0; i < addedToHomekitEvent; i++){
+			for (int i=0; i < noOfEventsToSend; i++){
 
 				int aid = evParams[i].aid;
 				int iid = evParams[i].iid;
@@ -3905,7 +3890,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 					if (character) {
 
-						LOG_D("Handle event %d for accessory %d.%d\n", eventCode, aid, iid);
+						LOG_D("Handle event %d for accessory %d.%d\n", EventManager::kEventNotifyController, aid, iid);
 
 						JsonObject chr = jsonCharacteristics.createNestedObject();
 						chr["aid"] = aid;
@@ -3917,7 +3902,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 						isSubcribedToAtLeastOne = true;
 					} else {
-						LOG_W("WARNING: Not notifiable event %d for accessory %d.%d\n", eventCode, aid, iid);
+						LOG_W("WARNING: Not notifiable event %d for accessory %d.%d\n", EventManager::kEventNotifyController, aid, iid);
 					}
 				}
 			}
@@ -3933,10 +3918,8 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 				sendEvent(hapClient, root);
 			}
 		}
-
 	}
-
-};
+}
 
 
 bool HAPServer::sendEvent(HAPClient* hapClient, const JsonDocument& response){
@@ -3945,9 +3928,9 @@ bool HAPServer::sendEvent(HAPClient* hapClient, const JsonDocument& response){
 #if defined( ARDUINO_ARCH_ESP32 )
 	LogD("Sending event to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
 #elif defined( CORE_TEENSY )
-	LOG_D("Handle client [");
+	LOG_D("Sending event to client [");
 	LOGDEVICE->print(hapClient->client.remoteIP());
-	LOGRAW_D("] -> Sending event ...");
+	LOGRAW_D("] ...");
 
 #endif
 
@@ -4172,5 +4155,7 @@ void HAPServer::taskButtonRead(void* pvParameters){
 	}
 }
 #endif
+
+
 
 HAPServer hap;

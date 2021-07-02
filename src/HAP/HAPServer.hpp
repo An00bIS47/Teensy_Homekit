@@ -273,7 +273,9 @@ protected:
 	//
 	// Event handler
 	//
-	void handleEvents( int eventCode, struct HAPEvent eventParam );
+
+	void processEvents();
+
 	void handleEventUpdateConfigNumber( int eventCode, struct HAPEvent eventParam );
 	void handleEventUpdatedConfig(int eventCode, struct HAPEvent eventParam);
 	void handleEventRebootNow(int eventCode, struct HAPEvent eventParam);
@@ -358,6 +360,7 @@ private:
 #if HAP_DEBUG
 	unsigned long _previousMillisHeap;
 #endif
+
 
 	HAPSRP* _hapsrp;
 
