@@ -141,6 +141,13 @@ bool HAPServer::begin(bool resume) {
 
 	if (resume == false){
 
+		LOG_N("Starting %s v%s [%s] %s\n", HOMEKIT_PROJECT, hap.versionString().c_str(), HOMEKIT_GIT_REV, HOMEKIT_GIT_BRANCH);
+		LOG_N("compiled at %s\n", HOMEKIT_COMPILE_TIME);
+		LOG_N("Feature Rev.: %s\n", HOMEKIT_FEATURE_REV);
+		LOG_N("Loglevel: %d\n", LOG_LEVEL);
+
+		LOG_DESC();
+
 #if defined(CORE_TEENSY)
 		LOG_I("Initialize entropy ...");
 		Entropy.Initialize();

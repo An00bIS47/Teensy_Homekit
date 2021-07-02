@@ -10,9 +10,14 @@
 #define HAPVERSION_HPP_
 
 #include <Arduino.h>
-#include "HAPBuildnumber.hpp"
-#include "HAPGlobals.hpp"
 
+#if !defined(HOMEKIT_VERSION_BUILD)
+#include "HAPBuildnumber.hpp"
+#endif
+
+#if !defined(HOMEKIT_VERSION_MAJOR)
+#include "HAPVersionHomekit.hpp"
+#endif
 
 /* Build automated generated version number */
 #define HOMEKIT_VERSION \
@@ -74,7 +79,7 @@ struct HAPVersion {
 	}
 
 	String toString(){
-		char str[32];
+		char str[32] = {'\0',};
 		sprintf(str, "%d.%d.%d+%d", major, minor, revision, build);
 		return String(str);
 	}

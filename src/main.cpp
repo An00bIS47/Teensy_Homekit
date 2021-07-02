@@ -7,14 +7,7 @@
 //      Author: michael
 //
 #include <Arduino.h>
-
-// #include "HAP/HAPLogger.hpp"
-#include "HAP/HAPLogging.hpp"
 #include "HAP/HAPServer.hpp"
-#include "HAP/HAPGlobals.hpp"
-
-#include "HAP/HAPHelper.hpp"
-#include "HAP/HAPVersion.hpp"
 
 #if TEENSY_DEBUG
 #include "TeensyDebug.h"
@@ -51,11 +44,6 @@
 // }
 // #endif
 
-
-
-
-
-
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
@@ -82,11 +70,6 @@ void setup() {
 	// Imprint infos to firmware
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);
 	Homekit_setBrand(HAP_MANUFACTURER);
-
-	LOG_N("Starting Homekit v%s\n", hap.versionString().c_str());
-	LOG_N("Loglevel: %d\n", LOG_LEVEL);
-
-	LOG_DESC();
 
 #if defined(TEENSY_DEBUG)
 	// halt();
