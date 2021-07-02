@@ -1,4 +1,4 @@
-#Import("env")
+Import("env")
 
 """ 
     Create version header and tracker file if missing 
@@ -215,6 +215,7 @@ if not os.path.exists(".version_no_increment"):
     #     ("HOMEKIT_VERSION_MINOR", minor),
     #     ("HOMEKIT_VERSION_REVISION", rev),
     # ])
+
     print("GIT:")
     print(" - project: {}".format(gitProjectName()))
     print(" - branch: {}".format(gitBranch()))
