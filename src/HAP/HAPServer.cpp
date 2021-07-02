@@ -1132,7 +1132,7 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
 
 
-	LOG_D("Handle encrypted request\n");
+	LOG_V("Handle encrypted request\n");
 
 	//
     // Each HTTP message is split into frames no larger than 1024 bytes
@@ -1372,6 +1372,8 @@ void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error)
 
 void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
 
+	LOG_V("Process incoming request\n");
+
 	size_t curLineBufferSize = 2048;
 	char curLine[curLineBufferSize];
 	size_t curLineCount = 0;
@@ -1512,6 +1514,8 @@ void HAPServer::processIncomingRequest(HAPClient* hapClient, ReadBufferingClient
 
 void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, size_t lineLength, int curPos){
 
+	LOG_V("Process path parameters\n");
+
 	//int index = line.indexOf("?", curPos);
 	int index = HAPHelper::indexOf(line, lineLength, '?', curPos);
 
@@ -1551,7 +1555,6 @@ void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, si
 			char *key = strtok (p, "=");
 			char *value = NULL;
 			if (key && (value = strtok (NULL, "="))){
-
 				hapClient->request.params[key] = value;
 			}
 		}
@@ -1560,6 +1563,8 @@ void HAPServer::processPathParameters(HAPClient* hapClient, const char* line, si
 
 
 void HAPServer::processIncomingLine(HAPClient* hapClient, const char* line, size_t lineLength){
+
+	LOG_V("Process incoming line\n");
 
 	// Print Line
 #if HAP_DEBUG_HOMEKIT_REQUEST
@@ -3833,10 +3838,12 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 
 void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 {
-
+	LOG_V("Handle events\n");
 	if (_clients.size() > 0){
-		int count = 0;
-		int totalEvents = _eventManager.getNumEventsInQueue();
+
+		LOG_V("Number of connected clients: %d\n", _clients.size());
+		// int count = 0;
+		// int totalEvents = _eventManager.getNumEventsInQueue();
 		int noOfEvents = _eventManager.getNumEventCodeInQueue(eventCode);
 		struct HAPEvent evParams[noOfEvents + 1];
 		int addedToHomekitEvent = 0;
@@ -3846,35 +3853,44 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 			evParams[addedToHomekitEvent++] = eventParam;
 		}
 
-		while (!_eventManager.isEventQueueEmpty()){
-
-			int evCode;
+		for (uint16_t i=0; i < _eventManager.getNumEventsInQueue(); i++){
 			struct HAPEvent evParam;
-			if (_eventManager.popEvent(&evCode, &evParam)){
+			int evCode = 0;
 
+			if (_eventManager.eventAtIndex(i, &evParam, &evCode)){
 				if (evCode == EventManager::kEventNotifyController) {
-
-
 					evParams[addedToHomekitEvent++] = evParam;
-				} else {
-					// Add again to queue
-					_eventManager.queueEvent(evCode, evParam);
-				}
-				count++;
-
-				if (count == totalEvents + 1){
-					break;
 				}
 			}
 		}
+		// while (!_eventManager.isEventQueueEmpty()){
+
+		// 	int evCode;
+		// 	struct HAPEvent evParam;
+		// 	if (_eventManager.popEvent(&evCode, &evParam)){
+
+		// 		if (evCode == EventManager::kEventNotifyController) {
+
+
+		// 			evParams[addedToHomekitEvent++] = evParam;
+		// 		} else {
+		// 			// Add again to queue
+		// 			_eventManager.queueEvent(evCode, evParam);
+		// 		}
+		// 		count++;
+
+		// 		if (count == totalEvents + 1){
+		// 			break;
+		// 		}
+		// 	}
+		// }
 
 		for (auto& hapClient : _clients) {
 
-			const size_t bufferSize = 512;
+			const size_t bufferSize = 1024;
 			DynamicJsonDocument root(bufferSize);
 
 			JsonArray jsonCharacteristics = root.createNestedArray("characteristics");
-			String response = "";
 
 			bool isSubcribedToAtLeastOne = false;
 
@@ -3925,6 +3941,7 @@ void HAPServer::handleEvents( int eventCode, struct HAPEvent eventParam )
 
 bool HAPServer::sendEvent(HAPClient* hapClient, const JsonDocument& response){
 
+	LOG_V("Send events\n");
 #if defined( ARDUINO_ARCH_ESP32 )
 	LogD("Sending event to client [" + hapClient->client.remoteIP().toString() + "] ...", false);
 #elif defined( CORE_TEENSY )

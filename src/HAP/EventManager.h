@@ -293,6 +293,7 @@ public:
 	// this function might never return.  YOU HAVE BEEN WARNED.
 	int processAllEvents();
 
+	boolean eventAtIndex(const int index, HAPEvent* event, int* eventCode, EventPriority pri = kHighPriority);
 
 	// EventQueue class used internally by EventManager
 	class EventQueue
@@ -327,6 +328,14 @@ public:
 		// Returns true if successful, false if the queue is empty (the parameteres are not touched in this case)
 		boolean popEvent( int* eventCode, struct HAPEvent* eventParam );
 
+		boolean eventAtIndex(const int index, HAPEvent* event, int* eventCode){
+			if (index > getNumEvents()) return false;
+
+			*event = mEventQueue[index].param;
+			*eventCode = mEventQueue[index].code;
+			
+			return true;
+		}
 	private:
 
 		// Event queue size.
@@ -523,8 +532,10 @@ inline boolean EventManager::popEvent(int* eventCode, struct HAPEvent* eventPara
 	return ( pri == kHighPriority ) ?
 		mHighPriorityQueue.popEvent( eventCode, eventParam ) : mLowPriorityQueue.popEvent( eventCode, eventParam );
 }
-
-
+inline boolean EventManager::eventAtIndex(const int index, HAPEvent* event, int* eventCode, EventPriority pri){
+	return (pri == kHighPriority) ?
+		 mHighPriorityQueue.eventAtIndex(index, event, eventCode) : mLowPriorityQueue.eventAtIndex(index, event, eventCode);
+}
 
 //*********  INLINES   EventManager::EventQueue::  ***********
 
