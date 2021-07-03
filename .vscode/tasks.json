@@ -1,0 +1,95 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "PlatformIO",
+            "task": "Monitor",
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo ${workspaceFolder}"
+        },
+        {
+            "label": "PlatformIO Custom Build",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "PlatformIO Custom Build+Upload",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}",
+                "-t",
+                "upload"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "PlatformIO Custom Clean",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}",
+                "-t",
+                "clean"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "PlatformIO Teensy Size",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}",
+                "-t",
+                "teensy_size"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+          "type": "pickString",
+          "id": "envName",
+          "description": "What type of component do you want to create?",
+          "options": [
+            "teensy_41",
+            "teensy_41_debug"
+          ],
+          "default": "teensy_41"
+        }
+      ]
+}
