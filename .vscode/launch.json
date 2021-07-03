@@ -29,25 +29,6 @@
             "projectEnvName": "teensy_41",
             "toolchainBinDir": "/Users/michael/.platformio/packages/toolchain-gccarmnoneeabi@1.50401.190816/bin",
             "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "name": "Launch GDB",
-            "type": "cppdbg",
-            "request": "launch",
-            "miDebuggerPath": "/Users/michael/.platformio/packages/toolchain-gccarmnoneeabi@1.50401.190816/bin/arm-none-eabi-gdb",
-            "miDebuggerArgs": "--baud=115200",
-            "MIMode": "gdb",
-            "targetArchitecture": "arm",
-            "program": "/Users/michael/Development/Teensy/Teensy_Homekit/.pio/build/teensy_41_debug/firmware.elf",
-            "launchCompleteCommand": "None",
-            "filterStderr": false,
-            "filterStdout": false,
-            "externalConsole": false,
-            "cwd": "${workspaceRoot}",
-            "setupCommands": [
-                {"text": "set target-async off"},
-                {"text": "target extended-remote /dev/cu.usbmodem84180903"},
-              ]
-          }
+        }
     ]
 }

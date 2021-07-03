@@ -17,7 +17,7 @@
             "command": "echo ${workspaceFolder}"
         },
         {
-            "label": "PlatformIO Custom Build",
+            "label": "PlatformIO: Custom Build",
             "type": "shell",
             "command": "pio",
             "args": [
@@ -34,7 +34,7 @@
             }
         },
         {
-            "label": "PlatformIO Custom Build+Upload",
+            "label": "PlatformIO: Custom Build+Upload",
             "type": "shell",
             "command": "pio",
             "args": [
@@ -50,7 +50,7 @@
             "group": "build"
         },
         {
-            "label": "PlatformIO Custom Clean",
+            "label": "PlatformIO: Custom Clean",
             "type": "shell",
             "command": "pio",
             "args": [
@@ -65,7 +65,7 @@
             ]
         },
         {
-            "label": "PlatformIO Teensy Size",
+            "label": "PlatformIO: Teensy Size",
             "type": "shell",
             "command": "pio",
             "args": [
@@ -78,13 +78,24 @@
             "problemMatcher": [
                 "$platformio"
             ]
+        },
+        {
+            "label": "PlatformIO: Increment Version",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "scripts/platformio/pre_increment_version.py"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
         }
     ],
     "inputs": [
         {
           "type": "pickString",
           "id": "envName",
-          "description": "What type of component do you want to create?",
+          "description": "For what environment do you want to do it?",
           "options": [
             "teensy_41",
             "teensy_41_debug"
