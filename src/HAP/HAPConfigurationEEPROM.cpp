@@ -8,6 +8,7 @@
 
 #include "HAPConfigurationEEPROM.hpp"
 #include "HAPPlugins.hpp"
+#include "HAPLogging.hpp"
 
 #define HAP_TEENSY_EEPROM_SIZE 4284
 
@@ -41,7 +42,8 @@ HAPConfigurationEEPROM::~HAPConfigurationEEPROM(){
 bool HAPConfigurationEEPROM::begin() {
 	buildDataMap();
 
-	printDataMapTo(Serial);
+	// printDataMapTo(Serial);
+	logDataMap();
 
 #if defined (ARDUINO_ARCH_ESP32)
 	//EEPROM.begin(KNX_FLASH_SIZE);
@@ -336,6 +338,14 @@ void HAPConfigurationEEPROM::printDataMapTo(Print& prt){
 	for (uint8_t i=0; i < _dataMap.size(); i++){
 		_dataMap[i].printTo(prt);
 	}
+}
+
+void HAPConfigurationEEPROM::logDataMap(){
+	LOG_D("DataMap:\n");
+	for (uint8_t i=0; i < _dataMap.size(); i++){
+		LOG_D(" - name: %-20s - offset: %4d - size: %4d\n", _dataMap[i].name, _dataMap[i].offset, _dataMap[i].size);
+	}
+
 }
 
 

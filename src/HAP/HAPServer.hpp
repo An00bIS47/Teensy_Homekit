@@ -224,7 +224,7 @@ public:
 	// HAPEventManager _evtMgr;
 protected:
 
-	void updateConfig();
+
 
 	HAPAccessorySet* _accessorySet;
 	std::vector<HAPClient*> _clients;
@@ -270,10 +270,31 @@ protected:
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
 	HAPFakegatoFactory _fakeGatoFactory;
+
+	bool _homekitStarted;
+	bool _isInPairingMode;
+
+	uint8_t _homekitFailedLoginAttempts;
+
+	// String _curLine;
+	uint16_t _port;
+
+#if HAP_DEBUG
+	unsigned long _previousMillisHeap;
+#endif
+
+
+	HAPSRP* _hapsrp;
+
+	char _brand[MAX_BRAND_LENGTH];
+
+
+
+	void updateConfig();
+
 	//
 	// Event handler
 	//
-
 	void processEvents();
 
 	void handleEventUpdateConfigNumber( int eventCode, struct HAPEvent eventParam );
@@ -349,22 +370,6 @@ private:
 #if HAP_DEBUG && HAP_WEBSERVER_USE_SPIFFS
 	static void listDir(FS &fs, const char * dirname, uint8_t levels);
 #endif
-
-	bool _isInPairingMode;
-
-	uint8_t _homekitFailedLoginAttempts;
-
-	// String _curLine;
-	uint16_t _port;
-
-#if HAP_DEBUG
-	unsigned long _previousMillisHeap;
-#endif
-
-
-	HAPSRP* _hapsrp;
-
-	char _brand[MAX_BRAND_LENGTH];
 
 	//
 	// Bonjour

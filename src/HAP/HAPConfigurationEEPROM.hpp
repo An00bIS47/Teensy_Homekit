@@ -54,7 +54,7 @@ public:
 	void validateConfig() override;
 	bool validConfig() override;
 
-
+	void logDataMap();
 	void printDataMapTo(Print& prt);
 protected:
 

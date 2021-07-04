@@ -14,7 +14,10 @@
         {
             "label": "echo",
             "type": "shell",
-            "command": "echo ${workspaceFolder}"
+            "command": "echo ${workspaceFolder}",
+            "problemMatcher": [
+                "$platformio"
+            ]
         },
         {
             "label": "PlatformIO: Custom Build",
@@ -80,11 +83,45 @@
             ]
         },
         {
-            "label": "PlatformIO: Increment Version",
+            "label": "Increment Buildnumber+Version",
             "type": "shell",
             "command": "python",
             "args": [
                 "scripts/platformio/pre_increment_version.py"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Tycmd: Reset",
+            "type": "shell",
+            "command": "tycmd",
+            "args": [
+                "reset"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Tycmd: Monitor",
+            "type": "shell",
+            "command": "tycmd",
+            "args": [
+                "monitor"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Tycmd: List",
+            "type": "shell",
+            "command": "tycmd",
+            "args": [
+                "list",
+                "-v"
             ],
             "problemMatcher": [
                 "$platformio"

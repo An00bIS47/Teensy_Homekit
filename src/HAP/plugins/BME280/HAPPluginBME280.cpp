@@ -161,7 +161,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 FLASHMEM
 #endif
 HAPAccessory* HAPPluginBME280::initAccessory(){
-	LOG_V("\nInitializing accessory for plugin: %s ...\n", _config->name);
+	LOG_V("Initializing accessory for plugin: %s ...\n", _config->name);
 
 	//
 	// Unique serial number !!!

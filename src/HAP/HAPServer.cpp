@@ -104,7 +104,7 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 
 	_hapsrp = nullptr;
 
-
+	_homekitStarted = false;
 	_isInPairingMode = false;
 	_homekitFailedLoginAttempts = 0;
 
@@ -135,7 +135,7 @@ HAPServer::~HAPServer() {
 FLASHMEM
 #endif
 bool HAPServer::begin(bool resume) {
-
+	LOG_V("Begin\n");
 	// Generate DeviceID
 	uint8_t *baseMac = HAPDeviceID::generateID();
 
@@ -753,12 +753,12 @@ bool HAPServer::begin(bool resume) {
 
 #if defined( ARDUINO_ARCH_ESP32)
 	if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
-		LOG_E( "ERROR: Updating HAP service txt failed!\n");
+		LOG_E( "ERROR: Advertising mDNS service txt failed!\n");
 		return false;
 	}
 #else
 	if ( !updateServiceTxt() ){
-		LOG_E("ERROR: Advertising HAP service failed!\n");
+		LOG_E("ERROR: Advertising mDNS service failed!\n");
 		return false;
 	}
 #endif
@@ -788,6 +788,14 @@ bool HAPServer::begin(bool resume) {
 	//
   	LOG_D("Number of event listeners: %d\n", _eventManager.numListeners());
 
+
+	// Handle any events that are in the queue
+	_eventManager.processAllEvents();
+
+	_homekitStarted = true;
+	if ( !updateServiceTxt() ){
+		LOG_E("ERROR: Updating mDNS service failed!\n");
+	}
 
 	//
 	// Startup completed
@@ -828,8 +836,7 @@ bool HAPServer::begin(bool resume) {
 #endif
 #endif
 
-	// Handle any events that are in the queue
-	_eventManager.processAllEvents();
+	
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 	_pixelIndicator.confirmWithColor(HAPColorGreen);
@@ -841,7 +848,7 @@ bool HAPServer::begin(bool resume) {
 
 // ToDo: Rewrite and fix memory leaks !!!
 bool HAPServer::updateServiceTxt() {
-
+	LOG_V("updateServiceTxt\n");
 #if defined(ARDUINO_ARCH_ESP32)
 
 	uint8_t *baseMac = HAPDeviceID::generateID();
@@ -860,7 +867,6 @@ bool HAPServer::updateServiceTxt() {
 		{.key = "s#", .value = (const char*) 1},
 		{.key = "sh", .value = (const char*) _accessorySet->setupHash()},
 	};
-
 	return mDNSExt.addServiceTxtSet((char*)"_hap", "_tcp", 9, hapTxtData);
 
 #elif defined( CORE_TEENSY )
@@ -877,6 +883,7 @@ bool HAPServer::updateServiceTxt() {
 	_hapMdnsTxt.setStateNumber(1);										// Current state number. Required. - This must have a value of ”1”.
 	_hapMdnsTxt.setCi(_accessorySet->accessoryType());					// Accessory Category Identifier. Required.
 	_hapMdnsTxt.setSh(_accessorySet->setupHash());						// Setup Hash
+
 	return true;
 #endif
 
@@ -1012,14 +1019,12 @@ void HAPServer::handle() {
 #endif
 
 	// Handle plugins
-	// if (!_stopPlugins){
-		// LOG_V("Handle plugins\n");
-		for (auto& plugin : _plugins) {
-			if (plugin->isEnabled()) {
-				plugin->handle();
-			}
+	for (auto& plugin : _plugins) {
+		if (plugin->isEnabled()) {
+			plugin->handle();
 		}
-	// }
+	}
+
 
 	//
 	// Handle fakeGatos
@@ -1040,7 +1045,7 @@ void HAPServer::handle() {
 
 
 void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
-
+	LOG_V("handleClientDisconnect\n");
 	if (hapClient == nullptr) return;
 
 	for ( int i = 0; i < _clients.size(); i++ ) {
@@ -1053,7 +1058,7 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 }
 
 void HAPServer::handleClientState(HAPClient* hapClient) {
-
+	LOG_V("handleClientState\n");
 	if ((hapClient->state == HAP_CLIENT_STATE_DISCONNECTED) || (!hapClient->client.connected())){
 		handleClientDisconnect( hapClient );
 		return;
@@ -1254,6 +1259,7 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 
 
 bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen){
+	LOG_V("handlePath\n");
 
 	bool validPath = false;
 	// /accessories
@@ -1311,7 +1317,7 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 
 
 void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_len, uint8_t** out, int* outLen){
-
+	LOG_V("parseRequest\n");
 	int curPos = 0;
 
 	for (int i = 0; i < msg_len; i++) {
@@ -1359,6 +1365,7 @@ void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_l
 FLASHMEM
 #endif
 void HAPServer::sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error){
+	LOG_V("sendErrorTLV\n");
 	TLV8 response;
 	response.encode(HAP_TLV_STATE, 1, state);
 	response.encode(HAP_TLV_ERROR, 1, error);
@@ -1670,6 +1677,7 @@ FLASHMEM
 #endif
 bool HAPServer::encode(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
 
+	LOG_V("encode\n");
 	uint16_t written = 0;
 	bool success = false;
 
@@ -1803,7 +1811,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 FLASHMEM
 #endif
 bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
-
+	LOG_V("send\n");
 	if (httpStatus == HTTP_204) {
 		send204(hapClient);
 		return true;
@@ -1872,7 +1880,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_
 
 bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 
-
+	LOG_V("send\n");
 	if (httpStatus == HTTP_204) {
 		send204(hapClient);
 		return true;
@@ -2044,7 +2052,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 }
 
 bool HAPServer::send204(HAPClient* hapClient){
-
+	LOG_V("send204\n");
 	// LogD(F("\nEncrpyting response ..."), false);
 
 	uint8_t* encrypted = nullptr;
@@ -2754,7 +2762,9 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber);
 	LOGRAW_V("OK\n");
 #else
-	updateServiceTxt();
+	if ( !updateServiceTxt() ){
+		LOG_E("ERROR: Updating mDNS service failed!\n");
+	}
 #endif
 
 	LOGRAW_D("OK\n");
@@ -3471,7 +3481,7 @@ void HAPServer::handlePairingsRemove(HAPClient* hapClient, const uint8_t* identi
 		}
 #else
 		if ( !updateServiceTxt() ){
-			LOG_E("ERROR: Advertising HAP service failed!\n");
+			LOG_E("ERROR: Updating mDNS service failed!\n");
 			return;
 		}
 #endif
@@ -3766,18 +3776,23 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 }
 
 void HAPServer::handleEventUpdateConfigNumber( int eventCode, struct HAPEvent eventParam ){
+	LOG_V("handleEventUpdateConfigNumber\n");
 	_accessorySet->configurationNumber++;
 	// updateServiceTxt();
+
+	if (_homekitStarted) {
 #if defined( ARDUINO_ARCH_ESP32)
-	if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
-		LogE( F("ERROR: Updating HAP service txt failed!"), true);
-		return;
-	}
+		if (!mDNSExt.updateHomekitTxt(_accessorySet->isPaired(), _accessorySet->configurationNumber)){
+			LogE( F("ERROR: Updating HAP service txt failed!"), true);
+			return;
+		}
 #else
-	if ( !updateServiceTxt() ){
-		LOG_E("ERROR: Advertising HAP service failed!\n");
-		return;
+		if ( !updateServiceTxt() ){
+			LOG_E("ERROR: Updating mDNS service failed!\n");
+			return;
+		}
 	}
+
 #endif
 }
 
@@ -3838,7 +3853,7 @@ void HAPServer::handleEventDeleteAllPairings(int eventCode, struct HAPEvent even
 	}
 #else
 	if ( !updateServiceTxt() ){
-		LOG_E("ERROR: Advertising HAP service failed!\n");
+		LOG_E("ERROR: Updating mDNS service failed!\n");
 		return;
 	}
 #endif
