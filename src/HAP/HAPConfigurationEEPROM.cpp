@@ -197,7 +197,7 @@ void HAPConfigurationEEPROM::buildDataMap(){
     for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
     	auto plugin = factory.getPlugin(*it);
 		char label[20];
-		sprintf(label, "p%s", plugin->name().c_str());
+		sprintf(label, "p%s", plugin->name());
 		HAPConfigurationPlugin* pluginConfig = plugin->getConfiguration();
 
 		size_t dataSize = pluginConfig->getCommonSize() + pluginConfig->getDataSize();
