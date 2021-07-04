@@ -206,11 +206,11 @@ public:
 		return _type;
 	}
 
-	String version(){
-		return _version.toString();
+	const char* version(){
+		return _version.toString().c_str();
 	}
 
-	String name(){
+	const char* name(){
 		return _config->name;
 	}
 

@@ -141,7 +141,7 @@ bool HAPServer::begin(bool resume) {
 
 	if (resume == false){
 
-		LOG_N("Starting %s v%s [%s] %s\n", HOMEKIT_PROJECT, hap.versionString().c_str(), HOMEKIT_GIT_REV, HOMEKIT_GIT_BRANCH);
+		LOG_N("Starting %s v%s [%s] %s\n", HOMEKIT_PROJECT, hap.versionString(), HOMEKIT_GIT_REV, HOMEKIT_GIT_BRANCH);
 		LOG_N("compiled at %s\n", HOMEKIT_COMPILE_TIME);
 		LOG_N("Feature Rev.: %s\n", HOMEKIT_FEATURE_REV);
 		LOG_N("Loglevel: %d\n", LOG_LEVEL);
@@ -637,17 +637,17 @@ bool HAPServer::begin(bool resume) {
 		LOG_HEAP("", 0,0);
     	auto plugin = factory.getPlugin(*it);
 
-		LOG_I("   - %s [v%s] of type %d", plugin->name().c_str(), plugin->version().c_str(), plugin->type());
+		LOG_I("   - %s [v%s] of type %d", plugin->name(), plugin->version(), plugin->type());
 
 		plugin->setAccessorySet(_accessorySet);
 		plugin->setFakeGatoFactory(&_fakeGatoFactory);
 		plugin->addEventListener(&_eventManager);
 
 		// Load configuration from NVS here and pass it to the plugins
-		size_t pluginConfigSize = _configuration.getDataLengthForPlugin(plugin->name().c_str());
+		size_t pluginConfigSize = _configuration.getDataLengthForPlugin(plugin->name());
 		HAPConfigurationPlugin* pluginConfig = new HAPConfigurationPlugin();
 
-		_configuration.getDataForPlugin(plugin->name().c_str(), pluginConfig, pluginConfigSize);
+		_configuration.getDataForPlugin(plugin->name(), pluginConfig, pluginConfigSize);
 		plugin->setConfiguration(pluginConfig);
 		// delete pluginConfig;
 

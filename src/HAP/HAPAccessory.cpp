@@ -215,35 +215,35 @@ void HAPAccessory::printTo(Print& print){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufacturerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
+HAPService* HAPAccessory::addInfoService(const char* accessoryName, const char* manufacturerName, const char* modelName, const char* serialNumber, identifyFunctionCallback callback, const char* firmwareRev){
 
 
 	initInfoService();
 
 
 	if (_accessoryName == nullptr) {
-		_accessoryName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		_accessoryName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
 
 	if (_manufacturer == nullptr) {
-		_manufacturer = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_MANUFACTURER, (uint8_t)1);
+		_manufacturer = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MANUFACTURER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);
 
 
 	if (_modelName == nullptr) {
-		_modelName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_MODEL, (uint8_t)1);
+		_modelName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MODEL, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);
 
 
 	if (_serialNumber == nullptr) {
-		_serialNumber = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, (uint8_t)1);
+		_serialNumber = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_SERIAL_NUMBER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);
@@ -270,10 +270,10 @@ void HAPAccessory::initInfoService(){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-void HAPAccessory::setFirmware(const String& firmwareRev){
+void HAPAccessory::setFirmware(const char* firmwareRev){
 	initInfoService();
 	if (_firmware == nullptr) {
-		_firmware = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ);
+		_firmware = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _firmware);
 	}
 	_firmware->setValue(firmwareRev, false);

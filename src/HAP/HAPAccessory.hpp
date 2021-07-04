@@ -44,15 +44,13 @@ public:
 	HAPCharacteristicBase* characteristicsOfType(const char* typeString);
 
 	void printTo(Print& print);
-	// void toJson(JsonArray& array);
-	// String describe() const;
 
-	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");
+	HAPService* addInfoService(const char* accessoryName, const char* manufacturerName, const char* modelName, const char* serialNumber, identifyFunctionCallback callback, const char* firmwareRev);
 
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
 
-	void setFirmware(const String& firmwareRev);
+	void setFirmware(const char* firmwareRev);
 
 	uint8_t aid() { return _aid; }
     void setAID(uint8_t aid) { _aid = aid; }
@@ -68,11 +66,11 @@ protected:
 
 	HAPService*	_infoService;
 	HAPCharacteristic<bool>* 	_identify;
-	HAPCharacteristic<String>* _accessoryName;
-	HAPCharacteristic<String>* _firmware;
-	HAPCharacteristic<String>* _manufacturer;
-	HAPCharacteristic<String>* _modelName;
-	HAPCharacteristic<String>* _serialNumber;
+	HAPCharacteristic<std::string>* _accessoryName;
+	HAPCharacteristic<std::string>* _firmware;
+	HAPCharacteristic<std::string>* _manufacturer;
+	HAPCharacteristic<std::string>* _modelName;
+	HAPCharacteristic<std::string>* _serialNumber;
 };
 
 

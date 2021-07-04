@@ -202,8 +202,8 @@ public:
 	bool begin(bool resume = false);
 	void handle();
 
-	static String versionString(){
-		return HAPVersion(HOMEKIT_VERSION).toString();
+	static const char* versionString(){
+		return HAPVersion(HOMEKIT_VERSION).toString().c_str();
 	}
 
 
