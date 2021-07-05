@@ -38,10 +38,10 @@ const char* HAPDeviceID::deviceID(){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-String HAPDeviceID::deviceID(){
+std::string HAPDeviceID::deviceID(){
     char baseMacChr[18];
     sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
-    return String(baseMacChr);
+    return std::string(baseMacChr);
 }
 
 #if defined(ARDUINO_TEENSY41)
@@ -55,25 +55,25 @@ void HAPDeviceID::deviceID(char baseMacChr[18]){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-String HAPDeviceID::chipID(){
+std::string HAPDeviceID::chipID(){
     char baseMacChr[18];
     sprintf(baseMacChr, "%02X%02X%02X%02X%02X%02X", _deviceID[5], _deviceID[4], _deviceID[3], _deviceID[2], _deviceID[1], _deviceID[0]);
-    return String(baseMacChr);
+    return std::string(baseMacChr);
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-String HAPDeviceID::serialNumber(String type, String id){
-    char serialNumber[6 + 2 + type.length() + id.length()];
-    sprintf(serialNumber, "%02X%02X%02X-%s-%s", _deviceID[3], _deviceID[4], _deviceID[5], type.c_str(), id.c_str());
-    return String(serialNumber);
+std::string HAPDeviceID::serialNumber(const char* type, const char* id){
+    char serialNumber[6 + 2 + strlen(type) + strlen(id)];
+    sprintf(serialNumber, "%02X%02X%02X-%s-%s", _deviceID[3], _deviceID[4], _deviceID[5], type, id);
+    return std::string(serialNumber);
 }
 
 #if defined(ARDUINO_ARCH_ESP32)
-String HAPDeviceID::provisioningID(const char* prefix){
+std::string HAPDeviceID::provisioningID(const char* prefix){
     char provId[6 + 1 + strlen(prefix)];
     sprintf(provId, "%s%02X%02X%02X", prefix, _deviceID[3], _deviceID[4], _deviceID[5]);
-    return String(provId);
+    return std::string(provId);
 }
 #endif

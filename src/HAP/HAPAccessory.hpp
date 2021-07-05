@@ -45,7 +45,7 @@ public:
 
 	void printTo(Print& print);
 
-	HAPService* addInfoService(const char* accessoryName, const char* manufacturerName, const char* modelName, const char* serialNumber, identifyFunctionCallback callback, const char* firmwareRev);
+	HAPService* addInfoService(const char* accessoryName, const char* manufactuerName, const char* modelName, const char* serialNumber, identifyFunctionCallback callback, const char* firmwareRev = "");
 
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
@@ -65,7 +65,7 @@ protected:
 	std::vector<std::unique_ptr<HAPService>> _services;
 
 	HAPService*	_infoService;
-	HAPCharacteristic<bool>* 	_identify;
+	HAPCharacteristic<bool>*   _identify;
 	HAPCharacteristic<std::string>* _accessoryName;
 	HAPCharacteristic<std::string>* _firmware;
 	HAPCharacteristic<std::string>* _manufacturer;

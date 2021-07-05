@@ -163,7 +163,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	//
 	// Unique serial number !!!
 	//
-    char hex[6];
+    char hex[6] = {'\0',};
 #if HAP_PLUGIN_BME280_USE_DUMMY
 	sprintf(hex, "%s", "DUMMY");
 #else
