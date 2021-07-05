@@ -10,7 +10,7 @@
 #define HAPDEVICEID_HPP_
 
 #include <Arduino.h>
-
+#include <string>
 #if defined(ARDUINO_ARCH_ESP32)
 #include <WiFi.h>
 #include "esp_system.h"
@@ -26,13 +26,13 @@ public:
 	//static const char* deviceID();
 	static void deviceID(char baseMacChr[18]);
 
-	static String deviceID();	// mac address -> change to random
-	static String chipID();		// basically mac reverse
+	static std::string deviceID();	// mac address -> change to random
+	static std::string chipID();		// basically mac reverse
 
-	static String serialNumber(String type, String id);
+	static std::string serialNumber(const char* type, const char* id);
 
 #if defined(ARDUINO_ARCH_ESP32)
-	static String provisioningID(const char* prefix);
+	static std::string provisioningID(const char* prefix);
 #endif
 
 private:

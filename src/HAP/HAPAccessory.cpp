@@ -215,40 +215,40 @@ void HAPAccessory::printTo(Print& print){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-HAPService* HAPAccessory::addInfoService(const String& accessoryName, const String& manufacturerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev){
+HAPService* HAPAccessory::addInfoService(const char* accessoryName, const char* manufacturerName, const char* modelName, const char* serialNumber, identifyFunctionCallback callback, const char* firmwareRev){
 
 
 	initInfoService();
 
 
 	if (_accessoryName == nullptr) {
-		_accessoryName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		_accessoryName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
 
 	if (_manufacturer == nullptr) {
-		_manufacturer = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_MANUFACTURER, HAP_PERMISSION_READ);
+		_manufacturer = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MANUFACTURER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);
 
 
 	if (_modelName == nullptr) {
-		_modelName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_MODEL, HAP_PERMISSION_READ);
+		_modelName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MODEL, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);
 
 
 	if (_serialNumber == nullptr) {
-		_serialNumber = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_SERIAL_NUMBER, HAP_PERMISSION_READ);
+		_serialNumber = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_SERIAL_NUMBER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);
 
-	setFirmware(firmwareRev.c_str());
+	setFirmware(firmwareRev);
 
 	setIdentifyCallback(callback);
 
