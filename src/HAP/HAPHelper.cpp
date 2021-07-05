@@ -443,3 +443,12 @@ int HAPHelper::indexOf(const char* array, int arr_size, char to_find, int startP
 bool HAPHelper::startsWith(const char *str, const char *pre){
     return strncmp(str, pre, strlen(pre)) == 0;
 }
+
+int HAPHelper::indexOf(std::string str, const char* ch){
+	std::string::size_type loc = str.find( ch, 0 );
+	if( loc == std::string::npos ) {
+		return -1;
+	} else {
+		return (int)loc;
+	}
+}

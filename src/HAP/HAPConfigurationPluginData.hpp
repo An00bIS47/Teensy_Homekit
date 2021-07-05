@@ -13,7 +13,7 @@
 #include <vector>
 #include <functional>
 #include "HAPGlobals.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 
 #include "HAPConfigurationItem.hpp"
 
@@ -112,7 +112,7 @@ public:
 		uint8_t size = strlen(name_);
 
 		if (size > 20) {
-			LogE(F("ERROR: NAME is too long!"), true);
+			LOG_E("ERROR: NAME is too long!\n");
 			return;
 		}
 
@@ -132,7 +132,7 @@ public:
 		uint8_t size = strlen(name_);
 
 		if (size > 20) {
-			LogE(F("ERROR: NAME is too long!"), true);
+			LOG_E("ERROR: NAME is too long!\n");
 			return false;
 		}
 		strncpy(name, name_, 20);

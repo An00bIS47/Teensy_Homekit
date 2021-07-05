@@ -11,7 +11,7 @@
 
 #if HAP_DEBUG_TLV8
 #include "HAPHelper.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #endif
 
 TLV8::TLV8()
@@ -499,26 +499,9 @@ bool TLV8::isValidTLVType(uint8_t type) {
 #if HAP_DEBUG_TLV8
 void TLV8::printNode( TLV8Entry *ptr )
 {
-	LogD( "T:", false );
-	LogD( "0x0", false );
-	LogD( String(ptr->type, HEX), false);
-	LogD( " L:", false );
-	LogD( String(ptr->length, DEC), false);
-	LogD( " V:", false );
-
-	// char* out = HAPHelper::toHex(ptr->value, ptr->length);
-	// LogD( out, true );
-	// free(out);
-
-	// out = (char*)malloc(sizeof(char) * (ptr->length * 2) + 1);
-	char out[sizeof(char) * (ptr->length * 2) + 1];
-	HAPHelper::binToHex(ptr->value, ptr->length, out, (ptr->length * 2) + 1);
-	LogD( out, true );
-
-
-	// HAPHelper::array_print("T:", (uint8_t*)ptr->type, 1);
-	// HAPHelper::array_print("L:", (uint8_t*)ptr->length, 1);
-	// HAPHelper::array_print("V:", ptr->value, ptr->length);
+	LOG_D("T: 0x%X\n", ptr->type);
+	LOG_D("L: %d\n", ptr->length);
+	LOGARRAY_D("V:", ptr->value, ptr->length);
 }
 
 void TLV8::print( ) {
@@ -526,9 +509,9 @@ void TLV8::print( ) {
 }
 
 void TLV8::printList( TLV8Entry *ptr ){
-	LogD( "================= TLV8 =================", true );
+	LOG_D( "================= TLV8 =================\n");
 	if(!ptr) {
-		LogD( "Nothing to display!", true );
+		LOG_D( "Nothing to display!\n");
 		return;
 	}
 

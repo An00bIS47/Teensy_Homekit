@@ -63,7 +63,7 @@ public:
 
     static bool begin();
 
-    static String timeString();
+    static const char* timeString();
     static uint32_t timestamp();
 
     static time_t sunRise(time_t date = 0);
@@ -156,6 +156,9 @@ protected:
     static float _latitude;
     static uint32_t _refTime;
     static uint32_t _t_offset;
+
+
+    static char _timestring[30];
 
     static callbackGetTime_t _callbackGetTime;
 

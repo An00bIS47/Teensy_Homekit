@@ -39,8 +39,8 @@ public:
 
 
 protected:
-	HAPCharacteristicT<bool>* 	_powerState;
-	HAPCharacteristicT<bool>* 	_enabledState;
+	HAPCharacteristic<bool>* 	_powerState;
+	HAPCharacteristic<bool>* 	_enabledState;
 
 	bool 	_blinkingEnabled;
 	uint8_t _gpio;

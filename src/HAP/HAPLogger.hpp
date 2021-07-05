@@ -9,6 +9,10 @@
 #ifndef HAPLOGGER_HPP_
 #define HAPLOGGER_HPP_
 
+
+#if 0
+
+
 #include <Arduino.h>
 #include <string>
 
@@ -115,6 +119,8 @@ public:
 
 	static void logOK(const char* color);
 
+	static size_t print(const __FlashStringHelper *ifsh);
+
 	static void flush();
 	static void checkError(int err_code);
 	static void checkErrorOK(int err_code);
@@ -125,3 +131,5 @@ private:
 };
 
 #endif /* HAPLOGGER_HPP_ */
+
+#endif

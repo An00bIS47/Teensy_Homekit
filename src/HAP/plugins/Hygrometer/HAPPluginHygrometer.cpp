@@ -240,11 +240,11 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 		HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
 		_accessory->addService(humidityService);
 		{
-			HAPCharacteristicT<String> *humServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+			HAPCharacteristic<String> *humServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
 			humServiceName->setValue("Soil Moisture Sensor");
 			_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-			_humidityValue = new HAPCharacteristicT<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
+			_humidityValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
 			_humidityValue->setValue(0.0F);
 
 			_humidityValue->setValueChangeCallback(std::bind(&HAPPluginHygrometer::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));

@@ -27,7 +27,7 @@
 
 #include <Arduino.h>
 #include "HAPPlugins.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
 #include "HAPFakegato.hpp"
@@ -88,15 +88,15 @@ public:
 
 #endif
 
-	inline float getAveragedTemperatureValue(){
+	float getAveragedTemperatureValue(){
 		return _temperatureAverage.getAverage();
 	}
 
-	inline float getAveragedHumidityValue(){
+	float getAveragedHumidityValue(){
 		return _humidityAverage.getAverage();
 	}
 
-	inline uint16_t getAveragedPressureValue(){
+	uint16_t getAveragedPressureValue(){
 		return _pressureAverage.getAverage();
 	}
 
@@ -110,26 +110,20 @@ protected:
 
  	struct HAPPluginBME280Config* _configInternal;
 
-	HAPCharacteristicT<float>*		_humidityValue;
+	HAPCharacteristic<float>*		_humidityValue;
 	HAPFakegatoAverage<float>		_humidityAverage;
 
-	HAPCharacteristicT<float>*		_temperatureValue;
+	HAPCharacteristic<float>*		_temperatureValue;
 	HAPFakegatoAverage<float>		_temperatureAverage;
 
 
-	HAPCharacteristicT<uint16_t>*	_pressureValue;
+	HAPCharacteristic<uint16_t>*	_pressureValue;
 	HAPFakegatoAverage<uint16_t>	_pressureAverage;
-
-
-	// HAPCharacteristicFloat*		_humidityValue;
-	// HAPCharacteristicFloat*		_temperatureValue;
-	// HAPCharacteristicUInt16*	_pressureValue;
 
 	Adafruit_BME280* _bme;
 	uint32_t _timestampLastRead;
 
 	bool fakeGatoCallback();
-	// HAPFakeGatoWeather _fakegato;
 	HAPFakegato _fakegato;
 };
 

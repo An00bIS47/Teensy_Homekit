@@ -110,32 +110,10 @@ hap.__setBrand(__FLAGGED_BRAND);
 #endif
 
 
-
-
-
 #define SRP_SALT_LENGTH         16
 #define SRP_PUBLIC_KEY_LENGTH   384
 #define SRP_PROOF_LENGTH        64
 #define SRP_SESSION_KEY_LENGTH  64
-
-
-
-// ToDo: Remove?
-static const char HTTP_200[] PROGMEM 					= "HTTP/1.1 200 OK\r\n";
-static const char HTTP_204[] PROGMEM 					= "HTTP/1.1 204 No Content\r\n\r\n";
-static const char HTTP_207[] PROGMEM 					= "HTTP/1.1 207 Multi-Status\r\n";
-static const char HTTP_400[] PROGMEM 					= "HTTP/1.1 400 Bad Request\r\n";
-
-static const char HTTP_CONTENT_TYPE_HAPJSON[] PROGMEM 	= "Content-Type: application/hap+json\r\n";
-static const char HTTP_CONTENT_TYPE_TLV8[] PROGMEM 		= "Content-Type: application/pairing+tlv8\r\n";
-
-static const char HTTP_KEEP_ALIVE[] PROGMEM		 		= "Connection: keep-alive\r\n";
-static const char HTTP_TRANSFER_ENCODING[] PROGMEM		= "Transfer-Encoding: chunked\r\n";
-
-static const char HTTP_CRLF[] PROGMEM 					= "\r\n";
-
-static const char EVENT_200[] PROGMEM 					= "EVENT/1.0 200 OK\r\n";
-
 
 #if defined( CORE_TEENSY )
 struct HAP_MDNS_TXT {
@@ -205,8 +183,8 @@ public:
 	bool begin(bool resume = false);
 	void handle();
 
-	static String versionString(){
-		return HAPVersion(HOMEKIT_VERSION).toString();
+	static const char* versionString(){
+		return HAPVersion(HOMEKIT_VERSION).toString().c_str();
 	}
 
 
@@ -227,7 +205,7 @@ public:
 	// HAPEventManager _evtMgr;
 protected:
 
-	void updateConfig();
+
 
 	HAPAccessorySet* _accessorySet;
 	std::vector<HAPClient*> _clients;
@@ -273,10 +251,33 @@ protected:
 
 	std::vector<std::unique_ptr<HAPPlugin>> _plugins;
 	HAPFakegatoFactory _fakeGatoFactory;
+
+	bool _homekitStarted;
+	bool _isInPairingMode;
+
+	uint8_t _homekitFailedLoginAttempts;
+
+	// String _curLine;
+	uint16_t _port;
+
+#if HAP_DEBUG
+	unsigned long _previousMillisHeap;
+#endif
+
+
+	HAPSRP* _hapsrp;
+
+	char _brand[MAX_BRAND_LENGTH];
+
+
+
+	void updateConfig();
+
 	//
 	// Event handler
 	//
-	void handleEvents( int eventCode, struct HAPEvent eventParam );
+	void processEvents();
+
 	void handleEventUpdateConfigNumber( int eventCode, struct HAPEvent eventParam );
 	void handleEventUpdatedConfig(int eventCode, struct HAPEvent eventParam);
 	void handleEventRebootNow(int eventCode, struct HAPEvent eventParam);
@@ -284,8 +285,6 @@ protected:
 	void handleEventConfigReset(int eventCode, struct HAPEvent eventParam);
 	void handleEventDeleteAllPairings(int eventCode, struct HAPEvent eventParam);
 
-	bool stopEvents();
-	void stopEvents(bool value);
 
 
 	// HAPEventManager	_evtMgr;
@@ -331,7 +330,7 @@ protected:
 
 	// /characteristics
 	void handleCharacteristicsGet(HAPClient* hapClient);
-	void handleCharacteristicsPut(HAPClient* hapClient, String body);
+	void handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen);
 
 	// pairings
 	void handlePairingsPost(HAPClient* hapClient, uint8_t* bodyData, size_t bodyDataLen);
@@ -343,12 +342,6 @@ protected:
 	void handleIdentify(HAPClient* hapClient);
 
 
-	//
-	// Plugin handling
-	// ToDo: currently unused
-	//
-	void stopPlugins(bool value);
-	bool startPlugin(std::unique_ptr<HAPPlugin> plugin);
 
 	// Callbacks
 	void handleAllPairingsRemoved();
@@ -358,24 +351,6 @@ private:
 #if HAP_DEBUG && HAP_WEBSERVER_USE_SPIFFS
 	static void listDir(FS &fs, const char * dirname, uint8_t levels);
 #endif
-
-	bool _isInPairingMode;
-
-	uint8_t _homekitFailedLoginAttempts;
-
-	// String _curLine;
-	uint16_t _port;
-
-#if HAP_DEBUG
-	unsigned long _previousMillisHeap;
-#endif
-
-	HAPSRP* _hapsrp;
-
-	char _brand[MAX_BRAND_LENGTH];
-
-	bool _stopEvents;
-	bool _stopPlugins;
 
 	//
 	// Bonjour
@@ -408,16 +383,14 @@ private:
 	//
 	void sendResponse(HAPClient* hapClient, TLV8* response);
 
-	bool send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const String httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
+	bool send(HAPClient* hapClient, const char* httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const char* httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const char* httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
 		return send(hapClient, httpStatus, (const uint8_t*)data, length, mode, contentType);
 	}
 
 	void sendErrorTLV(HAPClient* hapClient, uint8_t state, uint8_t error);
-
 	bool sendEvent(HAPClient* hapClient, const JsonDocument& response);
-	
 	bool send204(HAPClient* hapClient);
 
 #if HAP_ENABLE_PIXEL_INDICATOR

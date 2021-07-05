@@ -6,6 +6,8 @@
 //      Author: michael
 //
 
+#if 0
+
 #include "HAPLogger.hpp"
 //#include "HAPServer.hpp"
 #include "HAPTime.hpp"
@@ -167,7 +169,6 @@ void flexRamInfo(void) {
                );
 }
 #endif
-
 
 LogLevel HAPLogger::_logLevel(LogLevel::DEBUG);
 Stream* HAPLogger::_printer(&Serial);
@@ -377,3 +378,40 @@ void HAPLogger::printTeensyInfo(){
 	flexRamInfo();
 }
 
+size_t HAPLogger::print(const __FlashStringHelper *ifsh) {
+
+    PGM_P p = reinterpret_cast<PGM_P>(ifsh);
+
+    char buff[128] __attribute__ ((aligned(4)));
+
+    auto len = strlen_P(p);
+
+    size_t n = 0;
+
+    while (n < len) {
+
+        int to_write = std::min(sizeof(buff), len - n);
+
+        memcpy_P(buff, p, to_write);
+
+        auto written = _printer->write(buff, to_write);
+
+        n += written;
+
+        p += written;
+
+        if (!written) {
+
+            // Some error, write() should write at least 1 byte before returning
+
+            break;
+
+        }
+
+    }
+
+    return n;
+
+}
+
+#endif

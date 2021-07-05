@@ -12,14 +12,14 @@
 #include <Arduino.h>
 #include <vector>
 #include <memory>
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 
 class HAPService {
 public:
 
     HAPService();
     HAPService(uint8_t _uuid);
-    HAPService(const String& _uuid);
+    HAPService(const char* _uuid);
 
     uint32_t aid() { return _aid; }
     void setAID(uint32_t aid) { _aid = aid; }
@@ -78,7 +78,7 @@ public:
 protected:
     uint32_t    _aid;
     uint8_t     _uuid;
-    String      _uuidString;
+    std::string _uuidString;
 
 
     uint8_t     _features; // hidden == 0x01, primary == 0x02

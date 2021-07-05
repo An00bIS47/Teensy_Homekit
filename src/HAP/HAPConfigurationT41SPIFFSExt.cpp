@@ -8,7 +8,7 @@
 
 #include "HAPConfigurationT41SPIFFSExt.hpp"
 #include "HAPHelper.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 
 HAPConfigurationT41SPIFFSExt::HAPConfigurationT41SPIFFSExt() : _config(INIT_FLASH_ONLY){
 
@@ -42,8 +42,12 @@ FLASHMEM
 #endif
 bool HAPConfigurationT41SPIFFSExt::mount(){
     int8_t result = _eRAM.begin(_config);
+
+    Serial.printf("result: %d\n", result);
+
     if (result == 0){
         _eRAM.fs_mount();
+        
         return true;
     } else {
         return false;
@@ -64,7 +68,7 @@ size_t HAPConfigurationT41SPIFFSExt::writeBytes(const char* label, const uint8_t
     if (result > 0) {
         return expectedDataLen;
     } else {
-        LogE("ERROR: Failed to writeBytes from " + String(label) + ": " + String(result), true);
+        LOG_E("ERROR: Failed to writeBytes from %s: %d\n", label, result);
     }
 
     return result;
@@ -87,7 +91,7 @@ size_t HAPConfigurationT41SPIFFSExt::readBytes(const char* label, uint8_t* outpu
     if (result > 0) {
         return expectedDataLen;
     } else {
-        LogE("ERROR: Failed to readBytes from " + String(label) + ": " + String(result), true);
+        LOG_E("ERROR: Failed to writeBytes from %s: %d\n", label, result);
     }
 
     return result;
@@ -100,7 +104,7 @@ size_t HAPConfigurationT41SPIFFSExt::getBytesLength(const char* label){
     spiffs_stat fileInfo;
     _eRAM.f_info(label, &fileInfo);
 
-    LogD("Filesize for " + String(label) + ": " + String(fileInfo.size), true);
+    LOG_V("Filesize for %s: %d\n", label, fileInfo.size);
     return fileInfo.size;
 }
 
@@ -161,7 +165,7 @@ bool HAPConfigurationT41SPIFFSExt::fileExists(const char* name){
     if (result == SPIFFS_OK) {
 
     } else {
-        LogW("File does not exist: " + String(name), true);
+        LOG_E("ERROR: File does not exist: %s\n", name);
     }
 
     return (result == SPIFFS_OK);

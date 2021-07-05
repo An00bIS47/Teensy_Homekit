@@ -8,6 +8,7 @@
 
 #include "HAPConfigurationEEPROM.hpp"
 #include "HAPPlugins.hpp"
+#include "HAPLogging.hpp"
 
 #define HAP_TEENSY_EEPROM_SIZE 4284
 
@@ -17,7 +18,7 @@
 #define HAP_EEPROM_VERSION			0x01
 
 // #define HAP_EEPROM_OFFSET			0
-#define HAP_EEPROM_OFFSET_INTERNAL	HAP_EEPROM_OFFSET + 3	// 2x Magic byte + 1x version
+#define HAP_EEPROM_OFFSET_INTERNAL	HAP_EEPROM_OFFSET + 5	// uin32_t Magic byte + uint8_t version
 
 
 HAPConfigurationEEPROM::HAPConfigurationEEPROM(){
@@ -41,7 +42,8 @@ HAPConfigurationEEPROM::~HAPConfigurationEEPROM(){
 bool HAPConfigurationEEPROM::begin() {
 	buildDataMap();
 
-	printDataMapTo(Serial);
+	// printDataMapTo(Serial);
+	logDataMap();
 
 #if defined (ARDUINO_ARCH_ESP32)
 	//EEPROM.begin(KNX_FLASH_SIZE);
@@ -71,15 +73,15 @@ void HAPConfigurationEEPROM::validateConfig(){
 
 	_eeprom->commit();
 #else
-	EEPROM.write(HAP_EEPROM_OFFSET + 0, HAP_EEPROM_MAGIC_BYTE);
-	EEPROM.write(HAP_EEPROM_OFFSET + 2, HAP_EEPROM_VERSION);
+	writeLong(HAP_EEPROM_OFFSET + 0, HAP_EEPROM_MAGIC_BYTE);
+	EEPROM.write(HAP_EEPROM_OFFSET + 4, HAP_EEPROM_VERSION);
 #endif
 }
 
 
 bool HAPConfigurationEEPROM::validConfig(){
 
-	uint16_t magicByte = 0;
+	uint32_t magicByte;
 
 #if defined (ARDUINO_ARCH_ESP32)
 	if (_eeprom == nullptr){
@@ -88,14 +90,13 @@ bool HAPConfigurationEEPROM::validConfig(){
 		_eeprom->begin(HAP_EEPROM_PARTITION_SIZE);
 	}
 
-	magicByte = _eeprom->readUShort(HAP_EEPROM_OFFSET + 0);
+	magicByte = _eeprom->readLong(HAP_EEPROM_OFFSET + 0);
 
 #else
-	magicByte = EEPROM.read(HAP_EEPROM_OFFSET + 0);
+	magicByte = readLong(HAP_EEPROM_OFFSET);
 #endif
 	// HAPHelper::printHex("magic byte ", (uint8_t*)magicByte, 2);
-	Serial.print("MAGIC BYTE: ");
-	Serial.println(magicByte, HEX);
+	LOG_D("Magic Byte: %X\n", magicByte);
 
 	return (magicByte == HAP_EEPROM_MAGIC_BYTE);
 }
@@ -190,13 +191,13 @@ void HAPConfigurationEEPROM::buildDataMap(){
 
 
 	auto &factory = HAPPluginFactory::Instance();
-    std::vector<String> names = factory.names();
+    std::vector<std::string> names = factory.names();
 
 
-    for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
+    for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
     	auto plugin = factory.getPlugin(*it);
 		char label[20];
-		sprintf(label, "p%s", plugin->name().c_str());
+		sprintf(label, "p%s", plugin->name());
 		HAPConfigurationPlugin* pluginConfig = plugin->getConfiguration();
 
 		size_t dataSize = pluginConfig->getCommonSize() + pluginConfig->getDataSize();
@@ -227,7 +228,7 @@ bool HAPConfigurationEEPROM::getBytesForPlugin(const char* name, uint8_t* data, 
 #if HAP_DEBUG_CONFIGURATION
 	char text[32];
 	sprintf(text, "LOAD PLUGIN %s", name);
-	HAPHelper::array_print(text, (uint8_t*)data, dataSize);
+	LOGARRAY_D(text, (uint8_t*)data, dataSize);
 #endif
 
 	if (read == dataSize) {
@@ -337,4 +338,36 @@ void HAPConfigurationEEPROM::printDataMapTo(Print& prt){
 	for (uint8_t i=0; i < _dataMap.size(); i++){
 		_dataMap[i].printTo(prt);
 	}
+}
+
+void HAPConfigurationEEPROM::logDataMap(){
+	LOG_D("DataMap:\n");
+	for (uint8_t i=0; i < _dataMap.size(); i++){
+		LOG_D(" - name: %-20s - offset: %4d - size: %4d\n", _dataMap[i].name, _dataMap[i].offset, _dataMap[i].size);
+	}
+
+}
+
+
+void HAPConfigurationEEPROM::writeLong(int address, uint32_t value)
+{
+    uint8_t four = (value & 0xFF);
+    uint8_t three = ((value>>8)&0xFF);
+    uint8_t two = ((value>>16)&0xFF);
+    uint8_t one = ((value>>24)&0xFF);
+
+    EEPROM.write(address , four);
+    EEPROM.write(address+1, three);
+    EEPROM.write(address+2, two);
+    EEPROM.write(address+3, one);
+}
+
+uint32_t HAPConfigurationEEPROM::readLong(int address)
+{
+    uint8_t four = EEPROM.read(address);
+    uint8_t three = EEPROM.read(address+1);
+    uint8_t two = EEPROM.read(address+2);
+    uint8_t one = EEPROM.read(address+3);
+
+    return ((four<<0)&0xFF)+((three<<8)&0xFFFF)+((two<<16)&0xFFFFFF)+((one<<24)&0xFFFFFFFF);
 }

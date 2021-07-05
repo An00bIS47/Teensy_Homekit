@@ -13,19 +13,19 @@ HAPPluginFactory& HAPPluginFactory::Instance() {
 	return instance;
 }
 
-void HAPPluginFactory::registerPlugin(IPluginRegistrar* registrar, String name) {
+void HAPPluginFactory::registerPlugin(IPluginRegistrar* registrar, std::string name) {
 	_registry[name] = registrar;
 }
 
-std::unique_ptr<HAPPlugin> HAPPluginFactory::getPlugin(String name) {
+std::unique_ptr<HAPPlugin> HAPPluginFactory::getPlugin(std::string name) {
 	/* throws out_of_range if plugin unknown */
 	IPluginRegistrar* registrar = _registry.at(name);
 	return registrar->getPlugin();
 }
 
-std::vector<String> HAPPluginFactory::names(){
-	std::vector<String> v;
-	for(std::map<String, IPluginRegistrar*>::iterator it = _registry.begin(); it != _registry.end(); ++it) {
+std::vector<std::string> HAPPluginFactory::names(){
+	std::vector<std::string> v;
+	for(std::map<std::string, IPluginRegistrar*>::iterator it = _registry.begin(); it != _registry.end(); ++it) {
 		v.push_back(it->first);
 	}
 	return v;

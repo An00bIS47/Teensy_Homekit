@@ -21,7 +21,7 @@
 
 #include "HAPAccessory.hpp"
 #include "HAPAccessorySet.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPVersion.hpp"
 #include "HAPHelper.hpp"
 
@@ -29,7 +29,7 @@
 
 #include "HAPConfiguration.hpp"
 #include "HAPCharacteristics.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 #include "HAPServices.hpp"
 
 #include "HAPFakegato.hpp"
@@ -112,7 +112,7 @@ public:
 
 
 	virtual void identify(bool oldValue, bool newValue) {
-		LogE(F("Handle identify from plugins"), true);
+		LOG_I("Handle identify from plugins\n");
 	}
 
 	void handle(bool forced = false) {
@@ -206,11 +206,11 @@ public:
 		return _type;
 	}
 
-	String version(){
-		return _version.toString();
+	const char* version(){
+		return _version.toString().c_str();
 	}
 
-	String name(){
+	const char* name(){
 		return _config->name;
 	}
 
@@ -273,19 +273,19 @@ public:
 		_fakeGatoFactory = fakeGatoFactory;
 	}
 
-	void registerFakeGato(HAPFakegato* fakegato, const String& name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
+	void registerFakeGato(HAPFakegato* fakegato, const char* name, std::function<bool()> callback, uint32_t interval = HAP_FAKEGATO_INTERVAL){
 		_fakeGatoFactory->registerFakeGato(fakegato, callback, interval);
 	}
 
 
-	void queueNotifyEvent(uint32_t iid, String value){
-		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid, value);
+	void queueNotifyEvent(uint32_t iid){
+		struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), iid);
 		_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 	}
 
 	void queueNotifyEvent(HAPCharacteristicBase* characteristic){
 		if (characteristic->notifiable()){
-			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid(), characteristic->valueString());
+			struct HAPEvent event = HAPEvent(nullptr, _accessory->aid(), characteristic->iid());
 			_eventManager->queueEvent( EventManager::kEventNotifyController, event);
 		}
 	}
@@ -331,17 +331,17 @@ public:
 		/* Get Singleton instance */
 	static HAPPluginFactory& Instance();
 		/* Register a new plugin */
-	void registerPlugin(IPluginRegistrar* registrar, String name);
+	void registerPlugin(IPluginRegistrar* registrar, std::string name);
 		/* Get an instance of a plugin based on its name */
 		/* throws out_of_range if plugin not found */
-	std::unique_ptr<HAPPlugin> getPlugin(String name);
-	std::vector<String> names();
+	std::unique_ptr<HAPPlugin> getPlugin(std::string name);
+	std::vector<std::string> names();
 
 	void loadPlugins();
 
 private:
 		/* Holds pointers to plugin registrars */
-	std::map<String, IPluginRegistrar*> _registry;
+	std::map<std::string, IPluginRegistrar*> _registry;
 		/* Make constructors private and forbid cloning */
 	HAPPluginFactory(): _registry() {};
 	HAPPluginFactory(HAPPluginFactory const&) = delete;
@@ -358,16 +358,16 @@ private:
 	template<class TPlugin>
 class PluginRegistrar: public IPluginRegistrar {
 public:
-	PluginRegistrar(String classname);
+	PluginRegistrar(std::string classname);
 	std::unique_ptr<HAPPlugin> getPlugin();
 private:
 		/* That is not really used there, but could be useful */
-	String _classname;
+	std::string _classname;
 };
 
 /* template functions in header */
 template<class TPlugin>
-PluginRegistrar<TPlugin>::PluginRegistrar(String classname): _classname(classname) {
+PluginRegistrar<TPlugin>::PluginRegistrar(std::string classname): _classname(classname) {
 	HAPPluginFactory &factory = HAPPluginFactory::Instance();
 	factory.registerPlugin(this, classname);
 }

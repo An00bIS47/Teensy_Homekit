@@ -16,7 +16,7 @@
 
 #include "HAPService.hpp"
 #include "HAPCharacteristics.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 
 
 // typedef void (*identifyFunction)(bool oldValue, bool newValue);
@@ -44,15 +44,13 @@ public:
 	HAPCharacteristicBase* characteristicsOfType(const char* typeString);
 
 	void printTo(Print& print);
-	// void toJson(JsonArray& array);
-	// String describe() const;
 
-	HAPService* addInfoService(const String& accessoryName, const String& manufactuerName, const String& modelName, const String& serialNumber, identifyFunctionCallback callback, const String& firmwareRev = "");
+	HAPService* addInfoService(const char* accessoryName, const char* manufactuerName, const char* modelName, const char* serialNumber, identifyFunctionCallback callback, const char* firmwareRev = "");
 
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
 
-	void setFirmware(const String& firmwareRev);
+	void setFirmware(const char* firmwareRev);
 
 	uint8_t aid() { return _aid; }
     void setAID(uint8_t aid) { _aid = aid; }
@@ -67,12 +65,12 @@ protected:
 	std::vector<std::unique_ptr<HAPService>> _services;
 
 	HAPService*	_infoService;
-	HAPCharacteristicT<bool>* 	_identify;
-	HAPCharacteristicT<String>* _accessoryName;
-	HAPCharacteristicT<String>* _firmware;
-	HAPCharacteristicT<String>* _manufacturer;
-	HAPCharacteristicT<String>* _modelName;
-	HAPCharacteristicT<String>* _serialNumber;
+	HAPCharacteristic<bool>*   _identify;
+	HAPCharacteristic<std::string>* _accessoryName;
+	HAPCharacteristic<std::string>* _firmware;
+	HAPCharacteristic<std::string>* _manufacturer;
+	HAPCharacteristic<std::string>* _modelName;
+	HAPCharacteristic<std::string>* _serialNumber;
 };
 
 

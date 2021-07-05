@@ -12,7 +12,7 @@
 #include <Arduino.h>
 #include <functional>
 #include "HAPGlobals.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPConfigurationItem.hpp"
 
 #define HAP_KEYSTORE_LABEL_LENGTH	10
@@ -43,7 +43,7 @@ public:
 			uint8_t size = strlen(rhs.keystore);
 
 			if (size > HAP_KEYSTORE_LABEL_LENGTH) {
-				LogE(F("ERROR: KEYSTORE is too long!"), true);
+				LOG_E("ERROR: KEYSTORE is too long!\n");
 				return;
 			}
 			strncpy(keystore, rhs.keystore, HAP_KEYSTORE_LABEL_LENGTH);
@@ -71,7 +71,7 @@ public:
 			uint8_t size = strlen(rhs.keystore);
 
 			if (size > HAP_KEYSTORE_LABEL_LENGTH) {
-				LogE(F("ERROR: KEYSTORE is too long!"), true);
+				LOG_E("ERROR: KEYSTORE is too long!\n");
 				return (*this);
 			}
 			strncpy(keystore, rhs.keystore, HAP_KEYSTORE_LABEL_LENGTH);

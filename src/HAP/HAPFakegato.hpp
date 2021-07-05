@@ -121,11 +121,11 @@ public:
     HAPFakegato();
     virtual ~HAPFakegato();
 
-    virtual HAPService* registerFakeGatoService(HAPAccessory* accessory, const String& name);
+    virtual HAPService* registerFakeGatoService(HAPAccessory* accessory, const char* name);
 
     void addEntry(uint8_t bitmask);
 
-    String name() { return _name; }
+    const char* name() { return _name.c_str(); }
 
     uint32_t timestampLastEntry(){
         return _entries[_entries.size() - 1]->timestamp;
@@ -256,12 +256,17 @@ protected:
         }
 
         ~HAPFakegatoDataEntry(){
-            if (data) free(data);
+            clear();
         }
 
-#if HAP_DEBUG
+        void clear(){
+            if (data != nullptr) free(data);
+            data = nullptr;
+        }
+
+#if HAP_DEBUG_FAKEGATO
         void printTo(Print& prt){
-            prt.print(F("Entry:"));
+            prt.print(F("<<< Entry:"));
             prt.print(F(" bitmask:")); prt.print(bitmask);
             prt.print(F(" timestamp:")); prt.print(timestamp);
             prt.println("");
@@ -275,29 +280,28 @@ protected:
 
     virtual void addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length);
 
-    virtual void callbackHistorySetTime(String oldValue, String newValue);
-    virtual void callbackHistoryRequest(String oldValue, String newValue);
-
-    virtual String callbackGetHistoryInfo();
-    virtual String callbackGetHistoryEntries();
-
+    
+    // Get Data
+    void callbackGetHistoryInfo(uint8_t* output, size_t* len);
+    void callbackGetHistoryEntries(uint8_t* output, size_t* len);
     void getRefTime(uint8_t* data, uint16_t* length);
+    
+    // Set Data
+    void callbackSetHistoryTime(const uint8_t* decoded, const size_t len);
+    void callbackSetHistoryAddress(const uint8_t* decoded, const size_t len);
 
 
+    // Get Data
+    HAPCharacteristicData*  _historyInfo    = nullptr;      // 116 // _s2r1Characteristics;
+    HAPCharacteristicData*  _historyEntries = nullptr;      // 117 // _s2r2Characteristics;
 
-    // FIXME: Change to uint8_t* data characteristic with base64 encoding inside of the charactersitic
-    //        Add this to a new file specific for data chars ?
-    HAPCharacteristicT<String>* _historyInfo    = nullptr;  // 116 // _s2r1Characteristics;
-    HAPCharacteristicT<String>* _historyEntries = nullptr;  // 117 // _s2r2Characteristics;
-    HAPCharacteristicT<String>* _historyRequest = nullptr;  // 11C // _s2w1Characteristics;
-    HAPCharacteristicT<String>* _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
+    // Set Data
+    HAPCharacteristicData*  _historyRequest = nullptr;      // 11C // _s2w1Characteristics;
+    HAPCharacteristicData*  _historySetTime = nullptr;  // 121 // _s2w2Characteristics;
 
     std::function<bool()> _callbackAddEntry = nullptr;
 
-    String  _name;
-    // uint8_t _signature[12] = {0, };
-    // uint8_t _sigLength;
-    // uint8_t _fakegatoType = 0;
+    std::string _name;
     size_t  _requestedIndex = 0;
 
     uint32_t _previousMillis = 0;

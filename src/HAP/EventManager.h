@@ -56,10 +56,14 @@ struct HAPEvent {
 	HAPClient *hapClient;
 	uint8_t aid;
 	uint8_t iid;
-	String  value;
 
-	HAPEvent(){};
-	HAPEvent(HAPClient *hapClient_, uint8_t aid_, uint8_t iid_, String  value_) : hapClient(hapClient_), aid(aid_), iid(iid_), value(value_){};
+	HAPEvent(){
+		hapClient = nullptr;
+		aid = 0;
+		iid = 0;
+	};
+
+	HAPEvent(HAPClient *hapClient_, uint8_t aid_, uint8_t iid_) : hapClient(hapClient_), aid(aid_), iid(iid_){};
 };
 
 
@@ -70,7 +74,7 @@ public:
 };
 
 
-template<typename F> 
+template<typename F>
 class GenericCallable : public EventListener
 {
 	F* mf;
@@ -88,7 +92,7 @@ public:
 };
 
 
-template<class C> 
+template<class C>
 class MemberFunctionCallable : public EventListener
 {
 	typedef void (C::*memberfPointer)( int, struct HAPEvent );
@@ -202,18 +206,18 @@ public:
 		kEventUpdatedConfig             = 102,
 		kEventConfigReset               = 103,
 
-		
+
 		kEventNotifyController          = 110,
 		kEventNotifyAccessory           = 111,
-		
+
 		kEventPairingStep1              = 120,
 		kEventPairingStep2              = 121,
 		kEventPairingStep3              = 122,
-		kEventPairingStep4              = 123,     
+		kEventPairingStep4              = 123,
 		kEventPairingComplete           = 124,
 
 		kEventVerifyStep1               = 130,
-		kEventVerifyStep2               = 131,   
+		kEventVerifyStep2               = 131,
 		kEventVerifyComplete            = 132,
 
 		kEventAllPairingsRemoved        = 140,
@@ -272,7 +276,7 @@ public:
 	int getNumEventsInQueue( EventPriority pri = kHighPriority );
 
 	// Number of specified eventCode in queue
-	int getNumEventCodeInQueue( int eventCode, EventPriority pri = kHighPriority); 
+	int getNumEventCodeInQueue( int eventCode, EventPriority pri = kHighPriority);
 
 	// tries to insert an event into the queue;
 	// returns true if successful, false if the
@@ -284,11 +288,12 @@ public:
 	// this must be called regularly (usually by calling it inside the loop() function)
 	int processEvent();
 
+	int processEvent(int eventCode, struct HAPEvent param);
+
 	// this function can be called to process ALL events in the queue
 	// WARNING:  if interrupts are adding events as fast as they are being processed
 	// this function might never return.  YOU HAVE BEEN WARNED.
 	int processAllEvents();
-
 
 	// EventQueue class used internally by EventManager
 	class EventQueue
@@ -322,7 +327,6 @@ public:
 		// Tries to extract an event from the queue;
 		// Returns true if successful, false if the queue is empty (the parameteres are not touched in this case)
 		boolean popEvent( int* eventCode, struct HAPEvent* eventParam );
-
 	private:
 
 		// Event queue size.
@@ -519,8 +523,6 @@ inline boolean EventManager::popEvent(int* eventCode, struct HAPEvent* eventPara
 	return ( pri == kHighPriority ) ?
 		mHighPriorityQueue.popEvent( eventCode, eventParam ) : mLowPriorityQueue.popEvent( eventCode, eventParam );
 }
-
-
 
 //*********  INLINES   EventManager::EventQueue::  ***********
 

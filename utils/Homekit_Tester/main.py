@@ -35,12 +35,13 @@ class TestReport(object):
 
     """docstring for ClassName"""
 
-    def __init__(self, desc=None, args=None, gitCommit=None):
+    def __init__(self, desc=None, args=None, gitCommit=None, iterations=None):
         super(TestReport, self).__init__()
 
         self.args = args
         self.desc = desc
         self.gitCommit = gitCommit
+        self.iterations = iterations
         self.passed = True
         self.steps = []
         self.startTime = dt.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -106,6 +107,7 @@ class TestReport(object):
             ["Git Commit", self.gitCommit],
             ["Date", self.startTime],
             ["Passed", self.passed],
+            ["Iterations", self.iterations],
             ["Steps", self.stepsCount()],
             ["Duration", str(self.getTotalDuration()) + " ms"]
         ]
@@ -145,6 +147,7 @@ class TestReport(object):
         data["git"] = self.gitCommit
         data["date"] = self.startTime
         data["passed"] = self.passed
+        data["iterations"] = self.iterations
         data["steps"] = []
 
 
@@ -169,6 +172,7 @@ class TestReport(object):
                     ["Git Commit", self.gitCommit],
                     ["Date", self.startTime],
                     ["Passed", ":white_check_mark:" if self.passed == True else ":red_circle:"  ],
+                    ["Iterations", self.iterations],
                     ["Steps", self.stepsCount()],
                     ["Duration", str(self.getTotalDuration()) + " ms"]
                 ]
@@ -214,13 +218,15 @@ class TestReport(object):
 
 
         result += "\n"
-        result += "## Report Details" + "\n"
-        result += "<details>" + "\n"
-        result += "<summary>Click this to collapse/fold.</summary>" + "\n"
-        result += "<pre><code>" + "\n"
-        result += json.dumps(self.toJson(), indent=4) + "\n"
-        result += "</code></pre>" + "\n"
-        result += "</details>" + "\n"
+
+        if self.iterations <= 100:
+            result += "## Report Details" + "\n"
+            result += "<details>" + "\n"
+            result += "<summary>Click this to collapse/fold.</summary>" + "\n"
+            result += "<pre><code>" + "\n"
+            result += json.dumps(self.toJson(), indent=4) + "\n"
+            result += "</code></pre>" + "\n"
+            result += "</details>" + "\n"
 
         return result
 
@@ -326,7 +332,7 @@ class HomekitTester(object):
 
         self.createStorageFile()
 
-        self.report = TestReport(args=' '.join(sys.argv[0:]), gitCommit=self.args.gitCommit)
+        self.report = TestReport(args=' '.join(sys.argv[0:]), gitCommit=self.args.gitCommit, iterations=self.args.iterations)
 
         self.requestedEntry = 0
 
@@ -371,6 +377,8 @@ class HomekitTester(object):
     def uploadReportToGitlab(self, section = 'synologynas', configFile = './gitlab.ini', projectName = "Teensy_Homekit"):
         gl = gitlab.Gitlab.from_config(section, [configFile])
 
+        cprint('"Uploading to gitlab {a}"'.format(a=gl.url), "green")
+
         # list all the projects
         projects = gl.projects.list()
         for project in projects:
@@ -380,15 +388,16 @@ class HomekitTester(object):
                 date_time = now.strftime("%Y-%m-%d")
                 #print("date and time:",date_time)
 
-                project.wikis.create({'title': 'Testreports/Testreport ' + date_time,
+                project.wikis.create({'title': 'Testreports/Testreport ' + date_time + ' ' + str(self.args.iterations),
                                     'content': self.report.toMarkDown(self.accessoryData)})
 
                 # Add to Testreport Overview
                 page = project.wikis.get('Testreport-Overview')
                 addLine = "| " + date_time
+                addLine += " | " + str(self.args.iterations)
                 addLine += " | :white_check_mark:" if self.report.passed == True else " | :red_circle:"
                 addLine += " | " + self.report.gitCommit
-                addLine += " | " + "[report](Testreports/Testreport " + date_time + ")"
+                addLine += " | " + "[report](Testreports/Testreport " + date_time + " " + str(self.args.iterations) + ")"
                 addLine += " |\n"
 
                 page.content = page.content + addLine
@@ -799,7 +808,7 @@ class HomekitTester(object):
         print("Waiting for {} events ...".format(self.args.eventCount))
 
         self.eventCount = 0
-        
+
         try:
 
             with TimingManager(testname, loggingArray) as tm:
@@ -869,7 +878,7 @@ class HomekitTester(object):
             self.report.addStep(testname, False, loggingArray,"{a}".format(a=e))
             logging.debug(e, exc_info=True)
             return 0, None
-        
+
         return 1, None
 
     @measure
@@ -899,8 +908,8 @@ class HomekitTester(object):
             self.report.addStep(testname, False, loggingArray,"{a}".format(a=e))
             logging.debug(e, exc_info=True)
             return 0, None
-        
-        return 1, None        
+
+        return 1, None
 
     @measure
     def listPairings(self, testname):
@@ -945,7 +954,7 @@ class HomekitTester(object):
         alias = self.args.alias + "+add"
         print("")
         try:
-            
+
             with TimingManager(testname, loggingArray) as tm:
                 pairings = self.controller.get_pairings()
                 if alias in pairings:
@@ -1058,7 +1067,7 @@ class HomekitTester(object):
             cprint('"{a}" is no known alias'.format(a=alias), "red")
             self.report.addStep(testname, False, loggingArray,'"{a}" is no known alias'.format(a=alias))
             return -1, None
-        
+
         print("")
         try:
             with TimingManager(testname, loggingArray) as tm:
@@ -1278,26 +1287,26 @@ class HomekitTester(object):
             historyData = bytearray()
 
             allPassed = True
-            while self.requestedEntry < info["size"]:
+            if int(info["used"] > 0):
+                while self.requestedEntry < info["size"]:
 
-                if self.args.quiet == False:
-                    print("requestedEntry: " + str(self.requestedEntry))
+                    if self.args.quiet == False:
+                        print("requestedEntry: " + str(self.requestedEntry))
 
-                self.putHistoryAddress(self.requestedEntry + 1)
-                passed, data = self.getHistoryEntry()
-                if passed == True:
-                    base64_bytes = base64.b64decode(data[(2, 19)]["value"])
+                    self.putHistoryAddress(self.requestedEntry + 1)
+                    passed, data = self.getHistoryEntry()
+                    if passed == True:
+                        base64_bytes = base64.b64decode(data[(2, 19)]["value"])
 
-                    hexdata = "".join(map(lambda b: format(b, "02x"), base64_bytes))
-                    historyData.extend(bytearray.fromhex(hexdata))
-                else:
-                    allPassed = False
+                        hexdata = "".join(map(lambda b: format(b, "02x"), base64_bytes))
+                        historyData.extend(bytearray.fromhex(hexdata))
+                    else:
+                        allPassed = False
 
-                self.requestedEntry += 16
+                    self.requestedEntry += 16
 
-                if self.requestedEntry > info["used"] or data[(2,19)]["value"] == "AA==":
-                    break
-
+                    if self.requestedEntry > info["used"] or data[(2,19)]["value"] == "AA==":
+                        break
 
             self.fakegatoHistories.append(historyData)
 
@@ -1393,12 +1402,13 @@ if __name__ == '__main__':
         #tester.runTest("putCharacteristic", tester.putCharacteristic, characteristicsPut)
         tester.runTest("getAccessories", tester.getAccessories)
 
-        tester.runTest("listenEvents", tester.listenEvents)
+        #tester.runTest("listenEvents", tester.listenEvents)
 
         passed, fakegatoHistories = tester.runFakegato()
 
-        for historyEntry in fakegatoHistories:
-            tester.openInHexFiend(historyEntry)
+        if fakegatoHistories != None:
+            for historyEntry in fakegatoHistories:
+                tester.openInHexFiend(historyEntry)
 
 
         tester.runTest("pair", tester.pair)
@@ -1428,11 +1438,14 @@ if __name__ == '__main__':
 
         for i in range(0, args.iterations):
             print(k, i)
-            time.sleep(0.3)
+            time.sleep(0.1)
             tester.runTest("pair", tester.pair)
             tester.runTest("getAccessories", tester.getAccessories)
             tester.runTest("removePairing", tester.removePairing)
 
+    tester.runTest("pair", tester.pair)
+    tester.runTest("listenEvents", tester.listenEvents)
+    tester.runTest("removePairing", tester.removePairing)
 
     if args.summary == True:
         tester.printSummary()

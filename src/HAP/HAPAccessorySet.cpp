@@ -8,11 +8,9 @@
 
 #include "HAPAccessorySet.hpp"
 #include "HAPHelper.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPGlobals.hpp"
 #include "HAPServer.hpp"
-
-#include <WString.h>
 
 #include <mbedtls/sha512.h>
 #if defined ( ARDUINO_ARCH_ESP32)
@@ -60,10 +58,6 @@ FLASHMEM
 void HAPAccessorySet::addAccessoryInfo(){
 	HAPAccessory *accessory = new HAPAccessory();
 	accessory->addInfoService(modelName(), HAP_MANUFACTURER, HAP_MODELL_NAME, "44-22-777", NULL, hap.versionString());
-
-	// HAPCharacteristicString *fwCha = new HAPCharacteristicString(charType_firmwareRevision, permission_read, 32);
-	// fwCha->setValue(hap.versionString());
-	// accessory->addCharacteristics(infoService, fwCha);
 
 	addAccessory(accessory);
 }
@@ -205,10 +199,21 @@ FLASHMEM
 #endif
 void HAPAccessorySet::generateXMI(){
 
-	String tmp = _configuration->pincode;
-	tmp.replace("-", "");
+	// String tmp1 = _configuration->pincode;
+	// tmp1.replace("-", "");
+	// int lowValue = atoi(tmp1.c_str());
 
-	int lowValue = atoi(tmp.c_str());
+	// XXX-XX-XXX
+	// X-HM://0023ISZCGUPFT
+	char tmp[9] = {'\0',};
+	memcpy(tmp, _configuration->pincode, 3);
+	memcpy(tmp + 3, _configuration->pincode + 4, 2);
+	memcpy(tmp + 5, _configuration->pincode + 7, 3);
+	// int lowValue = atoi(tmp);
+	uint32_t lowValue = atol(tmp);
+
+	// LOG_E("tmp1: %s\n", tmp1.c_str());
+	// LOG_E("tmp: %s\n", tmp);
 
 	lowValue |= 1 << 28;
 
@@ -221,7 +226,7 @@ void HAPAccessorySet::generateXMI(){
 
 	int error_code = mbedtls_mpi_lset(&bignumLow, lowValue);
 	if (error_code != 0){
-		Serial.println("ERROR 1!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_lset\n");
 	}
 
 
@@ -232,7 +237,7 @@ void HAPAccessorySet::generateXMI(){
 	int dstLowLen = olenLow;
 	error_code = mbedtls_mpi_write_string(&bignumLow, 16, dstLow, dstLowLen, &olenLow);
 	if (error_code != 0){
-		Serial.println("ERROR 2!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_write_string\n");
 	}
 
 
@@ -243,7 +248,7 @@ void HAPAccessorySet::generateXMI(){
 
 	error_code = mbedtls_mpi_read_string(&bignumHigh, 16, dst2);
 	if (error_code != 0){
-		Serial.println("ERROR 3!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_read_string\n");
 	}
 
 
@@ -254,7 +259,7 @@ void HAPAccessorySet::generateXMI(){
 	int dstlen3 = olen2;
 	error_code = mbedtls_mpi_write_string(&bignumHigh, 16, dst3, dstlen3, &olen2);
 	if (error_code != 0){
-		Serial.println("ERROR 4!!!");
+		LOG_E("ERROR: Failed to mbedtls_mpi_write_string\n");
 	}
 
 	char dest[9];
@@ -317,62 +322,11 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
 	return false;
 }
 
-
-// String HAPAccessorySet::describe() {
-//     int numberOfAcc = numberOfAccessory();
-//     String *desc = new String[numberOfAcc];
-
-//     for (int i = 0; i < numberOfAcc; i++) {
-//         desc[i] = _accessories[i]->describe();
-//     }
-
-
-//     String result = HAPHelper::arrayWrap(desc, numberOfAcc);
-//     delete [] desc;
-//     String key = "accessories";
-//     result = HAPHelper::dictionaryWrap(&key, &result, 1);
-
-//     return result;
-// }
-
-
-
-// #if defined(ARDUINO_TEENSY41)
-// FLASHMEM
-// #endif
-// void HAPAccessorySet::toJson(JsonArray& array){
-
-// 	for (int i = 0; i < numberOfAccessory(); i++) {
-//         _accessories[i]->toJson(array);
-//     }
-// }
-
-// #if defined(ARDUINO_TEENSY41)
-// FLASHMEM
-// #endif
-// int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
-// 	HAPCharacteristic *c = getCharacteristics(aid, iid);
-// 	if (c != nullptr) {
-// 		*outSize = c->valueString().length() + 1;
-// 		if (out != NULL){
-// 			c->valueString().toCharArray(out, *outSize);
-// 		}
-// 		return 0;
-// 	}
-// 	return HAP_STATUS_RESOURCE_NOT_FOUND;
-// }
-
-
 HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t iid){
 	HAPAccessory* accessory = accessoryWithAID(aid);
 
 	if (accessory == nullptr) {
-
-		LogE("[ERROR] Accessory with aid: ", false);
-		LogE(String(aid), false);
-		LogE(" not found! - ErrorCode: ", false);
-		LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
-
+		LOG_E("ERROR: Accessory with aid: %d not found - Error Code %d\n", aid, HAP_STATUS_RESOURCE_NOT_FOUND);
 		//error_code = HAP_STATUS_RESOURCE_NOT_FOUND;
 		//errorOccured = true;
 		return nullptr;
@@ -381,12 +335,7 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 		HAPCharacteristicBase* chr = accessory->characteristicWithIID(iid);
 
 		if (chr == nullptr) {
-			LogE("[ERROR] Characteristics with aid: ", false);
-			LogE(String(aid), false);
-			LogE(" - iid: ", false);
-			LogE(String(iid), false);
-			LogE(" not found! - ErrorCode: ", false);
-			LogE(String(HAP_STATUS_RESOURCE_NOT_FOUND), true);
+			LOG_E("ERROR: Characteristics %d.%d not found - Error Code %d\n", aid, iid, HAP_STATUS_RESOURCE_NOT_FOUND);
 			return nullptr;
 		} else {
 			return chr;

@@ -54,7 +54,7 @@ public:
 	void validateConfig() override;
 	bool validConfig() override;
 
-
+	void logDataMap();
 	void printDataMapTo(Print& prt);
 protected:
 
@@ -62,8 +62,10 @@ protected:
 	EEPROMClass* _eeprom;
 #endif
 
-
 	void buildDataMap();
+
+	uint32_t readLong(int address);
+	void writeLong(int address, uint32_t value);
 
 	size_t writeBytes(const char* label, const uint8_t* input, const size_t expectedDataLen) override;
 	size_t readBytes(const char* label, uint8_t* output, const size_t expectedDataLen) override;

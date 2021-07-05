@@ -13,7 +13,7 @@
 #include <Arduino.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
-#include "HAPCharacteristicBase.hpp"
+#include "HAPCharacteristic.hpp"
 #include "EventManager.h"
 
 #include "HAPFakegato.hpp"
@@ -43,7 +43,7 @@ protected:
     uint16_t                _koReadState;
     uint16_t                _koWriteState;
 
-    HAPCharacteristicT<bool>*  _stateValue;
+    HAPCharacteristic<bool>*  _stateValue;
 
     // HAPCharacteristicString* 	_lastUpdate;
 

@@ -10,9 +10,14 @@
 #define HAPVERSION_HPP_
 
 #include <Arduino.h>
-#include "HAPBuildnumber.hpp"
-#include "HAPGlobals.hpp"
 
+#if !defined(HOMEKIT_VERSION_BUILD)
+#include "HAPBuildnumber.hpp"
+#endif
+
+#if !defined(HOMEKIT_VERSION_MAJOR)
+#include "HAPVersionHomekit.hpp"
+#endif
 
 /* Build automated generated version number */
 #define HOMEKIT_VERSION \
@@ -73,13 +78,13 @@ struct HAPVersion {
 		build = other.build;
 	}
 
-	String toString(){
-		char str[32];
+	std::string toString(){
+		char str[32] = {'\0',};
 		sprintf(str, "%d.%d.%d+%d", major, minor, revision, build);
-		return String(str);
+		return std::string(str);
 	}
 
-	static String featureRev(){
+	static std::string featureRev(){
 		const char* binaryString = HAP_PLUGIN_FEATURE_NUMBER;
 
 		// convert binary string to integer
@@ -89,7 +94,7 @@ struct HAPVersion {
 		char hexString[32]; // long enough for any 32-bit value, 4-byte aligned
 		sprintf(hexString, "%llx", value);
 
-		return String(hexString);
+		return std::string(hexString);
 	}
 
 	static uint64_t featureRevToInt(const char* rev){

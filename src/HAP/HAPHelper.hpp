@@ -10,6 +10,7 @@
 #define HAPHELPER_HPP_
 
 #include <Arduino.h>
+#include <string>
 // #include <ArduinoJson.h>
 // #include "HAPGlobals.hpp"
 
@@ -93,8 +94,8 @@ public:
 	static void getPartionTableInfo();
 #endif
 
-	static void mpi_print(const char* tag, const mbedtls_mpi* x);
-	static void array_print(const char* tag, const unsigned char* buf, int len);
+	static void mpi_print(const char* tag, const mbedtls_mpi* x) __attribute__ ((deprecated));
+	static void array_print(const char* tag, const unsigned char* buf, int len) __attribute__ ((deprecated));
 
 
 
@@ -105,12 +106,14 @@ public:
 	// rounds a number to 2 decimal places
 	// example: round(3.14159) -> 3.14
 	static double round2(double value) {
-   		return (int)(value * 100 + 0.5) / 100.0;
+   		return (int)(value * 100) / 100.0;
 	}
 
 	static int indexOf(const char* array, int arr_size, char to_find, int startPos = 0);
 	static bool startsWith(const char *str, const char *pre);
 
+
+	static int indexOf(std::string str, const char* ch);
 };
 
 // template<typename T>

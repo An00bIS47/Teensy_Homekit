@@ -1162,7 +1162,7 @@ void HAPWebServer::handleApiRestart(HTTPRequest *req, HTTPResponse *res)
     res->println("{ \"restart\": \"in 3 sec\" }");
     res->print("");
 
-    struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
+    struct HAPEvent event = HAPEvent(nullptr, 0, 0);
 	_eventManager->queueEvent( EventManager::kEventRebootNow, event);
 }
 
@@ -1183,7 +1183,7 @@ void HAPWebServer::handleApiReset(HTTPRequest *req, HTTPResponse *res)
     res->println("{ \"restart\": \"in 3 sec\" }");
     res->print("");
 
-    struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
+    struct HAPEvent event = HAPEvent(nullptr, 0, 0);
 	_eventManager->queueEvent( EventManager::kEventRebootNow, event);
 }
 
@@ -1239,7 +1239,7 @@ void HAPWebServer::handleApiKeystorePost(HTTPRequest * req, HTTPResponse * res){
         res->setStatusCode(201);
         res->setStatusText("Created");
 
-        struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
+        struct HAPEvent event = HAPEvent(nullptr, 0, 0);
 	    _eventManager->queueEvent( EventManager::kEventRebootNow, event);
 
         return;

@@ -7,25 +7,10 @@
 //
 
 #include "HAPFakegato+ScheduleEnergy.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPHelper.hpp"
 #include "HAPTLV8.hpp"
 #include "HAPTime.hpp"
-
-#if defined ( ARDUINO_ARCH_ESP32 )
-#if ESP_IDF_VERSION_MAJOR == 4
-#include "mbedtls/base64.h"
-#else
-extern "C" {
-    #include "crypto/base64.h"
-}
-
-#endif
-#elif defined(CORE_TEENSY)
-#include <Base64.h>
-#endif
-
-
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
@@ -44,8 +29,8 @@ void HAPFakegatoScheduleEnergy::decodeDays(uint8_t *data){
 	_days = HAPFakeGatoScheduleDays(daysnumber);
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-	Serial.printf("M T W T F S S \n");
-	Serial.printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
+	LOGDEVICE->printf("M T W T F S S \n");
+	LOGDEVICE->printf("%d %d %d %d %d %d %d \n", _days.mon, _days.tue, _days.wed, _days.thu, _days.fri, _days.sat, _days.sun);
 #endif
 }
 
@@ -104,7 +89,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 				tEvent.offset = ((timer >> 5) * 60);
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-				Serial.printf("hour: %d, min: %d, offset: %d state: %d type: %d \n", tEvent.hour, tEvent.minute, tEvent.offset, tEvent.state, tEvent.type);
+				LOGDEVICE->printf("hour: %d, min: %d, offset: %d state: %d type: %d \n", tEvent.hour, tEvent.minute, tEvent.offset, tEvent.state, tEvent.type);
 #endif
 			} else if ((timer & 0x1F) == 7 || (timer & 0x1F) == 3) {
 				tEvent.sunrise = static_cast<HAPFakeGatoScheduleSunriseType>(((timer >> 5) & 0x01));    // 1 = sunrise, 0 = sunset
@@ -112,7 +97,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 				tEvent.offset  = ((timer >> 6) & 0x01 ? ~((timer >> 7) * 60) + 1 : (timer >> 7) * 60);   // offset from sunrise/sunset (plus/minus value)
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-				Serial.printf("sunrise: %d, offset: %d state: %d type: %d \n", tEvent.sunrise, tEvent.offset, tEvent.state, tEvent.type);
+				LOGDEVICE->printf("sunrise: %d, offset: %d state: %d type: %d \n", tEvent.sunrise, tEvent.offset, tEvent.state, tEvent.type);
 #endif
 			}
 
@@ -258,7 +243,7 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-String HAPFakegatoScheduleEnergy::scheduleRead(){
+void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len){
     TLV8 tlv;
 
 	//
@@ -424,9 +409,9 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
 	}
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_LAST_ACTIVITY, 4, secsLastAct.ui8); // offset ?
 
-#if HAP_DEBUG_FAKEGATO_SCHEDULE
-	// HAPHelper::array_print("secsLastAct", secsLastAct.ui8, 4);
-#endif
+// #if HAP_DEBUG_FAKEGATO_SCHEDULE
+// 	HAPHelper::array_print("secsLastAct", secsLastAct.ui8, 4);
+// #endif
 
 	//
     //  EVE Time
@@ -436,9 +421,9 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
     secs.ui32 = (timestampLastEntry() - HAPTime::refTime());
 	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_EVE_TIME, 4, secs.ui8); // offset ?
 
-#if HAP_DEBUG_FAKEGATO_SCHEDULE
-	// HAPHelper::array_print("secs", secs.ui8, 4);
-#endif
+// #if HAP_DEBUG_FAKEGATO_SCHEDULE
+// 	HAPHelper::array_print("secs", secs.ui8, 4);
+// #endif
 
 	//
     // end mark
@@ -446,55 +431,40 @@ String HAPFakegatoScheduleEnergy::scheduleRead(){
     uint8_t endBytes[2] = {HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK, 0x00};
 
     size_t decodedLen = 0;
-	uint8_t out[tlv.size() + 2];
+	// uint8_t out[tlv.size() + 2];
 
-	tlv.decode(out, &decodedLen);
+
+	if (!output) {
+		*len = (tlv.size() + 2);
+		return;
+	}
+
+	tlv.decode(output, &decodedLen);
 
     // attach endingBytes
-    memcpy(out + decodedLen, endBytes, 2);
-    decodedLen = decodedLen + 2;
+    memcpy(output + decodedLen, endBytes, 2);
+    *len = decodedLen + 2;
 
 	tlv.clear();
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-    HAPHelper::array_print("tlv", out, decodedLen);
+    HAPHelper::array_print("tlv", output, decodedLen);
 #endif
 
-
-#if defined( ARDUINO_ARCH_ESP32 )
-	return base64::encode(out, decodedLen);
-#elif defined( CORE_TEENSY )
-	int encodedLen = base64_enc_len(decodedLen);
-	char encoded[encodedLen];
-
-	base64_encode(encoded, (char*)out, decodedLen);
-	return String(encoded);
-#endif
 }
 
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-void HAPFakegatoScheduleEnergy::scheduleWrite(String oldValue, String newValue){
-    LogD(HAPTime::timeString() + " " + "HAPFakegatoScheduleEnergy" + "->" + "scheduleWrite" + " [   ] " + "Schedule Write " + _name + " ..." , true);
-
-    // size_t outputLength = 0;
-    // mbedtls_base64_decode(NULL, 0, &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
-    // uint8_t decoded[outputLength];
-
-    // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength, (const uint8_t*)newValue.c_str(), newValue.length());
-
-	size_t outputLength = base64_dec_len((char*)newValue.c_str(), newValue.length());
-	uint8_t decoded[outputLength];
-	base64_decode((char*)decoded, (char*)newValue.c_str(), newValue.length());
+void HAPFakegatoScheduleEnergy::callbackSetSchedule(const uint8_t* decoded, const size_t len){
 
 #if HAP_DEBUG_FAKEGATO_SCHEDULE
-    HAPHelper::array_print("decoded", decoded, outputLength);
+    HAPHelper::array_print("decoded", decoded, len);
 #endif
 
     TLV8 tlv;
-    tlv.encode(decoded, outputLength);
+    tlv.encode((uint8_t*)decoded, len);
 
     if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE)){
         TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE);
@@ -521,8 +491,6 @@ void HAPFakegatoScheduleEnergy::scheduleWrite(String oldValue, String newValue){
 
     // _configReadCharacteristics->setValue(_schedule->buildScheduleString(), false);
 	saveConfig();
-
-	LogD("OK", true);
 
 	tlv.clear();
 }

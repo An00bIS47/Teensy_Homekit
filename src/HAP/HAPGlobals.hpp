@@ -73,16 +73,6 @@
 #define HOMEKIT_CONFIGURATION_NUMBER 		1		// Internal - keep value at 1
 #define HAP_BATTERY_LEVEL_LOW_THRESHOLD		15		// Battery threshold for alert
 
-
-
-/**
- * Version
- ********************************************************************/
-#define HOMEKIT_VERSION_MAJOR 		0
-#define HOMEKIT_VERSION_MINOR 		9
-#define HOMEKIT_VERSION_REVISION 	0
-
-
 /**
  * Debug
  ********************************************************************/

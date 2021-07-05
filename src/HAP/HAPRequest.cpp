@@ -26,17 +26,17 @@ HAPRequest::~HAPRequest() {
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-String HAPRequest::toString() const {
-	String result = F("method: ");
+std::string HAPRequest::toString() const {
+	std::string result = "method: ";
 	result += method;
 
-	result += F("\npath: ");
+	result += "\npath: ";
 	result += path;
 
-	result += F("\ncontentType: ");
+	result += "\ncontentType: ";
 	result += contentType;
 
-	result += F("\ncontentLength: ");
+	result += "\ncontentLength: ";
 	result += contentLength;
 
 	return result;

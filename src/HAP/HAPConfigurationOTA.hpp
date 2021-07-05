@@ -12,7 +12,7 @@
 #include <Arduino.h>
 #include <functional>
 #include "HAPGlobals.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPHelper.hpp"
 #include "HAPConfigurationItem.hpp"
 
@@ -66,7 +66,7 @@ public:
 			uint8_t size = strlen(rhs.password);
 
 			if (size > 32) {
-				LogE(F("ERROR: PASSWORD is too long!"), true);
+				LOG_E("ERROR: PASSWORD is too long!\n");
 				return;
 			}
 			strncpy(password, rhs.password, 32);
@@ -93,7 +93,7 @@ public:
 			uint8_t size = strlen(rhs.password);
 
 			if (size > 32) {
-				LogE(F("ERROR: PASSWORD is too long!"), true);
+				LOG_E("ERROR: PASSWORD is too long!\n");
 				return (*this);
 			}
 			strncpy(password, rhs.password, 32);

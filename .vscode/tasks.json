@@ -1,0 +1,143 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "PlatformIO",
+            "task": "Monitor",
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo ${workspaceFolder}",
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "PlatformIO: Custom Build",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "PlatformIO: Custom Build+Upload",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}",
+                "-t",
+                "upload"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "PlatformIO: Custom Clean",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}",
+                "-t",
+                "clean"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "PlatformIO: Teensy Size",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "-e",
+                "${input:envName}",
+                "-t",
+                "teensy_size"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Increment Buildnumber+Version",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "scripts/platformio/pre_increment_version.py"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Tycmd: Reset",
+            "type": "shell",
+            "command": "tycmd",
+            "args": [
+                "reset"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Tycmd: Monitor",
+            "type": "shell",
+            "command": "tycmd",
+            "args": [
+                "monitor"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "Tycmd: List",
+            "type": "shell",
+            "command": "tycmd",
+            "args": [
+                "list",
+                "-v"
+            ],
+            "problemMatcher": [
+                "$platformio"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+          "type": "pickString",
+          "id": "envName",
+          "description": "For what environment do you want to do it?",
+          "options": [
+            "teensy_41",
+            "teensy_41_debug"
+          ],
+          "default": "teensy_41"
+        }
+      ]
+}

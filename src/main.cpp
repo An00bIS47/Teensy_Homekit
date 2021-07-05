@@ -7,15 +7,9 @@
 //      Author: michael
 //
 #include <Arduino.h>
-
-#include "HAP/HAPLogger.hpp"
 #include "HAP/HAPServer.hpp"
-#include "HAP/HAPGlobals.hpp"
 
-#include "HAP/HAPHelper.hpp"
-#include "HAP/HAPVersion.hpp"
-
-#if defined(TEENSY_DEBUG)
+#if TEENSY_DEBUG
 #include "TeensyDebug.h"
 #pragma GCC optimize ("O0")
 #endif
@@ -50,11 +44,6 @@
 // }
 // #endif
 
-
-
-
-
-
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
@@ -62,21 +51,25 @@ void setup() {
 
 	Serial.begin(115200);
 
-#if defined(TEENSY_DEBUG)
+
+
+#if TEENSY_DEBUG
 	debug.begin(SerialUSB1);
 #endif
 	while(!Serial){
 		;
 	}
 
+#if HAP_DEBUG
+	if ( Serial && CrashReport ) { // Make sure Serial is alive and there is a CrashReport stored.
+    	Serial.print(CrashReport); // Once called any crash data is cleared
+    	// In this case USB Serial is used - but any Stream capable output will work : SD Card or other UART Serial
+  	}
+#endif
+
 	// Imprint infos to firmware
 	Homekit_setFirmware("Homekit", HOMEKIT_VERSION, HOMEKIT_FEATURE_REV);
 	Homekit_setBrand(HAP_MANUFACTURER);
-
-	LogI( F("Starting Homekit "), false);
-	LogI( hap.versionString() + String( " ..."), true);
-	LogI( F("Log level: "), false);
-	LogI( String(HAPLogger::getLogLevel() ), true);
 
 #if defined(TEENSY_DEBUG)
 	// halt();

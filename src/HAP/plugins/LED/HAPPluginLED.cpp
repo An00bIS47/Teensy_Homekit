@@ -135,11 +135,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     _accessory->addService(_service);
 
 
-    HAPCharacteristicT<String>* lightServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+    HAPCharacteristic<String>* lightServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
     lightServiceName->setValue("LED");
     _accessory->addCharacteristicToService(_service, lightServiceName);
 
-    _powerState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+    _powerState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
     _powerState->setValue(_isOn);
 
     auto callbackPowerState = std::bind(&HAPPluginLED::changePower, this, std::placeholders::_1, std::placeholders::_2);
@@ -154,11 +154,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     // HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
     // _accessory->addService(switchService);
 
-    // HAPCharacteristicT<String>* plugServiceName = new HAPCharacteristicT<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+    // HAPCharacteristic<String>* plugServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
     // plugServiceName->setValue("LED");
     // _accessory->addCharacteristicToService(switchService, plugServiceName);
 
-    // _enabledState = new HAPCharacteristicT<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+    // _enabledState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
     // _enabledState->setDescription("Enabled");
     // _enabledState->setValue(_blinkingEnabled);
 

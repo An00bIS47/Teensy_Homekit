@@ -27,6 +27,9 @@ float HAPTime::_latitude = 0;
 uint32_t HAPTime::_refTime = 0;
 uint32_t HAPTime::_t_offset = 0;
 
+char HAPTime::_timestring[30] = {'\0',};
+
+
 callbackGetTime_t HAPTime::_callbackGetTime = nullptr;
 
 #if HAP_ENABLE_NTP
@@ -419,38 +422,44 @@ uint32_t HAPTime::timestamp(){
  *
  * @return String current time
  */
-String HAPTime::timeString(){
+const char* HAPTime::timeString(){
 
-    char buffer[30];
+    memset((uint8_t*)_timestring, '\0', 30);
+    
 #if defined( ARDUINO_ARCH_ESP32 )
     timeval curTime;
     gettimeofday(&curTime, NULL);
 
     if (String(HAP_NTP_TIME_FORMAT).endsWith(".%f")){
+        char tmp[30];
         const char* timeformat = String(HAP_NTP_TIME_FORMAT).substring(0, String(HAP_NTP_TIME_FORMAT).length() - 3).c_str();
-        strftime(buffer, 30, timeformat, localtime(&curTime.tv_sec));
+        strftime(tmp, 30, timeformat, localtime(&curTime.tv_sec));
 
         int milli = curTime.tv_usec / 1000;
-        char currentTime[45] = "";
-        sprintf(currentTime, "%s.%03d", buffer, milli);
+        
+        snprintf(_timestring, 30, "%s.%03d", tmp, milli);
 
-        return String(currentTime);
-    } else {
-        strftime(buffer, 30, HAP_NTP_TIME_FORMAT, localtime(&curTime.tv_sec));
-    }
+        return _timestring;
+    } 
+
+    strftime(_timestring, 30, HAP_NTP_TIME_FORMAT, localtime(&curTime.tv_sec));
+    return _timestring;
+    
 #elif defined( CORE_TEENSY )
 	if (timeStatus() != timeNotSet) {
 
 		struct tm curTtime;
 		convertToTimeH(now(), curTtime);
-		strftime(buffer, 30, HAP_NTP_TIME_FORMAT, &curTtime);
+		strftime(_timestring, 30, HAP_NTP_TIME_FORMAT, &curTtime);
 
-        return String(buffer);
+        return (const char*)_timestring;
 	} else {
-		return String(millis());
-	}
+        snprintf(_timestring, 30, "%" PRIu32, millis());
+        return (const char*)_timestring;
+    }
 #else
-    return String(millis());
+    snprintf(_timestring, 30, "%" PRIu32, millis());
+    return (const char*)_timestring;
 #endif
 }
 

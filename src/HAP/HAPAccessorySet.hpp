@@ -95,18 +95,13 @@ public:
 	const char* xhm();
 	const char* setupHash();
 
-	// String describe();
-	// void toJson(JsonArray& array) __attribute__ ((deprecated));
-
 	void printTo(Print& print);
-
 
 	bool removeAccessory(HAPAccessory *acc);
 	void addAccessory(HAPAccessory *acc);
 
 	HAPAccessory* accessoryAtIndex(uint8_t index);
 	HAPAccessory* accessoryWithAID(uint8_t aid);
-
 
 
 	int32_t getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize);
@@ -136,9 +131,6 @@ protected:
 	// String 		_setupID;
 	char		_setupHash[9] = {0,};
 	char		_xhm[21] = {0,};
-
-	// String 		_modelName;
-	// String 		_pinCode;	// xxx-xx-xxx
 
 private:
 	void computeSetupHash();

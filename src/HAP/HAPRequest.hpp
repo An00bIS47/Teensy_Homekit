@@ -28,17 +28,18 @@ public:
 	~HAPRequest();
 
 
-	HAPServerMethod 			method;
-	String 						path;
-	String 						contentType;
-	uint16_t 					contentLength;
-	TLV8						tlv;
-	std::map<String, String> 	params;
+	HAPServerMethod 	method;
+	std::string 		path;
+	std::string 		contentType;
+	uint16_t 			contentLength;
+	TLV8				tlv;
+
+	std::map<std::string, std::string> params;
 
 	void clear();
 
 #if HAP_DEBUG_HOMEKIT
-	String toString() const;
+	std::string toString() const;
 #endif
 private:
 
