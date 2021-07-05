@@ -121,11 +121,11 @@ public:
     HAPFakegato();
     virtual ~HAPFakegato();
 
-    virtual HAPService* registerFakeGatoService(HAPAccessory* accessory, const String& name);
+    virtual HAPService* registerFakeGatoService(HAPAccessory* accessory, const char* name);
 
     void addEntry(uint8_t bitmask);
 
-    String name() { return _name; }
+    const char* name() { return _name.c_str(); }
 
     uint32_t timestampLastEntry(){
         return _entries[_entries.size() - 1]->timestamp;
@@ -301,7 +301,7 @@ protected:
 
     std::function<bool()> _callbackAddEntry = nullptr;
 
-    String  _name;
+    std::string _name;
     size_t  _requestedIndex = 0;
 
     uint32_t _previousMillis = 0;

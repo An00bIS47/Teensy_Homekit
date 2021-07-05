@@ -182,35 +182,6 @@ void HAPAccessory::printTo(Print& print){
 }
 
 
-// String HAPAccessory::describe() const {
-
-//     String keys[2];
-//     String values[2];
-
-//     {
-//         keys[0] = "aid";
-//         char temp[8];
-//         sprintf(temp, "%d", aid);
-//         values[0] = temp;
-//     }
-
-//     {
-//         //Form services list
-//         int noOfService = numberOfService();
-//         String *services = new String[noOfService];
-//         for (int i = 0; i < noOfService; i++) {
-//             services[i] = _services[i]->describe();
-//         }
-//         keys[1] = "services";
-//         values[1] = HAPHelper::arrayWrap(services, noOfService);
-//         delete [] services;
-//     }
-
-
-//     return HAPHelper::dictionaryWrap(keys, values, 2);
-// }
-
-
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM

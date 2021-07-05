@@ -29,5 +29,5 @@ void HAPFakegatoFactory::registerFakeGato(HAPFakegato* fakegato, std::function<b
     fakegato->setInterval(interval);
     fakegato->registerCallbackAddEntry(callback);
     _fakegatos.push_back(fakegato);
-    LOG_I("Registered Fakegato for %s with size %d\n", fakegato->name().c_str(), _fakegatos.size());
+    LOG_I("Registered Fakegato for %s with size %d\n", fakegato->name(), _fakegatos.size());
 }

@@ -155,7 +155,7 @@ public:
         _timers.clear();
     }
 
-    HAPService* registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const String& name);
+    HAPService* registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const char* name);
 
     bool isEnabled(){
         return _timers.isEnabled();

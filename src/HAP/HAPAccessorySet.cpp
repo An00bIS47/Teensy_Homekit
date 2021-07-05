@@ -317,52 +317,6 @@ bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
 	return false;
 }
 
-
-// String HAPAccessorySet::describe() {
-//     int numberOfAcc = numberOfAccessory();
-//     String *desc = new String[numberOfAcc];
-
-//     for (int i = 0; i < numberOfAcc; i++) {
-//         desc[i] = _accessories[i]->describe();
-//     }
-
-
-//     String result = HAPHelper::arrayWrap(desc, numberOfAcc);
-//     delete [] desc;
-//     String key = "accessories";
-//     result = HAPHelper::dictionaryWrap(&key, &result, 1);
-
-//     return result;
-// }
-
-
-
-// #if defined(ARDUINO_TEENSY41)
-// FLASHMEM
-// #endif
-// void HAPAccessorySet::toJson(JsonArray& array){
-
-// 	for (int i = 0; i < numberOfAccessory(); i++) {
-//         _accessories[i]->toJson(array);
-//     }
-// }
-
-// #if defined(ARDUINO_TEENSY41)
-// FLASHMEM
-// #endif
-// int32_t HAPAccessorySet::getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize){
-// 	HAPCharacteristic *c = getCharacteristics(aid, iid);
-// 	if (c != nullptr) {
-// 		*outSize = c->valueString().length() + 1;
-// 		if (out != NULL){
-// 			c->valueString().toCharArray(out, *outSize);
-// 		}
-// 		return 0;
-// 	}
-// 	return HAP_STATUS_RESOURCE_NOT_FOUND;
-// }
-
-
 HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t iid){
 	HAPAccessory* accessory = accessoryWithAID(aid);
 

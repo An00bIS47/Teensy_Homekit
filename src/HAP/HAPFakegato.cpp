@@ -26,13 +26,14 @@ HAPFakegato::~HAPFakegato(){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const String& name){
+HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const char* name){
     _name = name;
+    char accName[64] = {'\0',};
+    sprintf(accName, "%s History", name);
 
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);
-
-    HAPCharacteristic<String>* accNameCha = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
-    accNameCha->setValue(name + " History");
+    HAPCharacteristic<std::string>* accNameCha = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    accNameCha->setValue(accName);
     accessory->addCharacteristicToService(fgService, accNameCha);
 
     uint8_t zeroValue[1] = {0x00};
@@ -92,9 +93,6 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
 
 void HAPFakegato::handle(bool forced){
     if ( shouldHandle() || forced ){
-        // This line could cause a crash
-        // LogD(HAPTime::timeString() + " " + String(__CLASS_NAME__) + "->" + String(__FUNCTION__) + " [   ] " + "Handle fakegato ", true);
-
         if (_periodicUpdates) {
             if (_callbackAddEntry != NULL){
                 bool overwritten = !_callbackAddEntry();
@@ -116,10 +114,8 @@ bool HAPFakegato::shouldHandle(){
 
         if ((unsigned long)(currentMillis - _previousMillis) >= _interval) {
 
-            // save the last time you blinked the LED
             _previousMillis = currentMillis;
 
-            //LogD("Handle plugin: " + String(_name), true);
             return true;
         }
     }
@@ -147,15 +143,6 @@ void HAPFakegato::addEntry(uint8_t bitmask){
 FLASHMEM
 #endif
 void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
-
-    // LogD(HAPTime::timeString(), false);
-    // LogD(F(" HAPFakegato->addDataToBuffer [   ] Adding entry for "), false);
-    // LogD(_name, false);
-    // LogD(F(" [size="), false);
-    // LogD(_entries.size(), false);
-    // LogD(F(" bitmask="), false);
-    // LogD(bitmask, false);
-    // LogD(F("]"), true);
 
     LOG_D("Adding entry for %s [size=%d bitmask=%d] - data length: %d\n", _name.c_str(), _entries.size(), bitmask, length);
 
@@ -326,10 +313,6 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
         memcpy(data + offset + currentOffset, _entries[_requestedIndex]->data, _entries[_requestedIndex]->length);
         currentOffset += _entries[_requestedIndex]->length;  // + 1 for bitmask !
 
-// #if HAP_DEBUG_FAKEGATO
-//         String t = "History Entry " + String(entryCounter);
-//         HAPHelper::array_print(t.c_str(), data + offset, currentOffset);
-// #endif
         offset += currentOffset;
         _requestedIndex++;
         entryCounter++;

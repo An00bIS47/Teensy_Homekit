@@ -95,18 +95,13 @@ public:
 	const char* xhm();
 	const char* setupHash();
 
-	// String describe();
-	// void toJson(JsonArray& array) __attribute__ ((deprecated));
-
 	void printTo(Print& print);
-
 
 	bool removeAccessory(HAPAccessory *acc);
 	void addAccessory(HAPAccessory *acc);
 
 	HAPAccessory* accessoryAtIndex(uint8_t index);
 	HAPAccessory* accessoryWithAID(uint8_t aid);
-
 
 
 	int32_t getValueForCharacteristics(uint8_t aid, uint8_t iid, char* out, size_t* outSize);

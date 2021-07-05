@@ -39,7 +39,7 @@ public:
 	void clear();
 
 #if HAP_DEBUG_HOMEKIT
-	String toString() const;
+	std::string toString() const;
 #endif
 private:
 

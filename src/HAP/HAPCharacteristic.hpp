@@ -57,6 +57,10 @@
 #define HAP_HOMEKIT_DEFAULT_STRING_LENGTH   64
 #endif
 
+#ifndef HAP_USE_STD_STRING
+#define HAP_USE_STD_STRING 1
+#endif
+
 enum {
 	HAP_PERMISSION_READ             = 1,        // Paired read
     HAP_PERMISSION_WRITE            = 1 << 1,   // Paired write

@@ -54,9 +54,12 @@ struct HAPSubscribtionItem {
 		return rhs.aid < this->aid || (rhs.aid == this->aid && rhs.iid < this->iid);
   	};
 
-	String describe() const {
-		return String(aid) + "." + String(iid);
+	std::string describe() const {
+		char tmp[10] = {'\0',};
+		sprintf(tmp, "%d.%d", aid, iid);
+		return std::string(tmp);
 	}
+
 };
 
 class HAPClient {
@@ -104,10 +107,6 @@ public:
 	bool isSubscribed(int aid, int iid) const;
 
 	std::set<HAPSubscribtionItem> subscribtions;
-
-#if HAP_API_ADMIN_MODE
-	String describe() const;
-#endif
 
 	const uint8_t* getId(){
 		return _idPtr;
