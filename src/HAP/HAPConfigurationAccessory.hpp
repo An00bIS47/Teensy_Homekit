@@ -152,7 +152,7 @@ public:
 			return true;
 		} else {
 			LOG_E("ERROR: Pairing id not found!\n");
-			HEXDUMP_D("id", id, HAP_PAIRINGS_ID_LENGTH);
+			LOGARRAY_D("id", id, HAP_PAIRINGS_ID_LENGTH);
 			return false;
 		}
 	}
@@ -167,8 +167,8 @@ public:
             item->isAdmin = isAdminPairing;
 
 #if HAP_DEBUG_PAIRINGS
-            HEXDUMP_D("ID", item->id, HAP_PAIRINGS_ID_LENGTH);
-            HEXDUMP_D("Key", item->key, HAP_PAIRINGS_LTPK_LENGTH);
+            LOGARRAY_D("ID", item->id, HAP_PAIRINGS_ID_LENGTH);
+            LOGARRAY_D("Key", item->key, HAP_PAIRINGS_LTPK_LENGTH);
 			LOG_D("isAdmin: %d\n", item->isAdmin);
 #endif
 

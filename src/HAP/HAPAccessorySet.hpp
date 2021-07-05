@@ -132,9 +132,6 @@ protected:
 	char		_setupHash[9] = {0,};
 	char		_xhm[21] = {0,};
 
-	// String 		_modelName;
-	// String 		_pinCode;	// xxx-xx-xxx
-
 private:
 	void computeSetupHash();
 	char randomChar(char* letters);

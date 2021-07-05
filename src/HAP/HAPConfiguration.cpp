@@ -191,10 +191,10 @@ void HAPConfiguration::toJson(Print& prt){
 	prt.print("\"plugins\": [");
 
 	auto &factory = HAPPluginFactory::Instance();
-    std::vector<String> names = factory.names();
+    std::vector<std::string> names = factory.names();
 
 	uint8_t counter = 0;
-    for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
+    for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
 
     	auto plugin = factory.getPlugin(*it);
 		plugin->configToJson(prt);
@@ -205,7 +205,6 @@ void HAPConfiguration::toJson(Print& prt){
 		counter++;
     }
 	prt.print("]");
-
 
 	prt.print("}");
 }
@@ -808,10 +807,10 @@ FLASHMEM
 #endif
 bool HAPConfiguration::savePluginConfig(){
 	auto &factory = HAPPluginFactory::Instance();
-    std::vector<String> names = factory.names();
+    std::vector<std::string> names = factory.names();
 
 
-    for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
+    for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
 
     	auto plugin = factory.getPlugin(*it);
 		char label[20];
@@ -870,7 +869,7 @@ bool HAPConfiguration::saveOTAConfig(){
 
 
 #if HAP_DEBUG_CONFIGURATION
-    HEXDUMP_D("SAVE OTA", (uint8_t*)buffer, bufferSize);
+    LOGARRAY_D("SAVE OTA", (uint8_t*)buffer, bufferSize);
 #endif
 
 	size_t written = writeBytes("cOTA", (uint8_t*)buffer, bufferSize);
@@ -890,7 +889,7 @@ bool HAPConfiguration::loadOTAConfig(){
 	readBytes("cOTA", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("LOAD OTA", buffer, bufferSize);
+	LOGARRAY_D("LOAD OTA", buffer, bufferSize);
 #endif
 
 	_otaConfig->enabled = buffer[0];
@@ -918,7 +917,7 @@ bool HAPConfiguration::saveKeystoreConfig(){
     offset += HAP_KEYSTORE_LABEL_LENGTH;
 
 #if HAP_DEBUG_CONFIGURATION
-    HEXDUMP_D("SAVE KEYSTORE", (uint8_t*)buffer, offset);
+    LOGARRAY_D("SAVE KEYSTORE", (uint8_t*)buffer, offset);
 #endif
 
 	size_t written = writeBytes("cKeySt", (uint8_t*)buffer, bufferSize);
@@ -938,7 +937,7 @@ bool HAPConfiguration::loadKeystoreConfig(){
 	readBytes("cKeySt", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("LOAD KEYSTORE", buffer, bufferSize);
+	LOGARRAY_D("LOAD KEYSTORE", buffer, bufferSize);
 #endif
 
     memcpy(_keystoreConfig->keystore, buffer + offset, HAP_KEYSTORE_LABEL_LENGTH);
@@ -977,7 +976,7 @@ bool HAPConfiguration::saveWebServerConfig(){
 	}
 
 #if HAP_DEBUG_CONFIGURATION
-    HEXDUMP_D("SAVE WEBSERVER", (uint8_t*)buffer, offset);
+    LOGARRAY_D("SAVE WEBSERVER", (uint8_t*)buffer, offset);
 #endif
 
 	size_t written = writeBytes("cWebSvr", buffer, bufferSize);
@@ -998,7 +997,7 @@ bool HAPConfiguration::loadWebServerConfig(){
 	readBytes("cWebSvr", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("LOAD WEBSERVER", buffer, bufferSize);
+	LOGARRAY_D("LOAD WEBSERVER", buffer, bufferSize);
 #endif
 
 
@@ -1053,7 +1052,7 @@ bool HAPConfiguration::saveWiFiConfig(){
 	}
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("SAVE WIFI", buffer, bufferSize);
+	LOGARRAY_D("SAVE WIFI", buffer, bufferSize);
 #endif
 
 
@@ -1077,7 +1076,7 @@ bool HAPConfiguration::loadWiFiConfig(){
     }
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("LOAD WIFI", buffer, bufferSize);
+	LOGARRAY_D("LOAD WIFI", buffer, bufferSize);
 #endif
 
 	_wifiConfig->enabled = buffer[offset++];
@@ -1118,7 +1117,7 @@ bool HAPConfiguration::savePlatformConfig(){
 
 
 #if HAP_DEBUG_CONFIGURATION
-    HEXDUMP_D("SAVE PLATFORM", (uint8_t*)buffer, offset);
+    LOGARRAY_D("SAVE PLATFORM", (uint8_t*)buffer, offset);
 #endif
 
     size_t written = writeBytes("cPltfrm", (uint8_t*)buffer, bufferSize);
@@ -1143,7 +1142,7 @@ bool HAPConfiguration::loadPlatformConfig(){
 	readBytes("cPltfrm", buffer, bufferSize);
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("LOAD PLATFORM", buffer, bufferSize);
+	LOGARRAY_D("LOAD PLATFORM", buffer, bufferSize);
 #endif
 
 	// _platformConfig->_logLevel = (enum LogLevel)buffer[0];
@@ -1202,7 +1201,7 @@ bool HAPConfiguration::saveAccessoryConfig(){
 	}
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("SAVE ACCESSORY", buffer, bufferSize);
+	LOGARRAY_D("SAVE ACCESSORY", buffer, bufferSize);
 #endif
 
 
@@ -1231,7 +1230,7 @@ bool HAPConfiguration::loadAccessoryConfig(){
     }
 
 #if HAP_DEBUG_CONFIGURATION
-	HEXDUMP_D("LOAD ACCESSORY", buffer, read);
+	LOGARRAY_D("LOAD ACCESSORY", buffer, read);
 #endif
 
 	size_t offset = 0;

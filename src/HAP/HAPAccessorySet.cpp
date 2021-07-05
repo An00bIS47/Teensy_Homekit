@@ -12,8 +12,6 @@
 #include "HAPGlobals.hpp"
 #include "HAPServer.hpp"
 
-#include <WString.h>
-
 #include <mbedtls/sha512.h>
 #if defined ( ARDUINO_ARCH_ESP32)
 #include <mbedtls/base64.h>
@@ -60,10 +58,6 @@ FLASHMEM
 void HAPAccessorySet::addAccessoryInfo(){
 	HAPAccessory *accessory = new HAPAccessory();
 	accessory->addInfoService(modelName(), HAP_MANUFACTURER, HAP_MODELL_NAME, "44-22-777", NULL, hap.versionString());
-
-	// HAPCharacteristicString *fwCha = new HAPCharacteristicString(charType_firmwareRevision, permission_read, 32);
-	// fwCha->setValue(hap.versionString());
-	// accessory->addCharacteristics(infoService, fwCha);
 
 	addAccessory(accessory);
 }
@@ -205,10 +199,21 @@ FLASHMEM
 #endif
 void HAPAccessorySet::generateXMI(){
 
-	String tmp = _configuration->pincode;
-	tmp.replace("-", "");
+	// String tmp1 = _configuration->pincode;
+	// tmp1.replace("-", "");
+	// int lowValue = atoi(tmp1.c_str());
 
-	int lowValue = atoi(tmp.c_str());
+	// XXX-XX-XXX
+	// X-HM://0023ISZCGUPFT
+	char tmp[9] = {'\0',};
+	memcpy(tmp, _configuration->pincode, 3);
+	memcpy(tmp + 3, _configuration->pincode + 4, 2);
+	memcpy(tmp + 5, _configuration->pincode + 7, 3);
+	// int lowValue = atoi(tmp);
+	uint32_t lowValue = atol(tmp);
+
+	// LOG_E("tmp1: %s\n", tmp1.c_str());
+	// LOG_E("tmp: %s\n", tmp);
 
 	lowValue |= 1 << 28;
 

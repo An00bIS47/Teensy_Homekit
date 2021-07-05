@@ -164,17 +164,17 @@ uint8_t* HAPEncryption::encrypt(uint8_t *message, size_t length, int* encrypted_
 
 #if HAP_DEBUG_ENCRYPTION
         LOGDEVICE->println("=========================================================");
-        HEXDUMP_D("nonce", nonce, 12);
-        HEXDUMP_D("key", key, 32);
-        HEXDUMP_D("aad", aad, HAP_ENCRYPTION_AAD_SIZE);
-        HEXDUMP_D("decrypted_ptr", decrypted_ptr, strlen((const char*)decrypted_ptr));
+        LOGARRAY_D("nonce", nonce, 12);
+        LOGARRAY_D("key", key, 32);
+        LOGARRAY_D("aad", aad, HAP_ENCRYPTION_AAD_SIZE);
+        LOGARRAY_D("decrypted_ptr", decrypted_ptr, strlen((const char*)decrypted_ptr));
         LOGDEVICE->printf("chunk_len %d\n", chunk_len);
         LOGDEVICE->printf("length %zu\n", length);
 #endif
 		err_code = chacha20_poly1305_encrypt_with_nonce(nonce, key, aad, HAP_ENCRYPTION_AAD_SIZE, decrypted_ptr, chunk_len, encrypted_ptr);
 
 #if HAP_DEBUG_ENCRYPTION
-        HEXDUMP_D("encrypted_ptr", encrypted_ptr, chunk_len + 16);
+        LOGARRAY_D("encrypted_ptr", encrypted_ptr, chunk_len + 16);
         LOGDEVICE->println("=========================================================");
 #endif
 

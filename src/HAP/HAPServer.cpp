@@ -71,6 +71,23 @@
 
 #include "HAPPrint.hpp"
 
+
+static const char HTTP_200[]  					= "HTTP/1.1 200 OK\r\n";
+static const char HTTP_204[]  					= "HTTP/1.1 204 No Content\r\n\r\n";
+static const char HTTP_207[]  					= "HTTP/1.1 207 Multi-Status\r\n";
+static const char HTTP_400[]  					= "HTTP/1.1 400 Bad Request\r\n";
+
+static const char HTTP_CONTENT_TYPE_HAPJSON[]  	= "Content-Type: application/hap+json\r\n";
+static const char HTTP_CONTENT_TYPE_TLV8[]  	= "Content-Type: application/pairing+tlv8\r\n";
+
+static const char HTTP_KEEP_ALIVE[] 		 	= "Connection: keep-alive\r\n";
+static const char HTTP_TRANSFER_ENCODING[] 		= "Transfer-Encoding: chunked\r\n";
+
+static const char HTTP_CRLF[]  					= "\r\n";
+static const char EVENT_200[]  					= "EVENT/1.0 200 OK\r\n";
+
+
+
 //
 // init static variables
 //
@@ -630,9 +647,9 @@ bool HAPServer::begin(bool resume) {
   	LOG_I( "Loading plugins ...\n");
 
 	auto &factory = HAPPluginFactory::Instance();
-    std::vector<String> names = factory.names();
+    std::vector<std::string> names = factory.names();
 
-    for(std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
+    for(std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
     	//LOGDEVICE->println(*it);
 		LOG_HEAP("", 0,0);
     	auto plugin = factory.getPlugin(*it);
@@ -1246,7 +1263,7 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 		parseRequest(hapClient, (char*)plainText, trueLength, &bodyData, &bodyDataLen);
 
 #if HAP_DEBUG_HOMEKIT_REQUEST
-		HEXDUMP_D("bodyData", bodyData, bodyDataLen);
+		LOGARRAY_D("bodyData", bodyData, bodyDataLen);
 #endif
 
 		handlePath(hapClient, bodyData, bodyDataLen);
@@ -1709,7 +1726,7 @@ bool HAPServer::encode(HAPClient* hapClient, ReadBufferingClient* bufferedClient
 			LOG_D("------------------------------------------");
 			LOG_D(" - type: %x\n", type);
 			LOG_D(" - length: %d\n", length);
-			HEXDUMP_D("value", data, length);
+			LOGARRAY_D("value", data, length);
 #endif
 
 
@@ -1810,7 +1827,7 @@ void HAPServer::handleIdentify(HAPClient* hapClient){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
+bool HAPServer::send(HAPClient* hapClient, const char* httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 	LOG_V("send\n");
 	if (httpStatus == HTTP_204) {
 		send204(hapClient);
@@ -1878,7 +1895,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const uint8_
 
 }
 
-bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
+bool HAPServer::send(HAPClient* hapClient, const char* httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType){
 
 	LOG_V("send\n");
 	if (httpStatus == HTTP_204) {
@@ -1916,7 +1933,7 @@ bool HAPServer::send(HAPClient* hapClient, const String httpStatus, const JsonDo
 
 #if HAP_DEBUG_HOMEKIT
 		//LOGDEVICE->write(_buffer - l, chunk_size);
-		HAPHelper::array_print("response", response.c_str(), response.length());
+		LOGARRAY_D("response", response.c_str(), response.length());
 #endif
 
 		uint8_t* encrypted = nullptr;
@@ -2219,8 +2236,8 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 
 
 #if HAP_DEBUG_HOMEKIT
-		HEXDUMP_D("LTPK", _accessorySet->LTPK(), ED25519_PUBLIC_KEY_LENGTH);
-		HEXDUMP_D("LTSK", _accessorySet->LTSK(), ED25519_PRIVATE_KEY_LENGTH);
+		LOGARRAY_D("LTPK", _accessorySet->LTPK(), ED25519_PUBLIC_KEY_LENGTH);
+		LOGARRAY_D("LTSK", _accessorySet->LTSK(), ED25519_PRIVATE_KEY_LENGTH);
 #endif
 	}
 
@@ -2267,7 +2284,7 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 	LOGRAW_V("OK\n");
 
 #if HAP_DEBUG_SRP
-	HEXDUMP_D("salt", _hapsrp->data->bytes_s, _hapsrp->data->len_s);
+	LOGARRAY_D("salt", _hapsrp->data->bytes_s, _hapsrp->data->len_s);
 #endif
 
 	if (_hapsrp->data->keys == NULL) {
@@ -2286,7 +2303,7 @@ bool HAPServer::handlePairSetupM1(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_SRP
-	HEXDUMP_D("pubKey", _hapsrp->data->bytes_B, _hapsrp->data->len_B);
+	LOGARRAY_D("pubKey", _hapsrp->data->bytes_B, _hapsrp->data->len_B);
 #endif
 
 	LOG_V("Sending response ...");
@@ -2345,7 +2362,7 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 
 	LOG_V("Generating proof ...");
 #if HAP_DEBUG_SRP
-	HAPHelper::array_print("v", _hapsrp->data->bytes_v, _hapsrp->data->len_v);
+	LOGARRAY_D("v", _hapsrp->data->bytes_v, _hapsrp->data->len_v);
 #endif
 
 	_hapsrp->data->verifier = _hapsrp->newVerifier1(_hapsrp->data->session,
@@ -2393,19 +2410,19 @@ bool HAPServer::handlePairSetupM3(HAPClient* hapClient) {
 	HAPHelper::mpi_print("_hapsrp->data->keys->B = PubKey", &(_hapsrp->data->keys->B));
 	HAPHelper::mpi_print("_hapsrp->data->keys->b = Private Key ?", &(_hapsrp->data->keys->b));
 
-	HEXDUMP_D("_hapsrp->data->bytes_v", _hapsrp->data->bytes_v, _hapsrp->data->len_v);
+	LOGARRAY_D("_hapsrp->data->bytes_v", _hapsrp->data->bytes_v, _hapsrp->data->len_v);
 
 	// salt
-	HEXDUMP_D("_hapsrp->data->bytes_s = SALT", (uint8_t*)_hapsrp->data->bytes_s, _hapsrp->data->len_s);
-	HEXDUMP_D("_hapsrp->data->bytes_b", (uint8_t*)_hapsrp->data->bytes_B, _hapsrp->data->len_B);
+	LOGARRAY_D("_hapsrp->data->bytes_s = SALT", (uint8_t*)_hapsrp->data->bytes_s, _hapsrp->data->len_s);
+	LOGARRAY_D("_hapsrp->data->bytes_b", (uint8_t*)_hapsrp->data->bytes_B, _hapsrp->data->len_B);
 
 	// proof
-	HEXDUMP_D("_hapsrp->data->verifier->M", _hapsrp->data->verifier->M, SHA512_DIGEST_LENGTH);
-	HEXDUMP_D("proof", proof, SHA512_DIGEST_LENGTH);
+	LOGARRAY_D("_hapsrp->data->verifier->M", _hapsrp->data->verifier->M, SHA512_DIGEST_LENGTH);
+	LOGARRAY_D("proof", proof, SHA512_DIGEST_LENGTH);
 
 
-	HEXDUMP_D("_hapsrp->data->username", (uint8_t*)_hapsrp->data->username, strlen(_hapsrp->data->username));
-	HEXDUMP_D("password", (uint8_t*)_accessorySet->pinCode(), strlen(_accessorySet->pinCode()));
+	LOGARRAY_D("_hapsrp->data->username", (uint8_t*)_hapsrp->data->username, strlen(_hapsrp->data->username));
+	LOGARRAY_D("password", (uint8_t*)_accessorySet->pinCode(), strlen(_accessorySet->pinCode()));
 #endif
 
 	if (_hapsrp->verifySession(_hapsrp->data->verifier, proof, NULL) == false) {
@@ -2537,8 +2554,8 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	uint8_t subtlv[decryptedLen];
 
 #if HAP_DEBUG_HOMEKIT
-	HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
-	HAPHelper::array_print("encryptedTLV", encryptedTLV, encryptedTLVLen);
+	LOGARRAY_D("subtlv_key", subtlv_key, HKDF_KEY_LEN);
+	LOGARRAY_D("encryptedTLV", encryptedTLV, encryptedTLVLen);
 #endif
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PS05, subtlv_key, NULL, 0, encryptedTLV, encryptedTLVLen, subtlv);
 
@@ -2546,7 +2563,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
         LOGRAW_E("ERROR: Decrypting CHACHA20_POLY1305_TYPE_PS05 failed! Reason: %d\n");
 
 #if HAP_DEBUG_HOMEKIT
-		HAPHelper::array_print("subtlv", subtlv, decryptedLen);
+		LOGARRAY_D("subtlv", subtlv, decryptedLen);
 #endif
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 		response.clear();
@@ -2555,7 +2572,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
     LOGRAW_V("OK\n");
 
 #if HAP_DEBUG_HOMEKIT
-	HAPHelper::array_print("subtlv", subtlv, decryptedLen);
+	LOGARRAY_D("subtlv", subtlv, decryptedLen);
 #endif
 
 	TLV8 encTLV;
@@ -2601,7 +2618,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 		LOGRAW_E("ERROR: TLV decoding signature failed\n");
 		sendErrorTLV(hapClient, HAP_PAIR_STATE_M6, HAP_ERROR_AUTHENTICATON);
 
-		HAPHelper::array_print("signature:", ios_device_signature, ios_device_signature_len);
+		LOGARRAY_E("signature:", ios_device_signature, ios_device_signature_len);
 
 
 #if HAP_DEBUG_TLV8
@@ -2864,9 +2881,9 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 
-	HAPHelper::array_print("acc_curve_public_key", acc_curve_public_key, CURVE25519_SECRET_LENGTH);
-	HAPHelper::array_print("_accessorySet->LTSK()", _accessorySet->LTSK(), HAP_PAIRINGS_LTSK_LENGTH);
-	HAPHelper::array_print("ios_device_curve_key", ios_device_curve_key, ios_device_curve_key_len);
+	LOGARRAY_D("acc_curve_public_key", acc_curve_public_key, CURVE25519_SECRET_LENGTH);
+	LOGARRAY_D("_accessorySet->LTSK()", _accessorySet->LTSK(), HAP_PAIRINGS_LTSK_LENGTH);
+	LOGARRAY_D("ios_device_curve_key", ios_device_curve_key, ios_device_curve_key_len);
 
 #endif
 
@@ -3044,9 +3061,9 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	// LOGDEVICE->send_now();
 
 #if HAP_DEBUG_HOMEKIT
-	HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
-	HAPHelper::array_print("encryptedData", encryptedData, decryptedLen);
-	HAPHelper::array_print("mac", encryptedData + decryptedLen, CHACHA20_POLY1305_AUTH_TAG_LENGTH);
+	LOGARRAY_D("subtlv_key", subtlv_key, HKDF_KEY_LEN);
+	LOGARRAY_D("encryptedData", encryptedData, decryptedLen);
+	LOGARRAY_D("mac", encryptedData + decryptedLen, CHACHA20_POLY1305_AUTH_TAG_LENGTH);
 #endif
 
 	err_code = chacha20_poly1305_decrypt(CHACHA20_POLY1305_TYPE_PV03, subtlv_key, NULL, 0, encryptedData, encryptedDataLen, subtlvData);
@@ -3054,10 +3071,10 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 		LOGRAW_E("ERROR: Decrypting failed: Reason: %d\n", err_code);
 
 #if HAP_DEBUG_HOMEKIT
-		// HAPHelper::array_print("subtlv_key", subtlv_key, HKDF_KEY_LEN);
-		// HAPHelper::array_print("encryptedData", encryptedData, encryptedDataLen - 16);
-		// HAPHelper::array_print("mac", encryptedData + (encryptedDataLen - 16), 16);
-		HAPHelper::array_print("subtlvData", subtlvData, decryptedLen);
+		// LOGARRAY_D("subtlv_key", subtlv_key, HKDF_KEY_LEN);
+		// LOGARRAY_D("encryptedData", encryptedData, encryptedDataLen - 16);
+		// LOGARRAY_D("mac", encryptedData + (encryptedDataLen - 16), 16);
+		LOGARRAY_D("subtlvData", subtlvData, decryptedLen);
 #endif
 
 		sendErrorTLV(hapClient, HAP_VERIFY_STATE_M4, HAP_ERROR_AUTHENTICATON);
@@ -3066,7 +3083,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	LOGRAW_V("OK\n");
 
 #if HAP_DEBUG_TLV8
-	HAPHelper::array_print("subtlvData", subtlvData, decryptedLen);
+	LOGARRAY_D("subtlvData", subtlvData, decryptedLen);
 #endif
 
 	TLV8 subTlv;
@@ -3092,7 +3109,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 	LogD(F("Looking up iOS device LTPK for client: "), true);
-	HAPHelper::array_print("ios_device_pairing_id", ios_device_pairing_id, ios_device_pairing_id_len);
+	LOGARRAY_D("ios_device_pairing_id", ios_device_pairing_id, ios_device_pairing_id_len);
 #endif
 
 	uint8_t* ios_device_ltpk = _accessorySet->getKeyForPairingWithId(ios_device_pairing_id);
@@ -3107,7 +3124,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 	LogD("Found LTPK: ", true);
-	HAPHelper::array_print("ios_device_ltpk", ios_device_ltpk, ED25519_PUBLIC_KEY_LENGTH);
+	LOGARRAY_D("ios_device_ltpk", ios_device_ltpk, ED25519_PUBLIC_KEY_LENGTH);
 #endif
 
 	uint8_t ios_device_signature_len = subTlv.size(HAP_TLV_SIGNATURE);
@@ -3124,7 +3141,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 #if HAP_DEBUG_HOMEKIT
 	LogD(F("Found Signature: "), true);
-	HAPHelper::array_print("ios_device_signature", ios_device_signature, ios_device_signature_len);
+	LOGARRAY_D("ios_device_signature", ios_device_signature, ios_device_signature_len);
 #endif
 
 #if HAP_DEBUG_HOMEKIT
@@ -3619,13 +3636,13 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 
 			} else {
 				jsonCharacteristic["iid"] = iid;
-				jsonCharacteristic["status"] = String(HAP_STATUS_WRITEONLY_READ);
+				jsonCharacteristic["status"] = STR(HAP_STATUS_WRITEONLY_READ);
 				errorOccured = true;
 			}
 
 		} else {
 			jsonCharacteristic["iid"] = iid;
-			jsonCharacteristic["status"] = String(HAP_STATUS_RESOURCE_NOT_FOUND);
+			jsonCharacteristic["status"] = STR(HAP_STATUS_RESOURCE_NOT_FOUND);
 			errorCode = -1;
 			errorOccured = true;
 		}
@@ -3735,7 +3752,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 					// char has no event permission
 					LOG_W("WARNING: Resource notify not permitted for characteristic %d.%d\n", aid, iid);
 					jsonNewChr[F("iid")] = iid;
-					jsonNewChr[F("status")] = String(HAP_STATUS_NO_NOTIFICATION);
+					jsonNewChr[F("status")] = STR(HAP_STATUS_NO_NOTIFICATION);
 					errorOccured = true;
 				}
 			} else {
@@ -3747,7 +3764,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 				} else {
 					LOG_W("WARNING: Resource not writable for characteristic %d.%d\n", aid, iid);
 					jsonNewChr[F("iid")] = iid;
-					jsonNewChr[F("status")] = String(HAP_STATUS_READONLY_WRITE);
+					jsonNewChr[F("status")] = STR(HAP_STATUS_READONLY_WRITE);
 					errorOccured = true;
 				}
 			}
@@ -3755,7 +3772,7 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 		} else {
 			LOG_E("ERROR: Resource not found for characteristic %d.%d\n", aid, iid);
 			jsonNewChr[F("iid")] = iid;
-			jsonNewChr[F("status")] = String(HAP_STATUS_RESOURCE_NOT_FOUND);
+			jsonNewChr[F("status")] = STR(HAP_STATUS_RESOURCE_NOT_FOUND);
 			errorOccured = true;
 		}
 	}

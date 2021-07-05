@@ -191,10 +191,10 @@ void HAPConfigurationEEPROM::buildDataMap(){
 
 
 	auto &factory = HAPPluginFactory::Instance();
-    std::vector<String> names = factory.names();
+    std::vector<std::string> names = factory.names();
 
 
-    for (std::vector<String>::iterator it = names.begin(); it != names.end(); ++it) {
+    for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
     	auto plugin = factory.getPlugin(*it);
 		char label[20];
 		sprintf(label, "p%s", plugin->name());
@@ -228,7 +228,7 @@ bool HAPConfigurationEEPROM::getBytesForPlugin(const char* name, uint8_t* data, 
 #if HAP_DEBUG_CONFIGURATION
 	char text[32];
 	sprintf(text, "LOAD PLUGIN %s", name);
-	HEXDUMP_D(text, (uint8_t*)data, dataSize);
+	LOGARRAY_D(text, (uint8_t*)data, dataSize);
 #endif
 
 	if (read == dataSize) {

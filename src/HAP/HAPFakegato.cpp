@@ -148,7 +148,7 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
 
 #if HAP_DEBUG_FAKEGATO
     LOG_V("Size of data entry: %d + %d = %d\n", sizeof(HAPFakegatoDataEntry), length, (sizeof(HAPFakegatoDataEntry) + length));
-    HEXDUMP_V("data entry", data, length);
+    LOGARRAY_V("data entry", data, length);
 #endif    
 
     // Entry will be overwritten ...
@@ -164,7 +164,7 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
 
 #if HAP_DEBUG_FAKEGATO
     *LOGDEVICE->print("bitmask: "); *LOGDEVICE->println(bitmask);
-    HEXDUMP_D("FAKEGATO ENTRY DATA", data, length);
+    LOGARRAY_D("FAKEGATO ENTRY DATA", data, length);
 #endif
 
     // size_t indexLast = _entries.size() - 1;
@@ -319,7 +319,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
     }
 
 #if HAP_DEBUG_FAKEGATO
-    HEXDUMP_D("History Entries", data, offset);
+    LOGARRAY_D("History Entries", data, offset);
 #endif
 
     *len = offset;
@@ -430,7 +430,7 @@ void HAPFakegato::callbackSetHistoryTime(const uint8_t* decoded, const size_t le
 void HAPFakegato::callbackSetHistoryAddress(const uint8_t* decoded, const size_t len){
 
 #if HAP_DEBUG_FAKEGATO
-    HEXDUMP_D("History Request", decoded, len);
+    LOGARRAY_D("History Request", decoded, len);
 #endif
 
     ui32_to_ui8 requestedIndex;
@@ -442,7 +442,7 @@ void HAPFakegato::callbackSetHistoryAddress(const uint8_t* decoded, const size_t
 #if HAP_DEBUG_FAKEGATO
     ui32_to_ui8 address;
     address.ui32 = __builtin_bswap32(requestedIndex.ui32);
-    HEXDUMP_D("History Request address",  address.ui8, 4);
+    LOGARRAY_D("History Request address",  address.ui8, 4);
 #endif
 
     _requestedIndex = requestedIndex.ui32;
@@ -579,7 +579,7 @@ void HAPFakegato::callbackGetHistoryInfo(uint8_t* output, size_t* len){
     memcpy(output, data, offset);
 
 #if HAP_DEBUG_FAKEGATO
-    HEXDUMP_D("output", output, offset);
+    LOGARRAY_D("output", output, offset);
 #endif
 
     *len = offset;

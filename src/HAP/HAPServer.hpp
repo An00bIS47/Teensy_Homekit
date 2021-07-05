@@ -115,25 +115,6 @@ hap.__setBrand(__FLAGGED_BRAND);
 #define SRP_PROOF_LENGTH        64
 #define SRP_SESSION_KEY_LENGTH  64
 
-
-
-// ToDo: Remove?
-static const char HTTP_200[] PROGMEM 					= "HTTP/1.1 200 OK\r\n";
-static const char HTTP_204[] PROGMEM 					= "HTTP/1.1 204 No Content\r\n\r\n";
-static const char HTTP_207[] PROGMEM 					= "HTTP/1.1 207 Multi-Status\r\n";
-static const char HTTP_400[] PROGMEM 					= "HTTP/1.1 400 Bad Request\r\n";
-
-static const char HTTP_CONTENT_TYPE_HAPJSON[] PROGMEM 	= "Content-Type: application/hap+json\r\n";
-static const char HTTP_CONTENT_TYPE_TLV8[] PROGMEM 		= "Content-Type: application/pairing+tlv8\r\n";
-
-static const char HTTP_KEEP_ALIVE[] PROGMEM		 		= "Connection: keep-alive\r\n";
-static const char HTTP_TRANSFER_ENCODING[] PROGMEM		= "Transfer-Encoding: chunked\r\n";
-
-static const char HTTP_CRLF[] PROGMEM 					= "\r\n";
-
-static const char EVENT_200[] PROGMEM 					= "EVENT/1.0 200 OK\r\n";
-
-
 #if defined( CORE_TEENSY )
 struct HAP_MDNS_TXT {
 	char md[32 + 1];
@@ -402,9 +383,9 @@ private:
 	//
 	void sendResponse(HAPClient* hapClient, TLV8* response);
 
-	bool send(HAPClient* hapClient, const String httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const String httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const String httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
+	bool send(HAPClient* hapClient, const char* httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const char* httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const char* httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
 		return send(hapClient, httpStatus, (const uint8_t*)data, length, mode, contentType);
 	}
 
