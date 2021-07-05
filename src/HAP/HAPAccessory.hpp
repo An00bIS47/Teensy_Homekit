@@ -52,7 +52,7 @@ public:
 
 	void setIdentifyCallback(identifyFunctionCallback callback);
 
-	void setFirmware(const String& firmwareRev);
+	void setFirmware(const char* firmwareRev);
 
 	uint8_t aid() { return _aid; }
     void setAID(uint8_t aid) { _aid = aid; }
@@ -67,9 +67,9 @@ protected:
 	std::vector<std::unique_ptr<HAPService>> _services;
 
 	HAPService*	_infoService;
-	HAPCharacteristic<bool>* 	_identify;
+	HAPCharacteristic<bool>*   _identify;
 	HAPCharacteristic<String>* _accessoryName;
-	HAPCharacteristic<String>* _firmware;
+	HAPCharacteristic<std::string>* _firmware;
 	HAPCharacteristic<String>* _manufacturer;
 	HAPCharacteristic<String>* _modelName;
 	HAPCharacteristic<String>* _serialNumber;
