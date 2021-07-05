@@ -195,7 +195,7 @@ if not os.path.exists(".buildnumber_no_increment"):
     #     ("HOMEKIT_COMPILE_TIME", now.strftime("%d.%m.%Y %H:%M")),
     # ])
 
-    output = BUILDNUMBER_CONTENT.format(now.strftime("%d.%m.%Y"), getpass.getuser(), buildNumber, buildNumber, now.strftime("%d.%m.%Y %H:%M"))
+    output = BUILDNUMBER_CONTENT.format(now.strftime("%d.%m.%Y"), getpass.getuser(), buildNumber, buildNumber, now.strftime("%Y-%m-%d %H:%M"))
     # write output to src/HAP/HAPBuildnumber.hpp
     createBuildnumberHeader(output)
 
