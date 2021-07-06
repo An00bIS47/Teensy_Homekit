@@ -425,7 +425,7 @@ uint32_t HAPTime::timestamp(){
 const char* HAPTime::timeString(){
 
     memset((uint8_t*)_timestring, '\0', 30);
-    
+
 #if defined( ARDUINO_ARCH_ESP32 )
     timeval curTime;
     gettimeofday(&curTime, NULL);
@@ -436,15 +436,15 @@ const char* HAPTime::timeString(){
         strftime(tmp, 30, timeformat, localtime(&curTime.tv_sec));
 
         int milli = curTime.tv_usec / 1000;
-        
+
         snprintf(_timestring, 30, "%s.%03d", tmp, milli);
 
         return _timestring;
-    } 
+    }
 
     strftime(_timestring, 30, HAP_NTP_TIME_FORMAT, localtime(&curTime.tv_sec));
     return _timestring;
-    
+
 #elif defined( CORE_TEENSY )
 	if (timeStatus() != timeNotSet) {
 

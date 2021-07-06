@@ -23,7 +23,6 @@
 #endif
 
 #include <string>
-#include <WString.h>
 #include <algorithm>
 #include "HAPServer.hpp"
 #include "HAPLogging.hpp"
@@ -110,6 +109,7 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 
 #if HAP_DEBUG
 	_previousMillisHeap = 0;
+	
 #endif
 
 	_accessorySet = new HAPAccessorySet();
@@ -651,7 +651,7 @@ bool HAPServer::begin(bool resume) {
 
     for(std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
     	//LOGDEVICE->println(*it);
-		LOG_HEAP("", 0,0);
+		LOG_HEAP(0, 0);
     	auto plugin = factory.getPlugin(*it);
 
 		LOG_I("   - %s [v%s] of type %d", plugin->name(), plugin->version(), plugin->type());
@@ -793,7 +793,7 @@ bool HAPServer::begin(bool resume) {
 		LOGDEVICE->println();
 	}
 
-	LOG_HEAP("", 0, 0);
+	LOG_HEAP(0, 0);
 
 #endif
 
@@ -939,7 +939,7 @@ void HAPServer::handle() {
 	if ( millis() - _previousMillisHeap >= HAP_HEAP_LOG_INTERVAL) {
 	    // save the last time you blinked the LED
 	    _previousMillisHeap = millis();
-		LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
+		LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
 
 		// ToDo: remove
 		// LOGDEVICE->print("Task Button Handle: ");
@@ -2659,7 +2659,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	encTLV.clear();
 
-	LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
+	LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
 
 #if defined( ARDUINO_ARCH_ESP32 )
 	LogV( F("Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
@@ -2801,7 +2801,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	hapClient->clear();
 
-	LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
+	LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
 
     return true;
 }
@@ -2837,12 +2837,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LOG_V("Generating accessory curve25519 keys ...");
 
 	uint8_t acc_curve_public_key[CURVE25519_SECRET_LENGTH] = {0,};		// my_key_public
-
-	// ToDo: Fix this! This will stay constant 0x00
-	// ?? This will stay at 00 ?
-	// What key to use here?
-	// int r = crypto_ed25519_generate(key);
-	// uint8_t acc_curve_private_key[CURVE25519_SECRET_LENGTH] = {0,};	// my_key
 
 	// Create new public key from accessory's LTSK
 	err_code = X25519_scalarmult_base(acc_curve_public_key, _accessorySet->LTSK());
