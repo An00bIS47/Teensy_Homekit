@@ -654,7 +654,7 @@ bool HAPServer::begin(bool resume) {
 		LOG_HEAP(0, 0);
     	auto plugin = factory.getPlugin(*it);
 
-		LOG_I("   - %s [v%s] of type %d", plugin->name(), plugin->version(), plugin->type());
+		LOG_I("   - %s [v%s] of type %d : ", plugin->name(), plugin->version(), plugin->type());
 
 		plugin->setAccessorySet(_accessorySet);
 		plugin->setFakeGatoFactory(&_fakeGatoFactory);
@@ -670,14 +670,13 @@ bool HAPServer::begin(bool resume) {
 
 		// plugin->setConfig(_config.config()["plugins"][plugin->name()]);
 
+#if HAP_DEBUG
+		plugin->configToJson(*LOGDEVICE);
+		LOGDEVICE->println();
+#endif
 
 		if ( plugin->isEnabled()) {
-			LOGRAW_I(": ENABLED\n");
-
-#if HAP_DEBUG
-			plugin->configToJson(*LOGDEVICE);
-			LOGDEVICE->println();
-#endif
+			LOGRAW_I("ENABLED\n");
 
 			if (plugin->begin()) {
 
@@ -701,11 +700,12 @@ bool HAPServer::begin(bool resume) {
 				_plugins.push_back(std::move(plugin));
 
 			} else {
-				LOGRAW_E(": DISABLED\n");
+				LOGRAW_E("ERROR: Failed to start plugin\n");
+				plugin->enable(false);
 			}
 
     	} else {
-    		LOGRAW_E(": DISABLED\n");
+    		LOGRAW_W("Disabled\n");
     	}
 	}
 

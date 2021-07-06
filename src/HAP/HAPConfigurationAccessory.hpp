@@ -265,15 +265,15 @@ public:
 
 		prt.print(",");
 		prt.print("\"pincode\": ");
-		prt.print(HAPHelper::wrap(pincode));
+		prt.print(HAPHelper::wrap(pincode).c_str());
 
 		prt.print(",");
 		prt.print("\"setupId\": ");
-		prt.print(HAPHelper::wrap(setupId));
+		prt.print(HAPHelper::wrap(setupId).c_str());
 
 		prt.print(",");
 		prt.print("\"modelname\": ");
-		prt.print(HAPHelper::wrap(modelname));
+		prt.print(HAPHelper::wrap(modelname).c_str());
 
 		prt.print(",");
 		prt.print("\"pairings\": [");
@@ -281,12 +281,12 @@ public:
             prt.print("{");
             prt.print("\"id\": ");
             // ToDo: Print id properly
-            prt.print(HAPHelper::wrap(String(pairings[i]->id[0], HEX)));
+            prt.print(HAPHelper::wrap(String(pairings[i]->id[0], HEX).c_str()).c_str());
 
             prt.print(",");
             prt.print("\"key\": ");
             // ToDo: Print key properly
-            prt.print(HAPHelper::wrap(String(pairings[i]->key[0], HEX)));
+            prt.print(HAPHelper::wrap(String(pairings[i]->key[0], HEX).c_str()).c_str());
 
 			prt.print(",");
             prt.print("\"isAdmin\": ");

@@ -102,7 +102,7 @@ public:
 	void toJson(Print& prt) override {
 		prt.print("{");
 		prt.print("\"active\": ");
-		prt.print(HAPHelper::wrap(keystore));
+		prt.print(HAPHelper::wrap(keystore).c_str());
 		prt.print("}");
 	}
 };

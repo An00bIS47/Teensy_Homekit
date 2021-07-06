@@ -379,19 +379,19 @@ void HAPPluginInfluxDB::internalConfigToJson(Print& prt){
 
 	*/
 	prt.print("\"username\":");
-	prt.print(HAPHelper::wrap(_configInternal->username));
+	prt.print(HAPHelper::wrap(_configInternal->username).c_str());
 
     prt.print(",");
     prt.print("\"password\":");
-	prt.print(HAPHelper::wrap(_configInternal->password));
+	prt.print(HAPHelper::wrap(_configInternal->password).c_str());
 
     prt.print(",");
     prt.print("\"url\":");
-	prt.print(HAPHelper::wrap(_configInternal->url));
+	prt.print(HAPHelper::wrap(_configInternal->url).c_str());
 
     prt.print(",");
     prt.print("\"database\":");
-	prt.print(HAPHelper::wrap(_configInternal->database));
+	prt.print(HAPHelper::wrap(_configInternal->database).c_str());
 
     prt.print(",");
     prt.print("\"port\":");

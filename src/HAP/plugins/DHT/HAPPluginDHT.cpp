@@ -8,10 +8,12 @@
 #include "HAPPluginDHT.hpp"
 #include "HAPServer.hpp"
 
+#ifndef HAP_PLUGIN_DHT_INTERVAL
 #define HAP_PLUGIN_DHT_INTERVAL 5000
+#endif
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       7
+#define VERSION_MINOR       8
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
@@ -38,10 +40,10 @@ HAPPluginDHT::HAPPluginDHT(){
 FLASHMEM
 #endif
 bool HAPPluginDHT::begin(){
-	LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
+	LOG_V("Begin plugin %s\n", _config->name);
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
-	LogW("   - Using DHT dummy!", true);
+	LOG_W("   - Using DHT dummy!\n");
 	randomSeed(analogRead(DHTPIN));
 #else
 	_dht = new DHT_Unified(DHTPIN, DHTTYPE);
@@ -54,21 +56,22 @@ bool HAPPluginDHT::begin(){
 FLASHMEM
 #endif
 void HAPPluginDHT::identify(bool oldValue, bool newValue) {
-	Serial.printf("Start Identify %s\n", _config->name);
+	LOG_I("Start Identify %s\n", _config->name);
 }
 
 void HAPPluginDHT::changedTemperature(float oldValue, float newValue) {
-	Serial.println("[" + String(_config->name) + "] Changed temperature " + String(oldValue) + " >>> " + String(newValue));
+	LOG_I("[%s] Changed temperature: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
 }
 
 void HAPPluginDHT::changedHumidity(float oldValue, float newValue) {
-	Serial.println("[" + String(_config->name) + "] Changed humidity " + String(oldValue) + " >>> " + String(newValue));
+	LOG_I("[%s] Changed humidity: %.2lf >>> %.2lf\n", _config->name, oldValue, newValue);
 }
+
 
 
 void HAPPluginDHT::handleImpl(bool forced){
 
-	LogV(HAPTime::timeString() + " " + _config->name + "->" + "handleImpl" + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+	LOG_V("Handle plguin %s [%d]\n", (const char*)_config->name, _config->interval);
 
 	sensors_event_t sensorEventTemp;
 	sensors_event_t sensorEventHum;
@@ -80,8 +83,6 @@ void HAPPluginDHT::handleImpl(bool forced){
 
 	sensorEventTemp.temperature 		= random(200, 401) / 10.0;
 	sensorEventHum.relative_humidity 	= random(200, 401) / 10.0;
-	// setValue(_temperatureValue->iid, getValue(_temperatureValue->iid), String(sensorEvent.temperature) );
-	// setValue(_humidityValue->iid, getValue(_humidityValue->iid), String(sensorEvent.relative_humidity) );
 #else
 
 	_dht->temperature().getEvent(&sensorEventTemp);
@@ -89,13 +90,13 @@ void HAPPluginDHT::handleImpl(bool forced){
 #endif
 
 	if (!isnan(sensorEventTemp.temperature)) {
-		_temperatureValue->setValue(sensorEventTemp.temperature, false);
+		_temperatureValue->setValue(sensorEventTemp.temperature, true);
 		_temperatureAverage.addValue(sensorEventTemp.temperature);
 		queueNotifyEvent(_temperatureValue);
 	}
 
 	if (!isnan(sensorEventHum.relative_humidity)) {
-		_humidityValue->setValue(sensorEventHum.relative_humidity, false);
+		_humidityValue->setValue(sensorEventHum.relative_humidity, true);
 		_humidityAverage.addValue(sensorEventHum.relative_humidity);
 		queueNotifyEvent(_humidityValue);
 
@@ -107,7 +108,8 @@ void HAPPluginDHT::handleImpl(bool forced){
 FLASHMEM
 #endif
 HAPAccessory* HAPPluginDHT::initAccessory(){
-	LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
+
+	LOG_V("Initializing accessory for plugin: %s ...\n", _config->name);
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
 #else
@@ -115,27 +117,52 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	_dht->temperature().getSensor(&sensor);
 #endif
 
+
+	//
+	// Unique serial number !!!
+	//
+    char hex[6] = {'\0',};
+#if HAP_PLUGIN_BME280_USE_DUMMY
+	sprintf(hex, "%s", "DUMMY");
+#else
+	sensor_t sensor;
+	_dht->temperature().getSensor(&sensor);
+    sprintf(hex, "%x", sensor.sensor_id);
+#endif
+	char sensorName[20] = {'\0', };
+	sprintf(sensorName, "DHT %s", hex);
+
+#if HAP_PLUGIN_DHT_USE_DUMMY
+	const char* sn = HAPDeviceID::serialNumber("DHT", "DY").c_str();
+#else
+	char versionStr[6] = {'\0', };
+	sprintf(versionStr, "%d", sensor.version);
+	const char* sn = HAPDeviceID::serialNumber("DHT", versionStr).c_str();
+#endif
+
 	//
 	// Add new accessory
 	//
+	LOG_V("[%s] - Add new accessory ...", _config->name);
 	_accessory = new HAPAccessory();
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
-#if HAP_PLUGIN_DHT_USE_DUMMY
-	String sn = HAPDeviceID::serialNumber("DHT", "DUMMY");
-	_accessory->addInfoService("DHT Sensor", "ACME", "DHT", sn, callbackIdentify, version());
-#else
-	String sn = HAPDeviceID::serialNumber("DHT", String(sensor.version));
-	_accessory->addInfoService("DHT Sensor", "ACME", sensor.name, sn, callbackIdentify, version());
-#endif
+	_accessory->addInfoService("DHT Sensor", "ACME", sensorName, sn, callbackIdentify, version());
+	LOGRAW_V("OK\n");
+
 
 	//
 	// Temperature Service
 	//
+	LOG_V("[%s] - Add new %s service ...", _config->name, "temperature");
 	HAPService* temperatureService = new HAPService(HAP_SERVICE_TEMPERATURE_SENSOR);
 	_accessory->addService(temperatureService);
+	LOGRAW_V("OK\n");
+
 	{
+		LOG_V("[%s] - Add new %s sensor ...", _config->name, "temperature");
+
 		const char* serviceName = "DHT Temperature Sensor";
-		HAPCharacteristic<String> *temperatureServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
+		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		temperatureServiceName->setValue(serviceName);
 
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
@@ -149,6 +176,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 
 		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
 
+		LOGRAW_V("OK\n");
 	}
 
 
@@ -162,6 +190,8 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	//
 	// is bound to the temperature service
 	{
+		LOG_V("[%s] - Add new %s sensor ...", _config->name, "humidity");
+
 		_humidityValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);		_humidityValue->setValue(0.0);
 		_humidityValue->setValue(0.0F);
 
@@ -170,12 +200,15 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 
 
 		_accessory->addCharacteristicToService(temperatureService, _humidityValue);
+
+		LOGRAW_V("OK\n");
 	}
 
 
 	//
 	// FakeGato
 	//
+	LOG_V("[%s] - Add fakegato ...", _config->name);
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginDHT::getAveragedTemperatureValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginDHT::getAveragedHumidityValue, this)));
 
@@ -183,6 +216,9 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 
 	auto callbackAddEntry = std::bind(&HAPPluginDHT::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
+
+	LOGRAW_V("OK\n");
+
 
 	return _accessory;
 }
@@ -210,6 +246,7 @@ bool HAPPluginDHT::fakeGatoCallback(){
 FLASHMEM
 #endif
 HAPConfigurationPlugin* HAPPluginDHT::setDefaults(){
+	LOG_V("[%s] Set defaults\n", _config->name);
 	_config->enabled  = HAP_PLUGIN_USE_DHT;
 	_config->interval = HAP_PLUGIN_DHT_INTERVAL;
 	_config->dataPtr = nullptr;
@@ -263,5 +300,6 @@ float HAPPluginDHT::readHumidity(){
 FLASHMEM
 #endif
 void HAPPluginDHT::setConfiguration(HAPConfigurationPlugin* cfg){
+	LOG_V("[%s] Set configuration\n", _config->name);
 	_config = cfg;
 }

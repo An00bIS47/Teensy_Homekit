@@ -138,7 +138,7 @@ public:
 		prt.print(",");
 
 		prt.print("\"password\": ");
-		prt.print(HAPHelper::wrap(password));
+		prt.print(HAPHelper::wrap(password).c_str());
 
 		prt.print("}");
 	}

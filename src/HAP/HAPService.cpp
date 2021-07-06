@@ -40,7 +40,7 @@ void HAPService::printTo(Print& print){
     // type
     print.print(F("\"type\":"));
     if (_uuid == 0x00) {
-        print.print(HAPHelper::wrap(_uuidString.c_str()));
+        print.print(HAPHelper::wrap(_uuidString.c_str()).c_str());
     } else {
 #if HAP_LONG_UUID
         char uuidStr[HAP_UUID_LENGTH];
@@ -49,7 +49,7 @@ void HAPService::printTo(Print& print){
         char uuidStr[8];
         snprintf(uuidStr, 8, PSTR("%X"), _uuid);
 #endif
-        print.print(HAPHelper::wrap(uuidStr));
+        print.print(HAPHelper::wrap(uuidStr).c_str());
     }
     print.print(F(","));
 

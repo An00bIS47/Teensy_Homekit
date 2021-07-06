@@ -19,7 +19,7 @@
 #define SCL_PIN				SCL
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       7	// 7 = new fakegato; 6 = new configuration; 2 = FakeGato support
+#define VERSION_MINOR       8	// 8 = std::string; 7 = new fakegato; 6 = new configuration; 2 = FakeGato support
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
@@ -166,10 +166,12 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
     char hex[6] = {'\0',};
 #if HAP_PLUGIN_BME280_USE_DUMMY
 	sprintf(hex, "%s", "DUMMY");
+	const char* sn = HAPDeviceID::serialNumber("BME", "DY").c_str();
 #else
     sprintf(hex, "%x", _bme->sensorID());
+	const char* sn = HAPDeviceID::serialNumber("BME", hex).c_str();
 #endif
-	const char* sn = HAPDeviceID::serialNumber("BME", "DY").c_str();
+
 
 	char sensorName[20] = {'\0', };
 	sprintf(sensorName, "BME280 %s", hex);
@@ -177,18 +179,29 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	//
 	// Add new accessory
 	//
+	LOG_V("[%s] - Add new accessory ...", _config->name);
 	_accessory = new HAPAccessory();
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
    	_accessory->addInfoService("Weather", "ACME", sensorName, sn, callbackIdentify, version());
+
+	LOGRAW_V("OK\n");
 
 
 	//
 	// Temperature
 	//
+
+	LOG_V("[%s] - Add new %s service ...", _config->name, "temperature");
+
 	HAPService* temperatureService = new HAPService(HAP_SERVICE_TEMPERATURE_SENSOR);
 	// temperatureService->setPrimaryService(true);
 	_accessory->addService(temperatureService);
+
+	LOGRAW_V("OK\n");
+
 	{
+
+		LOG_V("[%s] - Add new %s sensor ...", _config->name, "temperature");
 		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		temperatureServiceName->setValue("Temperature Sensor");
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
@@ -200,15 +213,28 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_temperatureValue->setValueGetCallback(std::bind(&HAPPluginBME280::readTemperature, this));
 
 		_accessory->addCharacteristicToService(temperatureService, _temperatureValue);
+
+		LOGRAW_V("OK\n");
 	}
+
 
 
 	//
 	// Humidity
 	//
+
+	LOG_V("[%s] - Add new %s service ...", _config->name, "humidity");
+
 	HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
 	_accessory->addService(humidityService);
+
+	LOGRAW_V("OK\n");
+
+
 	{
+
+		LOG_V("[%s] - Add new %s sensor ...", _config->name, "humidity");
+
 		HAPCharacteristic<std::string> *humServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		humServiceName->setValue("Humidity Sensor");
 		_accessory->addCharacteristicToService(humidityService, humServiceName);
@@ -220,15 +246,26 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_humidityValue->setValueGetCallback(std::bind(&HAPPluginBME280::readHumidity, this));
 
 		_accessory->addCharacteristicToService(humidityService, _humidityValue);
+
+		LOGRAW_V("OK\n");
 	}
+
+
 
 
 	//
 	// AirPressure
 	//
+	LOG_V("[%s] - Add new %s service ...", _config->name, "air pressure");
+
 	HAPService* pressureService = new HAPService(HAP_SERVICE_FAKEGATO_AIR_PRESSURE_SENSOR);
 	_accessory->addService(pressureService);
+
+	LOGRAW_V("OK\n");
+
 	{
+		LOG_V("[%s] - Add new %s sensor ...", _config->name, "air pressure");
+
 		HAPCharacteristic<std::string> *pressureServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		pressureServiceName->setValue("AirPressure Sensor");
 		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
@@ -240,27 +277,38 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		_pressureValue->setValueGetCallback(std::bind(&HAPPluginBME280::readPressure, this));
 
 		_accessory->addCharacteristicToService(pressureService, _pressureValue);
+
+		LOGRAW_V("OK\n");
 	}
+
+
 
 	//
 	// Link services
 	//
+	LOG_V("[%s] - Link services ...", _config->name);
+
 	temperatureService->addLinkedServiceId(humidityService->aid());
 	temperatureService->addLinkedServiceId(pressureService->aid());
+
+	LOGRAW_V("OK\n");
+
 
 	//
 	// FakeGato
 	//
+	LOG_V("[%s] - Add fakegato ...", _config->name);
+
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginBME280::getAveragedTemperatureValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginBME280::getAveragedHumidityValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginBME280::getAveragedPressureValue, this)));
 
-	_fakegato.registerFakeGatoService(_accessory, sensorName);
+	_fakegato.registerFakeGatoService(_accessory, sn);
 
 	auto callbackAddEntry = std::bind(&HAPPluginBME280::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
 
-
+	LOGRAW_V("OK\n");
 
 	return _accessory;
 }
@@ -309,9 +357,7 @@ bool HAPPluginBME280::begin(){
 	_bme = new Adafruit_BME280();
 
 #if HAP_PLUGIN_BME280_USE_DUMMY
-
-	LOG_I("   - Using BME280 dummy!\n");
-	_config->interval = HAP_PLUGIN_BME280_INTERVAL;
+	LOG_W("   - Using BME280 dummy!\n");
 #else
 
 	Wire.begin(SDA_PIN, SCL_PIN);
@@ -434,6 +480,7 @@ bool HAPPluginBME280::fakeGatoCallback(){
 FLASHMEM
 #endif
 HAPConfigurationPlugin* HAPPluginBME280::setDefaults(){
+	LOG_V("[%s] Set defaults\n", _config->name);
 	_configInternal->mode = HAP_PLUGIN_BME280_INDOOR;
 	_config->enabled  = HAP_PLUGIN_USE_BME280;
 	_config->interval = HAP_PLUGIN_BME280_INTERVAL;
@@ -460,6 +507,8 @@ void HAPPluginBME280::internalConfigToJson(Print& prt){
 FLASHMEM
 #endif
 void HAPPluginBME280::setConfiguration(HAPConfigurationPlugin* cfg){
+	LOG_V("[%s] Set configuration\n", _config->name);
+
 	_config = cfg;
 	_configInternal = (HAPPluginBME280Config*)_config->dataPtr;
 	_config->setToJsonCallback(std::bind(&HAPPluginBME280::internalConfigToJson, this, std::placeholders::_1));

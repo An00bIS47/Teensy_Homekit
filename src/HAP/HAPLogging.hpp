@@ -73,8 +73,8 @@ extern int HAPLoglevel;
     LOG_V("%s - This is a %s message.\n", "VERBOSE", "verbose");
 
 #if HAP_LOGGING_SUPPORTS_HAPTIME
-  //                        [H] 2020-12-22 12:12:21 | main.cpp             [   22] setup |
-  #define LOG_HEADER(x) "[" #x "] %-20s | %-20s [%5d] %s | "
+  //                        [H] 2021-07-06 23:20:23 | main.cpp             [   22] setup |
+  #define LOG_HEADER(x) "[" #x "]  %8lu | %-19s | %-20s [%5d] %s | "
 #else
   //                        [H]    1968 | main.cpp             [   22] setup |
   #define LOG_HEADER(x) "[" #x "] %8lu | %-20s [%4d] %s | "
@@ -206,14 +206,14 @@ constexpr const char* file_name(const char* str) {
 #if IS_LINUX
   // Lines
 #if HAP_LOGGING_SUPPORTS_HAPTIME
-    #define LOG_LINE_C(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_CRITICAL LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_E(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_ERROR LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_W(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_WARNING LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_I(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_INFO LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_D(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_DEBUG LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_V(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_VERBOSE LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_C(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_CRITICAL LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_E(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_ERROR LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_W(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_WARNING LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_I(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_INFO LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_D(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_DEBUG LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_V(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_VERBOSE LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
 
-    #define LOG_LINE_T(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_HEADER(x) format,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_T(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_HEADER(x) format, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
 #else  
   #define LOG_LINE_C(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_CRITICAL LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
   #define LOG_LINE_E(level, x, format, ...) if (HAPLoglevel >= level) printf(LOG_COLOR_ERROR LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
@@ -272,14 +272,14 @@ constexpr const char* file_name(const char* str) {
 #else
   // Lines
 #if HAP_LOGGING_SUPPORTS_HAPTIME
-    #define LOG_LINE_C(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_CRITICAL LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_E(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_ERROR LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_W(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_WARNING LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_I(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_INFO LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_D(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_DEBUG LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
-    #define LOG_LINE_V(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_VERBOSE LOG_HEADER(x) format LOG_COLOR_NORMAL,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_C(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_CRITICAL LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_E(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_ERROR LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_W(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_WARNING LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_I(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_INFO LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_D(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_DEBUG LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_V(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_VERBOSE LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
 
-    #define LOG_LINE_T(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_HEADER(x) format,  HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
+    #define LOG_LINE_T(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_HEADER(x) format, millis(), HAPTime::timeString(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
 #else
     #define LOG_LINE_C(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_CRITICAL LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)
     #define LOG_LINE_E(level, x, format, ...) if (HAPLoglevel >= level) LOGDEVICE->printf(LOG_COLOR_ERROR LOG_HEADER(x) format LOG_COLOR_NORMAL, millis(), file_name(__FILE__), __LINE__, __func__, ##__VA_ARGS__)

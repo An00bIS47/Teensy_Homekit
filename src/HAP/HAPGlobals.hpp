@@ -742,9 +742,9 @@ STR(HAP_PLUGIN_USE_BME280)
 											// Default: 0
 
 
-
+#ifndef HAP_MINIMAL_PLUGIN_INTERVAL
 #define HAP_MINIMAL_PLUGIN_INTERVAL	1000	// Minimal plugin handle interval in ms
-											// Default: 1000
+#endif										// Default: 1000
 											// ToDo: Nedded ??
 
 

@@ -204,10 +204,10 @@ public:
 		for (uint8_t i = 0; i < credentials.size(); i++){
 			prt.print("{");
 			prt.print("\"ssid\":");
-			prt.print(HAPHelper::wrap(credentials[i]->ssid));
+			prt.print(HAPHelper::wrap(credentials[i]->ssid).c_str());
 			prt.print(",");
 			prt.print("\"passwort\":");
-			prt.print(HAPHelper::wrap(credentials[i]->password));
+			prt.print(HAPHelper::wrap(credentials[i]->password).c_str());
 			prt.print("}");
 			if (i + 1 < credentials.size()){
 				prt.print(",");
