@@ -1,6 +1,5 @@
 Import("env")
 
-
 if env.GetBuildType() == "debug":
     print("Applying debug build flags", end="")
     env.Append(

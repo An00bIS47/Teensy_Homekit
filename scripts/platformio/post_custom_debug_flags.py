@@ -1,7 +1,5 @@
 Import("env")
 
-
-
 if env.GetBuildType() == "debug":
    print("Applying custom debug flags ...", end="")
    for scope in ("ASFLAGS", "CCFLAGS", "LINKFLAGS"):

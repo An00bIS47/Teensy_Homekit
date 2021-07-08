@@ -29,22 +29,11 @@ env.AddCustomTarget(
 # Print teensy_size details
 env.AddCustomTarget(
     name="teensy_size",
-    dependencies=None,
+    dependencies="$BUILD_DIR/${PROGNAME}.elf",
     actions=[
         "teensy_size $BUILD_DIR/${PROGNAME}.elf"
     ],
     title="Teensy Size",
     description="Print detailed teensy size information"
-)
-
-# Increment version and buildnumber
-env.AddCustomTarget(
-    name="increment",
-    dependencies=None,
-    actions=[
-        "python scripts/platformio/pre_increment_version.py"
-    ],
-    title="Increment buildnumber",
-    description="Increment version and buildnumber"
 )
 

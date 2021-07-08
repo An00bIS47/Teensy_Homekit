@@ -1,7 +1,7 @@
-#Import("env")
+Import("env")
 
-""" 
-    Create version header and tracker file if missing 
+"""
+    Create version header and tracker file if missing
 """
 from datetime import datetime
 import os
@@ -178,26 +178,27 @@ now = datetime.now()
 ### Buildnummber
 ###
 if not os.path.exists(".buildnumber_no_increment"):
-    buildNumber = initBuildNumber()
-    buildNumber = incrementBuildNumber(buildNumber)
-    createBuildnumber(buildNumber)
+    if not env.GetBuildType() == "debug":
+        buildNumber = initBuildNumber()
+        buildNumber = incrementBuildNumber(buildNumber)
+        createBuildnumber(buildNumber)
 
-    print("BUILDNUMBER: {}".format(buildNumber))
+        print("BUILDNUMBER: {}".format(buildNumber))
 
-    # fileContent = BUILDNUMBER_CONTENT.format(now.strftime("%d.%m.%Y"), getpass.getuser(), buildNumber, buildNumber, now.strftime("%d.%m.%Y %H:%M"))
+        # fileContent = BUILDNUMBER_CONTENT.format(now.strftime("%d.%m.%Y"), getpass.getuser(), buildNumber, buildNumber, now.strftime("%d.%m.%Y %H:%M"))
 
-    # buildNumber = parseForBuildnumber(fileContent)
-    # buildNumber = incrementBuildNumber(buildNumber)
+        # buildNumber = parseForBuildnumber(fileContent)
+        # buildNumber = incrementBuildNumber(buildNumber)
 
-    # env.Append(CPPDEFINES=[
-    #     ("HOMEKIT_VERSION_BUILD", buildNumber),
-    #     ("HOMEKIT_VERSION_BUILD_STR", str(buildNumber)),
-    #     ("HOMEKIT_COMPILE_TIME", now.strftime("%d.%m.%Y %H:%M")),
-    # ])
+        # env.Append(CPPDEFINES=[
+        #     ("HOMEKIT_VERSION_BUILD", buildNumber),
+        #     ("HOMEKIT_VERSION_BUILD_STR", str(buildNumber)),
+        #     ("HOMEKIT_COMPILE_TIME", now.strftime("%d.%m.%Y %H:%M")),
+        # ])
 
-    output = BUILDNUMBER_CONTENT.format(now.strftime("%d.%m.%Y"), getpass.getuser(), buildNumber, buildNumber, now.strftime("%Y-%m-%d %H:%M"))
-    # write output to src/HAP/HAPBuildnumber.hpp
-    createBuildnumberHeader(output)
+        output = BUILDNUMBER_CONTENT.format(now.strftime("%d.%m.%Y"), getpass.getuser(), buildNumber, buildNumber, now.strftime("%Y-%m-%d %H:%M"))
+        # write output to src/HAP/HAPBuildnumber.hpp
+        createBuildnumberHeader(output)
 
 ###
 ### Version
