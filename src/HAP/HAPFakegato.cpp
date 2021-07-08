@@ -10,6 +10,11 @@
 #include "HAPLogging.hpp"
 #include "HAPTime.hpp"
 
+#ifndef HAP_FAKEGATO_INTERVAL
+#define HAP_FAKEGATO_INTERVAL       600000	// Interval to add entry to history in millis
+#endif                                      // EVE app requires at least one entry every 10 mins
+											// default: 600000
+
 
 HAPFakegato::HAPFakegato(){
     _restarted = true;
