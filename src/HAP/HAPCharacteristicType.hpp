@@ -5,11 +5,19 @@
 //  Created on: 10.07.2021
 //      Author: michael
 //
-
+// Bluetooth Characteristics:
+// 
+// HAP_CHARACTERISTIC_BLUETOOTH_PAIR_SETUP             = 0x4C,
+// HAP_CHARACTERISTIC_BLUETOOTH_PAIR_VERIFY            = 0x4E,
+// HAP_CHARACTERISTIC_BLUETOOTH_PAIRING_FEATURE        = 0x4F,
+// HAP_CHARACTERISTIC_BLUETOOTH_PAIRINGS               = 0x50,
+// HAP_CHARACTERISTIC_BLUETOOTH_SERVICE_INSTANCE_ID    = 0x51,
+// 
 #ifndef HAPCHARACTERISTICTYPE_HPP_
 #define HAPCHARACTERISTICTYPE_HPP_
 
 enum class HAPCharacteristicType : uint16_t {
+    None                                     = 0x0000,      // Internal only
     AdministratorOnlyAccess                  = 0x0001,
     AudioFeedback                            = 0x0005,
     Brightness                               = 0x0008,

@@ -37,7 +37,7 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
     sprintf(accName, "%s History", name);
 
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);
-    HAPCharacteristic<std::string>* accNameCha = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    HAPCharacteristic<std::string>* accNameCha = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     accNameCha->setValue(accName);
     accessory->addCharacteristicToService(fgService, accNameCha);
 

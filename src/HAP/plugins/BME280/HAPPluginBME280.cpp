@@ -131,7 +131,7 @@ void HAPPluginBME280::changedPressure(uint16_t oldValue, uint16_t newValue) {
 }
 
 void HAPPluginBME280::handleImpl(bool forced){
-	LOG_V("Handle plguin %s [%d]\n", (const char*)_config->name, _config->interval);
+	LOG_V("[%s] - Handle plugin [%d]\n", (const char*)_config->name, _config->interval);
 
 	if (_accessory->aid() == 0){
 		return;
@@ -158,7 +158,7 @@ void HAPPluginBME280::handleImpl(bool forced){
 FLASHMEM
 #endif
 HAPAccessory* HAPPluginBME280::initAccessory(){
-	LOG_V("Initializing accessory for plugin: %s ...\n", _config->name);
+	LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
 
 	//
 	// Unique serial number !!!
@@ -190,7 +190,6 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	//
 	// Temperature
 	//
-
 	LOG_V("[%s] - Add new %s service ...", _config->name, "temperature");
 
 	HAPService* temperatureService = new HAPService(HAPServiceType::TemperatureSensor);
@@ -202,11 +201,11 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	{
 
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "temperature");
-		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		temperatureServiceName->setValue("Temperature Sensor");
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
 
-		_temperatureValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
+		_temperatureValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentTemperature, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAPUnit::Celsius);
 		_temperatureValue->setValue(0.0F);
 
 		_temperatureValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
@@ -235,11 +234,11 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "humidity");
 
-		HAPCharacteristic<std::string> *humServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		HAPCharacteristic<std::string> *humServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		humServiceName->setValue("Humidity Sensor");
 		_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-		_humidityValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
+		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAPUnit::Percentage);
 		_humidityValue->setValue(0.0F);
 
 		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));
@@ -266,11 +265,11 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	{
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "air pressure");
 
-		HAPCharacteristic<std::string> *pressureServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		HAPCharacteristic<std::string> *pressureServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		pressureServiceName->setValue("AirPressure Sensor");
 		_accessory->addCharacteristicToService(pressureService, pressureServiceName);
 
-		_pressureValue = new HAPCharacteristic<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAP_UNIT_HPA);
+		_pressureValue = new HAPCharacteristic<uint16_t>(HAP_CHARACTERISTIC_FAKEGATO_AIR_PRESSURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 1100, 1, HAPUnit::HPA);
 		_pressureValue->setValue(320);
 
 		_pressureValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedPressure, this, std::placeholders::_1, std::placeholders::_2));

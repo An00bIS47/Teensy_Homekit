@@ -160,6 +160,9 @@ def characteristicsToEnum(array, enumName, typeStr = None):
 
 
     sortedArray = []
+    # Add "None to Chars Enum !!!
+    sortedArray.append({"name": "None", "value": 0})    
+
     for e in array:
         sortedArray.append({"name": e['Enum'], "value": int(e['Short UUID'], base=16)})
     

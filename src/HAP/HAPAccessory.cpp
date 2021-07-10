@@ -9,7 +9,7 @@
 #include "HAPHelper.hpp"
 #include "HAPServer.hpp"
 #include "EventManager.h"
-#include "HAPCharacteristics.hpp"
+#include "HAPCharacteristicType.hpp"
 #include "HAPCharacteristic.hpp"
 #include "HAPServiceType.hpp"
 
@@ -127,7 +127,7 @@ HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
 }
 
 
-HAPCharacteristicBase* HAPAccessory::characteristicsOfType(int type) {
+HAPCharacteristicBase* HAPAccessory::characteristicsOfType(HAPCharacteristicType type) {
 	for (auto it = _services.begin(); it != _services.end(); it++) {
 		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
 			if ((*jt)->type() == type) {
@@ -193,28 +193,28 @@ HAPService* HAPAccessory::addInfoService(const char* accessoryName, const char* 
 
 
 	if (_accessoryName == nullptr) {
-		_accessoryName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_accessoryName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
 
 	if (_manufacturer == nullptr) {
-		_manufacturer = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MANUFACTURER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_manufacturer = new HAPCharacteristic<std::string>(HAPCharacteristicType::Manufacturer, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);
 
 
 	if (_modelName == nullptr) {
-		_modelName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MODEL, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_modelName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Model, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);
 
 
 	if (_serialNumber == nullptr) {
-		_serialNumber = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_SERIAL_NUMBER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_serialNumber = new HAPCharacteristic<std::string>(HAPCharacteristicType::SerialNumber, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);
@@ -244,7 +244,7 @@ FLASHMEM
 void HAPAccessory::setFirmware(const char* firmwareRev){
 	initInfoService();
 	if (_firmware == nullptr) {
-		_firmware = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_firmware = new HAPCharacteristic<std::string>(HAPCharacteristicType::FirmwareRevision, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _firmware);
 	}
 	_firmware->setValue(firmwareRev, false);
@@ -256,7 +256,7 @@ FLASHMEM
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
 	initInfoService();
 	if (_identify == nullptr) {
-		_identify = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_IDENTIFY, HAP_PERMISSION_WRITE);
+		_identify = new HAPCharacteristic<bool>(HAPCharacteristicType::Identify, HAP_PERMISSION_WRITE);
 		addCharacteristicToService(_infoService, _identify);
 	}
 	_identify->setValueChangeCallback(callback);

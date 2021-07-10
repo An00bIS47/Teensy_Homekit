@@ -71,7 +71,7 @@ void HAPPluginDHT::changedHumidity(float oldValue, float newValue) {
 
 void HAPPluginDHT::handleImpl(bool forced){
 
-	LOG_V("Handle plguin %s [%d]\n", (const char*)_config->name, _config->interval);
+	LOG_V("[%s] - Handle plugin [%d]\n", (const char*)_config->name, _config->interval);
 
 	sensors_event_t sensorEventTemp;
 	sensors_event_t sensorEventHum;
@@ -109,7 +109,7 @@ FLASHMEM
 #endif
 HAPAccessory* HAPPluginDHT::initAccessory(){
 
-	LOG_V("Initializing accessory for plugin: %s ...\n", _config->name);
+	LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
 
 #if HAP_PLUGIN_DHT_USE_DUMMY
 #else
@@ -154,7 +154,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	// Temperature Service
 	//
 	LOG_V("[%s] - Add new %s service ...", _config->name, "temperature");
-	HAPService* temperatureService = new HAPService(HAP_SERVICE_TEMPERATURE_SENSOR);
+	HAPService* temperatureService = new HAPService(HAPServiceType::TemperatureSensor);
 	_accessory->addService(temperatureService);
 	LOGRAW_V("OK\n");
 
@@ -162,13 +162,13 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "temperature");
 
 		const char* serviceName = "DHT Temperature Sensor";
-		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		temperatureServiceName->setValue(serviceName);
 
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
 
 		//HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
-		_temperatureValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_TEMPERATURE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAP_UNIT_CELSIUS);
+		_temperatureValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentTemperature, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAPUnit::Celsius);
 		_temperatureValue->setValue(0.0F);
 
 		_temperatureValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
@@ -192,7 +192,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	{
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "humidity");
 
-		_humidityValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);		_humidityValue->setValue(0.0);
+		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAPUnit::Percentage);		_humidityValue->setValue(0.0);
 		_humidityValue->setValue(0.0F);
 
 		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));

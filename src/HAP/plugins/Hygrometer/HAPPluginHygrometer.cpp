@@ -136,7 +136,7 @@ void HAPPluginHygrometer::changedMoisture(float oldValue, float newValue) {
 
 
 void HAPPluginHygrometer::handleImpl(bool forced){
-	LOG_V("Handle plguin %s [%d]\n", (const char*)_config->name, _config->interval);
+	LOG_V("[%s] - Handle plugin [%d]\n", (const char*)_config->name, _config->interval);
 
 
 	float percentage = 0;
@@ -179,6 +179,8 @@ FLASHMEM
 #endif
 HAPAccessory* HAPPluginHygrometer::initAccessory(){
 
+	LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
+	
 #if HAP_PLUGIN_HYGROMETER_USE_DUMMY
 	const char* sn = HAPDeviceID::serialNumber("HY", "DY").c_str();
 #else
@@ -241,7 +243,7 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 		//
 		LOG_V("[%s] - Add new %s service ...", _config->name, "humidity");
 
-		HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
+		HAPService* humidityService = new HAPService(HAPServiceType::HumiditySensor);
 		_accessory->addService(humidityService);
 
 		LOGRAW_V("OK\n");
@@ -249,11 +251,11 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 		{
 			LOG_V("[%s] - Add new %s sensor ...", _config->name, "soil moisture");
 
-			HAPCharacteristic<std::string> *humServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+			HAPCharacteristic<std::string> *humServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 			humServiceName->setValue("Soil Moisture Sensor");
 			_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-			_humidityValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_CURRENT_RELATIVE_HUMIDITY, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAP_UNIT_PERCENTAGE);
+			_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAPUnit::Percentage);
 			_humidityValue->setValue(0.0F);
 
 			_humidityValue->setValueChangeCallback(std::bind(&HAPPluginHygrometer::changedMoisture, this, std::placeholders::_1, std::placeholders::_2));

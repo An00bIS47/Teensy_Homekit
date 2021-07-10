@@ -25,7 +25,7 @@
 #define HAPSERVICETYPE_HPP_
 
 enum class HAPServiceType : uint16_t {
-    None                                     = 0x0000,
+    None                                     = 0x0000,      // Internal only
     AccessoryInformation                     = 0x003E,
     Fan                                      = 0x0040,
     GarageDoorOpener                         = 0x0041,

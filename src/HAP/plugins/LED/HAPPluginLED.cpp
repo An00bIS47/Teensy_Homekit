@@ -86,7 +86,7 @@ void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
 void HAPPluginLED::handleImpl(bool forced){
 
     if (isEnabled() && _blinkingEnabled) {
-        LOG_V("Handle plguin %s [%d]\n", (const char*)_config->name, _config->interval);
+        LOG_V("[%s] - Handle plugin [%d]\n", (const char*)_config->name, _config->interval);
 
         _isOn == true ? _isOn = false : _isOn = true;
 
@@ -118,7 +118,7 @@ FLASHMEM
 #endif
 HAPAccessory* HAPPluginLED::initAccessory(){
 
-    LOG_V("Initializing accessory for plugin: %s ...\n", _config->name);
+    LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
 
     char gpioStr[5] = {'\0', };
     sprintf(gpioStr, "%d", _gpio);
@@ -149,11 +149,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     {
         LOG_V("[%s] - Add new %s sensor ...", _config->name, "led");
 
-        HAPCharacteristic<std::string>* lightServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        HAPCharacteristic<std::string>* lightServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         lightServiceName->setValue("LED");
         _accessory->addCharacteristicToService(_service, lightServiceName);
 
-        _powerState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+        _powerState = new HAPCharacteristic<bool>(HAPCharacteristicType::On, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
         _powerState->setValue(_isOn);
 
         auto callbackPowerState = std::bind(&HAPPluginLED::changeState, this, std::placeholders::_1, std::placeholders::_2);

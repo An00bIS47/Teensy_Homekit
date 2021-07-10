@@ -358,7 +358,7 @@ void HAPAccessorySet::printTo(Print& print){
 	print.print(F("]}"));
 }
 
-HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, uint8_t type){
+HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, HAPCharacteristicType type){
 	HAPAccessory* accessory = accessoryWithAID(aid);
 	if (accessory){
 		return accessory->characteristicsOfType(type);

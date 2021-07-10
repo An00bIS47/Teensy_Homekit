@@ -1784,7 +1784,7 @@ FLASHMEM
 void HAPServer::handleIdentify(HAPClient* hapClient){
 	LOG_D("Handle /identify ...");
 
-	HAPCharacteristic<bool>* c = reinterpret_cast< HAPCharacteristic<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY));
+	HAPCharacteristic<bool>* c = reinterpret_cast< HAPCharacteristic<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAPCharacteristicType::Identify));
 
 	WriteBufferingClient bufferedWifiClient{hapClient->client, 256};
 
