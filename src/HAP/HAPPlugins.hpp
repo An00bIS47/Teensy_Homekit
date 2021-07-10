@@ -30,7 +30,7 @@
 #include "HAPConfiguration.hpp"
 #include "HAPCharacteristics.hpp"
 #include "HAPCharacteristic.hpp"
-#include "HAPServices.hpp"
+#include "HAPServiceType.hpp"
 
 #include "HAPFakegato.hpp"
 #include "HAPFakegatoFactory.hpp"

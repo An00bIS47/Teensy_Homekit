@@ -185,6 +185,10 @@ def servicesToEnum(array, enumName, typeStr = None):
 
 
     sortedArray = []
+    # Add "None to Service Enum !!!
+    sortedArray.append({"name": "None", "value": 0})    
+
+    
     for e in array:
         sortedArray.append({"name": prettyName(e['Name']), "value": int(shortUUID(e['UUID']), base=16)})
     

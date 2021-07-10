@@ -13,13 +13,17 @@
 #include <vector>
 #include <memory>
 #include "HAPCharacteristic.hpp"
+#include "HAPServiceType.hpp"
 
 class HAPService {
 public:
 
     HAPService();
-    HAPService(uint8_t _uuid);
-    HAPService(const char* _uuid);
+    HAPService(HAPServiceType uuid);
+    HAPService(const char* uuid);
+
+
+    uint16_t uuidAsInt(){ return static_cast<uint16_t>(_uuid); }
 
     uint32_t aid() { return _aid; }
     void setAID(uint32_t aid) { _aid = aid; }
@@ -76,9 +80,9 @@ public:
 
     std::vector<std::unique_ptr<HAPCharacteristicBase>> _characteristics;
 protected:
-    uint32_t    _aid;
-    uint8_t     _uuid;
-    std::string _uuidString;
+    uint32_t        _aid;
+    HAPServiceType  _uuid;
+    std::string     _uuidString;
 
 
     uint8_t     _features; // hidden == 0x01, primary == 0x02

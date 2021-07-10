@@ -5,11 +5,27 @@
 //  Created on: 10.07.2021
 //      Author: michael
 //
+// 
+// Bluetooth Services:
+// 
+// HAP_SERVICE_BLUETOOTH_ACCESSORY_INFORMATION     = 0xFED3,
+// HAP_SERVICE_BLUETOOTH_CAMERA                    = 0xFEC9,
+// HAP_SERVICE_BLUETOOTH_FAN                       = 0xFECB,
+// HAP_SERVICE_BLUETOOTH_GARAGE_DOOR_OPENER        = 0xFECE,
+// HAP_SERVICE_BLUETOOTH_LIGHT_BULB                = 0xFED2,
+// HAP_SERVICE_BLUETOOTH_LOCK_MANAGEMENT           = 0xFECF,
+// HAP_SERVICE_BLUETOOTH_LOCK_MECHANISM            = 0xFED0,
+// HAP_SERVICE_BLUETOOTH_MICROPHONE                = 0xFEC8,
+// HAP_SERVICE_BLUETOOTH_OUTLET                    = 0xFECC,
+// HAP_SERVICE_BLUETOOTH_SPEAKER                   = 0xFEC7,
+// HAP_SERVICE_BLUETOOTH_SWITCH                    = 0xFECD,
+
 
 #ifndef HAPSERVICETYPE_HPP_
 #define HAPSERVICETYPE_HPP_
 
 enum class HAPServiceType : uint16_t {
+    None                                     = 0x0000,
     AccessoryInformation                     = 0x003E,
     Fan                                      = 0x0040,
     GarageDoorOpener                         = 0x0041,

@@ -140,7 +140,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     // Lightbulb Service
     //
     LOG_V("[%s] - Add new %s service ...", _config->name, "light bulb");
-    HAPService* _service = new HAPService(HAP_SERVICE_LIGHTBULB);
+    HAPService* _service = new HAPService(HAPServiceType::Lightbulb);
     // _service->setPrimaryService(true);
     _accessory->addService(_service);
 

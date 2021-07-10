@@ -11,7 +11,7 @@
 #include "EventManager.h"
 #include "HAPCharacteristics.hpp"
 #include "HAPCharacteristic.hpp"
-#include "HAPServices.hpp"
+#include "HAPServiceType.hpp"
 
 
 #if defined(ARDUINO_TEENSY41)
@@ -232,7 +232,7 @@ FLASHMEM
 #endif
 void HAPAccessory::initInfoService(){
 	if (_infoService == nullptr) {
-		_infoService = new HAPService(HAP_SERVICE_ACCESSORY_INFORMATION);
+		_infoService = new HAPService(HAPServiceType::AccessoryInformation);
 		addService(_infoService);
 	}
 }

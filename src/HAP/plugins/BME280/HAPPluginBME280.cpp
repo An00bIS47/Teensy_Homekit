@@ -193,7 +193,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 
 	LOG_V("[%s] - Add new %s service ...", _config->name, "temperature");
 
-	HAPService* temperatureService = new HAPService(HAP_SERVICE_TEMPERATURE_SENSOR);
+	HAPService* temperatureService = new HAPService(HAPServiceType::TemperatureSensor);
 	// temperatureService->setPrimaryService(true);
 	_accessory->addService(temperatureService);
 
@@ -225,7 +225,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 
 	LOG_V("[%s] - Add new %s service ...", _config->name, "humidity");
 
-	HAPService* humidityService = new HAPService(HAP_SERVICE_HUMIDITY_SENSOR);
+	HAPService* humidityService = new HAPService(HAPServiceType::HumiditySensor);
 	_accessory->addService(humidityService);
 
 	LOGRAW_V("OK\n");
