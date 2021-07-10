@@ -171,6 +171,9 @@ def createVersionHeader(versionContent, fileName = VERSION_HEADER):
         f.write("{}".format(versionContent))
         f.truncate()
 
+
+
+
 now = datetime.now()
 
 

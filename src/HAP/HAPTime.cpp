@@ -53,7 +53,6 @@ HAPTime::~HAPTime(){
 
 
 bool HAPTime::begin(){
-
     setSyncProvider(getDstCorrectedTime);
     setSyncInterval(HAP_TIME_SYNC_INTERVAL);
     return true;

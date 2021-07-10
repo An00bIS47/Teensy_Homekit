@@ -491,7 +491,7 @@ bool HAPServer::begin(bool resume) {
 
 	LOG_I("Setup accessory ...");
 	_accessorySet->setModelName(hostname);
-	_accessorySet->setAccessoryType(HAP_ACCESSORY_TYPE_BRIDGE);
+	_accessorySet->setAccessoryType(HAPAccessoryType::Bridge);
 	_accessorySet->setPinCode(HAP_PIN_CODE);
 	_accessorySet->begin();
 	LOGRAW_I("OK\n");
@@ -739,7 +739,7 @@ bool HAPServer::begin(bool resume) {
 	// mDNSExt.addService("_hap", "_tcp", _port);
 
 
-	mDNSExt.enableHomekit(_port, HAPDeviceID::deviceID(), _accessorySet->modelName(), _accessorySet->accessoryType(), _accessorySet->setupHash(), "1.0");
+	mDNSExt.enableHomekit(_port, HAPDeviceID::deviceID(), _accessorySet->modelName(), _accessorySet->accessoryTypeAsInt(), _accessorySet->setupHash(), "1.0");
 
 #if HAP_ENABLE_WEBSERVER
 	if (_configuration.getWebServerConfig()->enabled){
@@ -898,7 +898,7 @@ bool HAPServer::updateServiceTxt() {
 	_hapMdnsTxt.setSf(!_accessorySet->isPaired());						// Status flags
 	_hapMdnsTxt.setPv(HOMEKIT_PROTOKOL_VERSION);						// Protocol Version
 	_hapMdnsTxt.setStateNumber(1);										// Current state number. Required. - This must have a value of ”1”.
-	_hapMdnsTxt.setCi(_accessorySet->accessoryType());					// Accessory Category Identifier. Required.
+	_hapMdnsTxt.setCi(_accessorySet->accessoryTypeAsInt());					// Accessory Category Identifier. Required.
 	_hapMdnsTxt.setSh(_accessorySet->setupHash());						// Setup Hash
 
 	return true;

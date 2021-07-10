@@ -17,6 +17,10 @@
 
 #include "HAPGlobals.hpp"
 
+#if HAP_ENABLE_NTP
+#include <NativeEthernetUdp.h>
+#endif
+
 #ifndef HAP_ENABLE_KNX_TIME
 #define HAP_ENABLE_KNX_TIME 0
 #endif
@@ -50,9 +54,7 @@
 #endif
 
 
-#if HAP_ENABLE_NTP
-#include <NativeEthernetUdp.h>
-#endif
+
 
 #define callbackGetTime_t std::function<time_t(void)>
 
