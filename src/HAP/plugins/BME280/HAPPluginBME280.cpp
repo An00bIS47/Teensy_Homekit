@@ -238,7 +238,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 		humServiceName->setValue("Humidity Sensor");
 		_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAPUnit::Percentage);
+		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 1, HAPUnit::Percentage);
 		_humidityValue->setValue(0.0F);
 
 		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginBME280::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));

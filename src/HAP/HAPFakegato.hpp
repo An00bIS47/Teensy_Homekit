@@ -16,6 +16,7 @@
 #include <CircularBuffer.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
+#include "HAPLogging.hpp"
 #include "HAPFakegatoCharacteristic.hpp"
 
 #ifndef HAP_FAKEGATO_BUFFER_SIZE
@@ -270,7 +271,7 @@ protected:
             prt.print(F(" bitmask:")); prt.print(bitmask);
             prt.print(F(" timestamp:")); prt.print(timestamp);
             prt.println("");
-            HAPHelper::array_print("data", data, length);
+            LOGARRAY_N("data", data, length);
         }
 
 #endif

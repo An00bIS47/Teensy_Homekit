@@ -191,7 +191,7 @@ void HAPLogger::logFreeHeap(int clients, int queue, const char* color){
 	if (HAPLogger::_logLevel >= LogLevel::DEBUG) {
 		_printer->print(color);
 #if HAP_ENABLE_NTP
-		_printer->print(HAPTime::timeString());
+		_printer->print(HAPTime::timestring());
 		_printer->print(F(" "));
 #else
 		_printer->printf(F("%lu "), millis());

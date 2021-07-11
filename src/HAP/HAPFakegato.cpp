@@ -7,7 +7,6 @@
 //
 
 #include "HAPFakegato.hpp"
-#include "HAPLogging.hpp"
 #include "HAPTime.hpp"
 
 #ifndef HAP_FAKEGATO_INTERVAL
@@ -168,7 +167,7 @@ void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length
     }
 
 #if HAP_DEBUG_FAKEGATO
-    *LOGDEVICE->print("bitmask: "); *LOGDEVICE->println(bitmask);
+    LOG_D("Bitmask %d\n", bitmask);
     LOGARRAY_D("FAKEGATO ENTRY DATA", data, length);
 #endif
 
@@ -242,8 +241,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
     uint8_t usedBatch = 0;
 
 #if HAP_DEBUG_FAKEGATO
-    *LOGDEVICE->print(">>>> _requestedIndex: ");
-    *LOGDEVICE->print(_requestedIndex);
+    LOG_D("requestedIndex: %d\n", _requestedIndex);
 #endif
 
     // ToDo:
@@ -267,8 +265,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
 
 
 #if HAP_DEBUG_FAKEGATO
-        *LOGDEVICE->print(">>>> _requestedIndex: ");
-        *LOGDEVICE->println(_requestedIndex);
+    LOG_D("requestedEntry: %d\n", _requestedIndex);
 #endif
 
     for (uint8_t i=0; i < (HAP_FAKEGATO_BATCH_SIZE - usedBatch); i++) {
@@ -284,8 +281,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
 
 
 #if HAP_DEBUG_FAKEGATO
-        *LOGDEVICE->print(">>>> _requestedIndex: ");
-        *LOGDEVICE->println(_requestedIndex);
+        LOG_D("current entry: %d\n", _requestedIndex);
 #endif
 
         uint8_t currentOffset = 0;
@@ -370,7 +366,7 @@ void HAPFakegato::getRefTime(uint8_t* data, uint16_t* length){
     offset += 4;
 
 #if HAP_DEBUG_FAKEGATO
-    LOG_D(">>>>> Fakegato RefTime: %d\n", refTime.ui32);
+    LOG_D("fakegato reftime: %d\n", refTime.ui32);
 #endif
     memset(data + offset, 0x00, 7);
     offset += 7;
@@ -404,7 +400,7 @@ void HAPFakegato::callbackSetHistoryTime(const uint8_t* decoded, const size_t le
         // mbedtls_base64_decode(decoded, sizeof(decoded), &outputLength,(uint8_t*)newValue.c_str(), newValue.length());
 
 #if HAP_DEBUG_FAKEGATO
-        HAPHelper::array_print("History Set Time", decoded, len);
+        LOGARRAY_D("History Set Time", decoded, len);
 #endif
 
         uint32_t timestamp = HAPHelper::u8_to_u32(decoded) + HAP_FAKEGATO_EPOCH;

@@ -435,61 +435,6 @@
 
 
 
-/**
- * NTP Settings
- ********************************************************************/
-#ifndef HAP_ENABLE_NTP
-#define HAP_ENABLE_NTP 			1		// Enable SNTP client
-											// Default: 1
-#endif
-
-
-#if HAP_ENABLE_NTP
-
-#ifndef HAP_NTP_SERVER_URL
-#define HAP_NTP_SERVER_URL			"fritz.box"						// NTP server url
-#endif
-
-
-#ifndef HAP_NTP_SERVER_URL_2
-#define HAP_NTP_SERVER_URL_2		"time.euro.apple.com"						// NTP server url
-#endif
-
-#ifndef HAP_NTP_SERVER_URL_FALLBACK
-#define HAP_NTP_SERVER_URL_FALLBACK	"pool.ntp.org"
-#endif
-
-const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_URL_2, HAP_NTP_SERVER_URL_FALLBACK};
-#define HAP_NTP_SERVER_URLS_SIZE 	3
-
-
-
-
-
-#if defined( ARDUINO_ARCH_ESP32)
-// get the timezones here:
-// https://remotemonitoringsystems.ca/time-zone-abbreviations.php
-#ifndef HAP_NTP_TZ_INFO
-#define HAP_NTP_TZ_INFO     		"CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"		// timezone for berlin
-#endif
-
-#elif defined( CORE_TEENSY )
-
-#ifndef HAP_TIMEZONE
-#define HAP_TIMEZONE  1     // Central European Time
-	// #define timeZone -5  // Eastern Standard Time (USA)
-	// #define timeZone -4  // Eastern Daylight Time (USA)
-	// #define timeZone -8  // Pacific Standard Time (USA)
-	// #define timeZone -7  // Pacific Daylight Time (USA)
-#endif
-
-
-#define UNIX_OFFSET					2208988800UL
-
-
-#endif /* ARDUINO_ARCH_ESP32 */
-#endif /* HAP_ENABLE_NTP */
-
 
 
 /**

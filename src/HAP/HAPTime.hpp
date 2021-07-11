@@ -1,116 +1,127 @@
 //
 // HAPTime.hpp
-// Homekit
+// Teensy_Homekit
 //
-//  Created on: 07.03.2021
+//  Created on: 08.07.2021
 //      Author: michael
 //
 
 #ifndef HAPTIME_HPP_
 #define HAPTIME_HPP_
 
-#include <Arduino.h>
+
 #include <TimeLib.h>
-#include <math.h>
-#include <functional>
+#include <Timezone.h>
 #include <time.h>
+#include <functional>
 
-#include "HAPGlobals.hpp"
 
-#if HAP_ENABLE_NTP
-#include <NativeEthernetUdp.h>
+#ifndef HAP_TIME_NTP_ENABLED
+#define HAP_TIME_NTP_ENABLED        1
 #endif
 
-#ifndef HAP_ENABLE_KNX_TIME
-#define HAP_ENABLE_KNX_TIME 0
-#endif
-
-#ifndef HAP_ENABLE_NTP
-#define HAP_ENABLE_NTP 0
-#endif
-
-#ifndef NTP_PACKET_SIZE
-#define NTP_PACKET_SIZE 48
-#endif
-
-#ifndef HAP_NTP_TIME_FORMAT
-#define HAP_NTP_TIME_FORMAT	"%Y-%m-%d %H:%M:%S"	    // strftime format
-#endif
-
-#ifndef HAP_NTP_TIMEOUT
-#define HAP_NTP_TIMEOUT	3000
+#ifndef HAP_TIME_FAKEGATO_ENABLED
+#define HAP_TIME_FAKEGATO_ENABLED   1
 #endif
 
 #ifndef HAP_TIME_SYNC_INTERVAL
-#define HAP_TIME_SYNC_INTERVAL 600000
+#define HAP_TIME_SYNC_INTERVAL      600000
 #endif
 
-#ifndef HAP_FAKEGATO_EPOCH
-#define HAP_FAKEGATO_EPOCH       978307200
+#define HAP_TIME_STR_FORMAT         "%Y-%m-%d %H:%M:%S"	    // strftime format
+
+
+#ifndef HAP_TIME_FAKEGATO_EPOCH
+#define HAP_TIME_FAKEGATO_EPOCH		978307200
 #endif
 
-#if HAP_ENABLE_KNX_TIME
-#include <knx.h>
+#define HAP_TIME_UNIX_OFFSET		2208988800UL
+
+#if HAP_TIME_NTP_ENABLED
+#include <NativeEthernetUdp.h>
+#define HAP_NTP_TIMEOUT	            3000
+#define HAP_TIME_NTP_PACKET_SIZE    48
+
+
+#define HAP_TIME_NTP_SERVER_URLS_SIZE 	3
+
+#ifndef HAP_TIME_NTP_SERVER_URL_1
+#define HAP_TIME_NTP_SERVER_URL_1	"fritz.box"						// NTP server url
 #endif
 
+#ifndef HAP_TIME_NTP_SERVER_URL_2
+#define HAP_TIME_NTP_SERVER_URL_2	"time.euro.apple.com"			// NTP server url
+#endif
 
+#ifndef HAP_TIME_NTP_SERVER_URL_3
+#define HAP_TIME_NTP_SERVER_URL_3	"pool.ntp.org"
+#endif /* HAP_TIME_NTP_ENABLED */
 
-
-#define callbackGetTime_t std::function<time_t(void)>
+const char* const HAP_TIME_NTP_SERVER_URLS[] = {HAP_TIME_NTP_SERVER_URL_1, HAP_TIME_NTP_SERVER_URL_2, HAP_TIME_NTP_SERVER_URL_3};
+#endif
 
 class HAPTime {
 public:
-    HAPTime();
-    ~HAPTime();
+    HAPTime() {}
+    ~HAPTime() {}
 
-    static bool begin();
+	// Central European Time (Frankfurt, Paris)
+    static TimeChangeRule CEST; // = {"CEST", Last, Sun, Mar, 2, 120};      // Central European Summer Time
+    static TimeChangeRule CET;  // = {"CET ", Last, Sun, Oct, 3, 60};       // Central European Standard Time
 
-    static const char* timeString();
-    static uint32_t timestamp();
+    static void begin(TimeChangeRule dstStart = CEST, TimeChangeRule stdStart = CET);
+    static void setSyncCallback(std::function<time_t(void)> callback);
 
-    static time_t sunRise(time_t date = 0);
-    static time_t sunSet(time_t date = 0);
+    static time_t utcTimestamp();       // utc timestamp
+    static time_t timestamp();          // localized timestamp
+    static const char* timestring();    // localized time string
 
+    static void printDateTime(Print& prt, Timezone tz, time_t utc, const char *descr);
 
-    static bool setLongitudeLatitude(float longitude, float latitude);
-    static bool setTimeZone(int timezone);
+	static void setTimeFromTimestamp(time_t date = 0);
 
-    static uint8_t dstOffset(uint8_t dayValue, uint8_t monthValue, unsigned int yearValue, uint8_t hourValue);
-
-    static time_t getDstCorrectedTime();
-
-#if HAP_ENABLE_NTP
-    static time_t getNTPTime();
-    bool beginNTP();
+#if HAP_TIME_NTP_ENABLED
+    static time_t getNTPTime();         // method to be used for begin and/or setCallbackGetTime
 #endif
 
-    static void setTimeFromTimestamp(time_t date = 0) {
-        setTime(date);
-    }
+#if HAP_TIME_FAKEGATO_ENABLED
+    static void setRefTime(time_t refTime);   // ToDo: change to time_t in HAPFakegato
+    static time_t refTime();                  // ToDo: change to time_t in HAPFakegato
+    static time_t fakegatoTimestamp();        // ToDo: change to time_t in HAPFakegato
 
-    static void setCallbackGetTime(callbackGetTime_t callback);
+	static uint16_t daysToDST(const unsigned int year, const uint8_t month);
 
-    static void setReftime(const uint32_t reftime){
-        _refTime = reftime;
-    }
+    static int offset();                        // ToDo: change to proper format!! currently in minutes
+#endif
 
-    static uint32_t refTime() {
-        return _refTime;
-    }
+protected:
+    static char _timestring[30];
+    static std::function<time_t(void)> _callbackSync;
+    static Timezone* _tz;
 
-    static uint32_t getTOffset(){
-        return _t_offset;
-    }
-
-    static int getUTCOffset(){
-        return _utcOffset;
-    }
+    static time_t compileTime();
+    static time_t getTimeFromCallback();
 
 
-    static uint16_t getDaysToDST(const unsigned int year, const uint8_t month);
 
-    static uint8_t getDstStartDay(unsigned int yearValue);
-    static uint8_t getDstEndDay(unsigned int yearValue);
+
+#if HAP_TIME_FAKEGATO_ENABLED
+    static time_t _refTime;
+
+	static uint8_t getDstEndDay(unsigned int yearValue);
+	static uint8_t getDstStartDay(unsigned int yearValue);
+#endif
+
+    
+
+#if HAP_TIME_NTP_ENABLED
+    static uint8_t _packetBuffer[HAP_TIME_NTP_PACKET_SIZE];
+    static EthernetUDP _udp;
+    static void sendNTPpacket(const char* address);
+#endif
+
+
+
 
 #if defined( CORE_TEENSY )
 	//converts TimeLib's time representations to time.h's representations
@@ -151,50 +162,6 @@ public:
 		return timeh; // + UNIX_OFFSET;
 	}
 #endif
-
-protected:
-    static int _utcOffset;      // GMP? offset in minutes
-    static float _longitude;
-    static float _latitude;
-    static uint32_t _refTime;
-    static uint32_t _t_offset;
-
-
-    static char _timestring[30];
-
-    static callbackGetTime_t _callbackGetTime;
-
-    static time_t sunTime(bool sunRise, time_t date = 0);
-
-    static bool getTimeFromString(const char *str, TimeElements& tm);
-    static bool getDateFromString(const char *str, TimeElements& tm);
-
-#if HAP_ENABLE_NTP
-    static uint8_t _packetBuffer[NTP_PACKET_SIZE];
-    static EthernetUDP _udp;
-    static void sendNTPpacket(const char* address);
-#endif
-
-#if HAP_ENABLE_KNX_TIME
-    static void setKNXComObjects(uint16_t koReadTime, uint16_t koWriteTime = 0);
-    static uint16_t _koReadTime;
-    static uint16_t _koWriteTime;
-#endif
-
-    static time_t getTimeFromCompiling();
-
-    // zenith:      Sun's zenith for sunrise/sunset
-    // offical      = 90 degrees 50'
-    // civil        = 96 degrees
-    // nautical     = 102 degrees
-    // astronomical = 108 degrees
-
-    // int utcOffset;     // Central European Time
-    //const int utcOffset = -5;  // Eastern Standard Time (USA)
-    //const int utcOffset = -4;  // Eastern Daylight Time (USA)
-    //const int utcOffset = -8;  // Pacific Standard Time (USA)
-    //const int utcOffset = -7;  // Pacific Daylight Time (USA)
-
 };
 
 #endif /* HAPTIME_HPP_ */

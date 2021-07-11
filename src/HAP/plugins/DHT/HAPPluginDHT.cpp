@@ -192,7 +192,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	{
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "humidity");
 
-		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAPUnit::Percentage);		_humidityValue->setValue(0.0);
+		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 1, HAPUnit::Percentage);		_humidityValue->setValue(0.0);
 		_humidityValue->setValue(0.0F);
 
 		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));

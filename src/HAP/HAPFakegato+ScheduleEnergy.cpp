@@ -348,32 +348,33 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 
 	// current year DST begin
 	ui16_to_ui8 dstBeginCurYear;
-	dstBeginCurYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970), 3);
+	dstBeginCurYear.ui16 = HAPTime::daysToDST((curTime.Year + 1970), 3);
 	memcpy(DST + offsetDST, dstBeginCurYear.ui8, 2);
 	offsetDST += 2;
 
 	// current year DST end
 	ui16_to_ui8 dstEndCurYear;
-	dstEndCurYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970), 10);
+	dstEndCurYear.ui16 = HAPTime::daysToDST((curTime.Year + 1970), 10);
 	memcpy(DST + offsetDST, dstEndCurYear.ui8, 2);
 	offsetDST += 2;
 
 	// next year DST begin
 	ui16_to_ui8 dstBeginNextYear;
-	dstBeginNextYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970 + 1), 3);
+	dstBeginNextYear.ui16 = HAPTime::daysToDST((curTime.Year + 1970 + 1), 3);
 	memcpy(DST + offsetDST, dstBeginNextYear.ui8, 2);
 	offsetDST += 2;
 
 	// next year DST end
 	ui16_to_ui8 dstEndNextYear;
-	dstEndNextYear.ui16 = HAPTime::getDaysToDST((curTime.Year + 1970 + 1), 10);
+	dstEndNextYear.ui16 = HAPTime::daysToDST((curTime.Year + 1970 + 1), 10);
 	memcpy(DST + offsetDST, dstEndNextYear.ui8, 2);
 	offsetDST += 2;
 
+	// ToDo: Add this to HAPTime
 	// time when changing clock
 	// 0x00000078 = 120 = 02:00 time
 	ui32_to_ui8 clockChangeTime;
-	clockChangeTime.ui32 = (HAPTime::getUTCOffset() * 60) + 60;
+	clockChangeTime.ui32 = (2 * 60);
 	memcpy(DST + offsetDST, clockChangeTime.ui8, 4);
 	offsetDST += 4;
 

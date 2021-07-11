@@ -44,7 +44,7 @@
 #include <ArduinoJson.h>
 #include <Base64.h>
 #include "HAPCharacteristicType.hpp"
-
+#include <math.h>
 
 #ifndef HAP_ADD_DESC_TO_JSON
 #define HAP_ADD_DESC_TO_JSON 1
@@ -58,6 +58,8 @@
 #define HAP_USE_STD_STRING 1
 #endif
 
+#define HAP_UUID_FORMAT "%08X-0000-1000-8000-0026BB765291"
+
 enum {
 	HAP_PERMISSION_READ             = 1,        // Paired read
     HAP_PERMISSION_WRITE            = 1 << 1,   // Paired write
@@ -68,7 +70,7 @@ enum {
     HAP_PERMISSION_WRITE_RESPONSE   = 1 << 6    // This characteristic supports write response
 };
 
-enum class HAPUnit {
+enum class HAPUnit : uint8_t {
     None      = 0x00,   // None
     Celsius,            // °C
     Percentage,         // %
@@ -260,6 +262,10 @@ public:
             } else {
                 char hexType[5];
                 sprintf(hexType, "%X", static_cast<uint16_t>(_type));
+
+                // char hexType[37];
+                // sprintf(hexType, HAP_UUID_FORMAT, static_cast<uint16_t>(_type));
+
                 root[F("type")] = hexType;
             }
         }
@@ -287,42 +293,61 @@ public:
         switch (unit) {
             case HAPUnit::ArcDegree:
                 root[F("unit")] = F("arcdegrees");
+                break;
             case HAPUnit::Celsius:
                 root[F("unit")] = F("celsius");
+                break;
             case HAPUnit::Percentage:
                 root[F("unit")] = F("percentage");
+                break;
             case HAPUnit::Lux:
                 root[F("unit")] = F("lux");
+                break;
             case HAPUnit::Seconds:
                 root[F("unit")] = F("seconds");
+                break;
             case HAPUnit::HPA:
                 root[F("unit")] = F("hPa");
+                break;
             case HAPUnit::Watt:
                 root[F("unit")] = F("W");
+                break;
             case HAPUnit::Voltage:
                 root[F("unit")] = F("V");
+                break;
             case HAPUnit::KWh:
                 root[F("unit")] = F("kWh");
+                break;
             case HAPUnit::KMh:
                 root[F("unit")] = F("km/h");
+                break;
             case HAPUnit::KM:
                 root[F("unit")] = F("km");
+                break;
             case HAPUnit::M:
                 root[F("unit")] = F("m");
+                break;
             case HAPUnit::MM:
                 root[F("unit")] = F("mm");
+                break;
             case HAPUnit::Kelvin:
                 root[F("unit")] = F("K");
+                break;
             case HAPUnit::DU:
                 root[F("unit")] = F("DU");
+                break;
             case HAPUnit::Mired:
                 root[F("unit")] = F("Mired");
+                break;
             case HAPUnit::PPM:
                 root[F("unit")] = F("ppm");
+                break;
             case HAPUnit::None:
-                root[F("unit")] = "";
+                //root[F("unit")] = "";
+                break;
             default:
-                root[F("unit")] = "";
+                // root[F("unit")] = "";
+                break;
         }
     }
 
@@ -397,10 +422,6 @@ protected:
 #if HAP_ADD_DESC_TO_JSON
 	char*           _desc = nullptr;
 #endif
-
-    double round2(double val) {
-   		return (int)(val * 100) / 100.0;
-	}
 
 };
 
@@ -809,7 +830,6 @@ public:
         root[F("format")] = F("bool");
     }
 
-
 #if HAP_USE_STD_STRING
     std::string valueString() {
         return value() == 1 ? std::string("1") : std::string("0");
@@ -850,27 +870,37 @@ template <>
 class HAPCharacteristic<float> : public HAPCharacteristicNumericBase<float> {
 public:
     HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, float minVal, float maxVal, float step, HAPUnit unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
-        this->_value = minVal;
+        this->_precision = getPrecision(step);
+        this->_value = roundToDigits(_minVal, _precision);
     }
 
     HAPCharacteristic(const char* type, uint8_t permissions, float minVal, float maxVal, float step, HAPUnit unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
-        this->_value = minVal;
+        this->_precision = getPrecision(step);
+        this->_value = roundToDigits(_minVal, _precision);
     }
 
     void valueToJson(JsonObject& root, bool withCallback = true) override {
         if (readable()) {
-            root[F("value")] = round2(value(withCallback));
+            root[F("value")] = value(withCallback);
         }
     }
 
-    void metaToJson(JsonObject& root) override {
-        root[F("minValue")] = round2(_minVal);
-        root[F("maxValue")] = round2(_maxVal);
-        root[F("minStep")]  = round2(_step);
+    float value(bool withCallback = true) override {
+        float val = HAPCharacteristicNumericBase::value(withCallback);
+        return roundToDigits(val, _precision);
+    }
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+    void setValue(const float& val, bool withCallback = true) override {
+        float newVal = roundToDigits(val, _precision);
+        HAPCharacteristicNumericBase::setValue(newVal, withCallback);
+    }
+
+    void metaToJson(JsonObject& root) override {
+        root[F("minValue")] = _minVal;      // roundToDigits(_minVal, _precision);
+        root[F("maxValue")] = _maxVal;      // roundToDigits(_maxVal, _precision);
+        root[F("minStep")]  = _step;
+
+        unitToJson(root, _unit);
 
         root[F("format")] = F("float");
     }
@@ -879,7 +909,7 @@ public:
 #if HAP_USE_STD_STRING
     std::string valueString() {
         char buffer[64] = {0,};
-        sprintf(buffer, "%.2lf", value());
+        sprintf(buffer, "%f", value());
         return std::string(buffer);
     }
 #else
@@ -908,7 +938,31 @@ public:
     //     }
     // }
 protected:
+    float roundToDigits(float val, int dp) {
+        int charsNeeded = 1 + snprintf(NULL, 0, "%.*f", dp, val);
+        char *buffer = (char*) malloc(charsNeeded);
+        snprintf(buffer, charsNeeded, "%.*f", dp, val);
+        float result = atof(buffer);
+        free(buffer);
+        return result;
+    }
 
+    int getPrecision(float x){
+        int counter = 0; 
+        
+        while ((int)x != x) { 
+            //while number is not int (still has numbers after decimal) 
+            x *= 10; 
+            //when u multiply a number by 10 it moves first float digit to before decimal 12.34 * 10 = 123.4 
+            counter++; 
+        } 
+
+        // Serial.printf("counter: %d\n", counter);
+
+        return counter;
+    }
+
+    int _precision = 0;
 };
 
 
@@ -938,9 +992,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         root[F("format")] = F("int");
     }
@@ -1007,9 +1059,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         root[F("format")] = F("int");
     }
@@ -1076,9 +1126,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         root[F("format")] = F("int");
     }
@@ -1167,9 +1215,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         if (_validValues != nullptr && _validValuesSize > 0){
             JsonArray validValuesJson = root.createNestedArray(F("valid-values"));
@@ -1249,9 +1295,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         root[F("format")] = F("uint16");
     }
@@ -1319,9 +1363,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         root[F("format")] = "uint32";
     }
@@ -1390,9 +1432,7 @@ public:
         root[F("maxValue")] = _maxVal;
         root[F("minStep")]  = _step;
 
-        if (_unit != HAPUnit::None) {
-            unitToJson(root, _unit);
-        }
+        unitToJson(root, _unit);
 
         root[F("format")] = "uint64";
     }

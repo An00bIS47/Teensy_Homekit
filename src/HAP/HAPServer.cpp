@@ -451,32 +451,15 @@ bool HAPServer::begin(bool resume) {
 	// Timesettings
 	//
 	// ToDo: Timezone to config
-	_time.setTimeZone(1);
-
-#if HAP_ENABLE_NTP
-	LOG_I("Starting NTP client ...");
-	if (_isConnected) {
-		if (_time.beginNTP()){
-			LOGRAW_I("OK\n");
-		} else {
-			LOG_E( "ERROR - Setting time from NTP failed!\n");
-		}
-#if defined( CORE_TEENSY )
-		_time.setCallbackGetTime(HAPTime::getNTPTime);
-
-#endif
-	}
-#endif /* HAP_ENABLE_NTP */
+	// _time.begin(CEST, CET);
 	_time.begin();
-	LOG_I("Set time to: %s\n", _time.timeString());
+
+	LOG_I("Set time to: %s\n", _time.timestring());
 
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
-	_time.setReftime(_configuration.getPlatformConfig()->refTime());
+	_time.setRefTime(_configuration.getPlatformConfig()->refTime());
 	// _configuration.getPlatformConfig()->setRefTime(1601846922);
-
 	LOG_D("Set reftime to: %lu\n", _time.refTime());
-	LOG_D("Set t_offset to: %lu\n", _time.getTOffset());
-
 
 	//
 	// Pairings
@@ -484,9 +467,9 @@ bool HAPServer::begin(bool resume) {
 	LOG_I("Loading pairings ...OK\n");
 	LOG_I("Loaded %d pairings from storage\n", _accessorySet->numberOfPairings());
 
-#if HAP_DEBUG_HOMEKIT
-	_accessorySet->getPairings()->print();
-#endif
+// #if HAP_DEBUG_HOMEKIT
+// 	_accessorySet->getPairings()->print();
+// #endif
 
 
 	LOG_I("Setup accessory ...");
@@ -3102,7 +3085,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 
 #if HAP_DEBUG_HOMEKIT
-	LogD(F("Looking up iOS device LTPK for client: "), true);
+	LOG_D("Looking up iOS device LTPK for client\n");
 	LOGARRAY_D("ios_device_pairing_id", ios_device_pairing_id, ios_device_pairing_id_len);
 #endif
 
@@ -3117,7 +3100,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	LogD("Found LTPK: ", true);
+	LOG_D("Found LTPK\n");
 	LOGARRAY_D("ios_device_ltpk", ios_device_ltpk, ED25519_PUBLIC_KEY_LENGTH);
 #endif
 
@@ -3134,13 +3117,12 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	LogD(F("Found Signature: "), true);
+	LOG_D("Found Signature\n");
 	LOGARRAY_D("ios_device_signature", ios_device_signature, ios_device_signature_len);
 #endif
 
 #if HAP_DEBUG_HOMEKIT
-	LogD(F("pairingIdIsAdmin: "), false);
-	LogD(_accessorySet->pairingIdIsAdmin(ios_device_pairing_id), true);
+	LOG_D("pairingIdIsAdmin: %d\n", _accessorySet->pairingIdIsAdmin(ios_device_pairing_id));
 #endif
 
 

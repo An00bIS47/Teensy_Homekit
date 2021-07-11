@@ -180,7 +180,7 @@ FLASHMEM
 HAPAccessory* HAPPluginHygrometer::initAccessory(){
 
 	LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
-	
+
 #if HAP_PLUGIN_HYGROMETER_USE_DUMMY
 	const char* sn = HAPDeviceID::serialNumber("HY", "DY").c_str();
 #else
@@ -255,7 +255,7 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 			humServiceName->setValue("Soil Moisture Sensor");
 			_accessory->addCharacteristicToService(humidityService, humServiceName);
 
-			_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 0.1, HAPUnit::Percentage);
+			_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 1, HAPUnit::Percentage);
 			_humidityValue->setValue(0.0F);
 
 			_humidityValue->setValueChangeCallback(std::bind(&HAPPluginHygrometer::changedMoisture, this, std::placeholders::_1, std::placeholders::_2));
@@ -316,7 +316,7 @@ HAPConfigurationValidationResult HAPPluginHygrometer::validateConfig(JsonObject 
 
 
 JsonObject HAPPluginHygrometer::getConfigImpl(){
-	LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+	LogD(HAPTime::timestring() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
     DynamicJsonDocument doc(128);
 

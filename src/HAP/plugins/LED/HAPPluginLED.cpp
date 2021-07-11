@@ -226,7 +226,7 @@ HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object)
 
 JsonObject HAPPluginLED::getConfigImpl(){
 
-    LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+    LogD(HAPTime::timestring() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
     DynamicJsonDocument doc(128);
     doc["gpio"] = _gpio;
