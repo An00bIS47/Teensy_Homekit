@@ -106,7 +106,7 @@ void HAPPluginLED::handleImpl(bool forced){
 FLASHMEM
 #endif
 bool HAPPluginLED::begin(){
-    LOG_V("Begin plugin %s\n", _config->name);
+    LOG_V("[%s] - Begin plugin\n", _config->name);
     pinMode(_gpio, OUTPUT);
     digitalWrite(_gpio, _isOn);
 
@@ -120,9 +120,20 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
     LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
 
-    char gpioStr[5] = {'\0', };
-    sprintf(gpioStr, "%d", _gpio);
-    const char* sn = HAPDeviceID::serialNumber("LED", gpioStr).c_str();
+
+    //
+	// Unique serial number !!!
+	//
+    char hex[7] = {'\0', };
+    sprintf(hex, "%d", _gpio);
+
+	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
+	char serialNumber[strlen(snTemp) + 1] = {'\0',};
+	strncpy(serialNumber, snTemp, strlen(snTemp));
+
+	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
+	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 1, "%s %s", _config->name, hex);
+
 
     //
     // Add new accessory
@@ -132,7 +143,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 	_accessory = new HAPAccessory();
 	//HAPAccessory::addInfoServiceToAccessory(_accessory, "Builtin LED", "ACME", "LED", "123123123", &identify);
     auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
-    _accessory->addInfoService("Builtin LED", "ACME", "LED", sn, callbackIdentify, version());
+    _accessory->addInfoService("Builtin LED", "ACME", "Builtin LED", serialNumber, callbackIdentify, version());
 
     LOGRAW_V("OK\n");
 

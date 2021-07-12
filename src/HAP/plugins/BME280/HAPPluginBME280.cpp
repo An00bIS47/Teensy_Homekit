@@ -163,18 +163,20 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	//
 	// Unique serial number !!!
 	//
-    char hex[6] = {'\0',};
+    char hex[7] = {'\0',};
 #if HAP_PLUGIN_BME280_USE_DUMMY
-	sprintf(hex, "%s", "DUMMY");
-	const char* sn = HAPDeviceID::serialNumber("BME", "DY").c_str();
+	snprintf(hex, 6, "%s", "DUMMY");
 #else
-    sprintf(hex, "%x", _bme->sensorID());
-	const char* sn = HAPDeviceID::serialNumber("BME", hex).c_str();
+	snprintf(hex, 6, "%X", _bme->sensorID());
 #endif
 
+	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
+	char serialNumber[strlen(snTemp)] = {'\0',};
+	strncpy(serialNumber, snTemp, strlen(snTemp));
 
-	char sensorName[20] = {'\0', };
-	sprintf(sensorName, "BME280 %s", hex);
+
+	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
+	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 2, "%s %s", _config->name, hex);
 
 	//
 	// Add new accessory
@@ -182,7 +184,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	LOG_V("[%s] - Add new accessory ...", _config->name);
 	_accessory = new HAPAccessory();
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
-   	_accessory->addInfoService("Weather", "ACME", sensorName, sn, callbackIdentify, version());
+   	_accessory->addInfoService("Weather", "ACME", sensorName, serialNumber, callbackIdentify, version());
 
 	LOGRAW_V("OK\n");
 
@@ -302,7 +304,7 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginBME280::getAveragedHumidityValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicAirPressure(std::bind(&HAPPluginBME280::getAveragedPressureValue, this)));
 
-	_fakegato.registerFakeGatoService(_accessory, sn);
+	_fakegato.registerFakeGatoService(_accessory, serialNumber);
 
 	auto callbackAddEntry = std::bind(&HAPPluginBME280::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
@@ -352,7 +354,7 @@ HAPConfigurationValidationResult HAPPluginBME280::validateConfig(JsonObject obje
 FLASHMEM
 #endif
 bool HAPPluginBME280::begin(){
-	LOG_V("Begin plugin %s\n", _config->name);
+	LOG_V("[%s] - Begin plugin\n", _config->name);
 	_bme = new Adafruit_BME280();
 
 #if HAP_PLUGIN_BME280_USE_DUMMY

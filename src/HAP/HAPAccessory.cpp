@@ -191,21 +191,21 @@ HAPService* HAPAccessory::addInfoService(const char* accessoryName, const char* 
 
 	initInfoService();
 
-
+	LOG_V("Set accessory name to %s\n", accessoryName);
 	if (_accessoryName == nullptr) {
 		_accessoryName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
-
+	LOG_V("Set manufacturer to %s\n", manufacturerName);
 	if (_manufacturer == nullptr) {
 		_manufacturer = new HAPCharacteristic<std::string>(HAPCharacteristicType::Manufacturer, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);
 
-
+	LOG_V("Set model to %s\n", modelName);
 	if (_modelName == nullptr) {
 		_modelName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Model, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _modelName);
@@ -213,6 +213,7 @@ HAPService* HAPAccessory::addInfoService(const char* accessoryName, const char* 
 	_modelName->setValue(modelName, false);
 
 
+	LOG_V("Set serialnumber to %s\n", serialNumber);
 	if (_serialNumber == nullptr) {
 		_serialNumber = new HAPCharacteristic<std::string>(HAPCharacteristicType::SerialNumber, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _serialNumber);
@@ -243,6 +244,8 @@ FLASHMEM
 #endif
 void HAPAccessory::setFirmware(const char* firmwareRev){
 	initInfoService();
+
+	LOG_V("Set firmware revision to %s\n", firmwareRev);
 	if (_firmware == nullptr) {
 		_firmware = new HAPCharacteristic<std::string>(HAPCharacteristicType::FirmwareRevision, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _firmware);

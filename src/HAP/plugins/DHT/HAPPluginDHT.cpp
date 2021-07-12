@@ -121,24 +121,23 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	//
 	// Unique serial number !!!
 	//
-    char hex[6] = {'\0',};
-#if HAP_PLUGIN_BME280_USE_DUMMY
-	sprintf(hex, "%s", "DUMMY");
+    char hex[7] = {'\0',};
+#if HAP_PLUGIN_DHT_USE_DUMMY
+	snprintf(hex, 6, "%s", "DUMMY");
 #else
 	sensor_t sensor;
 	_dht->temperature().getSensor(&sensor);
-    sprintf(hex, "%x", sensor.sensor_id);
+	snprintf(hex, 6, "%X", sensor.sensor_id);
 #endif
-	char sensorName[20] = {'\0', };
-	sprintf(sensorName, "DHT %s", hex);
 
-#if HAP_PLUGIN_DHT_USE_DUMMY
-	const char* sn = HAPDeviceID::serialNumber("DHT", "DY").c_str();
-#else
-	char versionStr[6] = {'\0', };
-	sprintf(versionStr, "%d", sensor.version);
-	const char* sn = HAPDeviceID::serialNumber("DHT", versionStr).c_str();
-#endif
+	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
+	char serialNumber[strlen(snTemp)] = {'\0',};
+	strncpy(serialNumber, snTemp, strlen(snTemp));
+
+
+	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
+	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 2, "%s %s", _config->name, hex);
+
 
 	//
 	// Add new accessory
@@ -146,7 +145,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	LOG_V("[%s] - Add new accessory ...", _config->name);
 	_accessory = new HAPAccessory();
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
-	_accessory->addInfoService("DHT Sensor", "ACME", sensorName, sn, callbackIdentify, version());
+	_accessory->addInfoService("DHT Sensor", "ACME", sensorName, serialNumber, callbackIdentify, version());
 	LOGRAW_V("OK\n");
 
 
@@ -212,7 +211,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicTemperature(std::bind(&HAPPluginDHT::getAveragedTemperatureValue, this)));
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginDHT::getAveragedHumidityValue, this)));
 
-	_fakegato.registerFakeGatoService(_accessory, sn);
+	_fakegato.registerFakeGatoService(_accessory, serialNumber);
 
 	auto callbackAddEntry = std::bind(&HAPPluginDHT::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);

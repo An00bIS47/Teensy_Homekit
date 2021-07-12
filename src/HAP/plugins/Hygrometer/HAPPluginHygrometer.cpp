@@ -181,18 +181,30 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 
 	LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
 
-#if HAP_PLUGIN_HYGROMETER_USE_DUMMY
-	const char* sn = HAPDeviceID::serialNumber("HY", "DY").c_str();
+	//
+	// Unique serial number !!!
+	//
+    char hex[7] = {'\0',};
+#if HAP_PLUGIN_DHT_USE_DUMMY
+	snprintf(hex, 6, "%s", "DUMMY");
 #else
-	char versionStr[6] = {'\0', };
-	sprintf(versionStr, "%s.%s", STR(HAP_PLUGIN_HYGROMETER_PIN_VCC), STR(HAP_PLUGIN_HYGROMETER_PIN_ADC));
-	const char* sn = HAPDeviceID::serialNumber("HY", versionStr).c_str();
+	sprintf(hex, 6, "%s.%s", STR(HAP_PLUGIN_HYGROMETER_PIN_VCC), STR(HAP_PLUGIN_HYGROMETER_PIN_ADC));
 #endif
+
+	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
+	char serialNumber[strlen(snTemp)] = {'\0',};
+	strncpy(serialNumber, snTemp, strlen(snTemp));
+
+
+	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
+	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 2, "%s %s", _config->name, hex);
+
+
 
 	LOG_V("[%s] - Add new accessory ...", _config->name);
 	_accessory = new HAPAccessory();
 	auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
-	_accessory->addInfoService("Hygrometer", "ACME", "YL-69", sn, callbackIdentify, version());
+	_accessory->addInfoService("Hygrometer", "ACME", "YL-69", serialNumber, callbackIdentify, version());
 
 	LOGRAW_V("OK\n");
 
@@ -276,7 +288,7 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 	LOG_V("[%s] - Add fakegato ...", _config->name);
 
 	_fakegato.addCharacteristic(new HAPFakegatoCharacteristicHumidity(std::bind(&HAPPluginHygrometer::getAveragedHumidityValue, this)));
-	_fakegato.registerFakeGatoService(_accessory, sn);
+	_fakegato.registerFakeGatoService(_accessory, serialNumber);
 
 	auto callbackAddEntry = std::bind(&HAPPluginHygrometer::fakeGatoCallback, this);
 	registerFakeGato(&_fakegato, _config->name, callbackAddEntry);
