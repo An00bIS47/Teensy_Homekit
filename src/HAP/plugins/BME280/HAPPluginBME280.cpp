@@ -172,11 +172,11 @@ HAPAccessory* HAPPluginBME280::initAccessory(){
 
 	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
 	char serialNumber[strlen(snTemp)] = {'\0',};
-	strncpy(serialNumber, snTemp, strlen(snTemp));
+	strcpy(serialNumber, snTemp);
 
 
 	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
-	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 2, "%s %s", _config->name, hex);
+	sprintf(sensorName, "%s %s", _config->name, hex);
 
 	//
 	// Add new accessory

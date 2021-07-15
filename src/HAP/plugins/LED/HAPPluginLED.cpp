@@ -129,10 +129,10 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 
 	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
 	char serialNumber[strlen(snTemp) + 1] = {'\0',};
-	strncpy(serialNumber, snTemp, strlen(snTemp));
+	strcpy(serialNumber, snTemp);
 
 	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
-	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 1, "%s %s", _config->name, hex);
+	sprintf(sensorName, "%s %s", _config->name, hex);
 
 
     //

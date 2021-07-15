@@ -16,8 +16,13 @@
 #include <functional>
 
 
+
+#ifndef HAP_DEBUG_TIME
+#define HAP_DEBUG_TIME 		0
+#endif
+
 #ifndef HAP_TIME_NTP_ENABLED
-#define HAP_TIME_NTP_ENABLED        1
+#define HAP_TIME_NTP_ENABLED        0
 #endif
 
 #ifndef HAP_TIME_FAKEGATO_ENABLED
@@ -25,7 +30,7 @@
 #endif
 
 #ifndef HAP_TIME_SYNC_INTERVAL
-#define HAP_TIME_SYNC_INTERVAL      600000
+#define HAP_TIME_SYNC_INTERVAL      600
 #endif
 
 #define HAP_TIME_STR_FORMAT         "%Y-%m-%d %H:%M:%S"	    // strftime format
@@ -79,6 +84,8 @@ public:
     static void printDateTime(Print& prt, Timezone tz, time_t utc, const char *descr);
 
 	static void setTimeFromTimestamp(time_t date = 0);
+
+	static time_t getTeensy3Time();
 
 #if HAP_TIME_NTP_ENABLED
     static time_t getNTPTime();         // method to be used for begin and/or setCallbackGetTime

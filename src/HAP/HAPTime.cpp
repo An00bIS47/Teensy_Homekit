@@ -27,7 +27,7 @@ EthernetUDP HAPTime::_udp;
 
 
 void HAPTime::begin(TimeChangeRule dstStart, TimeChangeRule stdStart){
-    
+
     LOG_V("Starting HAPTime ...");
     if (_tz == nullptr) {
         _tz = new Timezone(dstStart, stdStart);
@@ -135,16 +135,30 @@ const char* HAPTime::timestring(){
 time_t HAPTime::getTimeFromCallback(){
     // LOG_V("Get time from callback\n");
     //Serial.println("GET TIME FROM CALLBACK");
+
+#if HAP_DEBUG_TIME
+    LOGDEVICE->println("GET TIME FROM CALLBACK");
+#endif
+
     time_t utc = 0;
 
     if (_callbackSync){
         utc = _callbackSync();
+    } else {
+        utc = getTeensy3Time();
     }
+    
     return utc;
 }
 
 void HAPTime::setTimeFromTimestamp(time_t date) {
     setTime(date);
+}
+
+
+time_t HAPTime::getTeensy3Time()
+{
+	return Teensy3Clock.get();
 }
 
 
@@ -177,14 +191,20 @@ time_t HAPTime::getNTPTime(){
     for (uint8_t i=0; i < HAP_TIME_NTP_SERVER_URLS_SIZE; i++){
 
         // LOG_D("Getting time from %s\n", HAP_TIME_NTP_SERVER_URLS[i]);
-        Serial.printf("Transmit NTP Request to %s\n", HAP_TIME_NTP_SERVER_URLS[i]);
+#if HAP_DEBUG_TIME
+        LOGDEVICE->printf("Transmit NTP Request to %s\n", HAP_TIME_NTP_SERVER_URLS[i]);
+#endif
+
         sendNTPpacket(HAP_TIME_NTP_SERVER_URLS[i]);
         uint32_t beginWait = millis();
 
         while (millis() - beginWait < HAP_NTP_TIMEOUT) {
             int size = _udp.parsePacket();
             if (size >= HAP_TIME_NTP_PACKET_SIZE) {
+#if HAP_DEBUG_TIME
                 Serial.printf("Receive NTP Response: %d\n", size);
+#endif
+
                 _udp.read(_packetBuffer, HAP_TIME_NTP_PACKET_SIZE);  // read packet into the buffer
                 unsigned long secsSince1900;
                 // convert four bytes starting at location 40 to a long integer
@@ -193,15 +213,19 @@ time_t HAPTime::getNTPTime(){
                 secsSince1900 |= (unsigned long)_packetBuffer[42] << 8;
                 secsSince1900 |= (unsigned long)_packetBuffer[43];
 
+#if HAP_DEBUG_TIME
                 // LOGRAW_D("OK\n");
-                Serial.printf("result: %d\n", secsSince1900 - HAP_TIME_UNIX_OFFSET);
+                LOGDEVICE->printf("result: %d\n", secsSince1900 - HAP_TIME_UNIX_OFFSET);
+#endif
                 return (secsSince1900 - HAP_TIME_UNIX_OFFSET);
             }
         }
         // LOGRAW_W("WARNING: Failed to get time from server: %s\n", HAP_TIME_NTP_SERVER_URLS[i]);
     }
+#if HAP_DEBUG_TIME
 	// LOG_E("ERROR: Failed get time from NTP!\n");
-    Serial.println("Received no NTP Response :(");
+    LOGDEVICE->println("Received no NTP Response :(");
+#endif
 	return 0; // return 0 if unable to get the time
 }
 #endif

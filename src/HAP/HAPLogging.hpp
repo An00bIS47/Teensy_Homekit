@@ -514,5 +514,5 @@ constexpr const char* file_name(const char* str) {
     #define LOG_HEAP(clients, queue) LOG_LINE_V(LOG_LEVEL_VERBOSE, H, "heap:%6u | mem:%6u | stack:%6u | clients:%2d | queue:%2d \n", t_heapfree(), t_memfree(), t_maxstack(), clients, queue)
   #endif
 #else
-  #define LOG_HEAP()
+  #define LOG_HEAP(clients, queue)
 #endif

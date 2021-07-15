@@ -11,14 +11,9 @@
 
 void HAPFakegatoFactory::handle(bool forced){
     for (auto & gato : _fakegatos) {
-        if (forced) {
+        if (gato->isEnabled() || forced) {
             gato->handle();
-        } else {
-            if (gato->isEnabled()) {
-                gato->handle();
-            }
         }
-
 	}
 }
 

@@ -236,7 +236,7 @@ public:
 		if (isEnabled()) {
 			unsigned long currentMillis = millis(); // grab current time
 
-			if ((unsigned long)(currentMillis - _previousMillis) >= interval()) {
+			if (currentMillis - _previousMillis >= interval()) {
 
 				// save the last time you blinked the LED
 				_previousMillis = currentMillis;

@@ -123,20 +123,19 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	//
     char hex[7] = {'\0',};
 #if HAP_PLUGIN_DHT_USE_DUMMY
-	snprintf(hex, 6, "%s", "DUMMY");
+	sprintf(hex, "%s", "DUMMY");
 #else
 	sensor_t sensor;
 	_dht->temperature().getSensor(&sensor);
-	snprintf(hex, 6, "%X", sensor.sensor_id);
+	sprintf(hex, "%X", sensor.sensor_id);
 #endif
 
 	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
-	char serialNumber[strlen(snTemp)] = {'\0',};
-	strncpy(serialNumber, snTemp, strlen(snTemp));
-
+	char serialNumber[strlen(snTemp) + 1 ] = {'\0',};
+	strcpy(serialNumber, snTemp);
 
 	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
-	snprintf(sensorName, strlen(_config->name) + strlen(hex) + 2, "%s %s", _config->name, hex);
+	sprintf(sensorName, "%s %s", _config->name, hex);
 
 
 	//

@@ -116,7 +116,7 @@ bool HAPFakegato::shouldHandle(){
     if (_isEnabled && _periodicUpdates) {
         unsigned long currentMillis = millis(); // grab current time
 
-        if ((unsigned long)(currentMillis - _previousMillis) >= _interval) {
+        if (currentMillis - _previousMillis >= _interval) {
 
             _previousMillis = currentMillis;
 
