@@ -27,6 +27,11 @@
 #define HAP_FAKEGATO_BATCH_SIZE  16
 #endif
 
+#ifndef HAP_FAKEGATO_INTERVAL
+#define HAP_FAKEGATO_INTERVAL 600000        // default: every 10 minutes
+#endif
+
+
 #ifndef HAP_FAKEGATO_EPOCH
 #define HAP_FAKEGATO_EPOCH       978307200
 #endif

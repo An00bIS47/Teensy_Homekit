@@ -127,9 +127,7 @@ bool HAPFakegato::shouldHandle(){
     return false;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 void HAPFakegato::addEntry(uint8_t bitmask){
     uint8_t data[valueLength()];
     uint8_t offset = 0;
@@ -143,9 +141,7 @@ void HAPFakegato::addEntry(uint8_t bitmask){
     addDataToBuffer(bitmask, data, offset);
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
+
 void HAPFakegato::addDataToBuffer(uint8_t bitmask, uint8_t* data, uint8_t length){
 
     LOG_D("Adding entry for %s [size=%d bitmask=%d] - data length: %d\n", _name.c_str(), _entries.size(), bitmask, length);

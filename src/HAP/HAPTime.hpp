@@ -22,7 +22,7 @@
 #endif
 
 #ifndef HAP_TIME_NTP_ENABLED
-#define HAP_TIME_NTP_ENABLED        0
+#define HAP_TIME_NTP_ENABLED        1
 #endif
 
 #ifndef HAP_TIME_FAKEGATO_ENABLED

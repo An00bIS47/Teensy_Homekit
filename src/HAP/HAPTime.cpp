@@ -147,7 +147,7 @@ time_t HAPTime::getTimeFromCallback(){
     } else {
         utc = getTeensy3Time();
     }
-    
+
     return utc;
 }
 
@@ -156,8 +156,7 @@ void HAPTime::setTimeFromTimestamp(time_t date) {
 }
 
 
-time_t HAPTime::getTeensy3Time()
-{
+time_t HAPTime::getTeensy3Time() {
 	return Teensy3Clock.get();
 }
 
