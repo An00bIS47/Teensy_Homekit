@@ -23,7 +23,6 @@
 #endif
 
 #include <string>
-#include <WString.h>
 #include <algorithm>
 #include "HAPServer.hpp"
 #include "HAPLogging.hpp"
@@ -110,6 +109,7 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 
 #if HAP_DEBUG
 	_previousMillisHeap = 0;
+	
 #endif
 
 	_accessorySet = new HAPAccessorySet();
@@ -451,32 +451,15 @@ bool HAPServer::begin(bool resume) {
 	// Timesettings
 	//
 	// ToDo: Timezone to config
-	_time.setTimeZone(1);
-
-#if HAP_ENABLE_NTP
-	LOG_I("Starting NTP client ...");
-	if (_isConnected) {
-		if (_time.beginNTP()){
-			LOGRAW_I("OK\n");
-		} else {
-			LOG_E( "ERROR - Setting time from NTP failed!\n");
-		}
-#if defined( CORE_TEENSY )
-		_time.setCallbackGetTime(HAPTime::getNTPTime);
-
-#endif
-	}
-#endif /* HAP_ENABLE_NTP */
+	// _time.begin(CEST, CET);
 	_time.begin();
-	LOG_I("Set time to: %s\n", _time.timeString());
+
+	LOG_I("Set time to: %s\n", _time.timestring());
 
 	_configuration.getPlatformConfig()->setRefTime(_time.timestamp());
-	_time.setReftime(_configuration.getPlatformConfig()->refTime());
+	_time.setRefTime(_configuration.getPlatformConfig()->refTime());
 	// _configuration.getPlatformConfig()->setRefTime(1601846922);
-
 	LOG_D("Set reftime to: %lu\n", _time.refTime());
-	LOG_D("Set t_offset to: %lu\n", _time.getTOffset());
-
 
 	//
 	// Pairings
@@ -484,14 +467,14 @@ bool HAPServer::begin(bool resume) {
 	LOG_I("Loading pairings ...OK\n");
 	LOG_I("Loaded %d pairings from storage\n", _accessorySet->numberOfPairings());
 
-#if HAP_DEBUG_HOMEKIT
-	_accessorySet->getPairings()->print();
-#endif
+// #if HAP_DEBUG_HOMEKIT
+// 	_accessorySet->getPairings()->print();
+// #endif
 
 
 	LOG_I("Setup accessory ...");
 	_accessorySet->setModelName(hostname);
-	_accessorySet->setAccessoryType(HAP_ACCESSORY_TYPE_BRIDGE);
+	_accessorySet->setAccessoryType(HAPAccessoryType::Bridge);
 	_accessorySet->setPinCode(HAP_PIN_CODE);
 	_accessorySet->begin();
 	LOGRAW_I("OK\n");
@@ -651,10 +634,10 @@ bool HAPServer::begin(bool resume) {
 
     for(std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
     	//LOGDEVICE->println(*it);
-		LOG_HEAP("", 0,0);
+		LOG_HEAP(0, 0);
     	auto plugin = factory.getPlugin(*it);
 
-		LOG_I("   - %s [v%s] of type %d", plugin->name(), plugin->version(), plugin->type());
+		LOG_I("   - %s [v%s] of type %d : ", plugin->name(), plugin->version(), plugin->type());
 
 		plugin->setAccessorySet(_accessorySet);
 		plugin->setFakeGatoFactory(&_fakeGatoFactory);
@@ -670,14 +653,13 @@ bool HAPServer::begin(bool resume) {
 
 		// plugin->setConfig(_config.config()["plugins"][plugin->name()]);
 
+#if HAP_DEBUG
+		plugin->configToJson(*LOGDEVICE);
+		LOGDEVICE->println();
+#endif
 
 		if ( plugin->isEnabled()) {
-			LOGRAW_I(": ENABLED\n");
-
-#if HAP_DEBUG
-			plugin->configToJson(*LOGDEVICE);
-			LOGDEVICE->println();
-#endif
+			LOGRAW_I("ENABLED\n");
 
 			if (plugin->begin()) {
 
@@ -701,11 +683,12 @@ bool HAPServer::begin(bool resume) {
 				_plugins.push_back(std::move(plugin));
 
 			} else {
-				LOGRAW_E(": DISABLED\n");
+				LOGRAW_E("ERROR: Failed to start plugin\n");
+				plugin->enable(false);
 			}
 
     	} else {
-    		LOGRAW_E(": DISABLED\n");
+    		LOGRAW_W("Disabled\n");
     	}
 	}
 
@@ -739,7 +722,7 @@ bool HAPServer::begin(bool resume) {
 	// mDNSExt.addService("_hap", "_tcp", _port);
 
 
-	mDNSExt.enableHomekit(_port, HAPDeviceID::deviceID(), _accessorySet->modelName(), _accessorySet->accessoryType(), _accessorySet->setupHash(), "1.0");
+	mDNSExt.enableHomekit(_port, HAPDeviceID::deviceID(), _accessorySet->modelName(), _accessorySet->accessoryTypeAsInt(), _accessorySet->setupHash(), "1.0");
 
 #if HAP_ENABLE_WEBSERVER
 	if (_configuration.getWebServerConfig()->enabled){
@@ -793,7 +776,7 @@ bool HAPServer::begin(bool resume) {
 		LOGDEVICE->println();
 	}
 
-	LOG_HEAP("", 0, 0);
+	LOG_HEAP(0, 0);
 
 #endif
 
@@ -898,7 +881,7 @@ bool HAPServer::updateServiceTxt() {
 	_hapMdnsTxt.setSf(!_accessorySet->isPaired());						// Status flags
 	_hapMdnsTxt.setPv(HOMEKIT_PROTOKOL_VERSION);						// Protocol Version
 	_hapMdnsTxt.setStateNumber(1);										// Current state number. Required. - This must have a value of ”1”.
-	_hapMdnsTxt.setCi(_accessorySet->accessoryType());					// Accessory Category Identifier. Required.
+	_hapMdnsTxt.setCi(_accessorySet->accessoryTypeAsInt());					// Accessory Category Identifier. Required.
 	_hapMdnsTxt.setSh(_accessorySet->setupHash());						// Setup Hash
 
 	return true;
@@ -939,7 +922,7 @@ void HAPServer::handle() {
 	if ( millis() - _previousMillisHeap >= HAP_HEAP_LOG_INTERVAL) {
 	    // save the last time you blinked the LED
 	    _previousMillisHeap = millis();
-		LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
+		LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
 
 		// ToDo: remove
 		// LOGDEVICE->print("Task Button Handle: ");
@@ -1784,7 +1767,7 @@ FLASHMEM
 void HAPServer::handleIdentify(HAPClient* hapClient){
 	LOG_D("Handle /identify ...");
 
-	HAPCharacteristic<bool>* c = reinterpret_cast< HAPCharacteristic<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAP_CHARACTERISTIC_IDENTIFY));
+	HAPCharacteristic<bool>* c = reinterpret_cast< HAPCharacteristic<bool> *>(_accessorySet->getCharacteristicOfType(_accessorySet->aid(), HAPCharacteristicType::Identify));
 
 	WriteBufferingClient bufferedWifiClient{hapClient->client, 256};
 
@@ -2658,7 +2641,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	encTLV.clear();
 
-	LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
+	LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
 
 #if defined( ARDUINO_ARCH_ESP32 )
 	LogV( F("Handle client [") + hapClient->client.remoteIP().toString() + "] -> /pair-setup Step 4/4 ...", true);
@@ -2800,7 +2783,7 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
 	hapClient->clear();
 
-	LOG_HEAP(HAPTime::timeString(), _clients.size(), _eventManager.getNumEventsInQueue());
+	LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
 
     return true;
 }
@@ -2836,12 +2819,6 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	LOG_V("Generating accessory curve25519 keys ...");
 
 	uint8_t acc_curve_public_key[CURVE25519_SECRET_LENGTH] = {0,};		// my_key_public
-
-	// ToDo: Fix this! This will stay constant 0x00
-	// ?? This will stay at 00 ?
-	// What key to use here?
-	// int r = crypto_ed25519_generate(key);
-	// uint8_t acc_curve_private_key[CURVE25519_SECRET_LENGTH] = {0,};	// my_key
 
 	// Create new public key from accessory's LTSK
 	err_code = X25519_scalarmult_base(acc_curve_public_key, _accessorySet->LTSK());
@@ -3107,7 +3084,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 
 
 #if HAP_DEBUG_HOMEKIT
-	LogD(F("Looking up iOS device LTPK for client: "), true);
+	LOG_D("Looking up iOS device LTPK for client\n");
 	LOGARRAY_D("ios_device_pairing_id", ios_device_pairing_id, ios_device_pairing_id_len);
 #endif
 
@@ -3122,7 +3099,7 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	LogD("Found LTPK: ", true);
+	LOG_D("Found LTPK\n");
 	LOGARRAY_D("ios_device_ltpk", ios_device_ltpk, ED25519_PUBLIC_KEY_LENGTH);
 #endif
 
@@ -3139,13 +3116,12 @@ bool HAPServer::handlePairVerifyM3(HAPClient* hapClient){
 	}
 
 #if HAP_DEBUG_HOMEKIT
-	LogD(F("Found Signature: "), true);
+	LOG_D("Found Signature\n");
 	LOGARRAY_D("ios_device_signature", ios_device_signature, ios_device_signature_len);
 #endif
 
 #if HAP_DEBUG_HOMEKIT
-	LogD(F("pairingIdIsAdmin: "), false);
-	LogD(_accessorySet->pairingIdIsAdmin(ios_device_pairing_id), true);
+	LOG_D("pairingIdIsAdmin: %d\n", _accessorySet->pairingIdIsAdmin(ios_device_pairing_id));
 #endif
 
 

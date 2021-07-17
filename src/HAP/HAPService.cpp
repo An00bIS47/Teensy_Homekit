@@ -12,7 +12,7 @@
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-HAPService::HAPService(uint8_t uuid)
+HAPService::HAPService(HAPServiceType uuid)
 : _uuid(uuid)
 , _uuidString("")
 , _features(0)
@@ -23,7 +23,7 @@ HAPService::HAPService(uint8_t uuid)
 FLASHMEM
 #endif
 HAPService::HAPService(const char* _uuid)
-: _uuid(CHAR_TYPE_NULL)
+: _uuid(HAPServiceType::None)
 , _uuidString(_uuid)
 , _features(0)
 {
@@ -39,17 +39,17 @@ void HAPService::printTo(Print& print){
 
     // type
     print.print(F("\"type\":"));
-    if (_uuid == 0x00) {
-        print.print(HAPHelper::wrap(_uuidString.c_str()));
+    if (_uuid == HAPServiceType::None) {
+        print.print(HAPHelper::wrap(_uuidString.c_str()).c_str());
     } else {
 #if HAP_LONG_UUID
         char uuidStr[HAP_UUID_LENGTH];
         snprintf(uuidStr, HAP_UUID_LENGTH, HAP_UUID, uuid);
 #else
         char uuidStr[8];
-        snprintf(uuidStr, 8, PSTR("%X"), _uuid);
+        snprintf(uuidStr, 8, PSTR("%X"), uuidAsInt());
 #endif
-        print.print(HAPHelper::wrap(uuidStr));
+        print.print(HAPHelper::wrap(uuidStr).c_str());
     }
     print.print(F(","));
 

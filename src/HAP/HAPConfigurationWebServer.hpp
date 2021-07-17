@@ -261,10 +261,10 @@ public:
 			prt.print(credentials[i]->permission);
 			prt.print(",");
 			prt.print("\"username\":");
-			prt.print(HAPHelper::wrap(credentials[i]->username));
+			prt.print(HAPHelper::wrap(credentials[i]->username).c_str());
 			prt.print(",");
 			prt.print("\"passwort\":");
-			prt.print(HAPHelper::wrap(credentials[i]->password));
+			prt.print(HAPHelper::wrap(credentials[i]->password).c_str());
 			prt.print("}");
 			if (i + 1 < credentials.size()){
 				prt.print(",");

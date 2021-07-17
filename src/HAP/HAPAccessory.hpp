@@ -15,9 +15,9 @@
 #include <ArduinoJson.h>
 
 #include "HAPService.hpp"
-#include "HAPCharacteristics.hpp"
-#include "HAPCharacteristic.hpp"
 
+#include "HAPCharacteristic.hpp"
+#include "HAPCharacteristicType.hpp"
 
 // typedef void (*identifyFunction)(bool oldValue, bool newValue);
 typedef std::function<void(bool, bool)> identifyFunctionCallback;
@@ -40,7 +40,7 @@ public:
 
 	HAPCharacteristicBase* characteristicWithIID(uint32_t iid);
 	HAPCharacteristicBase* characteristicAtIndex(HAPService *service, size_t index);
-	HAPCharacteristicBase* characteristicsOfType(int type);
+	HAPCharacteristicBase* characteristicsOfType(HAPCharacteristicType type);
 	HAPCharacteristicBase* characteristicsOfType(const char* typeString);
 
 	void printTo(Print& print);

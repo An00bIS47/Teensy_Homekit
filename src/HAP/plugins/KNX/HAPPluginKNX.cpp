@@ -752,14 +752,14 @@ void HAPPluginKNX::internalConfigToJson(Print& prt){
         HAPPluginKNXServiceType serviceType = (HAPPluginKNXServiceType)knx.paramByte( (offset + ETS_HK_OFFSET_SERVICE_TYPE) );
         prt.print(F("{"));
         prt.print(F("\"type\":"));
-        prt.print(HAPHelper::wrap(HAPPluginKNXDevice::serviceEnumToString(serviceType)));
+        prt.print(HAPHelper::wrap(HAPPluginKNXDevice::serviceEnumToString(serviceType)).c_str());
 
         prt.print(F(","));
         prt.print(F("\"name\":"));
         char serviceName[41];
         memcpy(serviceName, knx.paramData( (offset + ETS_HK_OFFSET_SERVICE_NAME) ) , 40);
         serviceName[40] = '\0';
-        prt.print(HAPHelper::wrap(serviceName));
+        prt.print(HAPHelper::wrap(serviceName).c_str());
 
 
         uint8_t availableFeatures = knx.paramByte( (offset + ETS_HK_OFFSET_ENABLE_FAKEGATO) );

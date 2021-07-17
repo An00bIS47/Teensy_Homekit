@@ -29,7 +29,7 @@ public:
 	bool begin();
 	HAPAccessory* initAccessory() override;
 
-	void changedHumidity(float oldValue, float newValue);
+	void changedMoisture(float oldValue, float newValue);
 
 	void identify(bool oldValue, bool newValue);
     void handleImpl(bool forced = false);

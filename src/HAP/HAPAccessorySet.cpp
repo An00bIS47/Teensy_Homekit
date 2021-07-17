@@ -31,7 +31,7 @@ uint32_t HAPAccessorySet::configurationNumber = HOMEKIT_CONFIGURATION_NUMBER;
 FLASHMEM
 #endif
 HAPAccessorySet::HAPAccessorySet()
-: _accessoryType(HAP_ACCESSORY_TYPE_OTHER)
+: _accessoryType(HAPAccessoryType::Unknown)
 {
 	// memset(_xhm, 0, 21);
 	_configuration = nullptr;
@@ -63,18 +63,17 @@ void HAPAccessorySet::addAccessoryInfo(){
 }
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-uint8_t HAPAccessorySet::accessoryType(){
+uint8_t HAPAccessorySet::accessoryTypeAsInt() {
+	return static_cast<uint8_t>(_accessoryType);
+}
+
+HAPAccessoryType HAPAccessorySet::accessoryType(){
 	return _accessoryType;
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPAccessorySet::setAccessoryType(enum HAP_ACCESSORY_TYPE accessoryType){
-	_accessoryType = (uint8_t)accessoryType;
+
+void HAPAccessorySet::setAccessoryType(HAPAccessoryType accessoryType){
+	_accessoryType = accessoryType;
 }
 
 #if defined(ARDUINO_TEENSY41)
@@ -241,7 +240,7 @@ void HAPAccessorySet::generateXMI(){
 	}
 
 
-	int valueHigh = _accessoryType >> 1;
+	int valueHigh = accessoryTypeAsInt() >> 1;
 
 	char dst2[olenLow + 1];
 	sprintf(dst2, "%d%s", valueHigh, dstLow);
@@ -359,7 +358,7 @@ void HAPAccessorySet::printTo(Print& print){
 	print.print(F("]}"));
 }
 
-HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, uint8_t type){
+HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, HAPCharacteristicType type){
 	HAPAccessory* accessory = accessoryWithAID(aid);
 	if (accessory){
 		return accessory->characteristicsOfType(type);

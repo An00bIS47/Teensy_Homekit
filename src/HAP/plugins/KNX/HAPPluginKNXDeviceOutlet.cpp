@@ -316,7 +316,7 @@ void HAPPluginKNXDeviceOutlet::setCurrentPowerFromKNXCallback(GroupObject& go){
 
 
 void HAPPluginKNXDeviceOutlet::writeStateCallbackFromSchedule(uint16_t state){
-    LogD(HAPTime::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
+    LogD(HAPTime::timestring() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
 
     _shouldSend = true;
 
@@ -350,7 +350,7 @@ uint32_t HAPPluginKNXDeviceOutlet::getTimestampLastActivity(){
 FLASHMEM
 #endif
 void HAPPluginKNXDeviceOutlet::saveConfig(){
-    LogE(HAPTime::timeString() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);
+    LogE(HAPTime::timestring() + " " + "HAPPluginKNXDeviceOutlet" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
 }
 

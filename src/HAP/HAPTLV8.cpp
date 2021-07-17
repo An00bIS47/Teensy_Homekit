@@ -501,7 +501,7 @@ void TLV8::printNode( TLV8Entry *ptr )
 {
 	LOG_D("T: 0x%X\n", ptr->type);
 	LOG_D("L: %d\n", ptr->length);
-	LOGARRAY_D("V:", ptr->value, ptr->length);
+	 HAPTime::timestring_D("V:", ptr->value, ptr->length);
 }
 
 void TLV8::print( ) {

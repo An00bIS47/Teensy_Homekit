@@ -837,7 +837,7 @@ bool HAPConfiguration::savePluginConfig(){
 		memcpy(buffer+30, pluginConfig->dataPtr, pluginConfig->getDataSize());
 
 #if HAP_DEBUG_CONFIGURATION
-        HAPHelper::array_print("buffer", (uint8_t*)buffer, sizeof(buffer));
+        LOGARRAY_D("buffer", (uint8_t*)buffer, sizeof(buffer));
 #endif
         size_t written = writeBytes(label, buffer, sizeof(buffer));
 		if (written < sizeof(buffer)) {

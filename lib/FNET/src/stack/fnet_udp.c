@@ -270,7 +270,9 @@ static void _fnet_udp_input(fnet_netif_t *netif, struct fnet_sockaddr *foreign_a
             foreign_addr->sa_port = udp_header->source_port;
 
             _fnet_netbuf_trim(&nb, (fnet_int32_t)sizeof(fnet_udp_header_t));
-
+            
+            if(nb == 0) goto BAD;  // buffer was deleted. Don't continue parsing
+            
             /* Demultiplex broadcast & multicast datagrams.*/
             if((_fnet_socket_addr_is_broadcast(local_addr, netif)) || (fnet_socket_addr_is_multicast(local_addr)))
             {

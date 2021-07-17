@@ -159,22 +159,19 @@ void HAPHelper::prependZeros(char *dest, const char *src, uint8_t width) {
 }
 
 
-String HAPHelper::removeBrackets(String str){
+std::string HAPHelper::removeBrackets(std::string str){
 	if (str.length() > 2) {
-    	str = str.substring(1, str.length()-1);
+    	str = str.substr(1, str.length() -1);
 	}
 	return str;
 }
 
-
-String HAPHelper::wrap(String str) {
-	return String("\"" + str + "\"");
+std::string HAPHelper::wrap(const char* str){
+	std::string result = "\"";
+	result.append(str);
+	result.append("\"");
+	return result;
 }
-
-String HAPHelper::wrap(const char *str) {
-	return String("\"" + String(str) + "\"");
-}
-
 
 String HAPHelper::arrayWrap(String *s, unsigned short len) {
 	String result;
@@ -191,15 +188,18 @@ String HAPHelper::arrayWrap(String *s, unsigned short len) {
 }
 
 
-String HAPHelper::dictionaryWrap(String *key, String *value, unsigned short len) {
-	String result;
+std::string HAPHelper::dictionaryWrap(String *key, String *value, unsigned short len) {
+	std::string result;
 
 	result += "{";
 
 	for (int i = 0; i < len; i++) {
-		result += wrap(key[i].c_str())+":"+value[i]+",";
+		result += wrap(key[i].c_str());
+		result += ":";
+		result += value[i].c_str();
+		result += ",";
 	}
-	result = result.substring(0, result.length()-1);
+	result = result.substr(0, result.length()-1);
 
 	result += "}";
 
@@ -378,11 +378,11 @@ bool HAPHelper::isValidFloat(String tString) {
 }
 
 
-bool HAPHelper::isValidNumber(String str){
-   bool isNum=false;
-   for(uint8_t i=0;i<str.length();i++)
+bool HAPHelper::isValidNumber(const char* str){
+   bool isNum = false;
+   for(size_t i=0; i <strlen(str); i++)
    {
-       isNum = isDigit(str.charAt(i)) || str.charAt(i) == '+' || str.charAt(i) == '.' || str.charAt(i) == '-';
+       isNum = isDigit(str[i]) || str[i] == '+' || str[i] == '.' || str[i] == '-';
 
        if(!isNum) return false;
    }

@@ -51,11 +51,13 @@ public:
 	static uint8_t numDigits(const size_t n);
 	// static void arrayPrint(uint8_t* a, int len);
 
-	static String wrap(String str);
-	static String wrap(const char *str);
-	static String arrayWrap(String *s, unsigned short len);
-	static String dictionaryWrap(String *key, String *value, unsigned short len);
-	static String removeBrackets(String str);
+	static std::string wrap(const char* str);
+
+	static String arrayWrap(String *s, unsigned short len) __attribute__ ((deprecated));
+	static std::string dictionaryWrap(String *key, String *value, unsigned short len) __attribute__ ((deprecated));
+
+	static std::string removeBrackets(std::string str);
+
 
 	// static String printUnescaped(String str);
 
@@ -99,8 +101,8 @@ public:
 
 
 
-	static bool isValidFloat(String tString);
-	static bool isValidNumber(String str);
+	static bool isValidFloat(String tString) __attribute__ ((deprecated));
+	static bool isValidNumber(const char* str);
 
 
 	// rounds a number to 2 decimal places

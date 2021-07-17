@@ -227,7 +227,7 @@
 //#define HAP_SPRINTF_UI32			"%lu"
 
 #ifndef HAP_USE_SPIFFS_CONFIGURATION
-#define HAP_USE_SPIFFS_CONFIGURATION 1
+#define HAP_USE_SPIFFS_CONFIGURATION 0
 #endif
 
 #else	/* END CORE_TEENSY */
@@ -236,64 +236,6 @@
 
 #define HAP_ETHERNET_TIMEOUT		10000
 
-
-
-
-
-/**
- * Preferences / EEPROM
- ********************************************************************/
-#ifndef HAP_USE_EEPROM
-  #ifndef HAP_USE_SPIFFS_CONFIGURATION
-   #ifndef HAP_USE_PREFERENCES
-	#define HAP_USE_EEPROM 				1
-   #endif
- #endif
-#endif
-
-#ifndef HAP_USE_PREFERENCES
-#define HAP_USE_PREFERENCES 		0
-#endif
-
-#ifndef HAP_USE_SPIFFS_CONFIGURATION
-#define HAP_USE_SPIFFS_CONFIGURATION 	0
-#endif
-
-#if HAP_USE_EEPROM == 1
-	#ifdef HAP_USE_PREFERENCES
-	#undef HAP_USE_PREFERENCES
-	#define HAP_USE_PREFERENCES 	0
-	#endif
-
-	#ifdef HAP_USE_SPIFFS_CONFIGURATION
-	#undef HAP_USE_SPIFFS_CONFIGURATION
-	#define HAP_USE_SPIFFS_CONFIGURATION 0
-	#endif
-#endif
-
-#if HAP_USE_PREFERENCES == 1
-	#ifdef HAP_USE_EEPROM
-	#undef HAP_USE_EEPROM
-	#define HAP_USE_EEPROM 	0
-	#endif
-
-	#ifdef HAP_USE_SPIFFS_CONFIGURATION
-	#undef HAP_USE_SPIFFS_CONFIGURATION
-	#define HAP_USE_SPIFFS_CONFIGURATION 0
-	#endif
-#endif
-
-#if HAP_USE_SPIFFS_CONFIGURATION == 1
-	#ifdef HAP_USE_PREFERENCES
-	#undef HAP_USE_PREFERENCES
-	#define HAP_USE_PREFERENCES 	0
-	#endif
-
-	#ifdef HAP_USE_EEPROM
-	#undef HAP_USE_EEPROM
-	#define HAP_USE_EEPROM 	0
-	#endif
-#endif
 
 
 
@@ -359,7 +301,7 @@
  * Keystore
  ********************************************************************/
 #ifndef HAP_ENABLE_KEYSTORE
-#define HAP_ENABLE_KEYSTORE				1
+#define HAP_ENABLE_KEYSTORE				0
 #endif
 
 #define HAP_KEYSTORE_PARTITION_LABEL	 	"keystore_0"
@@ -371,7 +313,7 @@
  * WebServer
  ********************************************************************/
 #ifndef HAP_ENABLE_WEBSERVER
-#define HAP_ENABLE_WEBSERVER		1		// Enable Webinterface
+#define HAP_ENABLE_WEBSERVER		0		// Enable Webinterface
 #endif										// Default: 1
 
 // #define HAP_ENABLE_WEBSERVER_CORE_0	0		// Run webserver on core 0 in a seperate task
@@ -459,7 +401,7 @@
  ********************************************************************/
 
 #ifndef HAP_ENABLE_UPDATE_OTA
-#define HAP_ENABLE_UPDATE_OTA		1		// Enable ArduinoOTA
+#define HAP_ENABLE_UPDATE_OTA		0		// Enable ArduinoOTA
 #endif										// Default: 1
 
 #ifndef HAP_ENABLE_UPDATE_WEB
@@ -492,61 +434,6 @@
 #define HAP_UPDATE_TIMEOUT 			2000
 
 
-
-/**
- * NTP Settings
- ********************************************************************/
-#ifndef HAP_ENABLE_NTP
-#define HAP_ENABLE_NTP 			1		// Enable SNTP client
-											// Default: 1
-#endif
-
-
-#if HAP_ENABLE_NTP
-
-#ifndef HAP_NTP_SERVER_URL
-#define HAP_NTP_SERVER_URL			"fritz.box"						// NTP server url
-#endif
-
-
-#ifndef HAP_NTP_SERVER_URL_2
-#define HAP_NTP_SERVER_URL_2		"time.euro.apple.com"						// NTP server url
-#endif
-
-#ifndef HAP_NTP_SERVER_URL_FALLBACK
-#define HAP_NTP_SERVER_URL_FALLBACK	"pool.ntp.org"
-#endif
-
-const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_URL_2, HAP_NTP_SERVER_URL_FALLBACK};
-#define HAP_NTP_SERVER_URLS_SIZE 	3
-
-
-
-
-
-#if defined( ARDUINO_ARCH_ESP32)
-// get the timezones here:
-// https://remotemonitoringsystems.ca/time-zone-abbreviations.php
-#ifndef HAP_NTP_TZ_INFO
-#define HAP_NTP_TZ_INFO     		"CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"		// timezone for berlin
-#endif
-
-#elif defined( CORE_TEENSY )
-
-#ifndef HAP_TIMEZONE
-#define HAP_TIMEZONE  1     // Central European Time
-	// #define timeZone -5  // Eastern Standard Time (USA)
-	// #define timeZone -4  // Eastern Daylight Time (USA)
-	// #define timeZone -8  // Pacific Standard Time (USA)
-	// #define timeZone -7  // Pacific Daylight Time (USA)
-#endif
-
-
-#define UNIX_OFFSET					2208988800UL
-
-
-#endif /* ARDUINO_ARCH_ESP32 */
-#endif /* HAP_ENABLE_NTP */
 
 
 
@@ -605,12 +492,12 @@ const char* const HAP_NTP_SERVER_URLS[] = {HAP_NTP_SERVER_URL, HAP_NTP_SERVER_UR
  * QR Code
  ********************************************************************/
 #ifndef HAP_PRINT_QRCODE
-#define HAP_PRINT_QRCODE			0		// !!! HAP_GENERATE_XHM must be enabled !!!
-#endif										// Print QR code on console
-											// Default: 0
+#define HAP_PRINT_QRCODE			0		// Print QR code on console
+#endif
+
 
 #ifndef HAP_PRINT_QRCODE_SVG
-#define HAP_PRINT_QRCODE_SVG		0
+#define HAP_PRINT_QRCODE_SVG		0		// Print QR code as SVG on console
 #endif
 
 /**
@@ -742,9 +629,9 @@ STR(HAP_PLUGIN_USE_BME280)
 											// Default: 0
 
 
-
+#ifndef HAP_MINIMAL_PLUGIN_INTERVAL
 #define HAP_MINIMAL_PLUGIN_INTERVAL	1000	// Minimal plugin handle interval in ms
-											// Default: 1000
+#endif										// Default: 1000
 											// ToDo: Nedded ??
 
 

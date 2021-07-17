@@ -250,7 +250,7 @@ void HAPPluginRCSwitchDevice::changedPowerTotal(float oldValue, float newValue){
 
 void HAPPluginRCSwitchDevice::changedState(bool oldValue, bool newValue){
 
-    LogD(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Setting new value to " + String(newValue), true);
+    LogD(HAPTime::timestring() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Setting new value to " + String(newValue), true);
 
     if (oldValue != newValue) {
         _callbackRCSwitchSend(houseAddress, deviceAddress, newValue);
@@ -264,7 +264,7 @@ void HAPPluginRCSwitchDevice::changedState(bool oldValue, bool newValue){
 }
 
 bool HAPPluginRCSwitchDevice::fakeGatoCallback(){
-    // LogD(HAPTime::timeString() + " " + "HAPPluginPCA301Device" + "->" + String(__FUNCTION__) + " [   ] " + "fakeGatoCallback()", true);
+    // LogD(HAPTime::timestring() + " " + "HAPPluginPCA301Device" + "->" + String(__FUNCTION__) + " [   ] " + "fakeGatoCallback()", true);
 
     // Serial.println("power: " + _curPowerValue->value());
     _fakegato.addEntry(0x1F);
@@ -272,7 +272,7 @@ bool HAPPluginRCSwitchDevice::fakeGatoCallback(){
 }
 
 void HAPPluginRCSwitchDevice::switchCallback(uint16_t state){
-    LogD(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
+    LogD(HAPTime::timestring() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Callback to switch " + String(state == 1 ? "ON" : "OFF"), true);
     // _callbackRCSwitchSend(houseAddress, deviceAddress, state);
     _stateValue->setValue(state);
 }
@@ -299,7 +299,7 @@ void HAPPluginRCSwitchDevice::scheduleFromJson(JsonObject &root){
 FLASHMEM
 #endif
 void HAPPluginRCSwitchDevice::saveConfig(){
-    LogE(HAPTime::timeString() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);
+    LogE(HAPTime::timestring() + " " + "HAPPluginRCSwitchDevice" + "->" + String(__FUNCTION__) + " [   ] " + "Update config event", true);
     _eventManager->queueEvent( EventManager::kEventUpdatedConfig, HAPEvent());
 }
 

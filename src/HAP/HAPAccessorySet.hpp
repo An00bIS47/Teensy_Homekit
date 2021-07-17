@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "HAPAccessory.hpp"
-#include "HAPCategories.hpp"
+#include "HAPAccessoryType.hpp"
 // #include "HAPPairings.hpp"
 
 #include "HAPConfiguration.hpp"
@@ -78,8 +78,9 @@ public:
 		_configuration->save();
 	}
 
-	uint8_t accessoryType();
-	void setAccessoryType(enum HAP_ACCESSORY_TYPE accessoryType);
+	uint8_t accessoryTypeAsInt();
+	HAPAccessoryType accessoryType();
+	void setAccessoryType(HAPAccessoryType accessoryType);
 
 	void addAccessoryInfo();
 
@@ -108,7 +109,7 @@ public:
 
 	HAPCharacteristicBase* getCharacteristic(uint8_t aid, uint32_t iid);
 
-	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, uint8_t type);
+	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, HAPCharacteristicType type);
 	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, const char* type);
 
 	void setIdentifyCharacteristic(bool value);
@@ -123,7 +124,7 @@ public:
 
 protected:
 
-	uint8_t _accessoryType; // enum HAP_ACCESSORY_TYPE
+	HAPAccessoryType _accessoryType; // enum HAP_ACCESSORY_TYPE
 
 	// Setup ID can be provided, although, per spec, should be random
 	// every time the instance is started. If not provided on init, will be random.

@@ -8,7 +8,10 @@
 #include "HAPPluginLED.hpp"
 #include "HAPServer.hpp"
 
+
+#ifndef HAP_PLUGIN_LED_INTERVAL
 #define HAP_PLUGIN_LED_INTERVAL 1000
+#endif
 
 #if defined (CORE_TEENSY)
 #ifndef BUILTIN_LED
@@ -26,7 +29,7 @@
 #endif
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       6	// 2 = FakeGato support
+#define VERSION_MINOR       8	// 8 = std::string
 #define VERSION_REVISION    0
 #define VERSION_BUILD       0
 
@@ -50,59 +53,60 @@ HAPPluginLED::HAPPluginLED(){
 
     _powerState         = nullptr;
 
+#if HAP_PLUGIN_LED_SUPPORTS_ENABLED
     _enabledState       = nullptr;
+#endif
+
     _blinkingEnabled    = true;
 
     _config = new HAPConfigurationPlugin("LED", true, HAP_PLUGIN_LED_INTERVAL);
 }
 
 
-void HAPPluginLED::changePower(bool oldValue, bool newValue) {
-    // LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+void HAPPluginLED::changeState(bool oldValue, bool newValue) {
 
-    if (newValue == true) {
-        digitalWrite(_gpio, HIGH);     // dont know why to put low here, maybe because of SPI ?
-    } else {
-        digitalWrite(_gpio, LOW);
-    }
+    LOG_I("[%s] Changed state: %d >>> %d\n", _config->name, oldValue, newValue);
 }
 
+#if HAP_PLUGIN_LED_SUPPORTS_ENABLED
 void HAPPluginLED::changeEnabled(bool oldValue, bool newValue) {
-    // LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Setting iid " + String(iid) +  " oldValue: " + oldValue + " -> newValue: " + newValue, true);
+
+    LOG_I("[%s] Changed enabled: %d >>> %d\n", _config->name, oldValue, newValue);
 
     if (newValue != oldValue) {
         _blinkingEnabled = newValue;
 
-        _powerState->setValue(newValue);
-
-        // Config update notification
-        struct HAPEvent event = HAPEvent(nullptr, 0, 0, "");
-        _eventManager->queueEvent( EventManager::kEventUpdatedConfig, event, EventManager::kLowPriority);
+        _powerState->setValue(newValue, true);
+	    queueNotifyEvent(_powerState);
     }
 }
-
+#endif
 
 
 void HAPPluginLED::handleImpl(bool forced){
 
     if (isEnabled() && _blinkingEnabled) {
-        LogV(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Handle plguin [" + String(_config->interval) + "]", true);
+        LOG_V("[%s] - Handle plugin [%d]\n", (const char*)_config->name, _config->interval);
 
-        _powerState->setValue(_isOn);
+        _isOn == true ? _isOn = false : _isOn = true;
+
+        digitalWrite(HAP_LED_PIN, _isOn);
+
+        bool withCallback = false;
+#if HAP_DEBUG
+        withCallback = true;
+#endif
+
+        _powerState->setValue(_isOn, withCallback);
         queueNotifyEvent(_powerState);
-
     }
-
-
-
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
 bool HAPPluginLED::begin(){
-    LogV(HAPTime::timeString() + " " + String(_config->name) + "->" + String(__FUNCTION__) + " [   ] " + "begin()", true);
-
+    LOG_V("[%s] - Begin plugin\n", _config->name);
     pinMode(_gpio, OUTPUT);
     digitalWrite(_gpio, _isOn);
 
@@ -114,62 +118,87 @@ FLASHMEM
 #endif
 HAPAccessory* HAPPluginLED::initAccessory(){
 
-    LogV("\nInitializing accessory for plugin: " + String(_config->name) + " ...", true);
+    LOG_V("[%s] - Initializing accessory for plugin ...\n", _config->name);
 
-    String sn = HAPDeviceID::serialNumber("LED", String(_gpio));
+
+    //
+	// Unique serial number !!!
+	//
+    char hex[7] = {'\0', };
+    sprintf(hex, "%d", _gpio);
+
+	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
+	char serialNumber[strlen(snTemp) + 1] = {'\0',};
+	strcpy(serialNumber, snTemp);
+
+	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
+	sprintf(sensorName, "%s %s", _config->name, hex);
+
 
     //
     // Add new accessory
     //
+    LOG_V("[%s] - Add new accessory ...", _config->name);
+
 	_accessory = new HAPAccessory();
 	//HAPAccessory::addInfoServiceToAccessory(_accessory, "Builtin LED", "ACME", "LED", "123123123", &identify);
     auto callbackIdentify = std::bind(&HAPPlugin::identify, this, std::placeholders::_1, std::placeholders::_2);
-    _accessory->addInfoService("Builtin LED", "ACME", "LED", sn, callbackIdentify, version());
+    _accessory->addInfoService("Builtin LED", "ACME", "Builtin LED", serialNumber, callbackIdentify, version());
 
+    LOGRAW_V("OK\n");
 
     //
     // Lightbulb Service
     //
-    HAPService* _service = new HAPService(HAP_SERVICE_LIGHTBULB);
+    LOG_V("[%s] - Add new %s service ...", _config->name, "light bulb");
+    HAPService* _service = new HAPService(HAPServiceType::Lightbulb);
     // _service->setPrimaryService(true);
     _accessory->addService(_service);
 
+    LOGRAW_V("OK\n");
 
-    HAPCharacteristic<String>* lightServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-    lightServiceName->setValue("LED");
-    _accessory->addCharacteristicToService(_service, lightServiceName);
+    {
+        LOG_V("[%s] - Add new %s sensor ...", _config->name, "led");
 
-    _powerState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
-    _powerState->setValue(_isOn);
+        HAPCharacteristic<std::string>* lightServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        lightServiceName->setValue("LED");
+        _accessory->addCharacteristicToService(_service, lightServiceName);
 
-    auto callbackPowerState = std::bind(&HAPPluginLED::changePower, this, std::placeholders::_1, std::placeholders::_2);
-    _powerState->setValueChangeCallback(callbackPowerState);
-    _accessory->addCharacteristicToService(_service, _powerState);
+        _powerState = new HAPCharacteristic<bool>(HAPCharacteristicType::On, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+        _powerState->setValue(_isOn);
+
+        auto callbackPowerState = std::bind(&HAPPluginLED::changeState, this, std::placeholders::_1, std::placeholders::_2);
+        _powerState->setValueChangeCallback(callbackPowerState);
+        _accessory->addCharacteristicToService(_service, _powerState);
+
+        LOGRAW_V("OK\n");
+    }
 
 
+#if HAP_PLUGIN_LED_SUPPORTS_ENABLED
+    //
+    // Outlet Service / Switch Service
+    //
+    HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
+    _accessory->addService(switchService);
 
-    // //
-    // // Outlet Service / Switch Service
-    // //
-    // HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
-    // _accessory->addService(switchService);
+    HAPCharacteristic<std::string>* plugServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    plugServiceName->setValue("LED");
+    _accessory->addCharacteristicToService(switchService, plugServiceName);
 
-    // HAPCharacteristic<String>* plugServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ);
-    // plugServiceName->setValue("LED");
-    // _accessory->addCharacteristicToService(switchService, plugServiceName);
+    _enabledState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+    _enabledState->setDescription("Enabled");
+    _enabledState->setValue(_blinkingEnabled);
 
-    // _enabledState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
-    // _enabledState->setDescription("Enabled");
-    // _enabledState->setValue(_blinkingEnabled);
+    auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);
+    _enabledState->setValueChangeCallback(callbackEnabledState);
+    _accessory->addCharacteristicToService(switchService, _enabledState);
 
-    // auto callbackEnabledState = std::bind(&HAPPluginLED::changeEnabled, this, std::placeholders::_1, std::placeholders::_2);
-    // _enabledState->setValueChangeCallback(callbackEnabledState);
-    // _accessory->addCharacteristicToService(switchService, _enabledState);
+    // Link switchService to _service
+    _service->addLinkedServiceId(switchService->aid());
+#endif
 
-    // // Link switchService to _service
-    // _service->addLinkedServiceId(switchService->aid());
-
-	LogD("OK", true);
+	LOGRAW_D("OK\n");
 
 	return _accessory;
 }
@@ -179,7 +208,7 @@ HAPAccessory* HAPPluginLED::initAccessory(){
 FLASHMEM
 #endif
 void HAPPluginLED::identify(bool oldValue, bool newValue) {
-    Serial.printf(F("Start Identify Light from member\n"));
+    LOG_I("Start Identify %s\n", _config->name);
 }
 
 #if HAP_ENABLE_WEBSERVER
@@ -208,7 +237,7 @@ HAPConfigurationValidationResult HAPPluginLED::validateConfig(JsonObject object)
 
 JsonObject HAPPluginLED::getConfigImpl(){
 
-    LogD(HAPTime::timeString() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
+    LogD(HAPTime::timestring() + " " + _config->name + "->" + String(__FUNCTION__) + " [   ] " + "Get config implementation", true);
 
     DynamicJsonDocument doc(128);
     doc["gpio"] = _gpio;
@@ -240,6 +269,9 @@ void HAPPluginLED::setConfigImpl(JsonObject root){
 FLASHMEM
 #endif
 HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
+
+    LOG_V("[%s] Set defaults\n", _config->name);
+
 	_config->enabled  = HAP_PLUGIN_USE_LED;
 	_config->interval = HAP_PLUGIN_LED_INTERVAL;
 	_config->dataPtr = nullptr;
@@ -252,5 +284,7 @@ HAPConfigurationPlugin* HAPPluginLED::setDefaults(){
 FLASHMEM
 #endif
 void HAPPluginLED::setConfiguration(HAPConfigurationPlugin* cfg){
+    LOG_V("[%s] Set configuration\n", _config->name);
 	_config = cfg;
+    //_config->setToJsonCallback(std::bind(&HAPPluginBME280::internalConfigToJson, this, std::placeholders::_1));
 }

@@ -9,9 +9,9 @@
 #include "HAPHelper.hpp"
 #include "HAPServer.hpp"
 #include "EventManager.h"
-#include "HAPCharacteristics.hpp"
+#include "HAPCharacteristicType.hpp"
 #include "HAPCharacteristic.hpp"
-#include "HAPServices.hpp"
+#include "HAPServiceType.hpp"
 
 
 #if defined(ARDUINO_TEENSY41)
@@ -127,7 +127,7 @@ HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
 }
 
 
-HAPCharacteristicBase* HAPAccessory::characteristicsOfType(int type) {
+HAPCharacteristicBase* HAPAccessory::characteristicsOfType(HAPCharacteristicType type) {
 	for (auto it = _services.begin(); it != _services.end(); it++) {
 		for (auto jt = (*it)->_characteristics.begin(); jt != (*it)->_characteristics.end(); jt++) {
 			if ((*jt)->type() == type) {
@@ -191,30 +191,31 @@ HAPService* HAPAccessory::addInfoService(const char* accessoryName, const char* 
 
 	initInfoService();
 
-
+	LOG_V("Set accessory name to %s\n", accessoryName);
 	if (_accessoryName == nullptr) {
-		_accessoryName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_accessoryName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _accessoryName);
 	}
 	_accessoryName->setValue(accessoryName, false);
 
-
+	LOG_V("Set manufacturer to %s\n", manufacturerName);
 	if (_manufacturer == nullptr) {
-		_manufacturer = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MANUFACTURER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_manufacturer = new HAPCharacteristic<std::string>(HAPCharacteristicType::Manufacturer, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _manufacturer);
 	}
 	_manufacturer->setValue(manufacturerName, false);
 
-
+	LOG_V("Set model to %s\n", modelName);
 	if (_modelName == nullptr) {
-		_modelName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_MODEL, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_modelName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Model, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _modelName);
 	}
 	_modelName->setValue(modelName, false);
 
 
+	LOG_V("Set serialnumber to %s\n", serialNumber);
 	if (_serialNumber == nullptr) {
-		_serialNumber = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_SERIAL_NUMBER, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_serialNumber = new HAPCharacteristic<std::string>(HAPCharacteristicType::SerialNumber, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _serialNumber);
 	}
 	_serialNumber->setValue(serialNumber, false);
@@ -232,7 +233,7 @@ FLASHMEM
 #endif
 void HAPAccessory::initInfoService(){
 	if (_infoService == nullptr) {
-		_infoService = new HAPService(HAP_SERVICE_ACCESSORY_INFORMATION);
+		_infoService = new HAPService(HAPServiceType::AccessoryInformation);
 		addService(_infoService);
 	}
 }
@@ -243,8 +244,10 @@ FLASHMEM
 #endif
 void HAPAccessory::setFirmware(const char* firmwareRev){
 	initInfoService();
+
+	LOG_V("Set firmware revision to %s\n", firmwareRev);
 	if (_firmware == nullptr) {
-		_firmware = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_FIRMWARE_REVISION, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		_firmware = new HAPCharacteristic<std::string>(HAPCharacteristicType::FirmwareRevision, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		addCharacteristicToService(_infoService, _firmware);
 	}
 	_firmware->setValue(firmwareRev, false);
@@ -256,7 +259,7 @@ FLASHMEM
 void HAPAccessory::setIdentifyCallback(identifyFunctionCallback callback){
 	initInfoService();
 	if (_identify == nullptr) {
-		_identify = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_IDENTIFY, HAP_PERMISSION_WRITE);
+		_identify = new HAPCharacteristic<bool>(HAPCharacteristicType::Identify, HAP_PERMISSION_WRITE);
 		addCharacteristicToService(_infoService, _identify);
 	}
 	_identify->setValueChangeCallback(callback);

@@ -11,10 +11,13 @@
 
 #include <Arduino.h>
 #include "HAPPlugins.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 #include "HAPAccessory.hpp"
 #include "HAPGlobals.hpp"
 
+#ifndef HAP_PLUGIN_LED_SUPPORTS_ENABLED
+#define HAP_PLUGIN_LED_SUPPORTS_ENABLED 0
+#endif
 
 class HAPPluginLED: public HAPPlugin {
 public:
@@ -24,10 +27,11 @@ public:
 
 	bool begin();
 
-	void setValue(int iid, String oldValue, String newValue);
+	void changeState(bool oldValue, bool newValue);
 
-	void changePower(bool oldValue, bool newValue);
+#if HAP_PLUGIN_LED_SUPPORTS_ENABLED
 	void changeEnabled(bool oldValue, bool newValue);
+#endif
 
 	void handleImpl(bool forced=false);
 	void identify( bool oldValue, bool newValue);
@@ -40,7 +44,10 @@ public:
 
 protected:
 	HAPCharacteristic<bool>* 	_powerState;
+
+#if HAP_PLUGIN_LED_SUPPORTS_ENABLED
 	HAPCharacteristic<bool>* 	_enabledState;
+#endif
 
 	bool 	_blinkingEnabled;
 	uint8_t _gpio;

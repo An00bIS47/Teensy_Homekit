@@ -204,7 +204,7 @@ public:
 	void toJson(Print& prt) override {
 		prt.print("{");
 		prt.print("\"name\": ");
-		prt.print(HAPHelper::wrap(name));
+		prt.print(HAPHelper::wrap(name).c_str());
 
 
 		prt.print(",");

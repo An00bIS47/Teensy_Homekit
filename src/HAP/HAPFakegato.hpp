@@ -16,6 +16,7 @@
 #include <CircularBuffer.h>
 #include "HAPAccessory.hpp"
 #include "HAPService.hpp"
+#include "HAPLogging.hpp"
 #include "HAPFakegatoCharacteristic.hpp"
 
 #ifndef HAP_FAKEGATO_BUFFER_SIZE
@@ -25,6 +26,11 @@
 #ifndef HAP_FAKEGATO_BATCH_SIZE
 #define HAP_FAKEGATO_BATCH_SIZE  16
 #endif
+
+#ifndef HAP_FAKEGATO_INTERVAL
+#define HAP_FAKEGATO_INTERVAL 600000        // default: every 10 minutes
+#endif
+
 
 #ifndef HAP_FAKEGATO_EPOCH
 #define HAP_FAKEGATO_EPOCH       978307200
@@ -270,7 +276,7 @@ protected:
             prt.print(F(" bitmask:")); prt.print(bitmask);
             prt.print(F(" timestamp:")); prt.print(timestamp);
             prt.println("");
-            HAPHelper::array_print("data", data, length);
+            LOGARRAY_N("data", data, length);
         }
 
 #endif

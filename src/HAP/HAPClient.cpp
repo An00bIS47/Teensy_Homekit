@@ -8,7 +8,7 @@
 
 #include "HAPClient.hpp"
 #include "HAPHelper.hpp"
-#include "HAPLogger.hpp"
+#include "HAPLogging.hpp"
 
 
 HAPClient::HAPClient()
@@ -17,6 +17,7 @@ HAPClient::HAPClient()
 , verifyState(HAP_VERIFY_STATE_RESERVED)
 , _isEncrypted(false)
 , _isAdmin(false)
+
 {
 	memset(_idPtr,0,HAP_PAIRINGS_ID_LENGTH);
 }
