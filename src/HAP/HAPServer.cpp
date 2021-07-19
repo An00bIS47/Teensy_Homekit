@@ -951,7 +951,7 @@ void HAPServer::handle() {
 #endif
 
 	// Handle existing clients
-	// LOG_V("Handle existing clients\n");
+	LOG_V("Handle existing clients\n");
 	for (auto& hapClient : _clients) {
 
 		// Connected
@@ -981,13 +981,14 @@ void HAPServer::handle() {
 
 		// LogV( "HAPClient state " + hapClient.getClientState(), true );
 	}
-
+	LOG_V("OK\n");
 
 	// Handle new clients
 #if defined(ARDUINO_ARCH_ESP32)
 	WiFiClient client = _server.available();
 #elif defined( CORE_TEENSY)
 
+	LOG_V("Checking for new clients ...");
 	EthernetClient client = _server.available();
 #endif
 	if (client) {
@@ -1001,6 +1002,7 @@ void HAPServer::handle() {
 
 		handleClientState(hapClient);
 	}
+	LOG_V("OK\n");
 
 	// Handle Webserver
 #if HAP_ENABLE_WEBSERVER
@@ -1019,21 +1021,26 @@ void HAPServer::handle() {
 #endif
 
 	// Handle plugins
+	LOG_V("Handling plugins ...");
 	for (auto& plugin : _plugins) {
 		if (plugin->isEnabled()) {
 			plugin->handle();
 		}
 	}
-
+	LOG_V("OK\n");
 
 	//
 	// Handle fakeGatos
 	// LOG_V("Handle fakegato\n");
+	LOG_V("Handling Fakegato ...");
 	_fakeGatoFactory.handle();
+	LOG_V("OK\n");
 
 	// Handle any events that are in the queue
 	// LOG_V("Handle event manager\n");
+	LOG_V("Handling Events ...");
 	processEvents();
+	LOG_V("OK\n");
 	// _eventManager.processAllEvents();
 
 }
