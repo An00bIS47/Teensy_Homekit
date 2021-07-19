@@ -109,7 +109,7 @@ HAPServer::HAPServer(uint16_t port, uint8_t maxClients)
 
 #if HAP_DEBUG
 	_previousMillisHeap = 0;
-	
+
 #endif
 
 	_accessorySet = new HAPAccessorySet();
@@ -836,7 +836,7 @@ bool HAPServer::begin(bool resume) {
 #endif
 #endif
 
-	
+
 
 #if HAP_ENABLE_PIXEL_INDICATOR
 	_pixelIndicator.confirmWithColor(HAPColorGreen);
@@ -923,15 +923,6 @@ void HAPServer::handle() {
 	    // save the last time you blinked the LED
 	    _previousMillisHeap = millis();
 		LOG_HEAP(_clients.size(), _eventManager.getNumEventsInQueue());
-
-		// ToDo: remove
-		// LOGDEVICE->print("Task Button Handle: ");
-		// LOGDEVICE->println(_taskButtonHandle == NULL ? "NULL" : "not NULL");
-		// if (_taskButtonHandle != NULL){
-		// 	LOGDEVICE->print("Task State: ");
-		// 	LOGDEVICE->println(eTaskGetState(_taskButtonHandle));
-		// }
-
 	}
 #endif
 
@@ -950,8 +941,10 @@ void HAPServer::handle() {
 	}
 #endif
 
+	//
 	// Handle existing clients
-	LOG_V("Handle existing clients\n");
+	//
+	LOG_V("Handle existing clients ...");
 	for (auto& hapClient : _clients) {
 
 		// Connected
@@ -981,9 +974,11 @@ void HAPServer::handle() {
 
 		// LogV( "HAPClient state " + hapClient.getClientState(), true );
 	}
-	LOG_V("OK\n");
+	LOGRAW_V("OK\n");
 
+	//
 	// Handle new clients
+	//
 #if defined(ARDUINO_ARCH_ESP32)
 	WiFiClient client = _server.available();
 #elif defined( CORE_TEENSY)
@@ -1002,9 +997,11 @@ void HAPServer::handle() {
 
 		handleClientState(hapClient);
 	}
-	LOG_V("OK\n");
+	LOGRAW_V("OK\n");
 
+	//
 	// Handle Webserver
+	//
 #if HAP_ENABLE_WEBSERVER
 	if (_configuration.getWebServerConfig()->enabled){
 		// LOG_V("Handle webserver\n");
@@ -1012,7 +1009,9 @@ void HAPServer::handle() {
 	}
 #endif
 
+	//
 	// Handle Arduino OTA
+	//
 #if HAP_ENABLE_UPDATE_WEB || HAP_ENABLE_UPDATE_OTA
 	if (_configuration.getOTAConfig()->enabled){
 		// LOG_V("Handle OTA\n");
@@ -1020,27 +1019,30 @@ void HAPServer::handle() {
 	}
 #endif
 
+	//
 	// Handle plugins
+	//
 	LOG_V("Handling plugins ...");
 	for (auto& plugin : _plugins) {
 		if (plugin->isEnabled()) {
 			plugin->handle();
 		}
 	}
-	LOG_V("OK\n");
+	LOGRAW_V("OK\n");
 
 	//
 	// Handle fakeGatos
-	// LOG_V("Handle fakegato\n");
+	//
 	LOG_V("Handling Fakegato ...");
 	_fakeGatoFactory.handle();
-	LOG_V("OK\n");
+	LOGRAW_V("OK\n");
 
+	//
 	// Handle any events that are in the queue
-	// LOG_V("Handle event manager\n");
+	//
 	LOG_V("Handling Events ...");
 	processEvents();
-	LOG_V("OK\n");
+	LOGRAW_V("OK\n");
 	// _eventManager.processAllEvents();
 
 }
