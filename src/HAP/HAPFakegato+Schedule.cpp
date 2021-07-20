@@ -13,9 +13,11 @@
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-HAPService* HAPFakegatoSchedule::registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const char* name){
+HAPService* HAPFakegatoSchedule::registerFakeGatoService(HAPFakegatoScheduleDeviceType::Type deviceType, HAPAccessory* accessory, const char* name){
 
 	HAPService* fgService = HAPFakegato::registerFakeGatoService(accessory, name);
+	
+	_deviceType = deviceType;
 
 	uint8_t zeroValue[1] = {0x00};
 

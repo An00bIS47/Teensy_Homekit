@@ -82,8 +82,6 @@ public:
 	HAPAccessoryType accessoryType();
 	void setAccessoryType(HAPAccessoryType accessoryType);
 
-	void addAccessoryInfo();
-
 	const char* setupID();
 	void generateSetupID();
 

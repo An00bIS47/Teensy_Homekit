@@ -249,7 +249,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	//
 	// Device Type
 	//
-    tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DEVICE_TYPE, {_deviceType, 0x00});
+    tlv.encode(HAPFakegatoScheduleTLVType::DeviceType, {_deviceType, 0x00});
 
 
     tlv.encode(0x03, {0xB8, 0x04});
@@ -259,7 +259,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
     // Serial Number
 	//
     // tlv.encode(0x04, {0x42, 0x56, 0x31, 0x32, 0x4A, 0x31, 0x41, 0x30, 0x37, 0x32, 0x31, 0x32});
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_SERIALNUMBER, _serialNumber.length(), (uint8_t*)_serialNumber.c_str());
+	tlv.encode(HAPFakegatoScheduleTLVType::SerialNumber, _serialNumber.length(), (uint8_t*)_serialNumber.c_str());
 
 	//
 	// Number of history entries
@@ -267,7 +267,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
     // tlv.encode(0x06, {0xFB, 0x0A});
 	ui16_to_ui8 memoryUsed;
     memoryUsed.ui16 = _entries.size();
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY, 2, memoryUsed.ui8);
+	tlv.encode(HAPFakegatoScheduleTLVType::UsedMemory, 2, memoryUsed.ui8);
 
 	//
 	// Number of rolled over index
@@ -279,7 +279,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	} else {
 		rolledOverIndex.ui32 = 0;
 	}
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_ROLLED_OVER_INDEX, 4, rolledOverIndex.ui8);
+	tlv.encode(HAPFakegatoScheduleTLVType::RolledOverIndex, 4, rolledOverIndex.ui8);
 
     tlv.encode(0x0B, {0x00, 0x00});
     tlv.encode(0x05, {0x00});
@@ -297,7 +297,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	encodePrograms(nullptr, &dataSize);
 	uint8_t data[dataSize];
 	encodePrograms(data, &dataSize);
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS, dataSize, data);
+	tlv.encode(HAPFakegatoScheduleTLVType::Programs, dataSize, data);
 
 	//
     // Days
@@ -316,7 +316,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	daysHex[6] = daysNo >> 16;
 	daysHex[7] = daysNo >> 24;
 
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS, 84, daysHex);
+	tlv.encode(HAPFakegatoScheduleTLVType::Days, 84, daysHex);
 
 	//
     // Commands
@@ -326,9 +326,9 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	// ToDo:
 	// Logitude and Latitude calcualtion
 	if (_timers.isEnabled()) {
-		tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE, {0x05, 0x0D, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
+		tlv.encode(HAPFakegatoScheduleTLVType::CommandToggleSchedule, {0x05, 0x0D, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
 	} else {
-		tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE, {0x05, 0x0C, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
+		tlv.encode(HAPFakegatoScheduleTLVType::CommandToggleSchedule, {0x05, 0x0C, 0x00, 0x05, 0x03, 0x3C, 0x00, 0x00, 0x00, 0x32, 0xC2, 0x42, 0x42, 0xA1, 0x93, 0x34, 0x41});
 	}
 
 
@@ -384,7 +384,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	memcpy(DST + offsetDST, clockOffset.ui8, 4);
 	offsetDST += 4;
 
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_DST, offsetDST, DST);
+	tlv.encode(HAPFakegatoScheduleTLVType::DST, offsetDST, DST);
 
 
 	// ??
@@ -396,7 +396,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
     // Status LED
 	//
     // tlv.encode(0x60, {0x64});
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED, 1, _statusLED);
+	tlv.encode(HAPFakegatoScheduleTLVType::StatusLed, 1, _statusLED);
 
 	//
     // last activity On switch ?
@@ -408,7 +408,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	} else {
 		secsLastAct.ui32 = 0;
 	}
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_LAST_ACTIVITY, 4, secsLastAct.ui8); // offset ?
+	tlv.encode(HAPFakegatoScheduleTLVType::LastActivity, 4, secsLastAct.ui8); // offset ?
 
 // #if HAP_DEBUG_FAKEGATO_SCHEDULE
 // 	HAPHelper::array_print("secsLastAct", secsLastAct.ui8, 4);
@@ -420,7 +420,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	//tlv.encode(0x9B, {0xFB, 0x2C, 0x19, 0x00}); // offset ?
 	ui32_to_ui8 secs;
     secs.ui32 = (timestampLastEntry() - HAPTime::refTime());
-	tlv.encode(HAP_FAKEGATO_SCHEDULE_TYPE_EVE_TIME, 4, secs.ui8); // offset ?
+	tlv.encode(HAPFakegatoScheduleTLVType::EveTime, 4, secs.ui8); // offset ?
 
 // #if HAP_DEBUG_FAKEGATO_SCHEDULE
 // 	HAPHelper::array_print("secs", secs.ui8, 4);
@@ -429,7 +429,7 @@ void HAPFakegatoScheduleEnergy::callbackGetSchedule(uint8_t* output, size_t* len
 	//
     // end mark
 	//
-    uint8_t endBytes[2] = {HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK, 0x00};
+    uint8_t endBytes[2] = {HAPFakegatoScheduleTLVType::EndMark, 0x00};
 
     size_t decodedLen = 0;
 	// uint8_t out[tlv.size() + 2];
@@ -467,25 +467,25 @@ void HAPFakegatoScheduleEnergy::callbackSetSchedule(const uint8_t* decoded, cons
     TLV8 tlv;
     tlv.encode((uint8_t*)decoded, len);
 
-    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE)){
-        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE);
+    if (tlv.hasType(HAPFakegatoScheduleTLVType::CommandToggleSchedule)){
+        TLV8Entry* tlvEntry = tlv.getType(HAPFakegatoScheduleTLVType::CommandToggleSchedule);
         enable(decodeToggleOnOff(tlvEntry->value));
         _shouldSave = true;
     }
 
-    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED)){
-        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED);
+    if (tlv.hasType(HAPFakegatoScheduleTLVType::CommandStatusLed)){
+        TLV8Entry* tlvEntry = tlv.getType(HAPFakegatoScheduleTLVType::CommandStatusLed);
         setStatusLED(tlvEntry->value[0]);
     }
 
-    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS)){
-        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_DAYS);
+    if (tlv.hasType(HAPFakegatoScheduleTLVType::Days)){
+        TLV8Entry* tlvEntry = tlv.getType(HAPFakegatoScheduleTLVType::Days);
         decodeDays(tlvEntry->value);
         _shouldSave = true;
     }
 
-    if (tlv.hasType(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS)){
-        TLV8Entry* tlvEntry = tlv.getType(HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS);
+    if (tlv.hasType(HAPFakegatoScheduleTLVType::Programs)){
+        TLV8Entry* tlvEntry = tlv.getType(HAPFakegatoScheduleTLVType::Programs);
         decodePrograms(tlvEntry->value);
         _shouldSave = true;
     }

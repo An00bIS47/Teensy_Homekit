@@ -841,7 +841,6 @@ bool HAPServer::begin(bool resume) {
 #if HAP_ENABLE_PIXEL_INDICATOR
 	_pixelIndicator.confirmWithColor(HAPColorGreen);
 #endif
-
 	return true;
 }
 
@@ -886,7 +885,6 @@ bool HAPServer::updateServiceTxt() {
 
 	return true;
 #endif
-
 }
 
 
@@ -1064,6 +1062,7 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 			break;
 		}
     }
+
 }
 
 void HAPServer::handleClientState(HAPClient* hapClient) {
@@ -1102,12 +1101,15 @@ void HAPServer::handleClientState(HAPClient* hapClient) {
 		LOG_D("all pairings removed\n");
 		handleAllPairingsRemoved();
 	}
+
+
 }
 
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
 void HAPServer::handleAllPairingsRemoved(){
+	LOG_V("handleAllPairingsRemoved\n");
 	LOG_D("Handle all pairings removed ...");
 	for (int i=0; i < _clients.size(); i++){
 
@@ -1125,10 +1127,12 @@ void HAPServer::handleAllPairingsRemoved(){
 		_clients[i]->state = HAP_CLIENT_STATE_DISCONNECTED;
 	}
 	LOGRAW_D("OK\n");
+
+	LOG_V("END handleAllPairingsRemoved\n");
 }
 
 void HAPServer::handleClientAvailable(HAPClient* hapClient) {
-
+	LOG_V("handleClientAvailable\n");
 
 	LOG_D("Handle client available [enrypted: %d]\n", hapClient->isEncrypted());
 
@@ -1149,13 +1153,15 @@ void HAPServer::handleClientAvailable(HAPClient* hapClient) {
 
 	// Update client state *print*
 	handleClientState( hapClient );
+
+
 }
 
 
 void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBufferingClient* bufferedClient){
 
 
-	LOG_V("Handle encrypted request\n");
+	LOG_V("processIncomingEncryptedRequest\n");
 
 	//
     // Each HTTP message is split into frames no larger than 1024 bytes
@@ -1264,6 +1270,7 @@ void HAPServer::processIncomingEncryptedRequest(HAPClient* hapClient, ReadBuffer
 			free(bodyData);
 		}
 	}
+
 }
 
 
@@ -1321,6 +1328,8 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 		return false;
 	}
 
+
+	
 	return true;
 }
 

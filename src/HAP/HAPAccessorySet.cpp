@@ -48,20 +48,11 @@ HAPAccessorySet::~HAPAccessorySet(){
 FLASHMEM
 #endif
 void HAPAccessorySet::begin(){
-	addAccessoryInfo();
-}
-
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPAccessorySet::addAccessoryInfo(){
 	HAPAccessory *accessory = new HAPAccessory();
 	accessory->addInfoService(modelName(), HAP_MANUFACTURER, HAP_MODELL_NAME, "44-22-777", NULL, hap.versionString());
 
 	addAccessory(accessory);
 }
-
 
 uint8_t HAPAccessorySet::accessoryTypeAsInt() {
 	return static_cast<uint8_t>(_accessoryType);

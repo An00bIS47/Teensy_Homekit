@@ -17,37 +17,74 @@
 #include "HAPDailyTimerFactory.hpp"
 
 // ToDo: define or enum ?
-
-enum HAP_SCHEDULE_DEVICE_TYPE {
-    HAP_SCHEDULE_TYPE_WEATHER           = 0x01,
-    HAP_SCHEDULE_TYPE_ROOM              = 0x02,
-    HAP_SCHEDULE_TYPE_DOOR_WINDOW       = 0x03,
-    HAP_SCHEDULE_TYPE_ENERGY_EU         = 0x04,
-    HAP_SCHEDULE_TYPE_LIGHT_SWITCH      = 0x0B,
-    HAP_SCHEDULE_TYPE_THERMO            = 0x0C,
-    HAP_SCHEDULE_TYPE_ENERGY_US         = 0x0D,
-    HAP_SCHEDULE_TYPE_MOTION            = 0x11,
-    HAP_SCHEDULE_TYPE_ENERGY_UK         = 0x12,
-    HAP_SCHEDULE_TYPE_ENERGY_EU_2       = 0x14,
-    HAP_SCHEDULE_TYPE_ENERGY_AU         = 0x1A,
-    HAP_SCHEDULE_TYPE_LIGHT_SWITCH_2    = 0x22,
-    HAP_SCHEDULE_TYPE_AQUA              = 0x23,
-    HAP_SCHEDULE_TYPE_ENERGY_EU_3       = 0x24,
-    HAP_SCHEDULE_TYPE_MOTION_2          = 0x25,
-    HAP_SCHEDULE_TYPE_DOOR_WINDOW_2     = 0x26,
-    HAP_SCHEDULE_TYPE_ROOM_2            = 0x27,
-    HAP_SCHEDULE_TYPE_ENERGY_UK_2       = 0x28,
-    HAP_SCHEDULE_TYPE_ENERGY_AU_2       = 0x29,
-    HAP_SCHEDULE_TYPE_THERMO_2          = 0x2C,
-    HAP_SCHEDULE_TYPE_BUTTON            = 0x31,
-    HAP_SCHEDULE_TYPE_FLARE             = 0x33,
-    HAP_SCHEDULE_TYPE_LIGHT_STRIP       = 0x36,
-    HAP_SCHEDULE_TYPE_ENERGY_STRIP_EU   = 0x37,
-    HAP_SCHEDULE_TYPE_ENERGY_STRIP_US   = 0x38,
-    HAP_SCHEDULE_TYPE_LIGHT_SWITCH_3    = 0x39,
-    HAP_SCHEDULE_TYPE_EXTEND            = 0x3B,
-    HAP_SCHEDULE_TYPE_THERMO_3          = 0x47,
+struct HAPFakegatoScheduleDeviceType {
+    enum Type : uint8_t {
+        Weather         = 0x01,
+        Room            = 0x02,
+        DoorWindow      = 0x03,
+        EnergyEU        = 0x04,
+        LightSwitch     = 0x0B,
+        Thermo          = 0x0C,
+        EnergyUS        = 0x0D,
+        Motion          = 0x11,
+        EnergyUK        = 0x12,
+        EnergyEU2       = 0x14,
+        EnergyAU        = 0x1A,
+        LightSwitch2    = 0x22,
+        Aqua            = 0x23,
+        EnergyEU3       = 0x24,
+        Motion2         = 0x25,
+        DoorWindow2     = 0x26,
+        Room2           = 0x27,
+        EnergyUK2       = 0x28,
+        EnergyAU2       = 0x29,
+        Thermo2         = 0x2C,
+        Button          = 0x31,
+        Flare           = 0x33,
+        LightStrip      = 0x36,
+        EnergyStripEU   = 0x37,
+        EnergyStripUS   = 0x38,
+        LightSwitch3    = 0x39,
+        Extend          = 0x3B,
+        Thermo3         = 0x47
+    };
 };
+
+struct HAPFakegatoScheduleTLVType {
+    enum Type : uint8_t {
+        DeviceType              = 0x00,
+        SerialNumber            = 0x04,
+        UsedMemory              = 0x06,
+        RolledOverIndex         = 0x07,
+        CommandToggleSchedule   = 0x44,
+        CommandStatusLed        = 0x20,
+        Programs                = 0x45,
+        Days                    = 0x46,
+        DST                     = 0x47,
+        StatusLed               = 0x60,
+        LastActivity            = 0xD0,
+        EveTime                 = 0x9B,
+
+        EndMark                 = 0xD2        
+    };
+};
+
+// enum class HAPFakegatoScheduleTLVType : uint8_t {
+//     DeviceType              = 0x00,
+//     SerialNumber            = 0x04,
+//     UsedMemory              = 0x06,
+//     RolledOverIndex         = 0x07,
+//     CommandToggleSchedule   = 0x44,
+//     CommandStatusLed        = 0x20,
+//     Programs                = 0x45,
+//     Days                    = 0x46,
+//     DST                     = 0x47,
+//     StatusLed               = 0x60,
+//     LastActivity            = 0xD0,
+//     EveTime                 = 0x9B,
+
+//     EndMark                 = 0xD2
+// };
 
 // ToDo: define or enum ?
 #define HAP_FAKEGATO_SCHEDULE_TYPE_DEVICE_TYPE              0x00
@@ -155,7 +192,7 @@ public:
         _timers.clear();
     }
 
-    HAPService* registerFakeGatoService(enum HAP_SCHEDULE_DEVICE_TYPE deviceType, HAPAccessory* accessory, const char* name);
+    HAPService* registerFakeGatoService(HAPFakegatoScheduleDeviceType::Type deviceType, HAPAccessory* accessory, const char* name);
 
     bool isEnabled(){
         return _timers.isEnabled();
@@ -165,7 +202,7 @@ public:
         _timers.enable(on);
     }
 
-    void setSerialNumber(String serialNumber){
+    void setSerialNumber(const char* serialNumber){
         _serialNumber = serialNumber;
     }
 
@@ -200,8 +237,8 @@ public:
         _callbackSaveConfig = callback;
     }
 
-    void setDeviceType(enum HAP_SCHEDULE_DEVICE_TYPE deviceType){
-        _deviceType = (uint8_t)deviceType;
+    void setDeviceType(HAPFakegatoScheduleDeviceType::Type deviceType){
+        _deviceType = deviceType;
     }
 
 
@@ -234,7 +271,7 @@ protected:
         }
     }
 
-    String  _serialNumber;
+    std::string  _serialNumber;
     uint8_t _statusLED;
 
     bool    _shouldSave = false;
@@ -248,7 +285,7 @@ protected:
 
     std::function<void(void)> _callbackSaveConfig = nullptr;
 
-    uint8_t _deviceType;
+    HAPFakegatoScheduleDeviceType::Type _deviceType;
 };
 
 #endif /* HAPFAKEGATOSCHEDULE_HPP_ */
