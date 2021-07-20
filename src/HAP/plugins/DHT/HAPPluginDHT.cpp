@@ -160,13 +160,13 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "temperature");
 
 		const char* serviceName = "DHT Temperature Sensor";
-		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+		HAPCharacteristic<std::string> *temperatureServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAPPermission::Read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
 		temperatureServiceName->setValue(serviceName);
 
 		_accessory->addCharacteristicToService(temperatureService, temperatureServiceName);
 
 		//HAPCharacteristicFloat(uint8_t _type, int _permission, float minVal, float maxVal, float step, unit charUnit): characteristics(_type, _permission), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(charUnit)
-		_temperatureValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentTemperature, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, -50, 100, 0.1, HAPUnit::Celsius);
+		_temperatureValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentTemperature, HAPPermission::Read|HAPPermission::Notify, -50, 100, 0.1, HAPUnit::Celsius);
 		_temperatureValue->setValue(0.0F);
 
 		_temperatureValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedTemperature, this, std::placeholders::_1, std::placeholders::_2));
@@ -190,7 +190,7 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	{
 		LOG_V("[%s] - Add new %s sensor ...", _config->name, "humidity");
 
-		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0, 100, 1, HAPUnit::Percentage);		_humidityValue->setValue(0.0);
+		_humidityValue = new HAPCharacteristic<float>(HAPCharacteristicType::CurrentRelativeHumidity, HAPPermission::Read|HAPPermission::Notify, 0, 100, 1, HAPUnit::Percentage);		_humidityValue->setValue(0.0);
 		_humidityValue->setValue(0.0F);
 
 		_humidityValue->setValueChangeCallback(std::bind(&HAPPluginDHT::changedHumidity, this, std::placeholders::_1, std::placeholders::_2));

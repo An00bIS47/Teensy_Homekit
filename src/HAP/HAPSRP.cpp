@@ -240,7 +240,7 @@ HAPSRP::SRPKeyPair* HAPSRP::createKeyPair(SRPSession *session, const uint8_t* by
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad)
+void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm::Type alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad)
 {
     uint8_t   buff[ SHA512_DIGEST_LENGTH ];
     int       len_n1 = mbedtls_mpi_size(n1);
@@ -285,7 +285,7 @@ void HAPSRP::H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, 
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes )
+void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm::Type alg, const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes )
 {
     uint8_t   		buff[ SHA512_DIGEST_LENGTH ];
     int             len_n  = mbedtls_mpi_size(n);
@@ -310,7 +310,7 @@ void HAPSRP::H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi * n, 
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len )
+void HAPSRP::calculate_x( HAPHashAlgorithm::Type alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len )
 {
 	uint8_t ucp_hash[SHA512_DIGEST_LENGTH];
 
@@ -335,7 +335,7 @@ void HAPSRP::calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mp
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-void HAPSRP::calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K )
+void HAPSRP::calculate_M( HAPHashAlgorithm::Type alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K )
 {
     uint8_t H_N[ SHA512_DIGEST_LENGTH ];
     uint8_t H_g[ SHA512_DIGEST_LENGTH ];
@@ -373,7 +373,7 @@ void HAPSRP::calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, c
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-void HAPSRP::calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const mbedtls_mpi * A, const uint8_t* M, const uint8_t* K )
+void HAPSRP::calculate_H_AMK( HAPHashAlgorithm::Type alg, unsigned char *dest, const mbedtls_mpi * A, const uint8_t* M, const uint8_t* K )
 {
 	HAPHash hash(alg);
     hash.init();
@@ -419,8 +419,8 @@ void HAPSRP::initRandom()
 //#if defined(ARDUINO_TEENSY41)
 //FLASHMEM
 //#endif
-HAPSRP::SRPSession* HAPSRP::newSession( HAPHashAlgorithm alg, NGType_t ng_type, const char * N_hex, const char * g_hex){
-	if ((unsigned)alg>=(unsigned)SRP_SHA_LAST) return NULL;
+HAPSRP::SRPSession* HAPSRP::newSession( HAPHashAlgorithm::Type alg, NGType_t ng_type, const char * N_hex, const char * g_hex){
+	if ((unsigned)alg>=(unsigned)HAPHashAlgorithm::Last) return NULL;
 	if ((unsigned)ng_type>=(unsigned)SRP_NG_LAST) return NULL;
 
     SRPSession* session = new SRPSession();

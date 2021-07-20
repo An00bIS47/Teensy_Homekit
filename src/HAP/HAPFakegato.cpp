@@ -36,14 +36,14 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
     sprintf(accName, "%s History", name);
 
     HAPService* fgService = new HAPService(HAP_SERVICE_FAKEGATO_HISTORY);
-    HAPCharacteristic<std::string>* accNameCha = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    HAPCharacteristic<std::string>* accNameCha = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAPPermission::Read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     accNameCha->setValue(accName);
     accessory->addCharacteristicToService(fgService, accNameCha);
 
     uint8_t zeroValue[1] = {0x00};
 
     // History Info
-    _historyInfo = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    _historyInfo = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_STATUS, HAPPermission::Read|HAPPermission::Notify|HAPPermission::Hidden, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historyInfo->setDescription("EVE History Info");
     _historyInfo->setValue(zeroValue, 1, false);
 
@@ -54,7 +54,7 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
 
 
     // History Entries
-    _historyEntries = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+    _historyEntries = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_ENTRIES, HAPPermission::Read|HAPPermission::Notify|HAPPermission::Hidden, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
     _historyEntries->setDescription("EVE History Entries");
     _historyEntries->setValue(zeroValue, 1, false);
 
@@ -66,7 +66,7 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
 
 
     // History Set Address
-    _historyRequest = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    _historyRequest = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_HISTORY_REQUEST, HAPPermission::Write|HAPPermission::Hidden, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historyRequest->setDescription("EVE History Address");
 
     auto callbackHistoryRequest = std::bind(&HAPFakegato::callbackSetHistoryAddress, this, std::placeholders::_1, std::placeholders::_2);
@@ -77,7 +77,7 @@ HAPService* HAPFakegato::registerFakeGatoService(HAPAccessory* accessory, const 
 
 
     // History Set Time
-    _historySetTime = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    _historySetTime = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_SET_TIME, HAPPermission::Write|HAPPermission::Hidden, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     _historySetTime->setDescription("EVE History Time");
 
     auto callbackSetTime = std::bind(&HAPFakegato::callbackSetHistoryTime, this, std::placeholders::_1, std::placeholders::_2);

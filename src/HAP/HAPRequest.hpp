@@ -14,21 +14,26 @@
 
 #include "HAPTLV8.hpp"
 
-enum HAPServerMethod {
-	METHOD_UNKNOWN = 0,
-	METHOD_POST,
-	METHOD_GET,
-	METHOD_PUT,
-	METHOD_DELETE,
+
+struct HAPServerMethod {
+	enum Type : uint8_t {
+		Unknown 	= 0x00,
+		Post		= 0x01,
+		Get			= 0x02,
+		Put			= 0x03,
+		Delete		= 0x04
+	};
 };
 
+
 class HAPRequest {
+	
 public:
 	HAPRequest();
 	~HAPRequest();
 
 
-	HAPServerMethod 	method;
+	HAPServerMethod::Type 	method;
 	std::string 		path;
 	std::string 		contentType;
 	uint16_t 			contentLength;

@@ -257,7 +257,7 @@ public:
 
     struct SRPSession {
         NGConstant* ng = NULL;
-        HAPHashAlgorithm algorithm;
+        HAPHashAlgorithm::Type algorithm;
 
         void clear(){
             if (ng != NULL) ng->clear();
@@ -272,7 +272,7 @@ public:
 
 
     struct SRPVerifier {
-        HAPHashAlgorithm algorithm;
+        HAPHashAlgorithm::Type algorithm;
         NGConstant*      ng = NULL;
 
         // const char* username;
@@ -367,7 +367,7 @@ public:
                                     const uint8_t ** bytes_v, int* len_v);
 
 
-    SRPSession* newSession( HAPHashAlgorithm alg, NGType_t ng_type, const char* N_hex, const char* g_hex);
+    SRPSession* newSession( HAPHashAlgorithm::Type alg, NGType_t ng_type, const char* N_hex, const char* g_hex);
 
     SRPVerifier* newVerifier( SRPSession *session,
                                     const char *username,
@@ -400,12 +400,12 @@ protected:
     static mbedtls_ctr_drbg_context    _ctr_drbg_ctx;
     static mbedtls_mpi*                _RR;
 
-    static void H_nn(mbedtls_mpi* bn, HAPHashAlgorithm alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad);
-    static void H_ns(mbedtls_mpi* bn, HAPHashAlgorithm alg,const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes);
+    static void H_nn(mbedtls_mpi* bn, HAPHashAlgorithm::Type alg, const mbedtls_mpi* n1, const mbedtls_mpi* n2, bool do_pad);
+    static void H_ns(mbedtls_mpi* bn, HAPHashAlgorithm::Type alg,const mbedtls_mpi * n, const uint8_t* bytes, int len_bytes);
 
-    void calculate_x( HAPHashAlgorithm alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len );
-    static void calculate_M( HAPHashAlgorithm alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K );
-    static void calculate_H_AMK( HAPHashAlgorithm alg, unsigned char *dest, const mbedtls_mpi * A, const uint8_t* M, const uint8_t* K );
+    void calculate_x( HAPHashAlgorithm::Type alg, mbedtls_mpi* x, const mbedtls_mpi* salt, const char* username, const uint8_t* password, int password_len );
+    static void calculate_M( HAPHashAlgorithm::Type alg, NGConstant *ng, uint8_t* dest, const char* I, const mbedtls_mpi * s, const mbedtls_mpi * A, const mbedtls_mpi * B, const uint8_t* K );
+    static void calculate_H_AMK( HAPHashAlgorithm::Type alg, unsigned char *dest, const mbedtls_mpi * A, const uint8_t* M, const uint8_t* K );
 
     void initRandom();
 

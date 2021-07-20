@@ -78,14 +78,14 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         HAPService* outletService = new HAPService(HAP_SERVICE_OUTLET);
         _accessory->addService(outletService);
 
-        HAPCharacteristic<String>* plugServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        HAPCharacteristic<String>* plugServiceName = new HAPCharacteristic<String>(HAP_CHARACTERISTIC_NAME, HAPPermission::Read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         plugServiceName->setValue(_name);
         _accessory->addCharacteristicToService(outletService, plugServiceName);
 
         //
         // Power State
         //
-        _stateValue = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+        _stateValue = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAPPermission::Read|HAPPermission::Write|HAPPermission::Notify);
         _stateValue->setValue(false);
 
         _stateValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceOutlet::changedState, this, std::placeholders::_1, std::placeholders::_2));
@@ -100,7 +100,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         // in use State
         //
-        _inUseState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_OUTLET_IN_USE, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY);
+        _inUseState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_OUTLET_IN_USE, HAPPermission::Read|HAPPermission::Notify);
         // auto callbackState = std::bind(&HAPPluginRCSwitchDevice::setValue, this, std::placeholders::_1, std::placeholders::_2);
         // _inUseState->valueChangeFunctionCall = callbackState;
         _inUseState->setValue(true);
@@ -109,7 +109,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         // power current (EVE)
         //
-        _curPowerValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0.0, 3600, 0.1, HAP_UNIT_NONE);
+        _curPowerValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_FAKEGATO_ELECTRIC_CURRENT, HAPPermission::Read|HAPPermission::Notify, 0.0, 3600, 0.1, HAP_UNIT_NONE);
         _curPowerValue->setValue(0.0);
 
         _curPowerValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceOutlet::changedPowerCurrent, this, std::placeholders::_1, std::placeholders::_2));
@@ -124,7 +124,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         // power total (EVE)
         //
-        _ttlPowerValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY, 0.0, 3600, 0.1, HAP_UNIT_NONE);
+        _ttlPowerValue = new HAPCharacteristic<float>(HAP_CHARACTERISTIC_FAKEGATO_TOTAL_CONSUMPTION, HAPPermission::Read|HAPPermission::Notify, 0.0, 3600, 0.1, HAP_UNIT_NONE);
         _ttlPowerValue->setValue(0.0);
 
         _ttlPowerValue->setValueChangeCallback(std::bind(&HAPPluginKNXDeviceOutlet::changedPowerTotal, this, std::placeholders::_1, std::placeholders::_2));
@@ -139,7 +139,7 @@ HAPAccessory* HAPPluginKNXDeviceOutlet::initAccessory(){
         //
         // parental Lock
         //
-        _parentalLock = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE);
+        _parentalLock = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_LOCK_PHYSICAL_CONTROLS, HAPPermission::Read|HAPPermission::Write);
         _parentalLock->setValue(false);
         _accessory->addCharacteristicToService(outletService, _parentalLock);
 

@@ -78,7 +78,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 			HAPFakeGatoScheduleTimerEvent tEvent;
 
 			tEvent.state  = (timer & 0x1F) >> 2;
-			tEvent.type   = static_cast<HAPFakeGatoScheduleTimerType>( ((timer & 0x1F) & 0x02 ) >> 1);
+			tEvent.type   = static_cast<HAPFakeGatoScheduleTimerType::Type>( ((timer & 0x1F) & 0x02 ) >> 1);
 
 			if ((timer & 0x1F) == 1 || (timer & 0x1F) == 5) {
 
@@ -92,7 +92,7 @@ void HAPFakegatoScheduleEnergy::decodePrograms(uint8_t* data){
 				LOGDEVICE->printf("hour: %d, min: %d, offset: %d state: %d type: %d \n", tEvent.hour, tEvent.minute, tEvent.offset, tEvent.state, tEvent.type);
 #endif
 			} else if ((timer & 0x1F) == 7 || (timer & 0x1F) == 3) {
-				tEvent.sunrise = static_cast<HAPFakeGatoScheduleSunriseType>(((timer >> 5) & 0x01));    // 1 = sunrise, 0 = sunset
+				tEvent.sunrise = static_cast<HAPFakeGatoScheduleSunriseType::Type>(((timer >> 5) & 0x01));    // 1 = sunrise, 0 = sunset
 
 				tEvent.offset  = ((timer >> 6) & 0x01 ? ~((timer >> 7) * 60) + 1 : (timer >> 7) * 60);   // offset from sunrise/sunset (plus/minus value)
 
@@ -214,7 +214,7 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 			tEvent.state == true ? timerData += 4 : timerData += 0;
 
 			// tEvent.type  == TIME ? timerData += 1 : timerData += 3;
-			if (tEvent.type  == TIME){
+			if (tEvent.type  == HAPFakeGatoScheduleTimerType::Time){
 				timerData += (tEvent.offset / 60) << 5;
 				timerData += 1;
 			} else {

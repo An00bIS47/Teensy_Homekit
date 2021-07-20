@@ -316,7 +316,7 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 	HAPAccessory* accessory = accessoryWithAID(aid);
 
 	if (accessory == nullptr) {
-		LOG_E("ERROR: Accessory with aid: %d not found - Error Code %d\n", aid, HAP_STATUS_RESOURCE_NOT_FOUND);
+		LOG_E("ERROR: Accessory with aid: %d not found - Error Code %d\n", aid, HAPErrorCode::ResourceNotFound);
 		//error_code = HAP_STATUS_RESOURCE_NOT_FOUND;
 		//errorOccured = true;
 		return nullptr;
@@ -325,7 +325,7 @@ HAPCharacteristicBase* HAPAccessorySet::getCharacteristic(uint8_t aid, uint32_t 
 		HAPCharacteristicBase* chr = accessory->characteristicWithIID(iid);
 
 		if (chr == nullptr) {
-			LOG_E("ERROR: Characteristics %d.%d not found - Error Code %d\n", aid, iid, HAP_STATUS_RESOURCE_NOT_FOUND);
+			LOG_E("ERROR: Characteristics %d.%d not found - Error Code %d\n", aid, iid, HAPErrorCode::ResourceNotFound);
 			return nullptr;
 		} else {
 			return chr;
@@ -349,7 +349,7 @@ void HAPAccessorySet::printTo(Print& print){
 	print.print(F("]}"));
 }
 
-HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, HAPCharacteristicType type){
+HAPCharacteristicBase* HAPAccessorySet::getCharacteristicOfType(uint8_t aid, HAPCharacteristicType::Type type){
 	HAPAccessory* accessory = accessoryWithAID(aid);
 	if (accessory){
 		return accessory->characteristicsOfType(type);

@@ -23,7 +23,7 @@
 #include "HAPVerifyContext.hpp"
 #include "HAPVersion.hpp"
 #include "HAPSRP.hpp"
-#include "HAPTLV8Types.hpp"
+#include "HAPTypes.hpp"
 #include "HAPFakegatoFactory.hpp"
 #include "HAPTime.hpp"
 #include "HAPPrintEncrypted.hpp"
@@ -174,6 +174,16 @@ struct HAP_MDNS_TXT {
 };
 #endif
 
+struct HAPEncryptionMode {
+	enum Type : uint8_t {
+		Plain 			= 0x00,
+		PlainChunked 	= 0x01,
+		Decrypt 	 	= 0x02,
+		DecryptChunked 	= 0x03,
+		Encrypt 		= 0x04,
+		EncryptChunked 	= 0x05
+	};
+};
 
 class HAPServer {
 public:
@@ -383,9 +393,9 @@ private:
 	//
 	void sendResponse(HAPClient* hapClient, TLV8* response);
 
-	bool send(HAPClient* hapClient, const char* httpStatus, const JsonDocument& doc, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const char* httpStatus, const uint8_t* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json");
-	bool send(HAPClient* hapClient, const char* httpStatus, const char* data, const size_t length, const enum HAP_ENCRYPTION_MODE mode, const char* contentType = "application/hap+json"){
+	bool send(HAPClient* hapClient, const char* httpStatus, const JsonDocument& doc, const HAPEncryptionMode::Type mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const char* httpStatus, const uint8_t* data, const size_t length, const HAPEncryptionMode::Type mode, const char* contentType = "application/hap+json");
+	bool send(HAPClient* hapClient, const char* httpStatus, const char* data, const size_t length, const HAPEncryptionMode::Type mode, const char* contentType = "application/hap+json"){
 		return send(hapClient, httpStatus, (const uint8_t*)data, length, mode, contentType);
 	}
 

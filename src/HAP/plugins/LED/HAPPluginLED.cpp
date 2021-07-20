@@ -160,11 +160,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     {
         LOG_V("[%s] - Add new %s sensor ...", _config->name, "led");
 
-        HAPCharacteristic<std::string>* lightServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+        HAPCharacteristic<std::string>* lightServiceName = new HAPCharacteristic<std::string>(HAPCharacteristicType::Name, HAPPermission::Read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
         lightServiceName->setValue("LED");
         _accessory->addCharacteristicToService(_service, lightServiceName);
 
-        _powerState = new HAPCharacteristic<bool>(HAPCharacteristicType::On, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+        _powerState = new HAPCharacteristic<bool>(HAPCharacteristicType::On, HAPPermission::Read|HAPPermission::Write|HAPPermission::Notify);
         _powerState->setValue(_isOn);
 
         auto callbackPowerState = std::bind(&HAPPluginLED::changeState, this, std::placeholders::_1, std::placeholders::_2);
@@ -182,11 +182,11 @@ HAPAccessory* HAPPluginLED::initAccessory(){
     HAPService* switchService = new HAPService(HAP_SERVICE_SWITCH);
     _accessory->addService(switchService);
 
-    HAPCharacteristic<std::string>* plugServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAP_PERMISSION_READ, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
+    HAPCharacteristic<std::string>* plugServiceName = new HAPCharacteristic<std::string>(HAP_CHARACTERISTIC_NAME, HAPPermission::Read, HAP_HOMEKIT_DEFAULT_STRING_LENGTH);
     plugServiceName->setValue("LED");
     _accessory->addCharacteristicToService(switchService, plugServiceName);
 
-    _enabledState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAP_PERMISSION_READ|HAP_PERMISSION_WRITE|HAP_PERMISSION_NOTIFY);
+    _enabledState = new HAPCharacteristic<bool>(HAP_CHARACTERISTIC_ON, HAPPermission::Read|HAPPermission::Write|HAPPermission::Notify);
     _enabledState->setDescription("Enabled");
     _enabledState->setValue(_blinkingEnabled);
 

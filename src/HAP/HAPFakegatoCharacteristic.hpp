@@ -29,15 +29,7 @@ union ui16_to_ui8 {
     uint8_t ui8[2];
 };
 
-// const PROGMEM uint8_t type_size_map[] = {
-//     0,
-//     2,  // HAPFakegatoSignature_Temperature
-//     2,  // HAPFakegatoSignature_Humidity
-//     2,  // HAPFakegatoSignature_AirPressure
-//     2,  // HAPFakegatoSignature_AirQuality
-//     0,  // HAPFakegatoSignature_PowerApparent       // unknown
-//     1   // HAPFakegatoSignature_Door
-// };
+
 
 enum HAPFakegatoSignature {
     HAPFakegatoSignature_Temperature                = 0x01,     // Length: 2  = temperature   x 100

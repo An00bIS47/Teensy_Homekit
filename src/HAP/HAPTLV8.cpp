@@ -6,7 +6,7 @@
 //      Author: michael
 //
 #include "HAPTLV8.hpp"
-#include "HAPTLV8Types.hpp"
+#include "HAPTypes.hpp"
 #include <algorithm>
 
 #if HAP_DEBUG_TLV8
@@ -115,7 +115,7 @@ void TLV8::decode(uint8_t* out, size_t *outSize){
 		out[offset++] = _head->type;
 		out[offset++] = _head->length;
 
-		if (_head->type != HAP_TLV_SEPERATOR) {
+		if (_head->type != HAPTLVType::Seperator) {
 			memcpy(out + offset, _head->value, _head->length);
 			offset += _head->length;
 		}
@@ -146,7 +146,7 @@ void TLV8::addSeperator() {
 	// assign it
 	// then return pointer to new node
 	else {
-		ptr->type = HAP_TLV_SEPERATOR;
+		ptr->type = HAPTLVType::Seperator;
 		ptr->length = 0x00;
 		addNode( ptr );
 	}
@@ -460,35 +460,35 @@ size_t TLV8::size(TLV8Entry *ptr, uint8_t type ){
 
 bool TLV8::isValidTLVType(uint8_t type) {
 	switch (type) {
-		case HAP_TLV_METHOD:
+		case HAPTLVType::Method:
 			return true;
-		case HAP_TLV_IDENTIFIER:
+		case HAPTLVType::Identifier:
 			return true;
-		case HAP_TLV_SALT:
+		case HAPTLVType::Salt:
 			return true;
-		case HAP_TLV_PUBLIC_KEY:
+		case HAPTLVType::PublicKey:
 			return true;
-		case HAP_TLV_PROOF:
+		case HAPTLVType::Proof:
 			return true;
-		case HAP_TLV_ENCRYPTED_DATA:
+		case HAPTLVType::EncryptedData:
 			return true;
-		case HAP_TLV_STATE:
+		case HAPTLVType::State:
 			return true;
-		case HAP_TLV_ERROR:
+		case HAPTLVType::Error:
 			return true;
-		case HAP_TLV_RETRY_DELAY:
+		case HAPTLVType::RetryDelay:
 			return true;
-		case HAP_TLV_CERTIFICATE:
+		case HAPTLVType::Certificate:
 			return true;
-		case HAP_TLV_SIGNATURE:
+		case HAPTLVType::Signature:
 			return true;
-		case HAP_TLV_PERMISSIONS:
+		case HAPTLVType::Permissions:
 			return true;
-		case HAP_TLV_FRAGMENT_DATA:
+		case HAPTLVType::FragmentData:
 			return true;
-		case HAP_TLV_FRAGMENT_LAST:
+		case HAPTLVType::LastFragment:
 			return true;
-		case HAP_TLV_SEPERATOR:
+		case HAPTLVType::Seperator:
 			return true;
 		default:
 			return false;

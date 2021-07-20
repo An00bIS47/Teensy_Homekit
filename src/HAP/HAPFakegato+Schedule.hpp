@@ -16,7 +16,7 @@
 #include <vector>
 #include "HAPDailyTimerFactory.hpp"
 
-// ToDo: define or enum ?
+
 struct HAPFakegatoScheduleDeviceType {
     enum Type : uint8_t {
         Weather         = 0x01,
@@ -65,67 +65,38 @@ struct HAPFakegatoScheduleTLVType {
         LastActivity            = 0xD0,
         EveTime                 = 0x9B,
 
-        EndMark                 = 0xD2        
+        EndMark                 = 0xD2
     };
 };
 
-// enum class HAPFakegatoScheduleTLVType : uint8_t {
-//     DeviceType              = 0x00,
-//     SerialNumber            = 0x04,
-//     UsedMemory              = 0x06,
-//     RolledOverIndex         = 0x07,
-//     CommandToggleSchedule   = 0x44,
-//     CommandStatusLed        = 0x20,
-//     Programs                = 0x45,
-//     Days                    = 0x46,
-//     DST                     = 0x47,
-//     StatusLed               = 0x60,
-//     LastActivity            = 0xD0,
-//     EveTime                 = 0x9B,
 
-//     EndMark                 = 0xD2
-// };
-
-// ToDo: define or enum ?
-#define HAP_FAKEGATO_SCHEDULE_TYPE_DEVICE_TYPE              0x00
-#define HAP_FAKEGATO_SCHEDULE_TYPE_SERIALNUMBER             0x04
-
-#define HAP_FAKEGATO_SCHEDULE_TYPE_USED_MEMORY              0x06
-#define HAP_FAKEGATO_SCHEDULE_TYPE_ROLLED_OVER_INDEX        0x07
-
-#define HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_TOGGLE_SCHEDULE  0x44
-#define HAP_FAKEGATO_SCHEDULE_TYPE_COMMAND_STATUS_LED       0x20
-#define HAP_FAKEGATO_SCHEDULE_TYPE_PROGRAMS                 0x45
-#define HAP_FAKEGATO_SCHEDULE_TYPE_DAYS                     0x46
-#define HAP_FAKEGATO_SCHEDULE_TYPE_DST                      0x47
-#define HAP_FAKEGATO_SCHEDULE_TYPE_STATUS_LED               0x60
-#define HAP_FAKEGATO_SCHEDULE_TYPE_LAST_ACTIVITY            0xD0
-
-#define HAP_FAKEGATO_SCHEDULE_TYPE_EVE_TIME                 0x9B
-
-#define HAP_FAKEGATO_SCHEDULE_TYPE_END_MARK                 0xD2
-
-typedef enum {
-    TIME = 0,
-    SUN  = 1
-} HAPFakeGatoScheduleTimerType;
+struct HAPFakeGatoScheduleTimerType {
+    enum Type  : uint8_t {
+        Time = 0x00,
+        Sun  = 0x01
+    };
+};
 
 
-typedef enum {
-    SUNSET  = 0,
-    SUNRISE = 1
-} HAPFakeGatoScheduleSunriseType;
+struct HAPFakeGatoScheduleSunriseType {
+    enum Type : uint8_t {
+        Sunset  = 0x00,
+        Sunrise = 0x01
+    };
+};
+
 
 
 struct HAPFakeGatoScheduleTimerEvent {
-    HAPFakeGatoScheduleTimerType   type;
 
     uint8_t     hour;
     uint8_t     minute;
     int32_t     offset;
 
     bool        state;
-    HAPFakeGatoScheduleSunriseType sunrise;
+
+    HAPFakeGatoScheduleTimerType::Type   type;
+    HAPFakeGatoScheduleSunriseType::Type sunrise;
 };
 
 

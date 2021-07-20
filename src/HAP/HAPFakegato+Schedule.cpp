@@ -22,7 +22,7 @@ HAPService* HAPFakegatoSchedule::registerFakeGatoService(HAPFakegatoScheduleDevi
 	uint8_t zeroValue[1] = {0x00};
 
 	// Config Read
-	_scheduleRead = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAP_PERMISSION_READ|HAP_PERMISSION_NOTIFY|HAP_PERMISSION_HIDDEN, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
+	_scheduleRead = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_READ, HAPPermission::Read|HAPPermission::Notify|HAPPermission::Hidden, HAP_FAKEGATO_CHUNK_BUFFER_SIZE);
 	_scheduleRead->setDescription("EVE Schedule Read");
 	_scheduleRead->setValue(zeroValue, 1, false);
 	// auto callbackConfigRead = std::bind(&HAPFakegato::scheduleRead, this, std::placeholders::_1, std::placeholders::_2);
@@ -35,7 +35,7 @@ HAPService* HAPFakegatoSchedule::registerFakeGatoService(HAPFakegatoScheduleDevi
 
 
 	// Config Write
-	_scheduleWrite = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAP_PERMISSION_WRITE|HAP_PERMISSION_HIDDEN, HAP_FAKEGATO_CHUNK_BUFFER_SIZE / 2);
+	_scheduleWrite = new HAPCharacteristicData(HAP_CHARACTERISTIC_FAKEGATO_CONFIG_WRITE, HAPPermission::Write|HAPPermission::Hidden, HAP_FAKEGATO_CHUNK_BUFFER_SIZE / 2);
 	_scheduleWrite->setDescription("EVE Schedule Write");
 
 	auto callbackConfigWrite = std::bind(&HAPFakegatoSchedule::callbackSetSchedule, this, std::placeholders::_1, std::placeholders::_2);

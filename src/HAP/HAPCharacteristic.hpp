@@ -60,15 +60,28 @@
 
 #define HAP_UUID_FORMAT "%08X-0000-1000-8000-0026BB765291"
 
-enum {
-	HAP_PERMISSION_READ             = 1,        // Paired read
-    HAP_PERMISSION_WRITE            = 1 << 1,   // Paired write
-    HAP_PERMISSION_NOTIFY           = 1 << 2,   // Notify/Events = Accessory will notice the controller
-    HAP_PERMISSION_HIDDEN           = 1 << 3,   // Hidden
-    HAP_PERMISSION_ADDITIONAL_AUTH  = 1 << 4,   // This characteristic supports Additional Authorization
-    HAP_PERMISSION_TIMED_WRITE      = 1 << 5,   // This characteristic allows only timed write procedure
-    HAP_PERMISSION_WRITE_RESPONSE   = 1 << 6    // This characteristic supports write response
+struct HAPPermission {
+    enum Type : uint8_t {
+        Read            = 1,
+        Write           = 1 << 1,
+        Notify          = 1 << 2,
+        Hidden          = 1 << 3,
+        AdditionalAuth  = 1 << 4,
+        TimedWrite      = 1 << 5,
+        WriteResponse   = 1 << 6
+    };
 };
+
+
+// enum {
+// 	HAP_PERMISSION_READ             = 1,        // Paired read
+//     HAP_PERMISSION_WRITE            = 1 << 1,   // Paired write
+//     HAP_PERMISSION_NOTIFY           = 1 << 2,   // Notify/Events = Accessory will notice the controller
+//     HAP_PERMISSION_HIDDEN           = 1 << 3,   // Hidden
+//     HAP_PERMISSION_ADDITIONAL_AUTH  = 1 << 4,   // This characteristic supports Additional Authorization
+//     HAP_PERMISSION_TIMED_WRITE      = 1 << 5,   // This characteristic allows only timed write procedure
+//     HAP_PERMISSION_WRITE_RESPONSE   = 1 << 6    // This characteristic supports write response
+// };
 
 enum class HAPUnit : uint8_t {
     None      = 0x00,   // None
@@ -93,46 +106,22 @@ enum class HAPUnit : uint8_t {
     PPM                 // ppm
 };
 
-// typedef enum {
-// 	HAP_UNIT_NONE = 0,          // none
-// 	HAP_UNIT_CELSIUS,           // °C
-// 	HAP_UNIT_PERCENTAGE,        // %
-// 	HAP_UNIT_ARC_DEGREE,        // °
-// 	HAP_UNIT_LUX,               // lux
-// 	HAP_UNIT_SECONDS,           // sec
-
-// 	HAP_UNIT_HPA,               // hPa
-
-// 	HAP_UNIT_WATT,              // W
-// 	HAP_UNIT_VOLTAGE,           // V
-//     HAP_UNIT_KWH,               // kWh
-
-// 	HAP_UNIT_KMH,               // km/h
-
-//     HAP_UNIT_KM,                // km
-// 	HAP_UNIT_M,                 // m
-// 	HAP_UNIT_MM,                // mm
-
-//     HAP_UNIT_KELVIN,            // K
-
-//     HAP_UNIT_DU,                // DU
-
-//     HAP_UNIT_MIRED,             // Mired
-
-//     HAP_UNIT_PPM,               // ppm
-// } HAP_UNIT;
-
-enum class HAPBatteryLevel : uint8_t {
-	Normal = 0x00,
-	Low    = 0x01
+struct HAPBatteryLevel {
+    enum Type : uint8_t {
+        Normal = 0x00,
+        Low    = 0x01
+    };
 };
 
 
-enum class HAPChargingState : uint8_t {
-	NotCharging  = 0x00,
-	Charging     = 0x01,
-	NotChargable = 0x02
+struct HAPChargingState {
+    enum Type : uint8_t {
+        NotCharging  = 0x00,
+        Charging     = 0x01,
+        NotChargable = 0x02
+    };
 };
+
 
 
 // =========================================================================================================
@@ -143,7 +132,7 @@ enum class HAPChargingState : uint8_t {
 class HAPCharacteristicBase {
 public:
 
-    HAPCharacteristicBase(HAPCharacteristicType type, uint8_t permissions): _iid(0), _type(type), _permissions(permissions), _typeString(nullptr) {
+    HAPCharacteristicBase(HAPCharacteristicType::Type type, uint8_t permissions): _iid(0), _type(type), _permissions(permissions), _typeString(nullptr) {
 #if HAP_ADD_DESC_TO_JSON
         _desc = nullptr;
 #endif
@@ -175,12 +164,7 @@ public:
     void setIID(uint32_t iid){ _iid = iid; }
     uint32_t iid() { return _iid; }
 
-
-    uint16_t typeAsInt() {
-        return static_cast<uint16_t>(_type);
-    }
-
-    HAPCharacteristicType type(){
+    HAPCharacteristicType::Type type(){
         return _type;
     }
 
@@ -205,13 +189,13 @@ public:
     }
 #endif
 
-    bool readable()       { return _permissions & HAP_PERMISSION_READ;            }
-	bool writable()       { return _permissions & HAP_PERMISSION_WRITE;           }
-	bool notifiable()     { return _permissions & HAP_PERMISSION_NOTIFY;          }
-	bool hidden()         { return _permissions & HAP_PERMISSION_HIDDEN;          }
-	bool timedWrite()     { return _permissions & HAP_PERMISSION_TIMED_WRITE;     }
-	bool writeResponse()  { return _permissions & HAP_PERMISSION_WRITE_RESPONSE;  }
-	bool additionalAuth() { return _permissions & HAP_PERMISSION_ADDITIONAL_AUTH; }
+    bool readable()       { return _permissions & HAPPermission::Read;           }
+	bool writable()       { return _permissions & HAPPermission::Write;          }
+	bool notifiable()     { return _permissions & HAPPermission::Notify;         }
+	bool hidden()         { return _permissions & HAPPermission::Hidden;         }
+	bool timedWrite()     { return _permissions & HAPPermission::TimedWrite;     }
+	bool writeResponse()  { return _permissions & HAPPermission::WriteResponse;  }
+	bool additionalAuth() { return _permissions & HAPPermission::AdditionalAuth; }
 
     void permissionsToJson(JsonObject& root){
         JsonArray permsArray = root.createNestedArray(F("perms"));
@@ -261,10 +245,10 @@ public:
                 root[F("type")] = _typeString;
             } else {
                 char hexType[5];
-                sprintf(hexType, "%X", static_cast<uint16_t>(_type));
+                sprintf(hexType, "%X", _type);
 
                 // char hexType[37];
-                // sprintf(hexType, HAP_UUID_FORMAT, static_cast<uint16_t>(_type));
+                // sprintf(hexType, HAP_UUID_FORMAT, _type);
 
                 root[F("type")] = hexType;
             }
@@ -415,7 +399,7 @@ public:
 protected:
 
     uint32_t        _iid = 0;
-	const HAPCharacteristicType   _type;
+	const HAPCharacteristicType::Type   _type;
 	const uint8_t   _permissions;
 	const char*     _typeString;
 
@@ -438,7 +422,7 @@ class HAPCharacteristicBaseValue : public HAPCharacteristicBase {
 
 public:
 
-    HAPCharacteristicBaseValue(HAPCharacteristicType type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
+    HAPCharacteristicBaseValue(HAPCharacteristicType::Type type, uint8_t permissions) : HAPCharacteristicBase(type, permissions) {
 
     }
 
@@ -542,7 +526,7 @@ template <class T>
 class HAPCharacteristicNumericBase : public HAPCharacteristicBaseValue<T> {
 
 public:
-    HAPCharacteristicNumericBase(HAPCharacteristicType type, uint8_t permissions, T minVal, T maxVal, T step, HAPUnit unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
+    HAPCharacteristicNumericBase(HAPCharacteristicType::Type type, uint8_t permissions, T minVal, T maxVal, T step, HAPUnit unit) : HAPCharacteristicBaseValue<T>(type, permissions), _minVal(minVal), _maxVal(maxVal), _step(step), _unit(unit) {
         this->_value = minVal;
     }
 
@@ -631,7 +615,7 @@ public:
 class HAPCharacteristicData : public HAPCharacteristicBase {
 
 public:
-    HAPCharacteristicData(HAPCharacteristicType type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _valueLen(0), _maxDataLen(maxDataLen) {
+    HAPCharacteristicData(HAPCharacteristicType::Type type, uint8_t permissions, size_t maxDataLen, const char* desc = "") : HAPCharacteristicBase(type, permissions), _value(nullptr), _valueLen(0), _maxDataLen(maxDataLen) {
         if (strcmp(desc, "") == 0){
             setDescription(desc);
         }
@@ -813,7 +797,7 @@ template <>
 class HAPCharacteristic<bool> : public HAPCharacteristicBaseValue<bool> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
         _value = false;
     }
     HAPCharacteristic(const char* type, uint8_t permissions) : HAPCharacteristicBaseValue<bool>(type, permissions) {
@@ -869,7 +853,7 @@ protected:
 template <>
 class HAPCharacteristic<float> : public HAPCharacteristicNumericBase<float> {
 public:
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, float minVal, float maxVal, float step, HAPUnit unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, float minVal, float maxVal, float step, HAPUnit unit) : HAPCharacteristicNumericBase<float>(type, permissions, minVal, maxVal, step, unit) {
         this->_precision = getPrecision(step);
         this->_value = roundToDigits(_minVal, _precision);
     }
@@ -973,7 +957,7 @@ protected:
 template <>
 class HAPCharacteristic<int> : public HAPCharacteristicNumericBase<int> {
 public:
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, int minVal, int maxVal, int step, HAPUnit unit) : HAPCharacteristicNumericBase<int>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, int minVal, int maxVal, int step, HAPUnit unit) : HAPCharacteristicNumericBase<int>(type, permissions, minVal, maxVal, step, unit) {
         this->_value = minVal;
     }
 
@@ -1040,7 +1024,7 @@ protected:
 template <>
 class HAPCharacteristic<int16_t> : public HAPCharacteristicNumericBase<int16_t> {
 public:
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, int16_t minVal, int16_t maxVal, int16_t step, HAPUnit unit) : HAPCharacteristicNumericBase<int16_t>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, int16_t minVal, int16_t maxVal, int16_t step, HAPUnit unit) : HAPCharacteristicNumericBase<int16_t>(type, permissions, minVal, maxVal, step, unit) {
         this->_value = minVal;
     }
 
@@ -1107,7 +1091,7 @@ protected:
 template <>
 class HAPCharacteristic<int32_t> : public HAPCharacteristicNumericBase<int32_t> {
 public:
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, int32_t minVal, int32_t maxVal, int32_t step, HAPUnit unit) : HAPCharacteristicNumericBase<int32_t>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, int32_t minVal, int32_t maxVal, int32_t step, HAPUnit unit) : HAPCharacteristicNumericBase<int32_t>(type, permissions, minVal, maxVal, step, unit) {
         this->_value = minVal;
     }
 
@@ -1176,7 +1160,7 @@ template <>
 class HAPCharacteristic<uint8_t> : public HAPCharacteristicNumericBase<uint8_t> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAPUnit charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
+    HAPCharacteristic(HAPCharacteristicType::Type type_, uint8_t permissions, uint8_t minVal, uint8_t maxVal, uint8_t step, HAPUnit charUnit, uint8_t validValuesSize, uint8_t validValues[]) : HAPCharacteristicNumericBase<uint8_t>(type_, permissions, minVal, maxVal, step, charUnit), _validValuesSize(validValuesSize) {
         _value = minVal;
         _iid = 0;
 
@@ -1275,7 +1259,7 @@ template <>
 class HAPCharacteristic<uint16_t> : public HAPCharacteristicNumericBase<uint16_t> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, uint16_t minVal, uint16_t maxVal, uint16_t step, HAPUnit unit) : HAPCharacteristicNumericBase<uint16_t>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, uint16_t minVal, uint16_t maxVal, uint16_t step, HAPUnit unit) : HAPCharacteristicNumericBase<uint16_t>(type, permissions, minVal, maxVal, step, unit) {
         this->_value = minVal;
     }
 
@@ -1344,7 +1328,7 @@ template <>
 class HAPCharacteristic<uint32_t> : public HAPCharacteristicNumericBase<uint32_t> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, uint32_t minVal, uint32_t maxVal, uint32_t step, HAPUnit unit) : HAPCharacteristicNumericBase<uint32_t>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, uint32_t minVal, uint32_t maxVal, uint32_t step, HAPUnit unit) : HAPCharacteristicNumericBase<uint32_t>(type, permissions, minVal, maxVal, step, unit) {
         this->_value = minVal;
     }
 
@@ -1413,7 +1397,7 @@ template <>
 class HAPCharacteristic<uint64_t> : public HAPCharacteristicNumericBase<uint64_t> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, uint64_t minVal, uint64_t maxVal, uint64_t step, HAPUnit unit) : HAPCharacteristicNumericBase<uint64_t>(type, permissions, minVal, maxVal, step, unit) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, uint64_t minVal, uint64_t maxVal, uint64_t step, HAPUnit unit) : HAPCharacteristicNumericBase<uint64_t>(type, permissions, minVal, maxVal, step, unit) {
         this->_value = minVal;
     }
 
@@ -1484,7 +1468,7 @@ template <>
 class HAPCharacteristic<String> : public HAPCharacteristicBaseValue<String> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, String format = F("string"), size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, String format = F("string"), size_t maxlen = 64) : HAPCharacteristicBaseValue<String>(type, permissions) {
         _value = "";
         _maxLen = maxlen;
         _format = format;
@@ -1544,7 +1528,7 @@ template <>
 class HAPCharacteristic<std::string> : public HAPCharacteristicBaseValue<std::string> {
 public:
 
-    HAPCharacteristic(HAPCharacteristicType type, uint8_t permissions, size_t maxlen) : HAPCharacteristicBaseValue<std::string>(type, permissions) {
+    HAPCharacteristic(HAPCharacteristicType::Type type, uint8_t permissions, size_t maxlen) : HAPCharacteristicBaseValue<std::string>(type, permissions) {
         _value = "";
         _maxLen = maxlen;
     }

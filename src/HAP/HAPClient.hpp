@@ -25,24 +25,21 @@
 #include "HAPGlobals.hpp"
 #include "HAPRequest.hpp"
 #include "HAPVerifyContext.hpp"
-#include "HAPTLV8Types.hpp"
+#include "HAPTypes.hpp"
 
 #if HAP_API_ADMIN_MODE
 #include <ArduinoJson.h>
 #endif
 
-
-
-enum HAP_CLIENT_STATE {
-	HAP_CLIENT_STATE_DISCONNECTED = 0,
-	HAP_CLIENT_STATE_CONNECTED,
-	HAP_CLIENT_STATE_AVAILABLE,
-	HAP_CLIENT_STATE_SENT,
-	HAP_CLIENT_STATE_RECEIVED,
-	HAP_CLIENT_STATE_IDLE,
-	HAP_CLIENT_STATE_ALL_PAIRINGS_REMOVED
+struct HAPClientState {
+	enum Type : uint8_t {
+		Disconnected 		= 0x00,
+		Connected			= 0x01,
+		Available			= 0x02,
+		Idle				= 0x03,
+		AllPairingsRemoved 	= 0x04
+	};
 };
-
 
 
 struct HAPSubscribtionItem {
@@ -75,9 +72,9 @@ public:
 	EthernetClient	client;
 #endif
 
-	HAP_CLIENT_STATE 	state;
-	HAP_PAIR_STATE		pairState;
-	HAP_VERIFY_STATE	verifyState;
+	HAPClientState::Type 	state;
+	HAPPairingState::Type	pairState;
+	HAPVerifyState::Type	verifyState;
 
 
 	struct HAPVerifyContext 		verifyContext;

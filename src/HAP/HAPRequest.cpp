@@ -15,7 +15,7 @@ HAPRequest::HAPRequest() {
 	path = "";
 	contentType = "";
 	contentLength = 0;
-	method = METHOD_UNKNOWN;
+	method = HAPServerMethod::Unknown;
 }
 
 HAPRequest::~HAPRequest() {
@@ -47,7 +47,7 @@ void HAPRequest::clear(){
 	path = "";
 	contentType = "";
 	contentLength = 0;
-	method = METHOD_UNKNOWN;
+	method = HAPServerMethod::Unknown;
 
 	tlv.clear();
 	params.clear();

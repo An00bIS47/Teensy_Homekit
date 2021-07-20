@@ -12,9 +12,9 @@
 
 
 HAPClient::HAPClient()
-: state(HAP_CLIENT_STATE_DISCONNECTED)
-, pairState(HAP_PAIR_STATE_RESERVED)
-, verifyState(HAP_VERIFY_STATE_RESERVED)
+: state(HAPClientState::Disconnected)
+, pairState(HAPPairingState::Reserved)
+, verifyState(HAPVerifyState::Reserved)
 , _isEncrypted(false)
 , _isAdmin(false)
 

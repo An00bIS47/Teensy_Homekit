@@ -107,7 +107,7 @@ public:
 
 	HAPCharacteristicBase* getCharacteristic(uint8_t aid, uint32_t iid);
 
-	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, HAPCharacteristicType type);
+	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, HAPCharacteristicType::Type type);
 	HAPCharacteristicBase* getCharacteristicOfType(uint8_t aid, const char* type);
 
 	void setIdentifyCharacteristic(bool value);

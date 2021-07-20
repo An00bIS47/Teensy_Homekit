@@ -22,14 +22,17 @@
 #define SHA384_DIGEST_LENGTH    48
 #define SHA512_DIGEST_LENGTH    64
 
-typedef enum {
-    SRP_SHA1,
-    SRP_SHA224,
-    SRP_SHA256,
-    SRP_SHA384,
-    SRP_SHA512,
-    SRP_SHA_LAST
-} HAPHashAlgorithm;
+
+struct HAPHashAlgorithm {
+    enum Type : uint8_t {
+        Sha1, 
+        Sha224,
+        Sha256,
+        Sha384,
+        Sha512,
+        Last
+    };
+};
 
 typedef union {
     mbedtls_sha1_context   sha;
@@ -44,7 +47,7 @@ class HAPHash {
 public:
 
 
-    explicit HAPHash(HAPHashAlgorithm algorithm);
+    explicit HAPHash(HAPHashAlgorithm::Type algorithm);
     ~HAPHash();
 
     void init();
@@ -78,17 +81,17 @@ public:
         return digestLength(_hashAlgorithm);
     }
 
-    HAPHashAlgorithm algorithm() { return _hashAlgorithm; }
+    HAPHashAlgorithm::Type algorithm() { return _hashAlgorithm; }
 
-    static uint8_t digestLength( HAPHashAlgorithm alg );
-    static void init( HAPHashAlgorithm alg, HAPHashContext* context);
-    static void update( HAPHashAlgorithm alg, HAPHashContext *context, const uint8_t *data, size_t len );
-    static void final( HAPHashAlgorithm alg, HAPHashContext *context, uint8_t* md );
-    static void clear( HAPHashAlgorithm alg, HAPHashContext* context);
-    static void hash( HAPHashAlgorithm alg, const uint8_t* d, size_t n, uint8_t* md );
+    static uint8_t digestLength( HAPHashAlgorithm::Type alg );
+    static void init( HAPHashAlgorithm::Type alg, HAPHashContext* context);
+    static void update( HAPHashAlgorithm::Type alg, HAPHashContext *context, const uint8_t *data, size_t len );
+    static void final( HAPHashAlgorithm::Type alg, HAPHashContext *context, uint8_t* md );
+    static void clear( HAPHashAlgorithm::Type alg, HAPHashContext* context);
+    static void hash( HAPHashAlgorithm::Type alg, const uint8_t* d, size_t n, uint8_t* md );
 
 protected:
-    HAPHashAlgorithm _hashAlgorithm;
+    HAPHashAlgorithm::Type _hashAlgorithm;
     HAPHashContext*  _context;
 
 };

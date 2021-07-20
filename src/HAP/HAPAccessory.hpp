@@ -40,7 +40,7 @@ public:
 
 	HAPCharacteristicBase* characteristicWithIID(uint32_t iid);
 	HAPCharacteristicBase* characteristicAtIndex(HAPService *service, size_t index);
-	HAPCharacteristicBase* characteristicsOfType(HAPCharacteristicType type);
+	HAPCharacteristicBase* characteristicsOfType(HAPCharacteristicType::Type type);
 	HAPCharacteristicBase* characteristicsOfType(const char* typeString);
 
 	void printTo(Print& print);
