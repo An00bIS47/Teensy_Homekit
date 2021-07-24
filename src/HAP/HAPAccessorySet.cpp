@@ -136,7 +136,7 @@ FLASHMEM
 #endif
 void HAPAccessorySet::computeSetupHash(){
 
-	uint8_t *baseMac = HAPDeviceID::generateID();
+	uint8_t *baseMac = HAPDeviceID::mac();
 
 	char ci[18];
 	sprintf(ci, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);

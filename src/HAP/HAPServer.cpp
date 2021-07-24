@@ -154,7 +154,7 @@ FLASHMEM
 bool HAPServer::begin(bool resume) {
 	LOG_V("Begin\n");
 	// Generate DeviceID
-	uint8_t *baseMac = HAPDeviceID::generateID();
+	uint8_t *baseMac = HAPDeviceID::mac();
 
 	if (resume == false){
 
@@ -240,8 +240,14 @@ bool HAPServer::begin(bool resume) {
 #if HAP_DEBUG
 
 		LOG_D("Device Information:\n");
-		LOG_D("   %-14s: %s\n", "Device ID", HAPDeviceID::deviceID().c_str());
-		LOG_D("   %-14s: %s\n", "Chip ID", HAPDeviceID::chipID().c_str());
+		char deviceId[18] = {0, };
+		HAPDeviceID::deviceID(deviceId);
+
+		char chipId[18] = {0, };
+		HAPDeviceID::chipID(chipId);
+
+		LOG_D("   %-14s: %s\n", "Device ID", deviceId);
+		LOG_D("   %-14s: %s\n", "Chip ID", chipId);
 		LOG_D("   %-14s: %s\n", "Endian", IS_BIG_ENDIAN ? "BIG" : "little" );
 
 
@@ -870,8 +876,8 @@ bool HAPServer::updateServiceTxt() {
 
 #elif defined( CORE_TEENSY )
 
-	uint8_t *baseMac = HAPDeviceID::generateID();
-	char valIdentifier[18 + 1];
+	uint8_t *baseMac = HAPDeviceID::mac();
+	char valIdentifier[18 + 1] = {'\0', };
 	sprintf(valIdentifier, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 	_hapMdnsTxt.setId(valIdentifier);									// Device ID
 	_hapMdnsTxt.setModellDescription(_accessorySet->modelName());		// Model name of the accessory (e.g. ”Device1,1”). Required.
@@ -2680,8 +2686,11 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 
     int acc_info_len = 0;
 
+	char deviceId[18] = {'\0', };
+	HAPDeviceID::deviceID(deviceId);
+
     uint8_t* acc_info = concat3(accessoryx, sizeof(accessoryx),
-            (uint8_t*)HAPDeviceID::deviceID().c_str(), 17,
+            (uint8_t*)deviceId, 17,
             _accessorySet->LTPK(), ED25519_PUBLIC_KEY_LENGTH, &acc_info_len);
 
     LOG_V("Verifying signature ...");
@@ -2699,9 +2708,10 @@ bool HAPServer::handlePairSetupM5(HAPClient* hapClient) {
 	}
 	LOGRAW_V("OK\n");
 
+
 	// Encrypt data
 	TLV8 subTLV;
-	subTLV.encode(HAPTLVType::Identifier, 17, (uint8_t*)HAPDeviceID::deviceID().c_str()  );
+	subTLV.encode(HAPTLVType::Identifier, 17, (uint8_t*)deviceId );
 	subTLV.encode(HAPTLVType::PublicKey, ED25519_PUBLIC_KEY_LENGTH, _accessorySet->LTPK());
 	subTLV.encode(HAPTLVType::Signature, ED25519_SIGN_LENGTH, acc_signature);
 
@@ -2894,10 +2904,16 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 	}
 	LOGRAW_V("OK\n");
 
+
 	LOG_V("Generating signature ...");
+
+	char deviceId[18] = {'\0', };
+	HAPDeviceID::deviceID(deviceId);
+
+
 	int acc_info_len;
 	uint8_t* acc_info = concat3(acc_curve_public_key, CURVE25519_SECRET_LENGTH,
-		(uint8_t*)HAPDeviceID::deviceID().c_str(), 17,
+		(uint8_t*)deviceId, 17,
 		ios_device_curve_key, ios_device_curve_key_len,
 		&acc_info_len);
 
@@ -2912,7 +2928,7 @@ bool HAPServer::handlePairVerifyM1(HAPClient* hapClient){
 
 	LOG_V("Encoding into TLV ...");
 	TLV8 *subTLV = new TLV8();
-	subTLV->encode(HAPTLVType::Identifier, 17, (uint8_t*)HAPDeviceID::deviceID().c_str()  );
+	subTLV->encode(HAPTLVType::Identifier, 17, (uint8_t*)deviceId  );
 	subTLV->encode(HAPTLVType::Signature, ED25519_SIGN_LENGTH, acc_signature);
 
 	size_t tlv8Len = subTLV->size();

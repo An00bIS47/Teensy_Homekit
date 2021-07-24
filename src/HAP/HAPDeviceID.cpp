@@ -10,64 +10,39 @@
 #include "HAPHelper.hpp"
 
 
-uint8_t HAPDeviceID::_deviceID[] = {'\0'};
+uint8_t HAPDeviceID::_mac[6] = {'\0', };
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-uint8_t* HAPDeviceID::generateID() {
 
-    if (_deviceID[0] == '\0')
+uint8_t* HAPDeviceID::mac() {
+
+    if (_mac[0] == '\0')
 #if defined(ARDUINO_ARCH_ESP32)
-        esp_read_mac(_deviceID, ESP_MAC_WIFI_STA);
+        esp_read_mac(_mac, ESP_MAC_WIFI_STA);
 #elif defined ( CORE_TEENSY )
-        teensyMAC(_deviceID);
+        teensyMAC(_mac);
 #endif
 
-    return _deviceID;
+    return _mac;
 }
 
-/*
-const char* HAPDeviceID::deviceID(){
-    char baseMacChr[18];
-    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
-    return baseMacChr;
-}
-*/
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-std::string HAPDeviceID::deviceID(){
-    char baseMacChr[18];
-    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
-    return std::string(baseMacChr);
+void HAPDeviceID::deviceID(char* baseMacChr){
+    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
+    baseMacChr[17] = '\0';
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-void HAPDeviceID::deviceID(char baseMacChr[18]){
-    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", _deviceID[0], _deviceID[1], _deviceID[2], _deviceID[3], _deviceID[4], _deviceID[5]);
-    baseMacChr[18] = '\0';
+void HAPDeviceID::chipID(char* baseMacChr){
+    sprintf(baseMacChr, "%02X%02X%02X%02X%02X%02X", _mac[5], _mac[4], _mac[3], _mac[2], _mac[1], _mac[0]);
+    baseMacChr[12] = '\0';
 }
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-std::string HAPDeviceID::chipID(){
-    char baseMacChr[18];
-    sprintf(baseMacChr, "%02X%02X%02X%02X%02X%02X", _deviceID[5], _deviceID[4], _deviceID[3], _deviceID[2], _deviceID[1], _deviceID[0]);
-    return std::string(baseMacChr);
-}
+void HAPDeviceID::serialNumber(const char* type, const char* id, char* serialNumberStr, size_t* len){
+    *len = (6 + 2 + strlen(type) + strlen(id)) + 1;
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
-std::string HAPDeviceID::serialNumber(const char* type, const char* id){
-    char serialNumber[6 + 2 + strlen(type) + strlen(id)];
-    sprintf(serialNumber, "%02X%02X%02X-%s-%s", _deviceID[3], _deviceID[4], _deviceID[5], type, id);
-    return std::string(serialNumber);
+    if (serialNumberStr == nullptr ) return;
+
+    sprintf(serialNumberStr, "%02X%02X%02X-%s-%s", _mac[3], _mac[4], _mac[5], type, id);
+    serialNumberStr[*len - 1] = '\0';
 }
 
 #if defined(ARDUINO_ARCH_ESP32)

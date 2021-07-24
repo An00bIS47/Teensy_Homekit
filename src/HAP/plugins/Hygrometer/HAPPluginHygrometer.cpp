@@ -191,9 +191,10 @@ HAPAccessory* HAPPluginHygrometer::initAccessory(){
 	sprintf(hex, "%s.%s", STR(HAP_PLUGIN_HYGROMETER_PIN_VCC), STR(HAP_PLUGIN_HYGROMETER_PIN_ADC));
 #endif
 
-	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
-	char serialNumber[strlen(snTemp)] = {'\0',};
-	strcpy(serialNumber, snTemp);
+	size_t serialNumberLen = 0;
+	HAPDeviceID::serialNumber(_config->name, hex, nullptr, &serialNumberLen);
+	char serialNumber[serialNumberLen] = {'\0',};
+	HAPDeviceID::serialNumber(_config->name, hex, serialNumber, &serialNumberLen);
 
 
 	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };

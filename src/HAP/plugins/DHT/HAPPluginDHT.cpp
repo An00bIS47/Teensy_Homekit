@@ -130,9 +130,10 @@ HAPAccessory* HAPPluginDHT::initAccessory(){
 	sprintf(hex, "%X", sensor.sensor_id);
 #endif
 
-	const char* snTemp = HAPDeviceID::serialNumber(_config->name, hex).c_str();
-	char serialNumber[strlen(snTemp) + 1 ] = {'\0',};
-	strcpy(serialNumber, snTemp);
+	size_t serialNumberLen = 0;
+	HAPDeviceID::serialNumber(_config->name, hex, nullptr, &serialNumberLen);
+	char serialNumber[serialNumberLen] = {'\0',};
+	HAPDeviceID::serialNumber(_config->name, hex, serialNumber, &serialNumberLen);
 
 	char sensorName[strlen(_config->name) + strlen(hex) + 2] = {'\0', };
 	sprintf(sensorName, "%s %s", _config->name, hex);

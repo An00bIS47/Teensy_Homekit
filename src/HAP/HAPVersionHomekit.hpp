@@ -2,7 +2,7 @@
 // HAPVersionHomekit.hpp
 // Teensy_Homekit
 //
-//  Created on: 20.07.2021
+//  Created on: 24.07.2021
 //      Author: michael
 //
 
@@ -12,7 +12,7 @@
 #define HOMEKIT_PROJECT             "Teensy_Homekit"
 
 #define HOMEKIT_GIT_BRANCH          "dev"
-#define HOMEKIT_GIT_REV             "661679f"
+#define HOMEKIT_GIT_REV             "89331ef"
 #define HOMEKIT_GIT_TAG             "0.2.0"
 
 #define HOMEKIT_VERSION_MAJOR 		0

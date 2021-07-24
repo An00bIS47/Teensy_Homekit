@@ -21,22 +21,19 @@
 class HAPDeviceID {
 public:
 
-	static uint8_t* generateID();
-	//static byte* deviceID();
-	//static const char* deviceID();
-	static void deviceID(char baseMacChr[18]);
+	static uint8_t* mac();
 
-	static std::string deviceID();	// mac address -> change to random
-	static std::string chipID();		// basically mac reverse
+	static void deviceID(char* baseMacChr);
+	static void chipID(char* baseMacChr);
 
-	static std::string serialNumber(const char* type, const char* id);
+	static void serialNumber(const char* type, const char* id, char* serialNumberStr, size_t* len);
 
 #if defined(ARDUINO_ARCH_ESP32)
 	static std::string provisioningID(const char* prefix);
 #endif
 
 private:
-	static uint8_t _deviceID[6];
+	static uint8_t _mac[6];
 };
 
 #endif /* HAPDEVICEID_HPP_ */
