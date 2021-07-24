@@ -234,7 +234,7 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
     uint8_t data[512];
 
     uint16_t entryCounter = 0;
-    uint8_t usedBatch = 0;
+    size_t usedBatch = 0;
 
 #if HAP_DEBUG_FAKEGATO
     LOG_D("requestedIndex: %d\n", _requestedIndex);
@@ -264,9 +264,9 @@ void HAPFakegato::callbackGetHistoryEntries(uint8_t* output, size_t* len){
     LOG_D("requestedEntry: %d\n", _requestedIndex);
 #endif
 
-    for (uint8_t i=0; i < (HAP_FAKEGATO_BATCH_SIZE - usedBatch); i++) {
+    for (size_t i=0; i < (HAP_FAKEGATO_BATCH_SIZE - usedBatch); i++) {
 
-        if (_requestedIndex > _entries.size() - 1 ) {
+        if (_requestedIndex > (size_t)_entries.size() - 1 ) {
             //|| _entries[_requestedIndex]->length == 0
             // _requestedIndex is greater than _entries.size()!
             LOG_D("_requestedIndex is greater than _entries.size() or length = 0! BREAK\n");

@@ -93,7 +93,7 @@ void logArray(Print *output, const char *letter, const char *label, const uint8_
 
     PrintOut("=== [%s] (length:%d) ===\n", label, length);
     bool need_lf = true;
-    for (int i=0; i<length; i++) {
+    for (size_t i=0; i<length; i++) {
         if ((i & 0xf) == 0xf) {
             PrintOut("%02X\n", data[i]);
             need_lf = false;

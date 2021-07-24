@@ -226,7 +226,7 @@ protected:
 	// virtual size_t getBytesLength(uint16_t address) = 0;
 
 
-	static bool isOnlyZeros(const uint8_t* bytearray, int length);
+	static bool isOnlyZeros(const uint8_t* bytearray, size_t length);
 };
 
 

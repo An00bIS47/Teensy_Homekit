@@ -76,7 +76,7 @@ public:
 	// not needed
 	// static size_t encrypt(uint8_t *message, size_t length, uint8_t* buffer, uint8_t* key, uint16_t encryptCount);
 
-	static uint8_t* encrypt(uint8_t *message, size_t length, int* encrypted_len, uint8_t* key, uint16_t encryptCount);
+	static uint8_t* encrypt(uint8_t *message, size_t length, size_t* encrypted_len, uint8_t* key, uint16_t encryptCount);
 
 	static int chacha20_poly1305_update_aad(
         mbedtls_chachapoly_context* ctx,

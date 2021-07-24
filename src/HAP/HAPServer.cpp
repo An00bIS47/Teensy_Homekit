@@ -1061,7 +1061,7 @@ void HAPServer::handleClientDisconnect(HAPClient* hapClient) {
 	LOG_V("handleClientDisconnect\n");
 	if (hapClient == nullptr) return;
 
-	for ( int i = 0; i < _clients.size(); i++ ) {
+	for ( size_t i = 0; i < _clients.size(); i++ ) {
         if (_clients[i] == hapClient ) {
 			delete _clients[i];
 			_clients.erase(_clients.begin() + i);
@@ -1117,7 +1117,7 @@ FLASHMEM
 void HAPServer::handleAllPairingsRemoved(){
 	LOG_V("handleAllPairingsRemoved\n");
 	LOG_D("Handle all pairings removed ...");
-	for (int i=0; i < _clients.size(); i++){
+	for (size_t i=0; i < _clients.size(); i++){
 
 		if (_clients[i]->client.connected()){
 #if defined( ARDUINO_ARCH_ESP32 )
@@ -1342,9 +1342,9 @@ bool HAPServer::handlePath(HAPClient* hapClient, uint8_t* bodyData, size_t bodyD
 
 void HAPServer::parseRequest(HAPClient* hapClient, const char* msg, size_t msg_len, uint8_t** out, int* outLen){
 	LOG_V("parseRequest\n");
-	int curPos = 0;
+	size_t curPos = 0;
 
-	for (int i = 0; i < msg_len; i++) {
+	for (size_t i = 0; i < msg_len; i++) {
     		//LOGDEVICE->print(msg[i]);
 		if ( msg[i] == '\r' && msg[i + 1] == '\n' ) {
 
@@ -2080,7 +2080,7 @@ bool HAPServer::send204(HAPClient* hapClient){
 	// LogD(F("\nEncrpyting response ..."), false);
 
 	uint8_t* encrypted = nullptr;
-	int encryptedLen = 0;
+	size_t encryptedLen = 0;
 	encrypted = HAPEncryption::encrypt((uint8_t*)HTTP_204, strlen(HTTP_204), &encryptedLen, hapClient->encryptionContext.encryptKey, hapClient->encryptionContext.encryptCount++);
     if (encryptedLen == 0) {
     	LOG_E("ERROR: Encrpyting response failed!\n");
@@ -3656,7 +3656,7 @@ void HAPServer::handleCharacteristicsGet(HAPClient* hapClient){
 			errorOccured = true;
 		}
 
-		if (endIndex < idStr.length()) {
+		if (endIndex < (int)idStr.length()) {
 			idStr = idStr.substr(endIndex + 1);
 		} else {
 			break;

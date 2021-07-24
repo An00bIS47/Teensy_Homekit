@@ -77,13 +77,13 @@ public:
     void hash_num( const mbedtls_mpi * n, uint8_t* dest );
     void update_hash_n( const mbedtls_mpi * n );
 
-    uint8_t digestLength(){
+    size_t digestLength(){
         return digestLength(_hashAlgorithm);
     }
 
     HAPHashAlgorithm::Type algorithm() { return _hashAlgorithm; }
 
-    static uint8_t digestLength( HAPHashAlgorithm::Type alg );
+    static size_t digestLength( HAPHashAlgorithm::Type alg );
     static void init( HAPHashAlgorithm::Type alg, HAPHashContext* context);
     static void update( HAPHashAlgorithm::Type alg, HAPHashContext *context, const uint8_t *data, size_t len );
     static void final( HAPHashAlgorithm::Type alg, HAPHashContext *context, uint8_t* md );

@@ -303,7 +303,7 @@ void HAPAccessorySet::addAccessory(HAPAccessory *accessory) {
 
 
 bool HAPAccessorySet::removeAccessory(HAPAccessory *accessory) {
-	for (int i=0; i < _accessories.size(); i++){
+	for (size_t i=0; i < _accessories.size(); i++){
 		if (_accessories[i]->aid() == accessory->aid()){
 			_accessories.erase(_accessories.begin() + i);
 			return true;

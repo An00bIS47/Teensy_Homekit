@@ -163,7 +163,7 @@ void HAPHash::hash( HAPHashAlgorithm::Type alg, const uint8_t* d, size_t n, uint
     };
 }
 
-uint8_t HAPHash::digestLength( HAPHashAlgorithm::Type alg )
+size_t HAPHash::digestLength( HAPHashAlgorithm::Type alg )
 {
     switch (alg)
     {

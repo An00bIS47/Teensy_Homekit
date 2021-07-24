@@ -118,7 +118,7 @@ void HAPFakegatoSchedule::programTimers() {
 FLASHMEM
 #endif
 void HAPFakegatoSchedule::clear(){
-	for (int i = 0; i < _programEvents.size(); i++){
+	for (size_t i = 0; i < _programEvents.size(); i++){
 		_programEvents[i].timerEvents.clear();
 	}
 

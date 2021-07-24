@@ -193,7 +193,7 @@ void HAPConfiguration::toJson(Print& prt){
 	auto &factory = HAPPluginFactory::Instance();
     std::vector<std::string> names = factory.names();
 
-	uint8_t counter = 0;
+	size_t counter = 0;
     for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
 
     	auto plugin = factory.getPlugin(*it);
@@ -1191,7 +1191,7 @@ bool HAPConfiguration::saveAccessoryConfig(){
 	offset += HAP_PAIRINGS_LTSK_LENGTH;
 
     // Pairings
-	for (int i=0; i < _accessoryConfig->pairings.size(); i++){
+	for (size_t i=0; i < _accessoryConfig->pairings.size(); i++){
 		memcpy(buffer + offset, &_accessoryConfig->pairings[i]->id, HAP_PAIRINGS_ID_LENGTH);
 		offset += HAP_PAIRINGS_ID_LENGTH;
 
@@ -1284,7 +1284,7 @@ bool HAPConfiguration::loadAccessoryConfig(){
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-bool HAPConfiguration::isOnlyZeros(const uint8_t* bytearray, int length) {
+bool HAPConfiguration::isOnlyZeros(const uint8_t* bytearray, size_t length) {
 
     for (size_t i = 0; i < length; i++){
         if (bytearray[i] > 0) return false;

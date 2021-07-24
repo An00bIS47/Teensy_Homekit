@@ -78,7 +78,7 @@ void HAPAccessory::addCharacteristicToService(HAPService *service, HAPCharacteri
 }
 
 bool HAPAccessory::removeService(HAPService *service) {
-	for (int i=0; i < _services.size(); i++){
+	for (size_t i=0; i < _services.size(); i++){
 		if (_services[i]->aid() == service->aid()){
 			_services.erase(_services.begin() + i);
 			return true;
@@ -90,7 +90,7 @@ bool HAPAccessory::removeService(HAPService *service) {
 
 
 bool HAPAccessory::removeCharacteristicFromService(HAPService *service, HAPCharacteristicBase* characteristic) {
-	for (int i=0; i < service->_characteristics.size(); i++){
+	for (size_t i=0; i < service->_characteristics.size(); i++){
 		if (service->_characteristics[i]->iid() == characteristic->iid()){
 			service->_characteristics.erase(service->_characteristics.begin() + i);
 			return true;
@@ -117,7 +117,7 @@ HAPCharacteristicBase* HAPAccessory::characteristicAtIndex(HAPService *service, 
 
 
 HAPCharacteristicBase* HAPAccessory::characteristicWithIID(uint32_t iid) {
-	for (int i=0; i < _services.size(); i++){
+	for (size_t i=0; i < _services.size(); i++){
 		HAPCharacteristicBase* chr = _services[i]->characteristicWithIID(iid);
 		if (chr != nullptr){
 			return chr;
@@ -171,7 +171,7 @@ void HAPAccessory::printTo(Print& print){
 
 	// services
 	print.print("\"services\":[");
-	for (int i = 0; i < numberOfServices(); i++) {
+	for (size_t i = 0; i < numberOfServices(); i++) {
 		_services[i]->printTo(print);
 
 		if (i+1 < numberOfServices()){

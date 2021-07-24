@@ -241,7 +241,7 @@ size_t HAPConfigurationEEPROM::readBytes(const char* label, uint8_t* output, con
 	if (getIndexForLabel(label) == -1) return 0;
 
 	size_t address = getAddressForLabel(label);
-	for (int i=0; i < expectedDataLen; i++){
+	for (size_t i=0; i < expectedDataLen; i++){
 
 #if defined (ARDUINO_ARCH_ESP32)
 		output[i] = _eeprom->read(address + i);
@@ -280,7 +280,7 @@ size_t HAPConfigurationEEPROM::writeBytes(const char* label, const uint8_t* inpu
 	_eeprom->commit();
 	return expectedDataLen;
 #else
-	for (int i=0; i < expectedDataLen; i++){
+	for (size_t i=0; i < expectedDataLen; i++){
 		EEPROM.update(address + i, input[i]);
 	}
 	return expectedDataLen;
@@ -318,7 +318,7 @@ void HAPConfigurationEEPROM::reset(){
 	// EEPROM.commit();
 	_eeprom->commit();
 #else
-	for (int i=0; i < lastAddress; i++){
+	for (size_t i=0; i < lastAddress; i++){
 		EEPROM.update(i, 0xFF);
 	}
 #endif

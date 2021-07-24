@@ -205,7 +205,7 @@ void HAPFakegatoScheduleEnergy::encodePrograms(uint8_t* data, size_t *dataSize){
 		data[curIndex++] = ((timerCount[i] << 7) & 0xFF) + addition;
 		data[curIndex++] = ((timerCount[i] << 7 ) >> 8);
 
-		for (int j = 0; j < _programEvents[i].timerEvents.size(); j++){
+		for (size_t j = 0; j < _programEvents[i].timerEvents.size(); j++){
 
 			HAPFakeGatoScheduleTimerEvent tEvent = _programEvents[i].timerEvents[j];
 

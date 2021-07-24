@@ -17,7 +17,7 @@ HAPDailyTimerFactory::HAPDailyTimerFactory(){
 void HAPDailyTimerFactory::handle() {
 
 	if (_isEnabled) {
-		for (int i = 0; i < _timers.size(); i++) {
+		for (size_t i = 0; i < _timers.size(); i++) {
 			bool lastState = _timers[i].state;
 			_timers[i].state = HAPDailyTimer::isActive(&_timers[i]);
 			if(lastState != _timers[i].state) {

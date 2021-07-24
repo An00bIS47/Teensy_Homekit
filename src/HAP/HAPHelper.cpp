@@ -366,7 +366,7 @@ bool HAPHelper::isValidFloat(String tString) {
 	if(tString.charAt(0) == '+' || tString.charAt(0) == '-') tBuf = &tString[1];
 	else tBuf = tString;
 
-	for(int x=0;x<tBuf.length();x++)
+	for(size_t x=0;x<tBuf.length();x++)
 	{
 		if(tBuf.charAt(x) == '.') {
 		if(decPt) return false;

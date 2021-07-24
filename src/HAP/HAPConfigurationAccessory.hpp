@@ -122,7 +122,7 @@ public:
     }
 
     int getIndex(const uint8_t* id){
-        for(int i = 0; i < pairings.size(); i++) {
+        for(size_t i = 0; i < pairings.size(); i++) {
             struct HAPConfigurationPairingEntry* item = pairings[i];
             if ( memcmp(item->id, id, HAP_PAIRINGS_ID_LENGTH) == 0) {
                 return i;
@@ -277,7 +277,7 @@ public:
 
 		prt.print(",");
 		prt.print("\"pairings\": [");
-        for (uint8_t i=0; i < pairings.size(); i++){
+        for (size_t i=0; i < pairings.size(); i++){
             prt.print("{");
             prt.print("\"id\": ");
             // ToDo: Print id properly

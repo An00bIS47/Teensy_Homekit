@@ -12,7 +12,7 @@
 #define HOMEKIT_PROJECT             "Teensy_Homekit"
 
 #define HOMEKIT_GIT_BRANCH          "dev"
-#define HOMEKIT_GIT_REV             "89331ef"
+#define HOMEKIT_GIT_REV             "bb7a109"
 #define HOMEKIT_GIT_TAG             "0.2.0"
 
 #define HOMEKIT_VERSION_MAJOR 		0

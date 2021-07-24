@@ -125,7 +125,7 @@ int HAPEncryption::chacha20_poly1305_update( mbedtls_chachapoly_context* ctx, mb
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
-uint8_t* HAPEncryption::encrypt(uint8_t *message, size_t length, int* encrypted_len, uint8_t* key, uint16_t encryptCount) {
+uint8_t* HAPEncryption::encrypt(uint8_t *message, size_t length, size_t* encrypted_len, uint8_t* key, uint16_t encryptCount) {
 
 	// ToDo: Take care of bigger than hap encryp buffer
     //uint32_t tmp = length + (length / HAP_ENCRYPTION_BUFFER_SIZE + 1) * (HAP_ENCRYPTION_AAD_SIZE + CHACHA20_POLY1305_AUTH_TAG_LENGTH) + 1;

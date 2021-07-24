@@ -345,7 +345,7 @@ public:
     HAPSRP();
     ~HAPSRP();
 
-    int length(SRPSession* session){
+    size_t length(SRPSession* session){
         return HAPHash::digestLength(session->algorithm);
     }
 

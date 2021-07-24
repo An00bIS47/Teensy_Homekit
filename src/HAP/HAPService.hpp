@@ -67,7 +67,7 @@ public:
     FLASHMEM
 #endif
 	HAPCharacteristicBase* characteristicWithIID(uint32_t iid) {
-        for (int i=0; i < _characteristics.size(); i++){
+        for (size_t i=0; i < _characteristics.size(); i++){
             if (_characteristics[i]->iid() == iid){
                 return characteristicAtIndex(i);
             }

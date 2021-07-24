@@ -66,7 +66,7 @@ void HAPService::printTo(Print& print){
     // linked
     if (_linkedServiceIds.size() > 0 ){
         print.print(F("\"linked\":["));
-        for (uint8_t i = 0; i < _linkedServiceIds.size(); i++){
+        for (size_t i = 0; i < _linkedServiceIds.size(); i++){
             print.print(_linkedServiceIds[i]);
             if ( i + 1 < _linkedServiceIds.size()){
                 print.print(F(","));
@@ -78,7 +78,7 @@ void HAPService::printTo(Print& print){
 
     // _characteristics
     print.print(F("\"characteristics\":["));
-	for (int i = 0; i < numberOfCharacteristics(); i++) {
+	for (size_t i = 0; i < numberOfCharacteristics(); i++) {
         _characteristics[i]->printTo(print);
 
 		if (i+1 < numberOfCharacteristics()){
