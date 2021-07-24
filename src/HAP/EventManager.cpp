@@ -125,56 +125,39 @@ namespace
 	};
 
 #elif defined( CORE_TEENSY )
-
-#if defined(ARDUINO_TEENSY41)
+	
 	class SuppressInterrupts
 	{
 	public:
 
-		// Record the current state and suppress interrupts when the object is instantiated.
-		SuppressInterrupts()
-		{
-			// This turns off interrupts and gets the old state in one function call
-			// See https://github.com/esp8266/Arduino/issues/615 for details
-			// level 15 will disable ALL interrupts,
-			// level 0 will enable ALL interrupts
-			//mSavedInterruptState = xt_rsil( 15 );
-		}
-
-		// Restore whatever interrupt state was active before
-		~SuppressInterrupts()
-		{
-			// Restore the old interrupt state
-			//xt_wsr_ps( mSavedInterruptState );
-		}
-
-	private:
-
-		uint32_t    mSavedInterruptState;
-	};
-#else
-	class SuppressInterrupts
-	{
-	public:
-
-		//Reference: https://www.pjrc.com/teensy/interrupts.html
+		// Reference: https://www.pjrc.com/teensy/interrupts.html
+		// https://forum.pjrc.com/archive/index.php/t-66728.html
 		//Backup the interrupt enable state and restore it
 		SuppressInterrupts()
 		{
-			mSregBackup = SREG;     /* save interrupt enable/disable state */
-			cli();                  /* disable the global interrupt */
+			_interruptState = disableInterrupts();
 		}
 
 		~SuppressInterrupts()
 		{
-			SREG = mSregBackup;     /* restore interrupt state */
+			enableInterrupts(_interruptState);
 		}
 
 	private:
 
-		uint8_t mSregBackup;
+		bool disableInterrupts() {
+			uint32_t primask;
+			__asm__ volatile("mrs %0, primask\n" : "=r" (primask)::);
+			__disable_irq();
+			return (primask == 0) ? true : false;
+		}
+
+		void enableInterrupts(bool doit) {
+			if (doit) __enable_irq();
+		}
+
+		bool _interruptState;
 	};
-#endif
 
 #elif defined( ESP32 )
 	class SuppressInterrupts
