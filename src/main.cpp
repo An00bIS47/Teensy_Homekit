@@ -44,6 +44,30 @@
 // }
 // #endif
 
+#if TEENSY_DEBUG
+// Create an IntervalTimer object
+IntervalTimer debugLEDTimer;
+const int ledPin = 41;  // the pin with a LED
+// The interrupt will blink the LED, and keep
+// track of how many times it has blinked.
+int ledState = LOW;
+volatile unsigned long blinkCount = 0; // use volatile for shared variables
+
+// functions called by IntervalTimer should be short, run as quickly as
+// possible, and should avoid calling other functions if possible.
+void blinkLED() {
+	if (ledState == LOW) {
+		ledState = HIGH;
+		blinkCount = blinkCount + 1;  // increase when LED turns on
+	} else {
+		ledState = LOW;
+	}
+	digitalWrite(ledPin, ledState);
+}
+
+#endif
+
+
 #if defined(ARDUINO_TEENSY41)
 FLASHMEM
 #endif
@@ -78,8 +102,10 @@ void setup() {
 	// Start homekit
 	hap.begin();
 
-
-
+#if TEENSY_DEBUG
+	pinMode(ledPin, OUTPUT);
+  	debugLEDTimer.begin(blinkLED, 150000);  // blinkLED to run every 0.15 seconds
+#endif
 
 // #if HAP_ENABLE_WEBSERVER_CORE_0
 // 	xTaskCreatePinnedToCore(
@@ -98,4 +124,20 @@ void setup() {
 
 void loop(){
 	hap.handle();
+
+#if TEENSY_DEBUG
+	unsigned long blinkCopy;  // holds a copy of the blinkCount
+
+	// to read a variable which the interrupt code writes, we
+	// must temporarily disable interrupts, to be sure it will
+	// not change while we are reading.  To minimize the time
+	// with interrupts off, just quickly make a copy, and then
+	// use the copy while allowing the interrupt to keep working.
+	noInterrupts();
+	blinkCopy = blinkCount;
+	interrupts();
+
+	Serial.print("blinkCount = ");
+	Serial.println(blinkCopy);
+#endif
 }
