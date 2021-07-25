@@ -3728,8 +3728,8 @@ void HAPServer::handleCharacteristicsPut(HAPClient* hapClient, uint8_t* bodyData
 
 	for( auto jc : root[F("characteristics")].as<JsonArray>()) {
 
-    	int aid = jc[F("aid")].as<int>();
-    	int iid = jc[F("iid")].as<int>();
+    	uint8_t aid = jc[F("aid")].as<uint8_t>();
+    	uint32_t iid = jc[F("iid")].as<uint32_t>();
 
 
 

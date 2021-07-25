@@ -43,20 +43,13 @@ struct HAPClientState {
 
 
 struct HAPSubscribtionItem {
-	int aid;
-	int iid;
+	uint8_t aid;
+	uint32_t iid;
 
-	HAPSubscribtionItem(int aid_, int iid_) : aid(aid_), iid(iid_) {};
+	HAPSubscribtionItem(uint8_t aid_, uint32_t iid_) : aid(aid_), iid(iid_) {};
 	bool operator<(const HAPSubscribtionItem& rhs) const {
 		return rhs.aid < this->aid || (rhs.aid == this->aid && rhs.iid < this->iid);
   	};
-
-	std::string describe() const {
-		char tmp[10] = {'\0',};
-		sprintf(tmp, "%d.%d", aid, iid);
-		return std::string(tmp);
-	}
-
 };
 
 class HAPClient {
@@ -100,8 +93,8 @@ public:
 		_isAdmin = mode;
 	}
 
-	void subscribe(int aid, int iid, bool value = true);
-	bool isSubscribed(int aid, int iid) const;
+	void subscribe(uint8_t aid, uint32_t iid, bool value = true);
+	bool isSubscribed(uint8_t aid, uint32_t iid) const;
 
 	std::set<HAPSubscribtionItem> subscribtions;
 

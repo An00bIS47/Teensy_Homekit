@@ -43,7 +43,7 @@ void HAPClient::clear() {
 	request.clear();
 }
 
-void HAPClient::subscribe(int aid, int iid, bool value){
+void HAPClient::subscribe(uint8_t aid, uint32_t iid, bool value){
 	struct HAPSubscribtionItem item = HAPSubscribtionItem(aid, iid);
 
 	if (value){
@@ -54,7 +54,7 @@ void HAPClient::subscribe(int aid, int iid, bool value){
 
 }
 
-bool HAPClient::isSubscribed(int aid, int iid) const {
+bool HAPClient::isSubscribed(uint8_t aid, uint32_t iid) const {
 	struct HAPSubscribtionItem item = HAPSubscribtionItem(aid, iid);
 	return subscribtions.find(item) != subscribtions.end();
 }

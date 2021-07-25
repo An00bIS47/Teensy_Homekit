@@ -295,6 +295,7 @@
                 "HAP_USE_EEPROM=1",
                 "HAP_ENABLE_NTP=1",
                 "HAP_TIME_NTP_ENABLED=1",
+                "HAP_RESET_CONFIGURATION=1",
                 "HAP_PLUGIN_USE_BME280=1",
                 "HAP_PLUGIN_BME280_USE_DUMMY=1",
                 "HAP_PLUGIN_USE_LED=1",
