@@ -10,8 +10,11 @@
 #include <WiFi.h>
 #include "HAPBonjour.hpp"
 
-#if HAP_WIFI_MODE_DEFAULT == 1
+#if HAP_WIFI_MODE_DEFAULT==1
+
+#ifndef HAP_WIFI_SSID
 #include "../WiFiCredentials.hpp"
+#endif
 #endif
 
 #if HAP_DEBUG
@@ -921,7 +924,7 @@ void HAPServer::handle() {
 #endif
 
 
-#if HAP_DEBUG
+#if HAP_DEBUG_HEAP
 	// Free Heap every interval ms
 	if ( millis() - _previousMillisHeap >= HAP_HEAP_LOG_INTERVAL) {
 	    // save the last time you blinked the LED
@@ -991,7 +994,8 @@ void HAPServer::handle() {
 	EthernetClient client = _server.available();
 #endif
 	if (client) {
-		// LOG_V("Handle new clients\n");
+		LOGRAW_V("OK\n");
+		LOG_V("Handle new client ...");
 
 		HAPClient* hapClient = new HAPClient();
 
@@ -1027,10 +1031,11 @@ void HAPServer::handle() {
 	// Handle plugins
 	//
 	LOG_V("Handling plugins ...");
-	for (auto& plugin : _plugins) {
-		if (plugin->isEnabled()) {
+	for (auto& plugin : _plugins){
+		if ( plugin && plugin->isEnabled() ){
 			plugin->handle();
 		}
+
 	}
 	LOGRAW_V("OK\n");
 
@@ -3929,8 +3934,8 @@ void HAPServer::processEvents(){
 
 			for (int i=0; i < noOfEventsToSend; i++){
 
-				int aid = evParams[i].aid;
-				int iid = evParams[i].iid;
+				uint8_t aid = evParams[i].aid;
+				uint32_t iid = evParams[i].iid;
 
 
 				if ( hapClient->isSubscribed(aid, iid) ) {
@@ -3938,7 +3943,7 @@ void HAPServer::processEvents(){
 
 					if (character) {
 
-						LOG_D("Handle event %d for accessory %d.%d\n", EventManager::kEventNotifyController, aid, iid);
+						LOG_V("Handle event %d for accessory %d.%" PRIu32 "\n", EventManager::kEventNotifyController, aid, iid);
 
 						JsonObject chr = jsonCharacteristics.createNestedObject();
 						chr["aid"] = aid;
@@ -3950,7 +3955,7 @@ void HAPServer::processEvents(){
 
 						isSubcribedToAtLeastOne = true;
 					} else {
-						LOG_W("WARNING: Not notifiable event %d for accessory %d.%d\n", EventManager::kEventNotifyController, aid, iid);
+						LOG_W("WARNING: Not notifiable event %d for accessory %d.%" PRIu32 "\n", EventManager::kEventNotifyController, aid, iid);
 					}
 				}
 			}

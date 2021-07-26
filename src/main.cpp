@@ -15,7 +15,7 @@
 #endif
 
 
-#if TEENSY_DEBUG
+#if HAP_DEBUG_INTTIMER
 // Create an IntervalTimer object
 IntervalTimer debugLEDTimer;
 const int ledPin = 41;  // the pin with a LED
@@ -73,13 +73,13 @@ void setup() {
 	// halt();
 #endif
 
-	// Start homekit
-	hap.begin();
-
-#if TEENSY_DEBUG
+#if HAP_DEBUG_INTTIMER
 	pinMode(ledPin, OUTPUT);
   	debugLEDTimer.begin(blinkLED, 150000);  // blinkLED to run every 0.15 seconds
 #endif
+
+	// Start homekit
+	hap.begin();
 
 }
 
@@ -87,7 +87,7 @@ void loop(){
 
 	hap.handle();
 
-#if TEENSY_DEBUG
+#if HAP_DEBUG_INTTIMER
 	unsigned long blinkCopy;  // holds a copy of the blinkCount
 
 	// to read a variable which the interrupt code writes, we
@@ -99,7 +99,10 @@ void loop(){
 	blinkCopy = blinkCount;
 	interrupts();
 
+#if HAP_DEBUG
 	Serial.print("blinkCount = ");
 	Serial.println(blinkCopy);
+#endif
+
 #endif
 }

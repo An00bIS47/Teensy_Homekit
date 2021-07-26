@@ -2,8 +2,12 @@
     This table is generated from all 256 permutations of SUM(P0,P1,..,P7)
     where P_i = 2^(32i)*BasePoint
 */
+#if defined (ARDUINO_ARCH_ESP32)
+#define PROGMEM 
+#endif
 
 const PA_POINT _w_base_folding8[256] PROGMEM = {
+
     { /* P{0} */
       W256(0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000),
       W256(0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000),

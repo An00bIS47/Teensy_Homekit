@@ -3,7 +3,8 @@
     "files.associations": {
         "*.tpp": "cpp",
         "certs.h": "c",
-        "chachapoly.h": "c"
+        "chachapoly.h": "c",
+        "entropy_poll.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

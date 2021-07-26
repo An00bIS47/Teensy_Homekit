@@ -50,6 +50,7 @@ struct HAPSubscribtionItem {
 	bool operator<(const HAPSubscribtionItem& rhs) const {
 		return rhs.aid < this->aid || (rhs.aid == this->aid && rhs.iid < this->iid);
   	};
+
 };
 
 class HAPClient {

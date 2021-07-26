@@ -14,9 +14,6 @@
 #include "HAPServiceType.hpp"
 
 
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 HAPAccessory::HAPAccessory() {
 	_infoService    = nullptr;
 	_accessoryName  = nullptr;
@@ -27,10 +24,6 @@ HAPAccessory::HAPAccessory() {
 	_firmware       = nullptr;
 }
 
-
-#if defined(ARDUINO_TEENSY41)
-FLASHMEM
-#endif
 HAPAccessory::~HAPAccessory(){
 	if (_infoService) delete _infoService;
 

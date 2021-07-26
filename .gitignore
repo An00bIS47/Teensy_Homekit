@@ -380,13 +380,16 @@ homekitStorage.json
 gitlab.ini
 
 # TestReports* 
-reports*
+reports/*
 
 # buildnumber in root
 buildnumber
 
-
 # vscode counter
 .VSCodeCounter
+
+# CMakeLists
+CMakeLists.txt
+
 
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,macos,python,platformio,cmake,node

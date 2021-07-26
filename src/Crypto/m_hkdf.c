@@ -9,6 +9,9 @@
 #include <mbedtls/hkdf.h>
 #include <stdio.h>
 
+#if defined (ARDUINO_ARCH_ESP32)
+#define PROGMEM 
+#endif
 
 struct hkdf_salt_info {
     char* salt;

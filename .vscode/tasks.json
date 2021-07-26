@@ -135,7 +135,8 @@
           "description": "For what environment do you want to do it?",
           "options": [
             "teensy_41",
-            "teensy_41_debug"
+            "teensy_41_debug",
+            "esp32"
           ],
           "default": "teensy_41"
         }

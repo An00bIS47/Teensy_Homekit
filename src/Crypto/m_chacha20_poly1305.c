@@ -12,6 +12,9 @@
 #include "m_chacha20_poly1305.h"
 #include "mbedtls/chachapoly.h"
 
+#if defined (ARDUINO_ARCH_ESP32)
+#define PROGMEM 
+#endif
 
 static uint8_t nonce[][CHACHA20_POLY1305_NONCE_LENGTH] PROGMEM = {
     {0, 0, 0, 0, 'P', 'S', '-', 'M', 's', 'g', '0', '5'},
